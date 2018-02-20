@@ -1,0 +1,69 @@
+APP_REPO ?= ../marketplace-k8s-app-example
+APP_NAME ?= wordpress
+
+APP_INSTANCE_NAME ?= $(APP_NAME)-1
+NAMESPACE ?= default
+
+$(shell mkdir -p .build/)
+
+install-crd:
+	$(MAKE) -C "crd/" "$@"
+
+remove-crd:
+	$(MAKE) -C "crd/" "$@"
+
+build/kubectl:
+	curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.9.0/bin/linux/amd64/kubectl
+	chmod 755 kubectl
+	mkdir -p build/
+	mv kubectl build/
+
+.build/marketplace-deployer_kubectl_base: build/kubectl marketplace/deployer_kubectl_base/*
+	docker build \
+	    --tag "$(REGISTRY)/marketplace/deployer_kubectl_base" \
+	    -f marketplace/deployer_kubectl_base/Dockerfile \
+	    .
+	gcloud docker -- push "$(REGISTRY)/marketplace/deployer_kubectl_base"
+	touch "$@"
+
+.build/marketplace-controller: build/kubectl marketplace/controller/*
+	docker build \
+	    --tag "$(REGISTRY)/marketplace/controller" \
+	    -f marketplace/controller/Dockerfile \
+	    .
+	gcloud docker -- push "$(REGISTRY)/marketplace/controller"
+	touch "$@"
+
+build/app: .build/marketplace-deployer_kubectl_base .build/marketplace-controller
+	$(MAKE) -C "$(APP_REPO)" "build/$(APP_NAME)"
+
+up: build/app .build/marketplace-deployer_kubectl_base .build/marketplace-controller
+	scripts/start.sh \
+	    --app-name=$(APP_NAME) \
+	    --name=$(APP_INSTANCE_NAME) \
+	    --namespace=$(NAMESPACE) \
+	    --registry=$(REGISTRY)
+
+down:
+	scripts/stop.sh \
+	    --name=$(APP_INSTANCE_NAME) \
+	    --namespace=$(NAMESPACE)
+
+down-delete-events:
+	# Note: We don't do this in down because we intend for Kubernetes
+	# has its own garbage collection mechanism. We clean them up
+	# here to only to improve the development experience.
+	kubectl delete events \
+	    --namespace="$(NAMESPACE)" \
+	    --selector="app=$(APP_INSTANCE_NAME)"
+
+reload: down down-delete-events up
+
+watch:
+	scripts/watch.sh \
+	    --name=$(APP_INSTANCE_NAME) \
+	    --namespace=$(NAMESPACE)
+
+clean:
+	rm -rf .build/ build/
+	$(MAKE) -C "$(APP_REPO)" "clean/$(APP_NAME)"
