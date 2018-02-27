@@ -110,11 +110,17 @@ yet. It should look something like this:
 
 ```
 =========================================================================================
-Resources in the following namespace: "<NAMESPACE>"
-$ kubectl get all --namespace="<NAMESPACE>" --show-kind
+Application resources in the following namespace: "<NAMESPACE>"
+$ kubectl get applications --namespace="default" --show-kind
 -----------------------------------------------------------------------------------------
 No resources found.
 
+
+=========================================================================================
+Standard resources in the following namespace: "<NAMESPACE>"
+$ kubectl get all --namespace="<NAMESPACE>" --show-kind
+-----------------------------------------------------------------------------------------
+No resources found.
 
 
 =========================================================================================
@@ -145,8 +151,16 @@ Here's a `make watch` sample output if everyting goes well:
 
 ```
 ======================================================================================================
-Resources in the following namespace: ":<NAMESPACE>"
-$ kubectl get all --namespace=":<NAMESPACE>" --show-kind
+Application resources in the following namespace: "<NAMESPACE>"
+$ kubectl get applications --namespace="<NAMESPACE>" --show-kind
+------------------------------------------------------------------------------------------------------
+NAME                       AGE
+applications/wordpress-1   15m
+
+
+======================================================================================================
+Standard resources in the following namespace: "<NAMESPACE>"
+$ kubectl get all --namespace="<NAMESPACE>" --show-kind
 ------------------------------------------------------------------------------------------------------
 NAME                           DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
 deploy/<APP_INSTANCE_NAME>-mysql       1         1         1            1           15m
