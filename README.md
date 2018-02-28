@@ -16,12 +16,19 @@ environment variable.
 ## Tool Dependencies
 
 ```
-$ gcloud --version Google Cloud SDK 188.0.0 alpha 2017.09.15 beta
-2017.09.15 bq 2.0.28 core 2018.02.02 gcloud gsutil 4.28 kubectl
+$ gcloud --version
+Google Cloud SDK 188.0.0
+alpha 2017.09.15
+beta 2017.09.15
+bq 2.0.28
+core 2018.02.02
+gsutil 4.28
 
-$ docker --version Docker version 17.09.0-ce, build afdb6d4
+$ docker --version
+Docker version 17.09.0-ce, build afdb6d4
 
-$ kubectl version Client Version: version.Info{Major:"1", Minor:"8",
+$ kubectl version
+Client Version: version.Info{Major:"1", Minor:"8",
 GitVersion:"v1.8.6", GitCommit:"6260bb08c46c31eea6cb538b34a9ceb3e406689c",
 GitTreeState:"clean", BuildDate:"2017-12-21T06:34:11Z",
 GoVersion:"go1.8.3", Compiler:"gc", Platform:"linux/amd64"} Server
@@ -33,9 +40,9 @@ GoVersion:"go1.8.3b4", Compiler:"gc", Platform:"linux/amd64"}
 
 ## Provisioning a GKE cluster and configuring kubectl to connect to it.
 
-Note: We do not yet account for the RBAC changes that launch by default in
-GKE clusters >= 1.8, but we need >=1.8 for ownerReference based garbage
-collection of CRD resources. In the nearterm, we disable RBAC enforcement
+Note: We do not support RBAC changes that launch by default in GKE 
+clusters >= 1.8, but we need >=1.8 for ownerReference based garbage
+collection of CRD resources. For now, we will disable RBAC enforcement
 via `--enable-legacy-authorization`.
 
 ```
@@ -45,7 +52,7 @@ ZONE=us-west1-a
 # Create the cluster.
 gcloud beta container clusters create "$CLUSTER_NAME" \
     --zone "$ZONE" \
-    --cluster-version "1.8.6-gke.0" \
+    --cluster-version "1.8.7-gke.1" \
     --machine-type "n1-standard-1" \
     --num-nodes "3" \
     --enable-legacy-authorization
