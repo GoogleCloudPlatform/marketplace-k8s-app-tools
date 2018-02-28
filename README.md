@@ -40,9 +40,9 @@ GoVersion:"go1.8.3b4", Compiler:"gc", Platform:"linux/amd64"}
 
 ## Provisioning a GKE cluster and configuring kubectl to connect to it.
 
-Note: We do not support yet account for the RBAC changes that launch by default in
-GKE clusters >= 1.8, but we need >=1.8 for ownerReference based garbage
-collection of CRD resources. In the near future, we will disable RBAC enforcement
+Note: We do not support RBAC changes that launch by default in GKE 
+clusters >= 1.8, but we need >=1.8 for ownerReference based garbage
+collection of CRD resources. For now, we will disable RBAC enforcement
 via `--enable-legacy-authorization`.
 
 ```
