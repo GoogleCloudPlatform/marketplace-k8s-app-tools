@@ -18,12 +18,27 @@ build/kubectl:
 	mkdir -p build/
 	mv kubectl build/
 
+build/helm:
+	curl -LO https://storage.googleapis.com/kubernetes-helm/helm-v2.8.1-linux-amd64.tar.gz
+	tar -zxvf helm-v2.8.1-linux-amd64.tar.gz
+	mkdir -p build/
+	mv linux-amd64/helm build/
+	rm -rf helm-v2.8.1-linux-amd64.tar.gz linux-amd64
+
 .build/marketplace-deployer_kubectl_base: build/kubectl marketplace/deployer_kubectl_base/* check-env
 	docker build \
 	    --tag "$(REGISTRY)/marketplace/deployer_kubectl_base" \
 	    -f marketplace/deployer_kubectl_base/Dockerfile \
 	    .
 	gcloud docker -- push "$(REGISTRY)/marketplace/deployer_kubectl_base"
+	touch "$@"
+
+.build/marketplace-deployer_helm_base: build/kubectl build/helm marketplace/deployer_helm_base/* check-env
+	docker build \
+	    --tag "$(REGISTRY)/marketplace/deployer_helm_base" \
+	    -f marketplace/deployer_helm_base/Dockerfile \
+	    .
+	gcloud docker -- push "$(REGISTRY)/marketplace/deployer_helm_base"
 	touch "$@"
 
 .build/marketplace-controller: build/kubectl marketplace/controller/* check-env
@@ -34,7 +49,7 @@ build/kubectl:
 	gcloud docker -- push "$(REGISTRY)/marketplace/controller"
 	touch "$@"
 
-build/app: .build/marketplace-deployer_kubectl_base .build/marketplace-controller check-env
+build/app: .build/marketplace-deployer_kubectl_base .build/marketplace-deployer_helm_base .build/marketplace-controller check-env
 	$(MAKE) -C "$(APP_REPO)" "build/$(APP_NAME)"
 
 up: build/app .build/marketplace-deployer_kubectl_base .build/marketplace-controller check-env
