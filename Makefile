@@ -1,6 +1,8 @@
 APP_REPO ?= ../marketplace-k8s-app-example
 APP_NAME ?= wordpress
 
+AGENT_REPO ?= ../ubbagent
+
 APP_INSTANCE_NAME ?= $(APP_NAME)-1
 NAMESPACE ?= default
 
@@ -34,7 +36,15 @@ build/kubectl:
 	gcloud docker -- push "$(REGISTRY)/marketplace/controller"
 	touch "$@"
 
-build/app: .build/marketplace-deployer_kubectl_base .build/marketplace-controller
+.build/marketplace-ubbagent:
+	cd "$(AGENT_REPO)"; \
+	docker build \
+	    --tag "$(REGISTRY)/marketplace/ubbagent" \
+	    .
+	gcloud docker -- push "$(REGISTRY)/marketplace/ubbagent"
+	touch "$@"
+
+build/app: .build/marketplace-deployer_kubectl_base .build/marketplace-controller .build/marketplace-ubbagent
 	$(MAKE) -C "$(APP_REPO)" "build/$(APP_NAME)"
 
 up: build/app .build/marketplace-deployer_kubectl_base .build/marketplace-controller check-env

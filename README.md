@@ -6,10 +6,10 @@ as Google Cloud Marketplace's supports additional deployment mechanisms (e.g.
 Helm) and adopts ongoing community standard (e.g. SIG Apps defined Application).
 
 These tools operate on the repository directory structure defined in
-marketplace-k8s-app-example. By default, these tools assume that both
-marketplace-k8s-app-tools and marketplace-k8s-app-example are checked out
-in the same directory, but this can be configured with the `$APP_REPO`
-environment variable.
+marketplace-k8s-app-example. They assume the existence of two other repositories
+in the same directory: marketplace-k8s-app-example and ubbagent. These repo
+directories can be overridden using the `$APP_REPO` and `$AGENT_REPO`
+environment variables, respectively.
 
 # Getting Started
 
@@ -36,6 +36,15 @@ Version: version.Info{Major:"1", Minor:"8+", GitVersion:"v1.8.6-gke.0",
 GitCommit:"ee9a97661f14ee0b1ca31d6edd30480c89347c79",
 GitTreeState:"clean", BuildDate:"2018-01-05T03:36:42Z",
 GoVersion:"go1.8.3b4", Compiler:"gc", Platform:"linux/amd64"}
+```
+
+## Clone tool and example repositories.
+```
+$ mkdir k8s-marketplace
+$ cd k8s-marketplace
+$ git clone https://github.com/GoogleCloudPlatform/marketplace-k8s-app-tools.git
+$ git clone https://github.com/GoogleCloudPlatform/marketplace-k8s-app-example.git
+$ git clone https://github.com/GoogleCloudPlatform/ubbagent.git
 ```
 
 ## Provisioning a GKE cluster and configuring kubectl to connect to it.
