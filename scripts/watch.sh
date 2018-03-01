@@ -48,7 +48,7 @@ export -f print_bar
 function watch_function() {
   # TODO(trironkk): Extract printing and then running a command into a function.
   print_bar =
-  echo "Application Resources in \"$NAMESPACE\":"
+  echo "Application resources in the following namespace: \"$NAMESPACE\""
   echo "$ kubectl get applications --namespace=\"$NAMESPACE\" --show-kind"
   print_bar -
   echo -e "\n\n"
@@ -56,8 +56,9 @@ function watch_function() {
       --namespace="$NAMESPACE" \
       --show-kind
 
-  echo -e "\n\n"
-  echo "Resources in the following namespace: \"$NAMESPACE\""
+  echo -e "\n"
+  print_bar =
+  echo "Standard resources in the following namespace: \"$NAMESPACE\""
   echo "$ kubectl get all --namespace=\"$NAMESPACE\" --show-kind"
   print_bar -
   echo -e "\n\n"
@@ -65,7 +66,7 @@ function watch_function() {
       --namespace="$NAMESPACE" \
       --show-kind
 
-  echo -e "\n\n"
+  echo -e "\n"
   print_bar =
   echo "Events with the following label: app=\"$NAME\""
   echo "$ kubectl get events --namespace="$NAMESPACE" --selector="app=$NAME" \\

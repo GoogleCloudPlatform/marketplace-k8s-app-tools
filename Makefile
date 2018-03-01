@@ -37,19 +37,19 @@ build/kubectl:
 build/app: .build/marketplace-deployer_kubectl_base .build/marketplace-controller
 	$(MAKE) -C "$(APP_REPO)" "build/$(APP_NAME)"
 
-up: build/app .build/marketplace-deployer_kubectl_base .build/marketplace-controller
+up: build/app .build/marketplace-deployer_kubectl_base .build/marketplace-controller check-env
 	scripts/start.sh \
 	    --app-name=$(APP_NAME) \
 	    --name=$(APP_INSTANCE_NAME) \
 	    --namespace=$(NAMESPACE) \
 	    --registry=$(REGISTRY)
 
-down:
+down: check-env
 	scripts/stop.sh \
 	    --name=$(APP_INSTANCE_NAME) \
 	    --namespace=$(NAMESPACE)
 
-down-delete-events:
+down-delete-events: check-env
 	# Note: We don't do this in down because we intend for Kubernetes
 	# has its own garbage collection mechanism. We clean them up
 	# here to only to improve the development experience.
@@ -59,7 +59,7 @@ down-delete-events:
 
 reload: down down-delete-events up
 
-watch:
+watch: check-env
 	scripts/watch.sh \
 	    --name=$(APP_INSTANCE_NAME) \
 	    --namespace=$(NAMESPACE)
@@ -67,3 +67,20 @@ watch:
 clean:
 	rm -rf .build/ build/
 	$(MAKE) -C "$(APP_REPO)" "clean/$(APP_NAME)"
+
+check-env:
+ifndef REGISTRY
+  $(error REGISTRY is undefined. See README.md)
+endif
+ifndef APP_REPO
+  $(error APP_REPO is undefined. See README.md)
+endif
+ifndef APP_NAME
+  $(error APP_NAME is undefined. See README.md)
+endif
+ifndef APP_INSTANCE_NAME
+  $(error APP_INSTANCE_NAME is undefined. See README.md)
+endif
+ifndef NAMESPACE
+  $(error NAMESPACE is undefined. See README.md)
+endif
