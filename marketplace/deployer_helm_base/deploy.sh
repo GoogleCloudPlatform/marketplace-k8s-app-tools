@@ -14,9 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set -e
-set -o pipefail
-set -x
+set -eox pipefail
 
 # Assert existence of required environment variables.
 [[ -v "$APPLICATION_NAME" ]] && exit 1
@@ -30,7 +28,7 @@ for chart in /data/chart/*; do
   helm template "$chart" \
         --name="$APPLICATION_NAME" \
         --namespace="$NAMESPACE" \
-        --set="registry=$REGISTRY" \
+        --set="APPLICATION_NAME=$APPLICATION_NAME,NAMESPACE=$NAMESPACE,REGISTRY=$REGISTRY" \
     > "/manifest-expanded/$chart_manifest_file"
 done
 
