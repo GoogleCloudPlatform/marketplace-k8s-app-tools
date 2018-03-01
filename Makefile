@@ -18,7 +18,7 @@ build/kubectl:
 	mkdir -p build/
 	mv kubectl build/
 
-.build/marketplace-deployer_kubectl_base: build/kubectl marketplace/deployer_kubectl_base/* check-env
+.build/marketplace-deployer_kubectl_base: build/kubectl marketplace/deployer_kubectl_base/*
 	docker build \
 	    --tag "$(REGISTRY)/marketplace/deployer_kubectl_base" \
 	    -f marketplace/deployer_kubectl_base/Dockerfile \
@@ -26,7 +26,7 @@ build/kubectl:
 	gcloud docker -- push "$(REGISTRY)/marketplace/deployer_kubectl_base"
 	touch "$@"
 
-.build/marketplace-controller: build/kubectl marketplace/controller/* check-env
+.build/marketplace-controller: build/kubectl marketplace/controller/*
 	docker build \
 	    --tag "$(REGISTRY)/marketplace/controller" \
 	    -f marketplace/controller/Dockerfile \
@@ -34,7 +34,7 @@ build/kubectl:
 	gcloud docker -- push "$(REGISTRY)/marketplace/controller"
 	touch "$@"
 
-build/app: .build/marketplace-deployer_kubectl_base .build/marketplace-controller check-env
+build/app: .build/marketplace-deployer_kubectl_base .build/marketplace-controller
 	$(MAKE) -C "$(APP_REPO)" "build/$(APP_NAME)"
 
 up: build/app .build/marketplace-deployer_kubectl_base .build/marketplace-controller check-env
@@ -64,7 +64,7 @@ watch: check-env
 	    --name=$(APP_INSTANCE_NAME) \
 	    --namespace=$(NAMESPACE)
 
-clean: check-env
+clean:
 	rm -rf .build/ build/
 	$(MAKE) -C "$(APP_REPO)" "clean/$(APP_NAME)"
 
