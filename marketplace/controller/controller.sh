@@ -17,11 +17,11 @@
 set -e
 set -x
 
-[[ -z "$APPLICATION_NAME" ]] && exit 1
+[[ -z "$APP_INSTANCE_NAME" ]] && exit 1
 [[ -z "$NAMESPACE" ]] && exit 1
 
 report_status() {
-  event_name="$APPLICATION_NAME-$(date '+%s%S')"
+  event_name="$APP_INSTANCE_NAME-$(date '+%s%S')"
   event_reason="Cloud Marketplace"
   event_type="$1"
   event_message="$2"
@@ -35,21 +35,21 @@ involvedObject:
   apiVersion: marketplace.cloud.google.com/v1
   kind: Application
   namespace: $NAMESPACE
-  name: $APPLICATION_NAME
+  name: $APP_INSTANCE_NAME
   uid: $APPLICATION_UID
 kind: Event
 metadata:
   name: $event_name
   labels:
-    app: "$APPLICATION_NAME"
+    app: "$APP_INSTANCE_NAME"
 reason: $event_reason
 message: $event_message
 source:
-  component: "$APPLICATION_NAME-operator"
+  component: "$APP_INSTANCE_NAME-operator"
 type: Normal
 EOF
 
-  kubectl patch "applications/$APPLICATION_NAME" \
+  kubectl patch "applications/$APP_INSTANCE_NAME" \
     --namespace="$NAMESPACE" \
     --type=merge \
     --patch "metadata:
@@ -104,14 +104,14 @@ function is_healthy() {
   echo "false"
 }
 
-report_status "Initialization" "Starting control loop for applications/$APPLICATION_NAME..."
+report_status "Initialization" "Starting control loop for applications/$APP_INSTANCE_NAME..."
 previous_healthy="True"
 while true; do
-  APPLICATION_UID="$(kubectl get "applications/$APPLICATION_NAME" \
+  APPLICATION_UID="$(kubectl get "applications/$APP_INSTANCE_NAME" \
     --namespace="$NAMESPACE" \
     --output=jsonpath='{.metadata.uid}')"
 
-  top_level_resources=$(kubectl get "applications/$APPLICATION_NAME" \
+  top_level_resources=$(kubectl get "applications/$APP_INSTANCE_NAME" \
       --namespace="$NAMESPACE" \
       --output=json \
     | jq -r '.spec.components[] | to_entries[] | [.value.kind, .key] | join("/")')
@@ -136,14 +136,14 @@ while true; do
                      blockOwnerDeletion: true
                      controller: true
                      kind: Application
-                     name: $APPLICATION_NAME
+                     name: $APP_INSTANCE_NAME
                      uid: $APPLICATION_UID" || true
     fi
   done
 
   if [[ "$previous_healthy" != "$healthy" ]]; then
-    report_status "Initialization" "Found applications/$APPLICATION_NAME ready status to be $healthy."
-    kubectl patch "applications/$APPLICATION_NAME" \
+    report_status "Initialization" "Found applications/$APP_INSTANCE_NAME ready status to be $healthy."
+    kubectl patch "applications/$APP_INSTANCE_NAME" \
       --namespace="$NAMESPACE" \
       --type=merge \
       --patch "metadata:
