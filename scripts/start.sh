@@ -74,7 +74,7 @@ spec:
       - name: app
         image: "$registry/$app_name/deployer"
         env:
-        - name: APPLICATION_NAME
+        - name: APP_INSTANCE_NAME
           value: $name
         - name: NAMESPACE
           value: $namespace
