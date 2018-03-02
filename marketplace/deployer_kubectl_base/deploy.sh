@@ -19,7 +19,7 @@ set -o pipefail
 set -x
 
 # Assert existence of required environment variables.
-[[ -v "$APPLICATION_NAME" ]] && exit 1
+[[ -v "$APP_INSTANCE_NAME" ]] && exit 1
 [[ -v "$NAMESPACE" ]] && exit 1
 
 # Perform environment variable expansions.

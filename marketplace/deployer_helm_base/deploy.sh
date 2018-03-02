@@ -17,7 +17,7 @@
 set -eox pipefail
 
 # Assert existence of required environment variables.
-[[ -v "$APPLICATION_NAME" ]] && exit 1
+[[ -v "$APP_INSTANCE_NAME" ]] && exit 1
 [[ -v "$NAMESPACE" ]] && exit 1
 [[ -v "$REGISTRY" ]] && exit 1
 
@@ -26,9 +26,9 @@ mkdir "/manifest-expanded"
 for chart in /data/chart/*; do
   chart_manifest_file=$(basename "$chart" | sed 's/.tar.gz$//').yaml
   helm template "$chart" \
-        --name="$APPLICATION_NAME" \
+        --name="$APP_INSTANCE_NAME" \
         --namespace="$NAMESPACE" \
-        --set="APPLICATION_NAME=$APPLICATION_NAME,NAMESPACE=$NAMESPACE,REGISTRY=$REGISTRY" \
+        --set="APP_INSTANCE_NAME=$APP_INSTANCE_NAME,NAMESPACE=$NAMESPACE,REGISTRY=$REGISTRY" \
     > "/manifest-expanded/$chart_manifest_file"
 done
 
