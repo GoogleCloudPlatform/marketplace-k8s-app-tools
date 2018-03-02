@@ -40,11 +40,6 @@ GoVersion:"go1.8.3b4", Compiler:"gc", Platform:"linux/amd64"}
 
 ## Provisioning a GKE cluster and configuring kubectl to connect to it.
 
-Note: We do not support RBAC changes that launch by default in GKE 
-clusters >= 1.8, but we need >=1.8 for ownerReference based garbage
-collection of CRD resources. For now, we will disable RBAC enforcement
-via `--enable-legacy-authorization`.
-
 ```
 CLUSTER_NAME=cluster-1
 ZONE=us-west1-a
@@ -54,11 +49,15 @@ gcloud beta container clusters create "$CLUSTER_NAME" \
     --zone "$ZONE" \
     --cluster-version "1.8.7-gke.1" \
     --machine-type "n1-standard-1" \
-    --num-nodes "3" \
-    --enable-legacy-authorization
+    --num-nodes "3"
 
 # Configure kubectl authorization.
 gcloud container clusters get-credentials "$CLUSTER_NAME" --zone "$ZONE"
+
+# Bootstrap RBAC cluster-admin for your user.
+# More info: https://cloud.google.com/kubernetes-engine/docs/how-to/role-based-access-control
+kubectl create clusterrolebinding cluster-admin-binding \
+  --clusterrole cluster-admin --user $(gcloud config get-value account)
 
 # (Optional) Start up kubectl proxy.
 kubectl proxy
