@@ -75,10 +75,10 @@ spec:
         image: "$registry/$app_name/deployer"
         env:
         - name: APPLICATION_NAME
-          value: "$name"
+          value: $name
         - name: NAMESPACE
-          value: "$namespace"
+          value: $namespace
         - name: REGISTRY
-          value: "$registry"
+          value: $registry
       restartPolicy: Never
 EOF
