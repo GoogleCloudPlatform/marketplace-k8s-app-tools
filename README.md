@@ -49,8 +49,7 @@ gcloud beta container clusters create "$CLUSTER_NAME" \
     --zone "$ZONE" \
     --cluster-version "1.8.7-gke.1" \
     --machine-type "n1-standard-1" \
-    --num-nodes "3" \
-    --enable-legacy-authorization
+    --num-nodes "3"
 
 # Configure kubectl authorization.
 gcloud container clusters get-credentials "$CLUSTER_NAME" --zone "$ZONE"
