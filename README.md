@@ -16,12 +16,19 @@ environment variable.
 ## Tool Dependencies
 
 ```
-$ gcloud --version Google Cloud SDK 188.0.0 alpha 2017.09.15 beta
-2017.09.15 bq 2.0.28 core 2018.02.02 gcloud gsutil 4.28 kubectl
+$ gcloud --version
+Google Cloud SDK 188.0.0
+alpha 2017.09.15
+beta 2017.09.15
+bq 2.0.28
+core 2018.02.02
+gsutil 4.28
 
-$ docker --version Docker version 17.09.0-ce, build afdb6d4
+$ docker --version
+Docker version 17.09.0-ce, build afdb6d4
 
-$ kubectl version Client Version: version.Info{Major:"1", Minor:"8",
+$ kubectl version
+Client Version: version.Info{Major:"1", Minor:"8",
 GitVersion:"v1.8.6", GitCommit:"6260bb08c46c31eea6cb538b34a9ceb3e406689c",
 GitTreeState:"clean", BuildDate:"2017-12-21T06:34:11Z",
 GoVersion:"go1.8.3", Compiler:"gc", Platform:"linux/amd64"} Server
@@ -33,11 +40,6 @@ GoVersion:"go1.8.3b4", Compiler:"gc", Platform:"linux/amd64"}
 
 ## Provisioning a GKE cluster and configuring kubectl to connect to it.
 
-Note: We do not yet account for the RBAC changes that launch by default in
-GKE clusters >= 1.8, but we need >=1.8 for ownerReference based garbage
-collection of CRD resources. In the nearterm, we disable RBAC enforcement
-via `--enable-legacy-authorization`.
-
 ```
 CLUSTER_NAME=cluster-1
 ZONE=us-west1-a
@@ -45,13 +47,17 @@ ZONE=us-west1-a
 # Create the cluster.
 gcloud beta container clusters create "$CLUSTER_NAME" \
     --zone "$ZONE" \
-    --cluster-version "1.8.6-gke.0" \
+    --cluster-version "1.8.7-gke.1" \
     --machine-type "n1-standard-1" \
-    --num-nodes "3" \
-    --enable-legacy-authorization
+    --num-nodes "3"
 
 # Configure kubectl authorization.
 gcloud container clusters get-credentials "$CLUSTER_NAME" --zone "$ZONE"
+
+# Bootstrap RBAC cluster-admin for your user.
+# More info: https://cloud.google.com/kubernetes-engine/docs/how-to/role-based-access-control
+kubectl create clusterrolebinding cluster-admin-binding \
+  --clusterrole cluster-admin --user $(gcloud config get-value account)
 
 # (Optional) Start up kubectl proxy.
 kubectl proxy
@@ -110,11 +116,17 @@ yet. It should look something like this:
 
 ```
 =========================================================================================
-Resources in the following namespace: "<NAMESPACE>"
-$ kubectl get all --namespace="<NAMESPACE>" --show-kind
+Application resources in the following namespace: "<NAMESPACE>"
+$ kubectl get applications --namespace="default" --show-kind
 -----------------------------------------------------------------------------------------
 No resources found.
 
+
+=========================================================================================
+Standard resources in the following namespace: "<NAMESPACE>"
+$ kubectl get all --namespace="<NAMESPACE>" --show-kind
+-----------------------------------------------------------------------------------------
+No resources found.
 
 
 =========================================================================================
@@ -145,8 +157,16 @@ Here's a `make watch` sample output if everyting goes well:
 
 ```
 ======================================================================================================
-Resources in the following namespace: ":<NAMESPACE>"
-$ kubectl get all --namespace=":<NAMESPACE>" --show-kind
+Application resources in the following namespace: "<NAMESPACE>"
+$ kubectl get applications --namespace="<NAMESPACE>" --show-kind
+------------------------------------------------------------------------------------------------------
+NAME                       AGE
+applications/wordpress-1   15m
+
+
+======================================================================================================
+Standard resources in the following namespace: "<NAMESPACE>"
+$ kubectl get all --namespace="<NAMESPACE>" --show-kind
 ------------------------------------------------------------------------------------------------------
 NAME                           DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
 deploy/<APP_INSTANCE_NAME>-mysql       1         1         1            1           15m

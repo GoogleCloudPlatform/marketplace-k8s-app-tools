@@ -14,29 +14,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set -e
-set -o pipefail
-set -x
+set -eox pipefail
 
 # Assert existence of required environment variables.
 [[ -v "$APP_INSTANCE_NAME" ]] && exit 1
 [[ -v "$NAMESPACE" ]] && exit 1
+[[ -v "$REGISTRY" ]] && exit 1
 
-# Perform environment variable expansions.
-# Note: We list out all environment variables and explicitly pass them to
-# envsubst to avoid expanding templated variables that were not defined
-# in this container. In this manner, other containers can use a envsubst
-# for variable expansion, provided the variable names do not conflict.
-environment_variables="$(printenv \
-  | sed 's/=.*$//' \
-  | sed 's/^/$/' \
-  | paste -d' ' -s)"
+# Expand the chart template.
 mkdir "/manifest-expanded"
-for manifest_template_file in /data/manifest/*; do
-  manifest_file=$(basename "$manifest_template_file" | sed 's/.template$//')
-  cat "$manifest_template_file" \
-    | envsubst "$environment_variables" \
-    > "/manifest-expanded/$manifest_file"
+for chart in /data/chart/*; do
+  chart_manifest_file=$(basename "$chart" | sed 's/.tar.gz$//').yaml
+  helm template "$chart" \
+        --name="$APP_INSTANCE_NAME" \
+        --namespace="$NAMESPACE" \
+        --set="APP_INSTANCE_NAME=$APP_INSTANCE_NAME,NAMESPACE=$NAMESPACE,REGISTRY=$REGISTRY" \
+    > "/manifest-expanded/$chart_manifest_file"
 done
 
 # Apply the manifest.
