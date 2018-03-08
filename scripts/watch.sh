@@ -68,6 +68,16 @@ function watch_function() {
 
   echo -e "\n"
   print_bar =
+  echo "Service accounts and roles in the following namespace: \"$NAMESPACE\""
+  echo "$ kubectl get serviceaccounts,roles,rolebindings --namespace=\"$NAMESPACE\" --show-kind"
+  print_bar -
+  echo -e "\n\n"
+  kubectl get serviceaccounts,roles,rolebindings \
+      --namespace="$NAMESPACE" \
+      --show-kind
+
+  echo -e "\n"
+  print_bar =
   echo "Events with the following label: app=\"$NAME\""
   echo "$ kubectl get events --namespace="$NAMESPACE" --selector="app=$NAME" \\
     --output=custom-columns='TIME:.firstTimestamp,NAME:.metadata.name,:.reason,:.message'"
