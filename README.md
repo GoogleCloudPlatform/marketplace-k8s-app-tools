@@ -38,6 +38,36 @@ GitTreeState:"clean", BuildDate:"2018-01-05T03:36:42Z",
 GoVersion:"go1.8.3b4", Compiler:"gc", Platform:"linux/amd64"}
 ```
 
+## If you are using a GCE instance
+
+If you are using a GCE VM instance, additional setup steps need to be taken in order
+for everything to work. This is due to multiple caveats for GKE integration.
+
+### Granting VM userinfo-email scope
+
+Your VM must have `https://www.googleapis.com/auth/userinfo.email` scope in order
+for it to reveal the correct user name to GKE. No straight forward way to add scopes
+to a VM once it's created. The easiest is to set the scope when creating the VM:
+
+```shell
+gcloud compute instances create \
+  [INSTANCE_NAME] \
+  --machine-type n1-standard-1 \
+  --scopes cloud-platform,userinfo-email
+```
+
+### Granting service account k8s admin privilege
+
+By default, the Compute service account that the VM authorizes as does not have
+k8s engine admin privilege. You need to grant that role to the service account
+via the IAM Admin console.
+
+Alternatively, you can log in as yourself by running:
+
+```shell
+gcloud auth login
+```
+
 ## Provisioning a GKE cluster and configuring kubectl to connect to it.
 
 ```
