@@ -17,9 +17,9 @@
 set -eox pipefail
 
 # Assert existence of required environment variables.
-[[ -v "$APP_INSTANCE_NAME" ]] && exit 1
-[[ -v "$NAMESPACE" ]] && exit 1
-[[ -v "$REGISTRY" ]] && exit 1
+[[ -v "APP_INSTANCE_NAME" ]] || exit 1
+[[ -v "NAMESPACE" ]] || exit 1
+[[ -v "REGISTRY" ]] || exit 1
 
 # Expand the chart template.
 mkdir "/manifest-expanded"
