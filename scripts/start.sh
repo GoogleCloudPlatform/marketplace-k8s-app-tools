@@ -32,8 +32,16 @@ case $i in
     namespace="${i#*=}"
     shift
     ;;
+  --deployer=*)
+    deployer="${i#*=}"
+    shift
+    ;;
   --registry=*)
     registry="${i#*=}"
+    shift
+    ;;
+  --marketplace_registry=*)
+    marketplace_registry="${i#*=}"
     shift
     ;;
   *)
@@ -46,7 +54,9 @@ done
 [[ -z "$app_name" ]] && >&2 echo "--app-name required" && exit 1
 [[ -z "$name" ]] && name="$app_name"-1
 [[ -z "$namespace" ]] && namespace="default"
+[[ -z "$deployer" ]] && >&2 echo "--deployer required" && exit 1
 [[ -z "$registry" ]] && >&2 echo "--registry required" && exit 1
+[[ -z "$marketplace_registry" ]] && >&2 echo "--marketplace_registry required" && exit 1
 
 # Create RBAC role, service account, and role-binding.
 # TODO(huyhuynh): Application should define the desired permissions,
@@ -116,7 +126,7 @@ spec:
       serviceAccountName: ${name}-deployer-sa
       containers:
       - name: app
-        image: "$registry/$app_name/deployer"
+        image: "$deployer"
         env:
         - name: APP_INSTANCE_NAME
           value: $name
@@ -124,5 +134,7 @@ spec:
           value: $namespace
         - name: REGISTRY
           value: $registry
+        - name: MARKETPLACE_REGISTRY
+          value: $marketplace_registry
       restartPolicy: Never
 EOF

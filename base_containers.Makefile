@@ -1,0 +1,68 @@
+ifndef __BASE_CONTAINERS_MAKEFILE__
+
+__BASE_CONTAINERS_MAKEFILE__ := included
+
+
+include $(dir $(realpath $(lastword $(MAKEFILE_LIST))))/common.Makefile
+
+MARKETPLACE_BASE_BUILD = .build/marketplace-base-containers
+
+ifdef REGISTRY
+  MARKETPLACE_REGISTRY ?= $(REGISTRY)/marketplace
+endif
+
+$(MARKETPLACE_BASE_BUILD):
+	mkdir -p $(MARKETPLACE_BASE_BUILD)
+
+.PHONY: base/build/deployer/kubectl
+base/build/deployer/kubectl: $(MARKETPLACE_BASE_BUILD)/deployer-kubectl ;
+$(MARKETPLACE_BASE_BUILD)/deployer-kubectl: $(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_kubectl_base/* $(MARKETPLACE_BASE_BUILD)/registry_prefix | base/setup
+	cd $(MARKETPLACE_TOOLS_PATH) \
+	&& docker build \
+	      --tag "$(MARKETPLACE_REGISTRY)/deployer_kubectl_base" \
+	      -f marketplace/deployer_kubectl_base/Dockerfile \
+	      .
+	gcloud docker -- push "$(MARKETPLACE_REGISTRY)/deployer_kubectl_base"
+	@touch "$@"
+
+.PHONY: base/build/deployer/helm
+base/build/deployer/helm: $(MARKETPLACE_BASE_BUILD)/deployer-helm ;
+$(MARKETPLACE_BASE_BUILD)/deployer-helm: $(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_helm_base/* $(MARKETPLACE_BASE_BUILD)/registry_prefix | base/setup
+	cd $(MARKETPLACE_TOOLS_PATH) \
+	&& docker build \
+	      --tag "$(MARKETPLACE_REGISTRY)/deployer_helm_base" \
+	      -f marketplace/deployer_helm_base/Dockerfile \
+	      .
+	gcloud docker -- push "$(MARKETPLACE_REGISTRY)/deployer_helm_base"
+	@touch "$@"
+
+.PHONY: base/build/controller
+base/build/controller: $(MARKETPLACE_BASE_BUILD)/controller ;
+$(MARKETPLACE_BASE_BUILD)/controller: $(MARKETPLACE_TOOLS_PATH)/marketplace/controller/* $(MARKETPLACE_BASE_BUILD)/registry_prefix | base/setup
+	cd $(MARKETPLACE_TOOLS_PATH) \
+	&& docker build \
+	      --tag "$(MARKETPLACE_REGISTRY)/controller" \
+	      -f marketplace/controller/Dockerfile \
+	      .
+	gcloud docker -- push "$(MARKETPLACE_REGISTRY)/controller"
+	@touch "$@"
+
+# Using this rule as prerequisite triggers rebuilding when
+# MARKETPLACE_REGISTRY changes.
+$(MARKETPLACE_BASE_BUILD)/registry_prefix: $(MARKETPLACE_BASE_BUILD)/registry_prefix_phony ;
+.PHONY: $(MARKETPLACE_BASE_BUILD)/registry_prefix_phony
+$(MARKETPLACE_BASE_BUILD)/registry_prefix_phony: | $(MARKETPLACE_BASE_BUILD)
+ifneq ($(shell [ -e "$(MARKETPLACE_BASE_BUILD)/registry_prefix" ] && cat "$(MARKETPLACE_BASE_BUILD)/registry_prefix" || echo ""),$(MARKETPLACE_REGISTRY))
+	$(info MARKETPLACE_REGISTRY changed to $(MARKETPLACE_REGISTRY))
+	@echo "$(MARKETPLACE_REGISTRY)" > "$(MARKETPLACE_BASE_BUILD)/registry_prefix"
+endif
+
+.PHONY: base/setup
+base/setup: | common/setup $(MARKETPLACE_BASE_BUILD)
+ifndef MARKETPLACE_REGISTRY
+	$(error Must define MARKETPLACE_REGISTRY);
+endif
+$(info ---- MARKETPLACE_REGISTRY = $(MARKETPLACE_REGISTRY))
+
+
+endif
