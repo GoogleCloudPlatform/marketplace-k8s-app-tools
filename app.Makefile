@@ -15,7 +15,23 @@ ifdef APP_NAME
   endif
 endif
 
+APP_BUILD = .build/marketplace-app
+
 NAMESPACE ?= default
+
+$(APP_BUILD):
+	mkdir -p $(APP_BUILD)
+
+# Using this rule as prerequisite triggers rebuilding when
+# APP_REGISTRY changes.
+$(APP_BUILD)/registry_prefix: $(APP_BUILD)/registry_prefix_phony ;
+.PHONY: $(APP_BUILD)/registry_prefix_phony
+$(APP_BUILD)/registry_prefix_phony: | $(APP_BUILD)
+ifneq ($(shell [ -e "$(APP_BUILD)/registry_prefix" ] && cat "$(APP_BUILD)/registry_prefix" || echo ""),$(APP_REGISTRY))
+	$(info APP_REGISTRY changed to $(APP_REGISTRY))
+	@echo "$(APP_REGISTRY)" > "$(APP_BUILD)/registry_prefix"
+endif
+
 
 .PHONY: app/build
 app/build:: ;
