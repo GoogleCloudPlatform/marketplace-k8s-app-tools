@@ -2,6 +2,7 @@ ifndef __GCLOUD_MAKEFILE__
 
 __GCLOUD_MAKEFILE__ := included
 
+
 ifndef REGISTRY
   REGISTRY := gcr.io/$(shell gcloud config get-value project)
 endif

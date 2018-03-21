@@ -3,7 +3,8 @@ ifndef __CRD_MAKEFILE__
 __CRD_MAKEFILE__ := included
 
 
-include $(dir $(realpath $(lastword $(MAKEFILE_LIST))))/common.Makefile
+makefile_dir := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
+include $(makefile_dir)/common.Makefile
 
 .PHONY: crd/install
 crd/install: | common/setup

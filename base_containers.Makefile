@@ -2,8 +2,8 @@ ifndef __BASE_CONTAINERS_MAKEFILE__
 
 __BASE_CONTAINERS_MAKEFILE__ := included
 
-
-include $(dir $(realpath $(lastword $(MAKEFILE_LIST))))/common.Makefile
+makefile_dir := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
+include $(makefile_dir)/common.Makefile
 
 MARKETPLACE_BASE_BUILD = .build/marketplace-base-containers
 

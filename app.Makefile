@@ -2,9 +2,9 @@ ifndef __APP_MAKEFILE__
 
 __APP_MAKEFILE__ := included
 
-
-include $(dir $(realpath $(lastword $(MAKEFILE_LIST))))/common.Makefile
-include $(dir $(realpath $(lastword $(MAKEFILE_LIST))))/base_containers.Makefile
+makefile_dir := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
+include $(makefile_dir)/common.Makefile
+include $(makefile_dir)/base_containers.Makefile
 
 ifdef APP_NAME
   APP_INSTANCE_NAME ?= $(APP_NAME)-1
