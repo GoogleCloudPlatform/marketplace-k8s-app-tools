@@ -46,14 +46,17 @@ app/install: app/build | app/setup
 	    --registry=$(APP_REGISTRY) \
 	    --marketplace_registry=$(MARKETPLACE_REGISTRY)
 
-.PHONY: app/delete
-app/delete: | app/setup
+.PHONY: app/deploy
+app/deploy: app/install
+
+.PHONY: app/uninstall
+app/uninstall: | app/setup
 	$(MARKETPLACE_TOOLS_PATH)/scripts/stop.sh \
 	    --name=$(APP_INSTANCE_NAME) \
 	    --namespace=$(NAMESPACE)
 
-.PHONY: app/uninstall
-app/uninstall: app/delete
+.PHONY: app/delete
+app/delete: app/uninstall
 
 .PHONY: app/watch
 app/watch: | app/setup
