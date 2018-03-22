@@ -2,6 +2,12 @@ ifndef __GCLOUD_MAKEFILE__
 
 __GCLOUD_MAKEFILE__ := included
 
+# Include this Makefile to automatically derive registry
+# and target namespace from the current gcloud and kubectl
+# configurations.
+# This is for convenience over having to specifying the
+# environment variables manually.
+
 
 ifndef REGISTRY
   REGISTRY := gcr.io/$(shell gcloud config get-value project)
