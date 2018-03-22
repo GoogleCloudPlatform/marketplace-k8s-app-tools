@@ -68,7 +68,7 @@ $(MARKETPLACE_BASE_BUILD)/registry_prefix: $(MARKETPLACE_BASE_BUILD)/registry_pr
 .PHONY: $(MARKETPLACE_BASE_BUILD)/registry_prefix_phony
 $(MARKETPLACE_BASE_BUILD)/registry_prefix_phony: | $(MARKETPLACE_BASE_BUILD)
 ifneq ($(shell [ -e "$(MARKETPLACE_BASE_BUILD)/registry_prefix" ] && cat "$(MARKETPLACE_BASE_BUILD)/registry_prefix" || echo ""),$(MARKETPLACE_REGISTRY))
-p	$(info MARKETPLACE_REGISTRY changed to $(MARKETPLACE_REGISTRY))
+	$(info MARKETPLACE_REGISTRY changed to $(MARKETPLACE_REGISTRY))
 	@echo "$(MARKETPLACE_REGISTRY)" > "$(MARKETPLACE_BASE_BUILD)/registry_prefix"
 endif
 
