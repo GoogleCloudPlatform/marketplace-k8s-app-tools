@@ -66,7 +66,7 @@ app/watch: | app/setup
 	    --namespace=$(NAMESPACE)
 
 .PHONY: app/setup
-app/setup: | common/setup base/setup
+app/setup: | base/setup $(APP_BUILD)
 ifndef APP_INSTANCE_NAME
   $(error Must define APP_INSTANCE_NAME)
 endif
