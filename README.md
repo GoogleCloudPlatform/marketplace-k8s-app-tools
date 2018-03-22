@@ -13,7 +13,7 @@ environment variable.
 
 # Getting Started
 
-## Tool Dependencies
+## Tool dependencies
 
 ```
 $ gcloud --version
@@ -93,152 +93,55 @@ kubectl create clusterrolebinding cluster-admin-binding \
 kubectl proxy
 ```
 
-## Set up GCR.
+## Setting up GCR
 
 Enable the API:
 https://console.cloud.google.com/apis/library/containerregistry.googleapis.com
 
-## Set up environment variables.
+## Updating git submodules
 
-```
-export REGISTRY=gcr.io/<your_project_id>
-export APP_REPO=../marketplace-k8s-app-example
+This repo utilizies git submodules. This repo should typically be included in your
+application repo as a submodule as well. Run the following commands to make sure that
+all submodules are properly populated. `git clone` does not populate submodules by
+default.
 
-export APP_NAME=wordpress
-export APP_INSTANCE_NAME=$APP_NAME-1
-
-export NAMESPACE=default
-```
-
-Note: These scripts do not manage the lifecycle of namespaces. If a custom
-namespace is specified, you'll need to create it with the following command:
-
-```
-kubectl create namespace "$NAMESPACE"
+```shell
+git submodule sync --recursive
+git submodule update --recursive --remote
 ```
 
-## Install Application custom resource definition.
+## Building and installing your application
 
-Cloud Marketplace relies on a Application CustomResourceDefinition for lifecycle
-operations. To install this CustomResourceDefinition, run the following command:
+Follow the examples at https://github.com/GoogleCloudPlatform/marketplace-k8s-app-example
 
-```
-make install-crd
-```
+From within your application source directory, follow these steps for a quick start:
 
-Note: Google Cloud Marketplace will converge on the SIG Apps defined Application
-CustomResourceDefinition, as it matures, and these tools will be updated
-accordingly.
+* `make crd/install` to install the application CRD on the cluster. This needs to be
+  done only once.
+* `make app/install` to build all the container images and deploy the app to a target
+  namespace on the cluster.
+* `make app/uninstall` to delete the deployed app.
 
-## Running Wordpress
+# Makefile Overview
 
-### Run the following command to monitor relevant kubenetes resources.
+* `app.Makefile`: Application `Makefile` should include this.
+    * Application `Makefile` should define `app/build::` target to specify how to
+      build application containers
+    * `app.Makefile` defines 2 main targets to manage the lifecycle of the application
+      on the cluster in a target namespace: `make app/install` and `make app/uninstall`.
 
-Note: Don't forget to export the same variables as above (e.g. REGISTRY,
-APP_REPO, APP_NAME, APP_INSTANCE_NAME, NAMESPACE).
+* `crd.Makefile`: Include this to expose `make crd/install` and `make crd/uninstall`.
 
-```
-make watch
-```
+* `gcloud.Makefile`: Include this to conveniently derive the registry and target
+  namespace from local `gcloud` and `kubectl` configurations. Without this, user has
+  to define these via environment variables.
 
-Note: The expected initial output is empty - we haven't created anything
-yet. It should look something like this:
+* `base_containers.Makefile`: Included as part of `app.Makefile`. You application
+  build target typically depends on one or more targets in this file. For example,
+  your application would need the base `kubectl` deployer container to build upon.
 
-```
-=========================================================================================
-Application resources in the following namespace: "<NAMESPACE>"
-$ kubectl get applications --namespace="default" --show-kind
------------------------------------------------------------------------------------------
-No resources found.
-
-
-=========================================================================================
-Standard resources in the following namespace: "<NAMESPACE>"
-$ kubectl get all --namespace="<NAMESPACE>" --show-kind
------------------------------------------------------------------------------------------
-No resources found.
-
-
-=========================================================================================
-Events with the following label: app="<APP_INSTANCE_NAME>"
-$ kubectl get events --namespace=<NAMESPACE> --selector=app=<APP_INSTANCE_NAME> \
-    --output=custom-columns='TIME:.firstTimestamp,NAME:.metadata.name,:.reason,:.message'
------------------------------------------------------------------------------------------
-TIME      NAME      REASON    MESSAGE
-```
-
-### Run the following commands to create/delete/reload an application.
-
-Note: Don't forget to export the same variables as above (e.g. REGISTRY,
-APP_NAME, APP_INSTANCE_NAME, NAMESPACE).
-
-```
-# Create an application (and build if necessary):
-make up
-
-# Delete an existing application:
-make down
-
-# Reload an application (delete and recreate, rebuilding if necessary):
-make reload
-```
-
-Here's a `make watch` sample output if everyting goes well:
-
-```
-======================================================================================================
-Application resources in the following namespace: "<NAMESPACE>"
-$ kubectl get applications --namespace="<NAMESPACE>" --show-kind
-------------------------------------------------------------------------------------------------------
-NAME                       AGE
-applications/wordpress-1   15m
-
-
-======================================================================================================
-Standard resources in the following namespace: "<NAMESPACE>"
-$ kubectl get all --namespace="<NAMESPACE>" --show-kind
-------------------------------------------------------------------------------------------------------
-NAME                           DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
-deploy/<APP_INSTANCE_NAME>-mysql       1         1         1            1           15m
-deploy/<APP_INSTANCE_NAME>-wordpress   1         1         1            1           15m
-
-NAME                                  DESIRED   CURRENT   READY     AGE
-rs/<APP_INSTANCE_NAME>-mysql-6fc6d87d79       1         1         1         15m
-rs/<APP_INSTANCE_NAME>-wordpress-6858546889   1         1         1         15m
-
-NAME                           DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
-deploy/<APP_INSTANCE_NAME>-mysql       1         1         1            1           15m
-deploy/<APP_INSTANCE_NAME>-wordpress   1         1         1            1           15m
-
-NAME                                  DESIRED   CURRENT   READY     AGE
-rs/<APP_INSTANCE_NAME>-mysql-6fc6d87d79       1         1         1         15m
-rs/<APP_INSTANCE_NAME>-wordpress-6858546889   1         1         1         15m
-
-NAME                        DESIRED   SUCCESSFUL   AGE
-jobs/<APP_INSTANCE_NAME>-operator   1         1            15m
-
-NAME                                        READY     STATUS    RESTARTS   AGE
-po/<APP_INSTANCE_NAME>-mysql-6fc6d87d79-4thtl       1/1       Running   0          15m
-po/<APP_INSTANCE_NAME>-wordpress-6858546889-vrppr   1/1       Running   0          15m
-
-NAME                            TYPE           CLUSTER-IP     EXTERNAL-IP      PORT(S)        AGE
-svc/<APP_INSTANCE_NAME>-mysql-svc       ClusterIP      None           <none>           3306/TCP       15m
-svc/<APP_INSTANCE_NAME>-wordpress-svc   LoadBalancer   10.63.242.23   35.227.145.235   80:32612/TCP   15m
-
-
-
-======================================================================================================
-Events with the following label: app="<APP_INSTANCE_NAME>"
-$ kubectl get events --namespace=<NAMESPACE> --selector=app=<APP_INSTANCE_NAME> \
-    --output=custom-columns='TIME:.firstTimestamp,NAME:.metadata.name,:.reason,:.message'
-------------------------------------------------------------------------------------------------------
-TIME                   NAME
-2018-01-30T19:05:23Z   <APP_INSTANCE_NAME>-151733912323   Cloud Marketplace   Fetching manifest from applications/<APP_INSTANCE_NAME>...
-2018-01-30T19:05:24Z   <APP_INSTANCE_NAME>-151733912424   Cloud Marketplace   Starting control loop for applications/<APP_INSTANCE_NAME>...
-2018-01-30T19:05:25Z   <APP_INSTANCE_NAME>-151733912525   Cloud Marketplace   Found applications/<APP_INSTANCE_NAME> ready status to be False.
-2018-01-30T19:05:26Z   <APP_INSTANCE_NAME>-151733912626   Cloud Marketplace   Found applications/<APP_INSTANCE_NAME> ready status to be True.
-
-```
+* `ubbagent.Makefile`: Include this if your application needs to build usage base
+  metering agent. See https://github.com/GoogleCloudPlatform/ubbagent
 
 # Implementation Overview
 
