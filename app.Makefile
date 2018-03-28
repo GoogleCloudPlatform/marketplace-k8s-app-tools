@@ -14,7 +14,7 @@ ifdef APP_NAME
 
   ifdef REGISTRY
     APP_REGISTRY ?= $(REGISTRY)/$(APP_NAME)
-	APP_DEPLOYER_IMAGE ?= $(APP_REGISTRY)/deployer:$(APP_TAG)
+    APP_DEPLOYER_IMAGE ?= $(APP_REGISTRY)/deployer:$(APP_TAG)
   endif
 endif
 
