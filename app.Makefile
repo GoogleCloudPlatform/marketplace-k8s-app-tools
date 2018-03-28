@@ -12,7 +12,11 @@ ifdef APP_NAME
 
   ifdef REGISTRY
     APP_REGISTRY ?= $(REGISTRY)/$(APP_NAME)
-    APP_DEPLOYER_IMAGE ?= $(APP_REGISTRY)/deployer
+    ifdef APP_TAG
+      APP_DEPLOYER_IMAGE ?= $(APP_REGISTRY)/deployer:$(APP_TAG)
+    else
+      APP_DEPLOYER_IMAGE ?= $(APP_REGISTRY)/deployer
+    endif
   endif
 endif
 
@@ -84,6 +88,7 @@ $(info ---- APP_INSTANCE_NAME  = $(APP_INSTANCE_NAME))
 $(info ---- NAMESPACE          = $(NAMESPACE))
 $(info ---- APP_DEPLOYER_IMAGE = $(APP_DEPLOYER_IMAGE))
 $(info ---- APP_REGISTRY       = $(APP_REGISTRY))
+$(info ---- APP_TAG            = $(APP_TAG))
 
 
 endif
