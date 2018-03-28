@@ -107,7 +107,7 @@ default.
 
 ```shell
 git submodule sync --recursive
-git submodule update --recursive --remote
+git submodule update --recursive --init --force
 ```
 
 ## Building and installing your application
