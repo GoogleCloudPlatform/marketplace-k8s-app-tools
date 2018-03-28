@@ -7,12 +7,14 @@ makefile_dir := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
 include $(makefile_dir)/common.Makefile
 include $(makefile_dir)/base_containers.Makefile
 
+APP_TAG ?= latest
+
 ifdef APP_NAME
   APP_INSTANCE_NAME ?= $(APP_NAME)-1
 
   ifdef REGISTRY
     APP_REGISTRY ?= $(REGISTRY)/$(APP_NAME)
-    APP_DEPLOYER_IMAGE ?= $(APP_REGISTRY)/deployer
+    APP_DEPLOYER_IMAGE ?= $(APP_REGISTRY)/deployer:$(APP_TAG)
   endif
 endif
 
@@ -84,6 +86,7 @@ $(info ---- APP_INSTANCE_NAME  = $(APP_INSTANCE_NAME))
 $(info ---- NAMESPACE          = $(NAMESPACE))
 $(info ---- APP_DEPLOYER_IMAGE = $(APP_DEPLOYER_IMAGE))
 $(info ---- APP_REGISTRY       = $(APP_REGISTRY))
+$(info ---- APP_TAG            = $(APP_TAG))
 
 
 endif
