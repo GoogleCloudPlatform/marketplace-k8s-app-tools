@@ -55,17 +55,23 @@ experience.
 
 If this is not an option (e.g. integration testing), see the following:
 
-#### Granting GCE VM userinfo-email scope
+### Granting GCE VM userinfo-email scope
 
-Your VM must have `https://www.googleapis.com/auth/userinfo.email` scope in order
-for it to reveal the correct user name to GKE. No straight forward way to add scopes
-to a VM once it's created. The easiest is to set the scope when creating the VM:
+If you're running from a GCE VM, your VM must have
+`https://www.googleapis.com/auth/userinfo.email` scope in order for it to
+reveal the correct user name to GKE. No straight forward way to add scopes to a
+VM once it's created. The easiest is to set the scope when creating the VM:
 
 ```shell
 gcloud compute instances create \
   [INSTANCE_NAME] \
   --machine-type n1-standard-1 \
   --scopes cloud-platform,userinfo-email
+```
+
+To check the scopes currently granted:
+```shell
+curl "https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=$(gcloud auth print-access-token)"
 ```
 
 #### Granting service account k8s admin privilege
