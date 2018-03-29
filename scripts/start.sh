@@ -77,13 +77,13 @@ metadata:
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: admin
+  name: cluster-admin
 subjects:
 - kind: ServiceAccount
   name: ${name}-deployer-sa
 EOF
 
-# Create Application instance (stitching in the expanded manifest).
+# Create Application instance.
 kubectl apply --namespace="$namespace" --filename=- <<EOF
 apiVersion: marketplace.cloud.google.com/v1
 kind: Application
