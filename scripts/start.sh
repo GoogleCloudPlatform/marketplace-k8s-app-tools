@@ -70,24 +70,14 @@ metadata:
   namespace: $namespace
 ---
 apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  name: ${name}-deployer-role
-  namespace: $namespace
-rules:
-- apiGroups: ['*']
-  resources: ['*']
-  verbs: ['*']
----
-apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: ${name}-deployer-rb
   namespace: $namespace
 roleRef:
   apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: ${name}-deployer-role
+  kind: ClusterRole
+  name: admin
 subjects:
 - kind: ServiceAccount
   name: ${name}-deployer-sa
@@ -104,9 +94,6 @@ spec:
   components:
   - ${name}-deployer-sa:
       kind: ServiceAccount
-  - ${name}-deployer-role:
-      apiGroup: rbac.authorization.k8s.io
-      kind: Role
   - ${name}-deployer-rb:
       apiGroup: rbac.authorization.k8s.io
       kind: RoleBinding
