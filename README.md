@@ -89,7 +89,6 @@ ZONE=us-west1-a
 # Create the cluster.
 gcloud beta container clusters create "$CLUSTER_NAME" \
     --zone "$ZONE" \
-    --cluster-version "1.8.7-gke.1" \
     --machine-type "n1-standard-1" \
     --num-nodes "3"
 
