@@ -46,15 +46,6 @@ Log in as yourself by running:
 gcloud auth login
 ```
 
-### Running as a service account
-
-By default, gcloud run from GCE VMs have credentials associated with the
-service account, rather than a user. We recommend configuring it to authorize
-as a user (see command above) to be consistent with the Marketplace end-user
-experience.
-
-If this is not an option (e.g. integration testing), see the following:
-
 ### Granting GCE VM userinfo-email scope
 
 If you're running from a GCE VM, your VM must have
@@ -73,6 +64,15 @@ To check the scopes currently granted:
 ```shell
 curl "https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=$(gcloud auth print-access-token)"
 ```
+
+### Running as a service account
+
+By default, gcloud run from GCE VMs have credentials associated with the
+service account, rather than a user. We recommend configuring it to authorize
+as a user (see command above) to be consistent with the Marketplace end-user
+experience.
+
+If this is not an option (e.g. integration testing), see the following:
 
 #### Granting service account k8s admin privilege
 
