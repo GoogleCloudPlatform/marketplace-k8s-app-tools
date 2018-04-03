@@ -32,7 +32,7 @@ apiVersion: v1
 firstTimestamp: $event_timestamp
 lastTimestamp: $event_timestamp
 involvedObject:
-  apiVersion: marketplace.cloud.google.com/v1
+  apiVersion: application.k8s.io/v1alpha1
   kind: Application
   namespace: $NAMESPACE
   name: $APP_INSTANCE_NAME
@@ -54,7 +54,7 @@ EOF
     --type=merge \
     --patch "metadata:
                annotations:
-                 marketplace.cloud.google.com/status:
+                 application.k8s.io/status:
                    $event_type: $event_message" || true
 }
 
@@ -111,10 +111,18 @@ while true; do
     --namespace="$NAMESPACE" \
     --output=jsonpath='{.metadata.uid}')"
 
-  top_level_resources=$(kubectl get "applications/$APP_INSTANCE_NAME" \
-      --namespace="$NAMESPACE" \
+  top_level_kinds=$(kubectl get "applications/$APP_INSTANCE_NAME" \
+    --namespace="$NAMESPACE" \
+    --output=json \
+    | jq -r '.spec.componentKinds[] | .kind')
+
+  top_level_resources=()
+  for kind in ${top_level_kinds[@]}; do
+    top_level_resources+=($(kubectl get "$kind" \
+      --selector application.k8s.io/name="$APP_INSTANCE_NAME" \
       --output=json \
-    | jq -r '.spec.components[] | to_entries[] | [.value.kind, .key] | join("/")')
+      | jq -r '.items[] | [.kind, .metadata.name] | join("/")'))
+  done
 
   healthy="True"
   for resource in ${top_level_resources[@]}; do
