@@ -66,39 +66,42 @@ kubectl apply --namespace="$namespace" --filename=- <<EOF
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: ${name}-deployer-sa
-  namespace: $namespace
+  name: "${name}-deployer-sa"
+  namespace: "${namespace}"
+  labels:
+    application.k8s.io/name: "${name}"
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: ${name}-deployer-rb
-  namespace: $namespace
+  name: "${name}-deployer-rb"
+  namespace: "${namespace}"
+  labels:
+    application.k8s.io/name: "${name}"
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
   name: cluster-admin
 subjects:
 - kind: ServiceAccount
-  name: ${name}-deployer-sa
+  name: "${name}-deployer-sa"
 EOF
 
 # Create Application instance.
 kubectl apply --namespace="$namespace" --filename=- <<EOF
-apiVersion: marketplace.cloud.google.com/v1
+apiVersion: application.k8s.io/v1alpha1
 kind: Application
 metadata:
-  name: $name
-  namespace: $namespace
+  name: "${name}"
+  namespace: "${namespace}"
 spec:
-  components:
-  - ${name}-deployer-sa:
-      kind: ServiceAccount
-  - ${name}-deployer-rb:
-      apiGroup: rbac.authorization.k8s.io
-      kind: RoleBinding
-  - ${name}-deployer:
-      kind: Job
+  selector:
+    matchLabels:
+      application.k8s.io/name: "${name}"
+  componentKinds:
+  - kind: ServiceAccount
+  - kind: RoleBinding
+  - kind: Job
 EOF
 
 # Create deployer.
@@ -107,21 +110,23 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: "${name}-deployer"
+  labels:
+    application.k8s.io/name: "${name}"
 spec:
   template:
     spec:
-      serviceAccountName: ${name}-deployer-sa
+      serviceAccountName: "${name}-deployer-sa"
       containers:
       - name: app
         image: "$deployer"
         env:
         - name: APP_INSTANCE_NAME
-          value: $name
+          value: "${name}"
         - name: NAMESPACE
-          value: $namespace
+          value: "${namespace}"
         - name: REGISTRY
-          value: $registry
+          value: "${registry}"
         - name: MARKETPLACE_REGISTRY
-          value: $marketplace_registry
+          value: "${marketplace_registry}"
       restartPolicy: Never
 EOF
