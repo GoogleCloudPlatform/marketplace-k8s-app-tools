@@ -69,7 +69,7 @@ metadata:
   name: "${name}-deployer-sa"
   namespace: "${namespace}"
   labels:
-    application.k8s.io/name: "${name}"
+    app.kubernetes.io/name: "${name}"
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
@@ -77,7 +77,7 @@ metadata:
   name: "${name}-deployer-rb"
   namespace: "${namespace}"
   labels:
-    application.k8s.io/name: "${name}"
+    app.kubernetes.io/name: "${name}"
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -89,7 +89,7 @@ EOF
 
 # Create Application instance.
 kubectl apply --namespace="$namespace" --filename=- <<EOF
-apiVersion: application.k8s.io/v1alpha1
+apiVersion: app.k8s.io/v1alpha1
 kind: Application
 metadata:
   name: "${name}"
@@ -97,7 +97,7 @@ metadata:
 spec:
   selector:
     matchLabels:
-      application.k8s.io/name: "${name}"
+      app.kubernetes.io/name: "${name}"
   componentKinds:
   - kind: ServiceAccount
   - kind: RoleBinding
@@ -111,7 +111,7 @@ kind: Job
 metadata:
   name: "${name}-deployer"
   labels:
-    application.k8s.io/name: "${name}"
+    app.kubernetes.io/name: "${name}"
 spec:
   template:
     spec:

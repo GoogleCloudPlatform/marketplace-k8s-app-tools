@@ -9,12 +9,12 @@ include $(makefile_dir)/common.Makefile
 # Installs the application CRD on the cluster.
 .PHONY: crd/install
 crd/install: | common/setup
-	kubectl apply -f "$(MARKETPLACE_TOOLS_PATH)/crd/application-resource-definition.yaml"
+	kubectl apply -f "$(MARKETPLACE_TOOLS_PATH)/crd/app-crd.yaml"
 
 # Uninstalls the application CRD from the cluster.
 .PHONY: crd/uninstall
 crd/uninstall: | common/setup
-	kubectl delete "crd/applications.marketplace.cloud.google.com"
+	kubectl delete -f "$(MARKETPLACE_TOOLS_PATH)/crd/app-crd.yaml"
 
 
 endif

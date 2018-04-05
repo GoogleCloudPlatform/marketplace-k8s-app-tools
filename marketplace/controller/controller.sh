@@ -32,7 +32,7 @@ apiVersion: v1
 firstTimestamp: $event_timestamp
 lastTimestamp: $event_timestamp
 involvedObject:
-  apiVersion: application.k8s.io/v1alpha1
+  apiVersion: app.k8s.io/v1alpha1
   kind: Application
   namespace: $NAMESPACE
   name: $APP_INSTANCE_NAME
@@ -54,7 +54,7 @@ EOF
     --type=merge \
     --patch "metadata:
                annotations:
-                 application.k8s.io/status:
+                 app.kubernetes.io/status:
                    $event_type: $event_message" || true
 }
 
@@ -119,7 +119,7 @@ while true; do
   top_level_resources=()
   for kind in ${top_level_kinds[@]}; do
     top_level_resources+=($(kubectl get "$kind" \
-      --selector application.k8s.io/name="$APP_INSTANCE_NAME" \
+      --selector app.kubernetes.io/name="$APP_INSTANCE_NAME" \
       --output=json \
       | jq -r '.items[] | [.kind, .metadata.name] | join("/")'))
   done
