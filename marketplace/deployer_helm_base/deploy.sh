@@ -62,6 +62,7 @@ for chart in "$data_dir"/chart/*; do
   helm template "$chart" \
         --name="$APP_INSTANCE_NAME" \
         --namespace="$NAMESPACE" \
+        --mode="$MODE" \
     > "$manifest_dir/$chart_manifest_file"
 done
 

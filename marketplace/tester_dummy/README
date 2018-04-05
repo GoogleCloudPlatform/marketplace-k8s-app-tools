@@ -1,0 +1,4 @@
+The dummry tester is a validation tool for the protocol involving the real tester
+
+It doesn't perform any real tests, but it should behave like it did, so external tools
+can interact with it (i.e. driver)

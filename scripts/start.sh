@@ -32,6 +32,10 @@ case $i in
     deployer="${i#*=}"
     shift
     ;;
+  --mode=*)
+    mode="${i#*=}"
+    shift
+    ;;
   *)
     >&2 echo "Unrecognized flag: $i"
     exit 1
@@ -109,5 +113,7 @@ spec:
           value: "${name}"
         - name: NAMESPACE
           value: "${namespace}"
+        - name: MODE
+          value: "${mode}"
       restartPolicy: Never
 EOF

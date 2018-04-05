@@ -147,7 +147,7 @@ From within your application source directory, follow these steps for a quick st
   namespace from local `gcloud` and `kubectl` configurations. Without this, user has
   to define these via environment variables.
 
-* `base_containers.Makefile`: Included as part of `app.Makefile`. You application
+* `base_containers.Makefile`: Included as part of `app.Makefile`. Your application
   build target typically depends on one or more targets in this file. For example,
   your application would need the base `kubectl` deployer container to build upon.
 
