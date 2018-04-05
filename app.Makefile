@@ -45,7 +45,6 @@ app/build:: ;
 .PHONY: app/install
 app/install: app/build | app/setup
 	$(MARKETPLACE_TOOLS_PATH)/scripts/start.sh \
-	    --app-name=$(APP_NAME) \
 	    --name=$(APP_INSTANCE_NAME) \
 	    --namespace=$(NAMESPACE) \
 	    --deployer=$(APP_DEPLOYER_IMAGE)
