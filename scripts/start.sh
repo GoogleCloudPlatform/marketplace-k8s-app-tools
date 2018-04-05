@@ -20,10 +20,6 @@ set -o pipefail
 for i in "$@"
 do
 case $i in
-  --app-name=*)
-    app_name="${i#*=}"
-    shift
-    ;;
   --name=*)
     name="${i#*=}"
     shift
@@ -43,8 +39,7 @@ case $i in
 esac
 done
 
-[[ -z "$app_name" ]] && >&2 echo "--app-name required" && exit 1
-[[ -z "$name" ]] && name="$app_name"-1
+[[ -z "$name" ]] && >&2 echo "--name required" && exit 1
 [[ -z "$namespace" ]] && namespace="default"
 [[ -z "$deployer" ]] && >&2 echo "--deployer required" && exit 1
 
