@@ -48,9 +48,7 @@ app/install: app/build | app/setup
 	    --app-name=$(APP_NAME) \
 	    --name=$(APP_INSTANCE_NAME) \
 	    --namespace=$(NAMESPACE) \
-	    --deployer=$(APP_DEPLOYER_IMAGE) \
-	    --registry=$(APP_REGISTRY) \
-	    --marketplace_registry=$(MARKETPLACE_REGISTRY)
+	    --deployer=$(APP_DEPLOYER_IMAGE)
 
 # Uninstalls the application from the target namespace on the cluster.
 .PHONY: app/uninstall
