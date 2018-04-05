@@ -36,14 +36,6 @@ case $i in
     deployer="${i#*=}"
     shift
     ;;
-  --registry=*)
-    registry="${i#*=}"
-    shift
-    ;;
-  --marketplace_registry=*)
-    marketplace_registry="${i#*=}"
-    shift
-    ;;
   *)
     >&2 echo "Unrecognized flag: $i"
     exit 1
@@ -55,8 +47,6 @@ done
 [[ -z "$name" ]] && name="$app_name"-1
 [[ -z "$namespace" ]] && namespace="default"
 [[ -z "$deployer" ]] && >&2 echo "--deployer required" && exit 1
-[[ -z "$registry" ]] && >&2 echo "--registry required" && exit 1
-[[ -z "$marketplace_registry" ]] && >&2 echo "--marketplace_registry required" && exit 1
 
 # Create RBAC role, service account, and role-binding.
 # TODO(huyhuynh): Application should define the desired permissions,
@@ -124,9 +114,5 @@ spec:
           value: "${name}"
         - name: NAMESPACE
           value: "${namespace}"
-        - name: REGISTRY
-          value: "${registry}"
-        - name: MARKETPLACE_REGISTRY
-          value: "${marketplace_registry}"
       restartPolicy: Never
 EOF
