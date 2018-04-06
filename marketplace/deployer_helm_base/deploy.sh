@@ -19,8 +19,6 @@ set -eox pipefail
 # Assert existence of required environment variables.
 [[ -v "APP_INSTANCE_NAME" ]] || exit 1
 [[ -v "NAMESPACE" ]] || exit 1
-[[ -v "REGISTRY" ]] || exit 1
-[[ -v "MARKETPLACE_REGISTRY" ]] || exit 1
 
 # Expand the chart template.
 mkdir "/manifest-expanded"
@@ -29,7 +27,7 @@ for chart in /data/chart/*; do
   helm template "$chart" \
         --name="$APP_INSTANCE_NAME" \
         --namespace="$NAMESPACE" \
-        --set="APP_INSTANCE_NAME=$APP_INSTANCE_NAME,NAMESPACE=$NAMESPACE,REGISTRY=$REGISTRY,MARKETPLACE_REGISTRY=$MARKETPLACE_REGISTRY" \
+        --set="APP_INSTANCE_NAME=$APP_INSTANCE_NAME,NAMESPACE=$NAMESPACE" \
     > "/manifest-expanded/$chart_manifest_file"
 done
 
