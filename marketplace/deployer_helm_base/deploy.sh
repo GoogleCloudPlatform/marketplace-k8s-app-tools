@@ -27,7 +27,6 @@ for chart in /data/chart/*; do
   helm template "$chart" \
         --name="$APP_INSTANCE_NAME" \
         --namespace="$NAMESPACE" \
-        --set="APP_INSTANCE_NAME=$APP_INSTANCE_NAME,NAMESPACE=$NAMESPACE" \
     > "/manifest-expanded/$chart_manifest_file"
 done
 
