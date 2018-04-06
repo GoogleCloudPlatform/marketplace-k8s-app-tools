@@ -20,10 +20,6 @@ set -o pipefail
 for i in "$@"
 do
 case $i in
-  --app-name=*)
-    app_name="${i#*=}"
-    shift
-    ;;
   --name=*)
     name="${i#*=}"
     shift
@@ -36,14 +32,6 @@ case $i in
     deployer="${i#*=}"
     shift
     ;;
-  --registry=*)
-    registry="${i#*=}"
-    shift
-    ;;
-  --marketplace_registry=*)
-    marketplace_registry="${i#*=}"
-    shift
-    ;;
   *)
     >&2 echo "Unrecognized flag: $i"
     exit 1
@@ -51,12 +39,9 @@ case $i in
 esac
 done
 
-[[ -z "$app_name" ]] && >&2 echo "--app-name required" && exit 1
-[[ -z "$name" ]] && name="$app_name"-1
+[[ -z "$name" ]] && >&2 echo "--name required" && exit 1
 [[ -z "$namespace" ]] && namespace="default"
 [[ -z "$deployer" ]] && >&2 echo "--deployer required" && exit 1
-[[ -z "$registry" ]] && >&2 echo "--registry required" && exit 1
-[[ -z "$marketplace_registry" ]] && >&2 echo "--marketplace_registry required" && exit 1
 
 # Create RBAC role, service account, and role-binding.
 # TODO(huyhuynh): Application should define the desired permissions,
@@ -124,9 +109,5 @@ spec:
           value: "${name}"
         - name: NAMESPACE
           value: "${namespace}"
-        - name: REGISTRY
-          value: "${registry}"
-        - name: MARKETPLACE_REGISTRY
-          value: "${marketplace_registry}"
       restartPolicy: Never
 EOF
