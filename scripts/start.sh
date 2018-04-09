@@ -43,35 +43,6 @@ done
 [[ -z "$namespace" ]] && namespace="default"
 [[ -z "$deployer" ]] && >&2 echo "--deployer required" && exit 1
 
-# Create RBAC role, service account, and role-binding.
-# TODO(huyhuynh): Application should define the desired permissions,
-# which should be transated into appropriate rules here instead of
-# granting the role with all permissions.
-kubectl apply --namespace="$namespace" --filename=- <<EOF
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: "${name}-deployer-sa"
-  namespace: "${namespace}"
-  labels:
-    app.kubernetes.io/name: "${name}"
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name: "${name}-deployer-rb"
-  namespace: "${namespace}"
-  labels:
-    app.kubernetes.io/name: "${name}"
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: cluster-admin
-subjects:
-- kind: ServiceAccount
-  name: "${name}-deployer-sa"
-EOF
-
 # Create Application instance.
 kubectl apply --namespace="$namespace" --filename=- <<EOF
 apiVersion: app.k8s.io/v1alpha1
@@ -89,6 +60,53 @@ spec:
   - kind: Job
 EOF
 
+APPLICATION_UID="$(kubectl get "applications/${name}" \
+  --namespace="$NAMESPACE" \
+  --output=jsonpath='{.metadata.uid}')"
+
+# Create RBAC role, service account, and role-binding.
+# TODO(huyhuynh): Application should define the desired permissions,
+# which should be transated into appropriate rules here instead of
+# granting the role with all permissions.
+kubectl apply --namespace="$namespace" --filename=- <<EOF
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: "${name}-deployer-sa"
+  namespace: "${namespace}"
+  labels:
+    app.kubernetes.io/name: "${name}"
+  ownerReferences:
+  - apiVersion: "extensions/v1beta1"
+    kind: "Application"
+    controller: true
+    blockOwnerDeletion: true
+    name: "${name}"
+    uid: "${APPLICATION_UID}"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: "${name}-deployer-rb"
+  namespace: "${namespace}"
+  labels:
+    app.kubernetes.io/name: "${name}"
+  ownerReferences:
+  - apiVersion: "extensions/v1beta1"
+    kind: "Application"
+    controller: true
+    blockOwnerDeletion: true
+    name: "${name}"
+    uid: "${APPLICATION_UID}"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- kind: ServiceAccount
+  name: "${name}-deployer-sa"
+EOF
+
 # Create deployer.
 kubectl apply --namespace="$namespace" --filename=- <<EOF
 apiVersion: batch/v1
@@ -97,6 +115,13 @@ metadata:
   name: "${name}-deployer"
   labels:
     app.kubernetes.io/name: "${name}"
+  ownerReferences:
+  - apiVersion: "extensions/v1beta1"
+    kind: "Application"
+    controller: true
+    blockOwnerDeletion: true
+    name: "${name}"
+    uid: "${APPLICATION_UID}"
 spec:
   template:
     spec:

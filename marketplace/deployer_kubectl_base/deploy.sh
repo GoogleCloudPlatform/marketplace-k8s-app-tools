@@ -31,13 +31,31 @@ environment_variables="$(printenv \
   | sed 's/=.*$//' \
   | sed 's/^/$/' \
   | paste -d' ' -s)"
-mkdir "/manifest-expanded"
-for manifest_template_file in /data/manifest/*; do
+
+datadir="/data"
+manifestdir="$datadir/manifest-expanded"
+mkdir $manifestdir
+
+# Replace the environment variables placeholders from the manifest templates
+for manifest_template_file in $datadir/manifest/*; do
   manifest_file=$(basename "$manifest_template_file" | sed 's/.template$//')
+  
   cat "$manifest_template_file" \
     | envsubst "$environment_variables" \
-    > "/manifest-expanded/$manifest_file"
+    > "$manifestdir/$manifest_file" 
 done
 
+# Apply owner references
+APPLICATION_UID="$(kubectl get "applications/$APP_INSTANCE_NAME" \
+  --namespace="$NAMESPACE" \
+  --output=jsonpath='{.metadata.uid}')"
+
+resourcesyaml="$datadir/resources.yaml"
+python /bin/setownership.py \
+  --appname "$APP_INSTANCE_NAME" \
+  --appuid "$APPLICATION_UID" \
+  --manifests "$manifestdir" \
+  --dest "$resourcesyaml"
+
 # Apply the manifest.
-kubectl apply --namespace="$NAMESPACE" --filename="/manifest-expanded"
+kubectl apply --namespace="$NAMESPACE" --filename=$resourcesyaml

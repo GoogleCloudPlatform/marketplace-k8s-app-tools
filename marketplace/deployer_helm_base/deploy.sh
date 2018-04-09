@@ -20,15 +20,30 @@ set -eox pipefail
 [[ -v "APP_INSTANCE_NAME" ]] || exit 1
 [[ -v "NAMESPACE" ]] || exit 1
 
+datadir="/data"
+manifestdir="$datadir/manifest-expanded"
+mkdir $manifestdir
+
 # Expand the chart template.
-mkdir "/manifest-expanded"
 for chart in /data/chart/*; do
   chart_manifest_file=$(basename "$chart" | sed 's/.tar.gz$//').yaml
   helm template "$chart" \
         --name="$APP_INSTANCE_NAME" \
         --namespace="$NAMESPACE" \
-    > "/manifest-expanded/$chart_manifest_file"
+    > "$manifestdir/$chart_manifest_file"
 done
 
+# Apply owner references
+APPLICATION_UID="$(kubectl get "applications/$APP_INSTANCE_NAME" \
+  --namespace="$NAMESPACE" \
+  --output=jsonpath='{.metadata.uid}')"
+
+resourcesyaml="$datadir/resources.yaml"
+python /bin/setownership.py \
+  --appname "$APP_INSTANCE_NAME" \
+  --appuid "$APPLICATION_UID" \
+  --manifests "$manifestdir" \
+  --dest "$resourcesyaml"
+
 # Apply the manifest.
-kubectl apply --namespace="$NAMESPACE" --filename="/manifest-expanded"
+kubectl apply --namespace="$NAMESPACE" --filename=$resourcesyaml

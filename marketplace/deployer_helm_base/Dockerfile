@@ -12,11 +12,16 @@ RUN mkdir -p /bin/helm-downloaded \
     && tar -zxvf /bin/helm-downloaded/helm.tar.gz -C /bin/helm-downloaded \
     && mv /bin/helm-downloaded/linux-amd64/helm /bin/ \
     && rm -rf /bin/helm-downloaded
-
-COPY marketplace/deployer_helm_base/deploy.sh /bin/
-
 RUN apt-get update \
     && apt-get install -y --no-install-recommends apt-utils bash gettext jq
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends python
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends python-yaml
+
+COPY marketplace/deployer_helm_base/deploy.sh /bin/
+COPY marketplace/deployer_util/setownership.py /bin/
+COPY marketplace/deployer_util/util.py /bin/
 
 RUN mkdir -p /data/chart
 
