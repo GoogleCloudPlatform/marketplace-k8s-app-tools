@@ -60,10 +60,6 @@ spec:
   - kind: Job
 EOF
 
-APPLICATION_UID="$(kubectl get "applications/${name}" \
-  --namespace="$NAMESPACE" \
-  --output=jsonpath='{.metadata.uid}')"
-
 # Create RBAC role, service account, and role-binding.
 # TODO(huyhuynh): Application should define the desired permissions,
 # which should be transated into appropriate rules here instead of
@@ -76,13 +72,6 @@ metadata:
   namespace: "${namespace}"
   labels:
     app.kubernetes.io/name: "${name}"
-  ownerReferences:
-  - apiVersion: "extensions/v1beta1"
-    kind: "Application"
-    controller: true
-    blockOwnerDeletion: true
-    name: "${name}"
-    uid: "${APPLICATION_UID}"
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
@@ -91,13 +80,6 @@ metadata:
   namespace: "${namespace}"
   labels:
     app.kubernetes.io/name: "${name}"
-  ownerReferences:
-  - apiVersion: "extensions/v1beta1"
-    kind: "Application"
-    controller: true
-    blockOwnerDeletion: true
-    name: "${name}"
-    uid: "${APPLICATION_UID}"
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -115,13 +97,6 @@ metadata:
   name: "${name}-deployer"
   labels:
     app.kubernetes.io/name: "${name}"
-  ownerReferences:
-  - apiVersion: "extensions/v1beta1"
-    kind: "Application"
-    controller: true
-    blockOwnerDeletion: true
-    name: "${name}"
-    uid: "${APPLICATION_UID}"
 spec:
   template:
     spec:

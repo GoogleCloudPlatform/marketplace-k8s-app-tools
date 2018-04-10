@@ -21,7 +21,7 @@ RUN apt-get update \
 
 COPY marketplace/deployer_helm_base/deploy.sh /bin/
 COPY marketplace/deployer_util/setownership.py /bin/
-COPY marketplace/deployer_util/util.py /bin/
+COPY marketplace/deployer_util/yaml_util.py /bin/
 
 RUN mkdir -p /data/chart
 

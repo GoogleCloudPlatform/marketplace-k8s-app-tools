@@ -20,6 +20,38 @@ set -eox pipefail
 [[ -v "APP_INSTANCE_NAME" ]] || exit 1
 [[ -v "NAMESPACE" ]] || exit 1
 
+# Assign owner references to the existing kubernates resources tagged with the application name
+APPLICATION_UID=$(kubectl get "applications/$APP_INSTANCE_NAME" \
+  --namespace="$NAMESPACE" \
+  --output=jsonpath='{.metadata.uid}')
+
+top_level_kinds=$(kubectl get "applications/$APP_INSTANCE_NAME" \
+  --namespace="$NAMESPACE" \
+  --output=json \
+  | jq -r '.spec.componentKinds[] | .kind')  
+
+top_level_resources=() 
+for kind in ${top_level_kinds[@]}; do  
+  top_level_resources+=($(kubectl get "$kind" \
+    --selector app.kubernetes.io/name="$APP_INSTANCE_NAME" \
+    --output=json \
+    | jq -r '.items[] | [.kind, .metadata.name] | join("/")')) 
+done
+
+for resource in ${top_level_resources[@]}; do 
+  kubectl patch "$resource" \
+    --namespace="$NAMESPACE" \
+    --type=merge \
+    --patch="metadata: 
+               ownerReferences:  
+               - apiVersion: extensions/v1beta1  
+                 blockOwnerDeletion: true  
+                 controller: true  
+                 kind: Application 
+                 name: $APP_INSTANCE_NAME  
+                 uid: $APPLICATION_UID" || true   
+done
+
 datadir="/data"
 manifestdir="$datadir/manifest-expanded"
 mkdir $manifestdir
@@ -33,7 +65,8 @@ for chart in /data/chart/*; do
     > "$manifestdir/$chart_manifest_file"
 done
 
-# Apply owner references
+# Set Application to own all resources defined in its component kinds.
+# by inserting ownerReference in manifest before applying.
 APPLICATION_UID="$(kubectl get "applications/$APP_INSTANCE_NAME" \
   --namespace="$NAMESPACE" \
   --output=jsonpath='{.metadata.uid}')"
