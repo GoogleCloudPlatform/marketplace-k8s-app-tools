@@ -32,6 +32,10 @@ case $i in
     deployer="${i#*=}"
     shift
     ;;
+  --parameters=*)
+    parameters="${i#*=}"
+    shift
+    ;;
   *)
     >&2 echo "Unrecognized flag: $i"
     exit 1
@@ -42,6 +46,7 @@ done
 [[ -z "$name" ]] && >&2 echo "--name required" && exit 1
 [[ -z "$namespace" ]] && namespace="default"
 [[ -z "$deployer" ]] && >&2 echo "--deployer required" && exit 1
+[[ -z "$parameters" ]] && >&2 echo "--parameters required" && exit 1
 
 # Create RBAC role, service account, and role-binding.
 # TODO(huyhuynh): Application should define the desired permissions,
@@ -89,6 +94,22 @@ spec:
   - kind: Job
 EOF
 
+# Create ConfigMap (merging in passed in parameters).
+kubectl apply --filename=- --output=json --dry-run <<EOF \
+  | jq -s '.[0].data += .[1] | .[0]' \
+      - \
+      <(echo "$parameters") \
+  | kubectl apply --namespace="$namespace" --filename=-
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "${name}-deployer-config"
+  namespace: "${namespace}"
+data:
+  APP_INSTANCE_NAME: ${name}
+  NAMESPACE: ${namespace}
+EOF
+
 # Create deployer.
 kubectl apply --namespace="$namespace" --filename=- <<EOF
 apiVersion: batch/v1
@@ -103,11 +124,9 @@ spec:
       serviceAccountName: "${name}-deployer-sa"
       containers:
       - name: app
-        image: "$deployer"
-        env:
-        - name: APP_INSTANCE_NAME
-          value: "${name}"
-        - name: NAMESPACE
-          value: "${namespace}"
+        image: "${deployer}"
+        envFrom:
+        - configMapRef:
+            name: "${name}-deployer-config"
       restartPolicy: Never
 EOF
