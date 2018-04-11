@@ -56,4 +56,3 @@ def parse_resources_yaml(content):
 
 if __name__ == '__main__':
   unittest.main()
-  
