@@ -52,17 +52,17 @@ for resource in ${top_level_resources[@]}; do
                  uid: $APPLICATION_UID" || true   
 done
 
-datadir="/data"
-manifestdir="$datadir/manifest-expanded"
-mkdir $manifestdir
+data_dir="/data"
+manifest_dir="$data_dir/manifest-expanded"
+mkdir "$manifest_dir"
 
 # Expand the chart template.
-for chart in /data/chart/*; do
+for chart in "$data_dir"/chart/*; do
   chart_manifest_file=$(basename "$chart" | sed 's/.tar.gz$//').yaml
   helm template "$chart" \
         --name="$APP_INSTANCE_NAME" \
         --namespace="$NAMESPACE" \
-    > "$manifestdir/$chart_manifest_file"
+    > "$manifest_dir/$chart_manifest_file"
 done
 
 # Set Application to own all resources defined in its component kinds.
@@ -71,12 +71,12 @@ APPLICATION_UID="$(kubectl get "applications/$APP_INSTANCE_NAME" \
   --namespace="$NAMESPACE" \
   --output=jsonpath='{.metadata.uid}')"
 
-resourcesyaml="$datadir/resources.yaml"
+resources_yaml="$data_dir/resources.yaml"
 python /bin/setownership.py \
   --appname "$APP_INSTANCE_NAME" \
   --appuid "$APPLICATION_UID" \
-  --manifests "$manifestdir" \
-  --dest "$resourcesyaml"
+  --manifests "$manifest_dir" \
+  --dest "$resources_yaml"
 
 # Apply the manifest.
-kubectl apply --namespace="$NAMESPACE" --filename=$resourcesyaml
+kubectl apply --namespace="$NAMESPACE" --filename="$resources_yaml"

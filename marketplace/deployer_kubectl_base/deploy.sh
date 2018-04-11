@@ -64,27 +64,27 @@ environment_variables="$(printenv \
   | sed 's/^/$/' \
   | paste -d' ' -s)"
 
-datadir="/data"
-manifestdir="$datadir/manifest-expanded"
-mkdir $manifestdir
+data_dir="/data"
+manifest_dir="$data_dir/manifest-expanded"
+mkdir "$manifest_dir"
 
 # Replace the environment variables placeholders from the manifest templates
-for manifest_template_file in $datadir/manifest/*; do
+for manifest_template_file in "$data_dir"/manifest/*; do
   manifest_file=$(basename "$manifest_template_file" | sed 's/.template$//')
   
   cat "$manifest_template_file" \
     | envsubst "$environment_variables" \
-    > "$manifestdir/$manifest_file" 
+    > "$manifest_dir/$manifest_file" 
 done
 
 # Set Application to own all resources defined in its component kinds.
 # by inserting ownerReference in manifest before applying.''
-resourcesyaml="$datadir/resources.yaml"
+resources_yaml="$data_dir/resources.yaml"
 python /bin/setownership.py \
   --appname "$APP_INSTANCE_NAME" \
   --appuid "$APPLICATION_UID" \
-  --manifests "$manifestdir" \
-  --dest "$resourcesyaml"
+  --manifests "$manifest_dir" \
+  --dest "$resources_yaml"
 
 # Apply the manifest.
-kubectl apply --namespace="$NAMESPACE" --filename=$resourcesyaml
+kubectl apply --namespace="$NAMESPACE" --filename="$resources_yaml"
