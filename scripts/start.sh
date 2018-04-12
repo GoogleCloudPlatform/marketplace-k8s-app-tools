@@ -97,8 +97,7 @@ EOF
 # Create ConfigMap (merging in passed in parameters).
 kubectl apply --filename=- --output=json --dry-run <<EOF \
   | jq -s '.[0].data += .[1] | .[0]' \
-      - \
-      <(echo "$parameters") \
+      - <(echo "$parameters") \
   | kubectl apply --namespace="$namespace" --filename=-
 apiVersion: v1
 kind: ConfigMap

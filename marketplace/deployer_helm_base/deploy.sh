@@ -20,14 +20,32 @@ set -eox pipefail
 [[ -v "APP_INSTANCE_NAME" ]] || exit 1
 [[ -v "NAMESPACE" ]] || exit 1
 
+# Perform environment variable expansions.
+# Note: We list out all environment variables and explicitly pass them to
+# envsubst to avoid expanding templated variables that were not defined
+# in this container. In this manner, other containers can use a envsubst
+# for variable expansion, provided the variable names do not conflict.
+environment_variables="$(printenv \
+  | sed 's/=.*$//' \
+  | sed 's/^/$/' \
+  | paste -d' ' -s)"
+
 # Expand the chart template.
 mkdir "/manifest-expanded"
 for chart in /data/chart/*; do
+  tar -xf "$chart" "chart/values.yaml.template"
+  cat "chart/values.yaml.template" \
+    | envsubst "$environment_variables" \
+    > "values.yaml"
+
   chart_manifest_file=$(basename "$chart" | sed 's/.tar.gz$//').yaml
   helm template "$chart" \
         --name="$APP_INSTANCE_NAME" \
         --namespace="$NAMESPACE" \
+        --values="values.yaml" \
     > "/manifest-expanded/$chart_manifest_file"
+
+  rm "chart/values.yaml.template" "values.yaml"
 done
 
 # Apply the manifest.
