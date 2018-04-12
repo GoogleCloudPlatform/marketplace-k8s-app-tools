@@ -20,14 +20,33 @@ set -eox pipefail
 [[ -v "APP_INSTANCE_NAME" ]] || exit 1
 [[ -v "NAMESPACE" ]] || exit 1
 
+# Perform environment variable expansions.
+# Note: We list out all environment variables and explicitly pass them to
+# envsubst to avoid expanding templated variables that were not defined
+# in this container.
+environment_variables="$(printenv \
+  | sed 's/=.*$//' \
+  | sed 's/^/$/' \
+  | paste -d' ' -s)"
+
 # Expand the chart template.
 mkdir "/manifest-expanded"
 for chart in /data/chart/*; do
+  # TODO(trironkk): Construct values.yaml directly from ConfigMap, rather than
+  # stitching into values.yaml.template first.
+  tar -xf "$chart" "chart/values.yaml.template"
+  cat "chart/values.yaml.template" \
+    | envsubst "$environment_variables" \
+    > "values.yaml"
+
   chart_manifest_file=$(basename "$chart" | sed 's/.tar.gz$//').yaml
   helm template "$chart" \
         --name="$APP_INSTANCE_NAME" \
         --namespace="$NAMESPACE" \
+        --values="values.yaml" \
     > "/manifest-expanded/$chart_manifest_file"
+
+  rm "chart/values.yaml.template" "values.yaml"
 done
 
 # Apply the manifest.
