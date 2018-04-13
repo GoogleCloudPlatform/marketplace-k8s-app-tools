@@ -48,6 +48,23 @@ done
 [[ -z "$deployer" ]] && >&2 echo "--deployer required" && exit 1
 [[ -z "$parameters" ]] && >&2 echo "--parameters required" && exit 1
 
+# Create Application instance.
+kubectl apply --namespace="$namespace" --filename=- <<EOF
+apiVersion: app.k8s.io/v1alpha1
+kind: Application
+metadata:
+  name: "${name}"
+  namespace: "${namespace}"
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: "${name}"
+  componentKinds:
+  - kind: ServiceAccount
+  - kind: RoleBinding
+  - kind: Job
+EOF
+
 # Create RBAC role, service account, and role-binding.
 # TODO(huyhuynh): Application should define the desired permissions,
 # which should be transated into appropriate rules here instead of
@@ -75,23 +92,6 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: "${name}-deployer-sa"
-EOF
-
-# Create Application instance.
-kubectl apply --namespace="$namespace" --filename=- <<EOF
-apiVersion: app.k8s.io/v1alpha1
-kind: Application
-metadata:
-  name: "${name}"
-  namespace: "${namespace}"
-spec:
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: "${name}"
-  componentKinds:
-  - kind: ServiceAccount
-  - kind: RoleBinding
-  - kind: Job
 EOF
 
 # Create ConfigMap (merging in passed in parameters).
