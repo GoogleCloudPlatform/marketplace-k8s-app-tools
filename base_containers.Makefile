@@ -21,7 +21,7 @@ $(MARKETPLACE_BASE_BUILD):
 .PHONY: base/build/deployer/kubectl
 base/build/deployer/kubectl: $(MARKETPLACE_BASE_BUILD)/deployer-kubectl ;
 
-$(MARKETPLACE_BASE_BUILD)/deployer-kubectl: $(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_kubectl_base/* $(MARKETPLACE_BASE_BUILD)/registry_prefix | base/setup
+$(MARKETPLACE_BASE_BUILD)/deployer-kubectl: $(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_util/* $(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_kubectl_base/* $(MARKETPLACE_BASE_BUILD)/registry_prefix | base/setup
 	cd $(MARKETPLACE_TOOLS_PATH) \
 	&& docker build \
 	      --tag "$(MARKETPLACE_REGISTRY)/deployer_kubectl_base" \
@@ -37,28 +37,13 @@ $(MARKETPLACE_BASE_BUILD)/deployer-kubectl: $(MARKETPLACE_TOOLS_PATH)/marketplac
 .PHONY: base/build/deployer/helm
 base/build/deployer/helm: $(MARKETPLACE_BASE_BUILD)/deployer-helm ;
 
-$(MARKETPLACE_BASE_BUILD)/deployer-helm: $(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_helm_base/* $(MARKETPLACE_BASE_BUILD)/registry_prefix | base/setup
+$(MARKETPLACE_BASE_BUILD)/deployer-helm: $(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_util/* $(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_helm_base/* $(MARKETPLACE_BASE_BUILD)/registry_prefix | base/setup
 	cd $(MARKETPLACE_TOOLS_PATH) \
 	&& docker build \
 	      --tag "$(MARKETPLACE_REGISTRY)/deployer_helm_base" \
 	      -f marketplace/deployer_helm_base/Dockerfile \
 	      .
 	gcloud docker -- push "$(MARKETPLACE_REGISTRY)/deployer_helm_base"
-	@touch "$@"
-
-# Target for invoking directly with make. Don't use this as a prerequisite
-# if your target needs to build the controller.
-# Use $(MARKETPLACE_BASE_BUILD)/controller instead.
-.PHONY: base/build/controller
-base/build/controller: $(MARKETPLACE_BASE_BUILD)/controller ;
-
-$(MARKETPLACE_BASE_BUILD)/controller: $(MARKETPLACE_TOOLS_PATH)/marketplace/controller/* $(MARKETPLACE_BASE_BUILD)/registry_prefix | base/setup
-	cd $(MARKETPLACE_TOOLS_PATH) \
-	&& docker build \
-	      --tag "$(MARKETPLACE_REGISTRY)/controller" \
-	      -f marketplace/controller/Dockerfile \
-	      .
-	gcloud docker -- push "$(MARKETPLACE_REGISTRY)/controller"
 	@touch "$@"
 
 # Using this rule as a prerequisite triggers rebuilding when
