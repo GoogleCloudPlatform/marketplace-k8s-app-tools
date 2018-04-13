@@ -57,8 +57,7 @@ done
 # Perform environment variable expansions.
 # Note: We list out all environment variables and explicitly pass them to
 # envsubst to avoid expanding templated variables that were not defined
-# in this container. In this manner, other containers can use a envsubst
-# for variable expansion, provided the variable names do not conflict.
+# in this container.
 environment_variables="$(printenv \
   | sed 's/=.*$//' \
   | sed 's/^/$/' \

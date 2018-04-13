@@ -21,12 +21,7 @@ $(MARKETPLACE_BASE_BUILD):
 .PHONY: base/build/deployer/kubectl
 base/build/deployer/kubectl: $(MARKETPLACE_BASE_BUILD)/deployer-kubectl ;
 
-$(MARKETPLACE_BASE_BUILD)/deployer-kubectl: \
-	$(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_kubectl_base/* \
-	$(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_util/* \
-	$(MARKETPLACE_BASE_BUILD)/registry_prefix \
-	| base/setup
-
+$(MARKETPLACE_BASE_BUILD)/deployer-kubectl: $(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_util/* $(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_kubectl_base/* $(MARKETPLACE_BASE_BUILD)/registry_prefix | base/setup
 	cd $(MARKETPLACE_TOOLS_PATH) \
 	&& docker build \
 	      --tag "$(MARKETPLACE_REGISTRY)/deployer_kubectl_base" \
@@ -55,12 +50,7 @@ $(MARKETPLACE_BASE_BUILD)/tester_dummy: $(MARKETPLACE_TOOLS_PATH)/marketplace/te
 .PHONY: base/build/deployer/helm
 base/build/deployer/helm: $(MARKETPLACE_BASE_BUILD)/deployer-helm ;
 
-$(MARKETPLACE_BASE_BUILD)/deployer-helm: \
-	$(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_helm_base/* \
-	$(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_util/* \
-	$(MARKETPLACE_BASE_BUILD)/registry_prefix \
-	| base/setup
-
+$(MARKETPLACE_BASE_BUILD)/deployer-helm: $(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_util/* $(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_helm_base/* $(MARKETPLACE_BASE_BUILD)/registry_prefix | base/setup
 	cd $(MARKETPLACE_TOOLS_PATH) \
 	&& docker build \
 	      --tag "$(MARKETPLACE_REGISTRY)/deployer_helm_base" \
@@ -68,7 +58,6 @@ $(MARKETPLACE_BASE_BUILD)/deployer-helm: \
 	      .
 	gcloud docker -- push "$(MARKETPLACE_REGISTRY)/deployer_helm_base"
 	@touch "$@"
-
 
 # Target for invoking directly with make. Don't use this as a prerequisite
 # if your target needs to build the driver.

@@ -52,18 +52,36 @@ for resource in ${top_level_resources[@]}; do
                  uid: $APPLICATION_UID" || true   
 done
 
+# Perform environment variable expansions.
+# Note: We list out all environment variables and explicitly pass them to
+# envsubst to avoid expanding templated variables that were not defined
+# in this container.
+environment_variables="$(printenv \
+  | sed 's/=.*$//' \
+  | sed 's/^/$/' \
+  | paste -d' ' -s)"
+
 data_dir="/data"
 manifest_dir="$data_dir/manifest-expanded"
 mkdir "$manifest_dir"
 
 # Expand the chart template.
 for chart in "$data_dir"/chart/*; do
+  # TODO(trironkk): Construct values.yaml directly from ConfigMap, rather than
+  # stitching into values.yaml.template first.
+  tar -xf "$chart" "chart/values.yaml.template"
+  cat "chart/values.yaml.template" \
+    | envsubst "$environment_variables" \
+    > "values.yaml"
   chart_manifest_file=$(basename "$chart" | sed 's/.tar.gz$//').yaml
   helm template "$chart" \
         --name="$APP_INSTANCE_NAME" \
         --namespace="$NAMESPACE" \
         --mode="$MODE" \
+        --values="values.yaml" \
     > "$manifest_dir/$chart_manifest_file"
+
+  rm "chart/values.yaml.template" "values.yaml"
 done
 
 # Set Application to own all resources defined in its component kinds.

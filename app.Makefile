@@ -21,6 +21,10 @@ ifdef APP_NAME
   endif
 endif
 
+ifndef APP_PARAMETERS
+  APP_PARAMETERS = '{}'
+endif
+
 APP_BUILD = .build/marketplace-app
 
 NAMESPACE ?= default
@@ -50,7 +54,8 @@ app/install: app/build | app/setup
 	$(MARKETPLACE_TOOLS_PATH)/scripts/start.sh \
 	    --name=$(APP_INSTANCE_NAME) \
 	    --namespace=$(NAMESPACE) \
-	    --deployer=$(APP_DEPLOYER_IMAGE)
+	    --deployer=$(APP_DEPLOYER_IMAGE) \
+	    --parameters=$(APP_PARAMETERS)
 
 # Uninstalls the application from the target namespace on the cluster.
 .PHONY: app/uninstall
@@ -97,11 +102,15 @@ endif
 ifndef APP_REGISTRY
   $(error Must define APP_REGISTRY)
 endif
+ifndef APP_PARAMETERS
+  $(error Must define APP_PARAMETERS)
+endif
 $(info ---- APP_INSTANCE_NAME  = $(APP_INSTANCE_NAME))
 $(info ---- NAMESPACE          = $(NAMESPACE))
 $(info ---- APP_DEPLOYER_IMAGE = $(APP_DEPLOYER_IMAGE))
 $(info ---- APP_REGISTRY       = $(APP_REGISTRY))
 $(info ---- APP_TAG            = $(APP_TAG))
+$(info ---- APP_PARAMETERS     = $(APP_PARAMETERS))
 
 
 endif
