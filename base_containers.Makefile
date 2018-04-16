@@ -30,20 +30,6 @@ $(MARKETPLACE_BASE_BUILD)/deployer-kubectl: $(MARKETPLACE_TOOLS_PATH)/marketplac
 	gcloud docker -- push "$(MARKETPLACE_REGISTRY)/deployer_kubectl_base"
 	@touch "$@"
 
-
-.PHONY: base/build/tester_dummy
-base/build/tester_dummy: $(MARKETPLACE_BASE_BUILD)/tester_dummy ;
-
-$(MARKETPLACE_BASE_BUILD)/tester_dummy: $(MARKETPLACE_TOOLS_PATH)/marketplace/tester_dummy/*
-	cd $(MARKETPLACE_TOOLS_PATH) \
-	&& docker build \
-	      --tag "$(MARKETPLACE_REGISTRY)/tester_dummy" \
-	      -f marketplace/tester_dummy/Dockerfile \
-	      .
-	gcloud docker -- push "$(MARKETPLACE_REGISTRY)/tester_dummy"
-	@touch "$@"
-
-
 # Target for invoking directly with make. Don't use this as a prerequisite
 # if your target needs to build helm deployer.
 # Use $(MARKETPLACE_BASE_BUILD)/deployer-helm instead.

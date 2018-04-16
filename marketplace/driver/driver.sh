@@ -15,6 +15,8 @@
 # limitations under the License.
 
 set -x
+set -e
+set -o pipefail
 
 for i in "$@"
 do
@@ -27,8 +29,16 @@ case $i in
     deployer="${i#*=}"
     shift
     ;;
+  --parameters=*)
+    parameters="${i#*=}"
+    shift
+    ;;
   --marketplace_tools=*)
     marketplace_tools="${i#*=}"
+    shift
+    ;;
+  --wait_timeout=*)
+    wait_timeout="${i#*=}"
     shift
     ;;
   --tester_timeout=*)
@@ -44,7 +54,9 @@ done
 
 [[ -z "$app_name" ]] && echo "--app-name required" && exit 1
 [[ -z "$deployer" ]] && echo "--deployer required" && exit 1
+[[ -z "$parameters" ]] && parameters="{}"
 [[ -z "$marketplace_tools" ]] && echo "--marketplace_tools required" && exit 1
+[[ -z "$wait_timeout" ]] && wait_timeout=300
 [[ -z "$tester_timeout" ]] && tester_timeout=300
 
 # Getting the directory of the running script
@@ -63,7 +75,7 @@ function delete_namespace() {
   echo "INFO Collecting events for namespace \"$NAMESPACE\""
   kubectl get events --namespace=$NAMESPACE
   echo "INFO Deleting namespace \"$NAMESPACE\""
-  kubectl delete namespace $NAMESPACE
+  # kubectl delete namespace $NAMESPACE
 }
 
 function clean_and_exit() {
@@ -72,63 +84,25 @@ function clean_and_exit() {
 }
 
 echo "INFO Creates the Application CRD in the namespace"
-kubectl apply -f "$marketplace_tools/crd/application-resource-definition.yaml"
+kubectl apply -f "$marketplace_tools/crd/app-crd.yaml"
+
+echo "Parameters: $parameters"
 
 echo "INFO Initializes the deployer container which will deploy all the application components"
 $marketplace_tools/scripts/start.sh \
-  --name=$APP_INSTANCE_NAME \
-  --namespace=$NAMESPACE \
-  --deployer=$deployer \
+  --name="$APP_INSTANCE_NAME" \
+  --namespace="$NAMESPACE" \
+  --deployer="$deployer" \
+  --parameters="$parameters" \
   || clean_and_exit
 
+echo "INFO Wait $wait_timeout seconds for the application to get into ready state"
+timeout --foreground $wait_timeout $DIR/wait_for_ready.sh $APP_INSTANCE_NAME $NAMESPACE 
 
-echo "INFO Wait for tester job to succeed before $tester_timeout seconds"
-poll_interval=4
-waited=0
-while [[ $waited -lt $tester_timeout ]]; do
-  succeeded=$(kubectl get jobs --selector=tester=true -o=json --namespace="$NAMESPACE" | jq -r '.items[].status.succeeded')
-  
-  if [[ "$succeeded" = "1" ]]; then
-    echo "INFO Tester job suceeded"
-    break
-  else 
-    sleep $poll_interval
-    waited=$((waited+poll_interval))
-  fi
-done
-
-if [[ "$succeeded" != "1" ]]; then
-  echo "ERROR Tester has not run to completition."
-  tester_job_name=$(kubectl get jobs --selector=tester=true -o=json --namespace="$NAMESPACE" | jq -r '.items[].metadata.name')
-  [[ -z "$tester_job_name" ]] && echo "ERROR tester job not found" && clean_and_exit
-
-  echo  $(kubectl logs jobs/"$tester_job_name" --namespace="$NAMESPACE") \
-    || true
+if [[ $? -ne 0 ]]; then 
+  echo "ERROR Application did not get ready before timeout"
   clean_and_exit
 fi
-
-# echo "INFO Wait $wait_timeout seconds for the application to get into ready state"
-# timeout --foreground $wait_timeout $DIR/./wait_for_ready.sh $APP_INSTANCE_NAME $NAMESPACE \
-#   || echo "ERROR Application did not get ready before timeout"
-#   && clean_and_exit
-
-# echo "INFO Make sure that the app stays in ready state for $success_timeout seconds"
-# poll_interval=4
-# waited=0
-# while [[ $waited -lt $success_timeout ]]; do
-
-#   echo "INFO kubectl get Application/$APP_INSTANCE_NAME --namespace=\"$NAMESPACE\" -o=jsonpath='{.metadata.ApplicationStatus.ready}'"
-
-#   ready=$(kubectl get "Application/$APP_INSTANCE_NAME" --namespace="$NAMESPACE" -o=jsonpath='{.metadata.ApplicationStatus.ready}')
-  
-#   if [[ "$ready" = "true" ]]; then
-#     sleep $poll_interval
-#     waited=$((waited+poll_interval))
-#   else 
-#     echo "ERROR Application reverted to not ready state"
-#     exit 1
-#   fi
-# done
 
 echo "INFO Stop the application"
 $marketplace_tools/scripts/stop.sh \
@@ -138,7 +112,7 @@ $marketplace_tools/scripts/stop.sh \
 exitcode=0
 
 echo "INFO Wait for the applications to be deleted"
-timeout --foreground 20 $DIR/./wait_for_deletion.sh $NAMESPACE applications
+timeout --foreground 20 $DIR/wait_for_deletion.sh $NAMESPACE applications
 
 if [[ $? -ne 0 ]]; then 
   echo "ERROR Some applications where not deleted"
@@ -146,7 +120,7 @@ if [[ $? -ne 0 ]]; then
 fi
 
 echo "INFO Wait for standard resources were deleted."
-timeout --foreground 20 $DIR/./wait_for_deletion.sh $NAMESPACE all
+timeout --foreground 20 $DIR/wait_for_deletion.sh $NAMESPACE all
 
 if [[ $? -ne 0 ]]; then 
   echo "ERROR Some resources where not deleted"
@@ -154,7 +128,7 @@ if [[ $? -ne 0 ]]; then
 fi
 
 echo "INFO Wait for service accounts to be deleted."
-timeout --foreground 20 $DIR/./wait_for_deletion.sh $NAMESPACE serviceaccounts,roles,rolebindings
+timeout --foreground 20 $DIR/wait_for_deletion.sh $NAMESPACE serviceaccounts,roles,rolebindings
 
 if [[ $? -ne 0 ]]; then 
   echo "ERROR Some service accounts or roles where not deleted"

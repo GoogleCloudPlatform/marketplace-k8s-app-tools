@@ -15,8 +15,6 @@ ifdef APP_NAME
   ifdef REGISTRY
     APP_REGISTRY ?= $(REGISTRY)/$(APP_NAME)
     APP_DEPLOYER_IMAGE ?= $(APP_REGISTRY)/deployer:$(APP_TAG)
-    APP_DEPLOYER_IMAGE_INTEG ?= $(APP_REGISTRY)/deployer-integ:$(APP_TAG)
-    APP_TESTER_IMAGE_DUMMY ?= $(REGISTRY)/marketplace/tester_dummy:$(APP_TAG)
     APP_DRIVER_IMAGE ?= $(APP_REGISTRY)/driver:$(APP_TAG)
   endif
 endif
@@ -70,14 +68,9 @@ app/verify: app/build | app/setup
 	$(MARKETPLACE_TOOLS_PATH)/marketplace/driver/driver.sh \
 	    --app_name=$(APP_NAME) \
 	    --deployer=$(APP_DEPLOYER_IMAGE) \
-	    --marketplace_tools=$(MARKETPLACE_TOOLS_PATH)
+	    --marketplace_tools=$(MARKETPLACE_TOOLS_PATH) \
+	    --parameters=$(APP_PARAMETERS)
 
-# TODO(ruela) For local testing.
-.PHONY: app/tester_dummy
-app/tester_dummy: $(MARKETPLACE_BASE_BUILD)/tester_dummy
-	$(MARKETPLACE_TOOLS_PATH)/marketplace/tester_dummy/deploydummy.sh \
-	    --tester_img=$(APP_TESTER_IMAGE_DUMMY) \
-	    --namespace=$(NAMESPACE)
 
 # Monitors resources in the target namespace on the cluster.
 # A convenient way to look at relevant k8s resources on the CLI.

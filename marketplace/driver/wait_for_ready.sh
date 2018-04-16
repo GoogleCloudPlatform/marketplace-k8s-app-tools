@@ -14,35 +14,112 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-ready="false"
+set -x
+set -e
+set -o pipefail
 
 app=$1
 namespace=$2
 
-# echo "INFO Wait for $app to get ready"
-# while [[ "$ready" != "true" ]]; do
+function is_healthy() {
+  resource="$1"
+  kind=${resource%/*}
+  name=${resource#*/}
+  case "$kind" in
+    Deployment)
+      ready_replicas=$(kubectl get "deployments/$name" \
+          --namespace="$namespace" \
+          --output=jsonpath='{.status.readyReplicas}')
+      total_replicas=$(kubectl get "deployments/$name" \
+          --namespace="$namespace" \
+          --output=jsonpath='{.spec.replicas}')
+      if [[ "$ready_replicas" == "$total_replicas" ]]; then
+        echo "true"; return
+      fi
+      ;;
+    PersistentVolumeClaim)
+      phase=$(kubectl get "persistentvolumeclaims/$name" \
+          --namespace="$namespace" \
+          --output=jsonpath='{.status.phase}')
+      if [[ "$phase" == "Bound" ]]; then
+        echo "true"; return
+      fi
+      ;;
+    Service)
+      service_type=$(kubectl get "services/$name" \
+          --namespace="$namespace" \
+          --output=jsonpath='{.spec.type}')
+      if [[ "$service_type" != "LoadBalancer" ]]; then
+        echo "true"; return
+      fi
+      service_ip=$(kubectl get "services/$name" \
+          --namespace="$namespace" \
+          --output=jsonpath='{.status.loadBalancer.ingress[].ip}')
+      if [[ ! -z "$service_ip" ]]; then
+        echo "true"; return
+      fi
+      ;;
+    *)
+      # TODO(trironkk): Handle more resource types.
+      echo "true"; return
+      ;;
+  esac
+  echo "false"
+}
 
-#   echo "INFO kubectl get Application/$app --namespace=\"$namespace\" -o=jsonpath='{.metadata.ApplicationStatus.ready}'"
+echo "INFO Starting control loop for applications/$app..."
+previous_healthy="True"
 
-#   ready=$(kubectl get "Application/$app" --namespace="$namespace" -o=jsonpath='{.metadata.ApplicationStatus.ready}')
-  
-#   if [[ "$ready" = "true" ]]; then
-#     echo "INFO Application/$app is ready"
-#   else 
-#   	sleep 4
-#   fi
-# done
+total_time=0
+healthy_time=0
+healthy_time_target=10
+poll_interval=4
 
-echo "INFO Look for tester job"
-while [[ "$ready" != "true" ]]; do
+while true; do
+  APPLICATION_UID="$(kubectl get "applications/$app" \
+    --namespace="$namespace" \
+    --output=jsonpath='{.metadata.uid}')"
 
-  echo "INFO kubectl get Application/$app --namespace=\"$namespace\" -o=jsonpath='{.metadata.ApplicationStatus.ready}'"
+  top_level_kinds=$(kubectl get "applications/$app" \
+    --namespace="$namespace" \
+    --output=json \
+    | jq -r '.spec.componentKinds[] | .kind')
 
-  ready=$(kubectl get "Application/$app" --namespace="$namespace" -o=jsonpath='{.metadata.ApplicationStatus.ready}')
-  
-  if [[ "$ready" = "true" ]]; then
-    echo "INFO Application/$app is ready"
-  else 
-    sleep 4
+  top_level_resources=()
+  for kind in ${top_level_kinds[@]}; do
+    top_level_resources+=($(kubectl get "$kind" \
+      --namespace="$namespace" \
+      --selector app.kubernetes.io/name="$app" \
+      --output=json \
+      | jq -r '.items[] | [.kind, .metadata.name] | join("/")'))
+  done
+
+  echo "INFO top level resources: ${#top_level_resources[@]}"
+  if [[ "${#top_level_resources[@]}" = "0" ]]; then
+    echo "ERROR no top level resources found"
+    exit 1
   fi
+
+  healthy="True"
+  for resource in ${top_level_resources[@]}; do
+    resource_health=$(is_healthy "$resource")
+    if [[ "$resource_health" == "false" ]]; then
+      healthy="False"
+      break
+    fi
+  done
+
+  if [[ "$previous_healthy" != "$healthy" ]]; then
+    echo "INFO Initialization" "Found applications/$app ready status to be $healthy."
+    previous_healthy="$healthy"
+  fi
+
+  total_time=$((total_time+poll_interval))
+  if [[ "$healthy" = "True" ]]; then
+    healthy_time=$((healthy_time+poll_interval))
+    if [[ $healthy_time -ge $healthy_time_target ]];then 
+      exit 0
+    fi
+  fi
+  sleep $poll_interval
 done

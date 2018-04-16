@@ -34,6 +34,8 @@ case $i in
     ;;
   --mode=*)
     mode="${i#*=}"
+    shift
+    ;;
   --parameters=*)
     parameters="${i#*=}"
     shift
@@ -48,7 +50,7 @@ done
 [[ -z "$name" ]] && >&2 echo "--name required" && exit 1
 [[ -z "$namespace" ]] && namespace="default"
 [[ -z "$deployer" ]] && >&2 echo "--deployer required" && exit 1
-[[ -z "$parameters" ]] && >&2 echo "--parameters required" && exit 1
+[[ -z "$parameters" ]] && parameters="{}"
 
 # Create Application instance.
 kubectl apply --namespace="$namespace" --filename=- <<EOF
