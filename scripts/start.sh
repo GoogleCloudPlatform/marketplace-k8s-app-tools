@@ -32,10 +32,6 @@ case $i in
     deployer="${i#*=}"
     shift
     ;;
-  --mode=*)
-    mode="${i#*=}"
-    shift
-    ;;
   --parameters=*)
     parameters="${i#*=}"
     shift
