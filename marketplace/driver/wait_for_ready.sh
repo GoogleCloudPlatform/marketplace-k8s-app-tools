@@ -14,7 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set -x
 set -e
 set -o pipefail
 
@@ -75,16 +74,16 @@ healthy_time=0
 healthy_time_target=10
 poll_interval=4
 
-while true; do
-  APPLICATION_UID="$(kubectl get "applications/$app" \
-    --namespace="$namespace" \
-    --output=jsonpath='{.metadata.uid}')"
+APPLICATION_UID="$(kubectl get "applications/$app" \
+  --namespace="$namespace" \
+  --output=jsonpath='{.metadata.uid}')"
 
-  top_level_kinds=$(kubectl get "applications/$app" \
+top_level_kinds=$(kubectl get "applications/$app" \
     --namespace="$namespace" \
     --output=json \
     | jq -r '.spec.componentKinds[] | .kind')
-
+    
+while true; do
   top_level_resources=()
   for kind in ${top_level_kinds[@]}; do
     top_level_resources+=($(kubectl get "$kind" \
