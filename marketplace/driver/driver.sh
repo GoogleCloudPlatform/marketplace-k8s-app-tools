@@ -52,8 +52,8 @@ case $i in
 esac
 done
 
-[[ -z "$app_name" ]] && echo "--app-name required" && exit 1
-[[ -z "$deployer" ]] && echo "--deployer required" && exit 1
+[[ -z "$app_name" ]] && app_name="$APP_INSTANCE_NAME"
+[[ -z "$deployer" ]] && deployer="$APP_DEPLOYER_IMAGE"
 [[ -z "$parameters" ]] && parameters="{}"
 [[ -z "$marketplace_tools" ]] && echo "--marketplace_tools required" && exit 1
 [[ -z "$wait_timeout" ]] && wait_timeout=300
