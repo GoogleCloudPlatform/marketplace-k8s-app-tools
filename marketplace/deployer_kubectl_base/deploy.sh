@@ -22,6 +22,13 @@ set -x
 [[ -v "APP_INSTANCE_NAME" ]] || exit 1
 [[ -v "NAMESPACE" ]] || exit 1
 
+kubectl patch "applications/$APP_INSTANCE_NAME" \
+  --namespace="$NAMESPACE" \
+  --type=merge \
+  --patch "metadata:
+             annotations:
+               kubernetes-engine.cloud.google.com/application-deploy-status: Assembly"
+
 # Assign owner references to the existing kubernates resources tagged with the application name
 APPLICATION_UID=$(kubectl get "applications/$APP_INSTANCE_NAME" \
   --namespace="$NAMESPACE" \
@@ -87,3 +94,10 @@ python /bin/setownership.py \
 
 # Apply the manifest.
 kubectl apply --namespace="$NAMESPACE" --filename="$resources_yaml"
+
+kubectl patch "applications/$APP_INSTANCE_NAME" \
+  --namespace="$NAMESPACE" \
+  --type=merge \
+  --patch "metadata:
+             annotations:
+               kubernetes-engine.cloud.google.com/application-deploy-status: Assembled"
