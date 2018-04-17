@@ -46,24 +46,7 @@ done
 [[ -z "$name" ]] && >&2 echo "--name required" && exit 1
 [[ -z "$namespace" ]] && namespace="default"
 [[ -z "$deployer" ]] && >&2 echo "--deployer required" && exit 1
-[[ -z "$parameters" ]] && parameters="{}"
-
-# Create Application instance.
-kubectl apply --namespace="$namespace" --filename=- <<EOF
-apiVersion: app.k8s.io/v1alpha1
-kind: Application
-metadata:
-  name: "${name}"
-  namespace: "${namespace}"
-spec:
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: "${name}"
-  componentKinds:
-  - kind: ServiceAccount
-  - kind: RoleBinding
-  - kind: Job
-EOF
+[[ -z "$parameters" ]] && >&2 echo "--parameters required" && exit 1
 
 # Create Application instance.
 kubectl apply --namespace="$namespace" --filename=- <<EOF
