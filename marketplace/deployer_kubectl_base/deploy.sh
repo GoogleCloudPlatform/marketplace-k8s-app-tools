@@ -58,13 +58,10 @@ done
 # Note: We list out all environment variables and explicitly pass them to
 # envsubst to avoid expanding templated variables that were not defined
 # in this container.
-environment_variables="$(kubectl get "configmap/$APP_INSTANCE_NAME-deployer-config" \
-    --namespace="$NAMESPACE" \
-    --output=json \
-  | jq -r '.data | keys | @csv' \
-  | tr -d '"' \
+environment_variables="$(printenv \
+  | sed 's/=.*$//' \
   | sed 's/^/$/' \
-  | sed 's/,/,$/')"
+  | paste -d' ' -s)"
 
 data_dir="/data"
 manifest_dir="$data_dir/manifest-expanded"

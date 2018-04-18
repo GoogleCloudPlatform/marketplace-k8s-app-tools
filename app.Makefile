@@ -71,11 +71,22 @@ app/watch: | app/setup
 
 .PHONY: app/setup
 app/setup: | base/setup $(APP_BUILD)
-	@ [ -n '$(APP_INSTANCE_NAME)'  ] || echo 'Must define APP_INSTANCE_NAME'  || exit 1
-	@ [ -n '$(NAMESPACE)'          ] || echo 'Must define NAMESPACE'          || exit 1
-	@ [ -n '$(APP_DEPLOYER_IMAGE)' ] || echo 'Must define APP_DEPLOYER_IMAGE' || exit 1
-	@ [ -n '$(APP_REGISTRY)'       ] || echo 'Must define APP_REGISTRY'       || exit 1
-	@ [ -n '$(APP_PARAMETERS)'     ] || echo 'Must define APP_PARAMETERS'     || exit 1
+ifndef APP_INSTANCE_NAME
+	$(error Must define APP_INSTANCE_NAME)
+endif
+ifndef NAMESPACE
+	$(error Must define NAMESPACE)
+endif
+ifndef APP_DEPLOYER_IMAGE
+	$(error Must define APP_DEPLOYER_IMAGE. \
+	    APP_DEPLOYER_IMAGE can take a default value if APP_REGISTRY or both REGISTRY and APP_NAME are defined)
+endif
+ifndef APP_REGISTRY
+	$(error Must define APP_REGISTRY)
+endif
+ifndef APP_PARAMETERS
+	$(error Must define APP_PARAMETERS)
+endif
 	$(info ---- APP_INSTANCE_NAME  = $(APP_INSTANCE_NAME))
 	$(info ---- NAMESPACE          = $(NAMESPACE))
 	$(info ---- APP_DEPLOYER_IMAGE = $(APP_DEPLOYER_IMAGE))
