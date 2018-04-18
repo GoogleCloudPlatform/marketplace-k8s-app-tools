@@ -15,7 +15,6 @@ ifdef APP_NAME
   ifdef REGISTRY
     APP_REGISTRY ?= $(REGISTRY)/$(APP_NAME)
     APP_DEPLOYER_IMAGE ?= $(APP_REGISTRY)/deployer:$(APP_TAG)
-    APP_DRIVER_IMAGE ?= $(APP_REGISTRY)/driver:$(APP_TAG)
   endif
 endif
 
@@ -70,7 +69,6 @@ app/verify: app/build | app/setup
 	    --deployer=$(APP_DEPLOYER_IMAGE) \
 	    --marketplace_tools=$(MARKETPLACE_TOOLS_PATH) \
 	    --parameters=$(APP_PARAMETERS)
-
 
 # Monitors resources in the target namespace on the cluster.
 # A convenient way to look at relevant k8s resources on the CLI.

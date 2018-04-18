@@ -53,7 +53,6 @@ base/build/driver: $(MARKETPLACE_BASE_BUILD)/driver ;
 
 $(MARKETPLACE_BASE_BUILD)/driver: \
 	$(MARKETPLACE_BASE_BUILD)/registry_prefix \
-	$(MARKETPLACE_TOOLS_PATH)/*.Makefile \
 	$(MARKETPLACE_TOOLS_PATH)/marketplace/driver/* \
 	$(MARKETPLACE_TOOLS_PATH)/scripts/* \
 	| base/setup
@@ -66,7 +65,6 @@ $(MARKETPLACE_BASE_BUILD)/driver: \
 	gcloud docker -- push "$(MARKETPLACE_REGISTRY)/driver"
 	@touch "$@"
 
-
 # Using this rule as a prerequisite triggers rebuilding when
 # MARKETPLACE_REGISTRY variable changes its value.
 $(MARKETPLACE_BASE_BUILD)/registry_prefix: $(MARKETPLACE_BASE_BUILD)/registry_prefix_phony ;
@@ -78,11 +76,8 @@ ifneq ($(shell [ -e "$(MARKETPLACE_BASE_BUILD)/registry_prefix" ] && cat "$(MARK
 	@echo "$(MARKETPLACE_REGISTRY)" > "$(MARKETPLACE_BASE_BUILD)/registry_prefix"
 endif
 
-
 .PHONY: base/setup
-base/setup: \
-	| common/setup \
-	  $(MARKETPLACE_BASE_BUILD)
+base/setup: | common/setup $(MARKETPLACE_BASE_BUILD)
 ifndef MARKETPLACE_REGISTRY
 	$(error Must define MARKETPLACE_REGISTRY);
 endif
