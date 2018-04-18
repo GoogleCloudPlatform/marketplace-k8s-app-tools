@@ -88,7 +88,6 @@ metadata:
     name: "${name}"
     uid: "${application_uid}"
     blockOwnerDeletion: true
-    controller: true
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
@@ -103,7 +102,6 @@ metadata:
     name: "${name}"
     uid: "${application_uid}"
     blockOwnerDeletion: true
-    controller: true
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -129,7 +127,6 @@ metadata:
     name: "${name}"
     uid: "${application_uid}"
     blockOwnerDeletion: true
-    controller: true
 data:
   APP_INSTANCE_NAME: ${name}
   NAMESPACE: ${namespace}
@@ -149,7 +146,6 @@ metadata:
     name: "${name}"
     uid: "${application_uid}"
     blockOwnerDeletion: true
-    controller: true
 spec:
   template:
     spec:
