@@ -82,5 +82,7 @@ app/setup: | base/setup $(APP_BUILD)
 	$(info ---- APP_REGISTRY       = $(APP_REGISTRY))
 	$(info ---- APP_TAG            = $(APP_TAG))
 	$(info ---- APP_PARAMETERS     = $(APP_PARAMETERS))
+	
+	@ [ -n "$(which jq)" ] || echo 'Please install jq.' || exit 1
 
 endif
