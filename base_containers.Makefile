@@ -62,7 +62,7 @@ base/setup: | common/setup $(MARKETPLACE_BASE_BUILD)
 ifndef MARKETPLACE_REGISTRY
 	$(error Must define MARKETPLACE_REGISTRY);
 endif
-$(info ---- MARKETPLACE_REGISTRY = $(MARKETPLACE_REGISTRY))
+	$(info ---- MARKETPLACE_REGISTRY = $(MARKETPLACE_REGISTRY))
 
 
 endif
