@@ -83,7 +83,7 @@ metadata:
   labels:
     app.kubernetes.io/name: "${name}"
   ownerReferences:
-  - apiVersion: "extensions/v1beta1"
+  - apiVersion: "v1alpha"
     kind: "Application"
     name: "${name}"
     uid: "${application_uid}"
@@ -98,7 +98,7 @@ metadata:
   labels:
     app.kubernetes.io/name: "${name}"
   ownerReferences:
-  - apiVersion: "extensions/v1beta1"
+  - apiVersion: "v1alpha"
     kind: "Application"
     name: "${name}"
     uid: "${application_uid}"
@@ -124,7 +124,7 @@ metadata:
   name: "${name}-deployer-config"
   namespace: "${namespace}"
   ownerReferences:
-  - apiVersion: "extensions/v1beta1"
+  - apiVersion: "v1alpha"
     kind: "Application"
     name: "${name}"
     uid: "${application_uid}"
@@ -144,7 +144,7 @@ metadata:
   labels:
     app.kubernetes.io/name: "${name}"
   ownerReferences:
-  - apiVersion: "extensions/v1beta1"
+  - apiVersion: "v1alpha"
     kind: "Application"
     name: "${name}"
     uid: "${application_uid}"
