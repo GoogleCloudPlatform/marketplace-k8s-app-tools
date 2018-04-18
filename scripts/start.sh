@@ -65,6 +65,11 @@ spec:
   - kind: Job
 EOF
 
+# Fetch the server assigned uid for owner reference assignment.
+application_uid=$(kubectl get "applications/$name" \
+  --namespace="$NAMESPACE" \
+  --output=jsonpath='{.metadata.uid}')
+
 # Create RBAC role, service account, and role-binding.
 # TODO(huyhuynh): Application should define the desired permissions,
 # which should be transated into appropriate rules here instead of
@@ -77,6 +82,13 @@ metadata:
   namespace: "${namespace}"
   labels:
     app.kubernetes.io/name: "${name}"
+  ownerReferences:
+  - apiVersion: "extensions/v1beta1"
+    kind: "Application"
+    name: "${name}"
+    uid: "${application_uid}"
+    blockOwnerDeletion: true
+    controller: true
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
@@ -85,6 +97,13 @@ metadata:
   namespace: "${namespace}"
   labels:
     app.kubernetes.io/name: "${name}"
+  ownerReferences:
+  - apiVersion: "extensions/v1beta1"
+    kind: "Application"
+    name: "${name}"
+    uid: "${application_uid}"
+    blockOwnerDeletion: true
+    controller: true
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -104,6 +123,13 @@ kind: ConfigMap
 metadata:
   name: "${name}-deployer-config"
   namespace: "${namespace}"
+  ownerReferences:
+  - apiVersion: "extensions/v1beta1"
+    kind: "Application"
+    name: "${name}"
+    uid: "${application_uid}"
+    blockOwnerDeletion: true
+    controller: true
 data:
   APP_INSTANCE_NAME: ${name}
   NAMESPACE: ${namespace}
@@ -117,6 +143,13 @@ metadata:
   name: "${name}-deployer"
   labels:
     app.kubernetes.io/name: "${name}"
+  ownerReferences:
+  - apiVersion: "extensions/v1beta1"
+    kind: "Application"
+    name: "${name}"
+    uid: "${application_uid}"
+    blockOwnerDeletion: true
+    controller: true
 spec:
   template:
     spec:
