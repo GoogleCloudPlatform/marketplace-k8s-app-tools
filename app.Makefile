@@ -49,8 +49,6 @@ app/build:: ;
 .PHONY: app/install
 app/install: app/build | app/setup
 	$(MARKETPLACE_TOOLS_PATH)/scripts/start.sh \
-	    --name='$(APP_INSTANCE_NAME)' \
-	    --namespace='$(NAMESPACE)' \
 	    --deployer='$(APP_DEPLOYER_IMAGE)' \
 	    --parameters='$(APP_PARAMETERS)'
 
@@ -94,6 +92,6 @@ endif
 	$(info ---- APP_TAG            = $(APP_TAG))
 	$(info ---- APP_PARAMETERS     = $(APP_PARAMETERS))
 	
-	@ [ -n "$(which jq)" ] || echo 'Please install jq.' || exit 1
+	@ [ -n "$$(which jq)" ] || echo 'Please install jq.' || exit 1
 
 endif

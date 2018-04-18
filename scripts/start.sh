@@ -20,14 +20,6 @@ set -o pipefail
 for i in "$@"
 do
 case $i in
-  --name=*)
-    name="${i#*=}"
-    shift
-    ;;
-  --namespace=*)
-    namespace="${i#*=}"
-    shift
-    ;;
   --deployer=*)
     deployer="${i#*=}"
     shift
@@ -43,10 +35,12 @@ case $i in
 esac
 done
 
-[[ -z "$name" ]] && >&2 echo "--name required" && exit 1
-[[ -z "$namespace" ]] && namespace="default"
 [[ -z "$deployer" ]] && >&2 echo "--deployer required" && exit 1
 [[ -z "$parameters" ]] && >&2 echo "--parameters required" && exit 1
+
+# Extract APP_INSTANCE_NAME and NAMESPACE from parameters.
+name=$(echo "$parameters" | jq -r '.APP_INSTANCE_NAME')
+namespace=$(echo "$parameters" | jq -r '.NAMESPACE')
 
 # Create Application instance.
 kubectl apply --namespace="$namespace" --filename=- <<EOF
