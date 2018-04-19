@@ -30,7 +30,6 @@ $(MARKETPLACE_BASE_BUILD)/deployer-kubectl: $(MARKETPLACE_TOOLS_PATH)/marketplac
 	gcloud docker -- push "$(MARKETPLACE_REGISTRY)/deployer_kubectl_base"
 	@touch "$@"
 
-
 # Target for invoking directly with make. Don't use this as a prerequisite
 # if your target needs to build helm deployer.
 # Use $(MARKETPLACE_BASE_BUILD)/deployer-helm instead.
@@ -44,6 +43,26 @@ $(MARKETPLACE_BASE_BUILD)/deployer-helm: $(MARKETPLACE_TOOLS_PATH)/marketplace/d
 	      -f marketplace/deployer_helm_base/Dockerfile \
 	      .
 	gcloud docker -- push "$(MARKETPLACE_REGISTRY)/deployer_helm_base"
+	@touch "$@"
+
+# Target for invoking directly with make. Don't use this as a prerequisite
+# if your target needs to build the driver.
+# Use $(MARKETPLACE_BASE_BUILD)/driver instead.
+.PHONY: base/build/driver
+base/build/driver: $(MARKETPLACE_BASE_BUILD)/driver ;
+
+$(MARKETPLACE_BASE_BUILD)/driver: \
+	$(MARKETPLACE_BASE_BUILD)/registry_prefix \
+	$(MARKETPLACE_TOOLS_PATH)/marketplace/driver/* \
+	$(MARKETPLACE_TOOLS_PATH)/scripts/* \
+	| base/setup
+	
+	cd $(MARKETPLACE_TOOLS_PATH) \
+	&& docker build \
+	      --tag "$(MARKETPLACE_REGISTRY)/driver" \
+	      -f marketplace/driver/Dockerfile \
+	      .
+	gcloud docker -- push "$(MARKETPLACE_REGISTRY)/driver"
 	@touch "$@"
 
 # Using this rule as a prerequisite triggers rebuilding when
