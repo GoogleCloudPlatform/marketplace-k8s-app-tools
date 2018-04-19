@@ -20,13 +20,6 @@ set -eox pipefail
 [[ -v "APP_INSTANCE_NAME" ]] || exit 1
 [[ -v "NAMESPACE" ]] || exit 1
 
-kubectl patch "applications/$APP_INSTANCE_NAME" \
-  --namespace="$NAMESPACE" \
-  --type=merge \
-  --patch "metadata:
-             annotations:
-               kubernetes-engine.cloud.google.com/application-deploy-status: Assembly"
-
 # Assign owner references to the existing kubernates resources tagged with the application name
 APPLICATION_UID=$(kubectl get "applications/$APP_INSTANCE_NAME" \
   --namespace="$NAMESPACE" \
@@ -111,4 +104,4 @@ kubectl patch "applications/$APP_INSTANCE_NAME" \
   --type=merge \
   --patch "metadata:
              annotations:
-               kubernetes-engine.cloud.google.com/application-deploy-status: Assembled"
+               kubernetes-engine.cloud.google.com/application-deploy-status: Succeeded"
