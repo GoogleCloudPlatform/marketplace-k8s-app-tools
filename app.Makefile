@@ -49,17 +49,15 @@ app/build:: ;
 .PHONY: app/install
 app/install: app/build | app/setup
 	$(MARKETPLACE_TOOLS_PATH)/scripts/start.sh \
-	    --name=$(APP_INSTANCE_NAME) \
-	    --namespace=$(NAMESPACE) \
-	    --deployer=$(APP_DEPLOYER_IMAGE) \
-	    --parameters=$(APP_PARAMETERS)
+	    --deployer='$(APP_DEPLOYER_IMAGE)' \
+	    --parameters='$(APP_PARAMETERS)'
 
 # Uninstalls the application from the target namespace on the cluster.
 .PHONY: app/uninstall
 app/uninstall: | app/setup
 	$(MARKETPLACE_TOOLS_PATH)/scripts/stop.sh \
-	    --name=$(APP_INSTANCE_NAME) \
-	    --namespace=$(NAMESPACE)
+	    --name='$(APP_INSTANCE_NAME)' \
+	    --namespace='$(NAMESPACE)'
 
 # Runs the verification pipeline.
 .PHONY: app/verify
@@ -75,33 +73,34 @@ app/verify: app/build | app/setup
 .PHONY: app/watch
 app/watch: | app/setup
 	$(MARKETPLACE_TOOLS_PATH)/scripts/watch.sh \
-	    --name=$(APP_INSTANCE_NAME) \
-	    --namespace=$(NAMESPACE)
+	    --name='$(APP_INSTANCE_NAME)' \
+	    --namespace='$(NAMESPACE)'
 
 .PHONY: app/setup
 app/setup: | base/setup $(APP_BUILD)
 ifndef APP_INSTANCE_NAME
-  $(error Must define APP_INSTANCE_NAME)
+	$(error Must define APP_INSTANCE_NAME)
 endif
 ifndef NAMESPACE
-  $(error Must define NAMESPACE)
+	$(error Must define NAMESPACE)
 endif
 ifndef APP_DEPLOYER_IMAGE
-  $(error Must define APP_DEPLOYER_IMAGE. \
-          APP_DEPLOYER_IMAGE can take a default value if APP_REGISTRY or both REGISTRY and APP_NAME are defined)
+	$(error Must define APP_DEPLOYER_IMAGE. \
+	    APP_DEPLOYER_IMAGE can take a default value if APP_REGISTRY or both REGISTRY and APP_NAME are defined)
 endif
 ifndef APP_REGISTRY
-  $(error Must define APP_REGISTRY)
+	$(error Must define APP_REGISTRY)
 endif
 ifndef APP_PARAMETERS
-  $(error Must define APP_PARAMETERS)
+	$(error Must define APP_PARAMETERS)
 endif
-$(info ---- APP_INSTANCE_NAME  = $(APP_INSTANCE_NAME))
-$(info ---- NAMESPACE          = $(NAMESPACE))
-$(info ---- APP_DEPLOYER_IMAGE = $(APP_DEPLOYER_IMAGE))
-$(info ---- APP_REGISTRY       = $(APP_REGISTRY))
-$(info ---- APP_TAG            = $(APP_TAG))
-$(info ---- APP_PARAMETERS     = $(APP_PARAMETERS))
-
+	$(info ---- APP_INSTANCE_NAME  = $(APP_INSTANCE_NAME))
+	$(info ---- NAMESPACE          = $(NAMESPACE))
+	$(info ---- APP_DEPLOYER_IMAGE = $(APP_DEPLOYER_IMAGE))
+	$(info ---- APP_REGISTRY       = $(APP_REGISTRY))
+	$(info ---- APP_TAG            = $(APP_TAG))
+	$(info ---- APP_PARAMETERS     = $(APP_PARAMETERS))
+	
+	@ [ -n "$$(which jq)" ] || echo 'Please install jq.' || exit 1
 
 endif
