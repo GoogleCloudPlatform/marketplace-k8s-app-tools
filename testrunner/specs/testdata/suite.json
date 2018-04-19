@@ -1,0 +1,69 @@
+{
+  "actions": [
+    {
+      "name": "Can load home page",
+      "httpTest": {
+        "url": "http://{{.Vars.MainVmIp}}:9012",
+        "expect": {
+          "statusCode": {
+            "equals": 200
+          },
+          "statusText": {
+            "contains": "OK"
+          },
+          "bodyText": {
+            "html": {
+              "title": {
+                "contains": "Hello World!"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Can SSH and do basic queries",
+      "sshTest": {
+        "host": "{{.Vars.MainVmIp}}",
+        "port": 22,
+        "commands": [
+          {
+            "command": [
+              "redis",
+              "ping"
+            ],
+            "expect": {
+              "stdout": {
+                "exactly": "PONG"
+              },
+              "stderr": {
+                "exactly": ""
+              }
+            }
+          },
+          {
+            "script": "#!/bin/bash -eu\nredis-cli put MY_KEY MY_VALUE\nredis-cli get MY_KEY",
+            "expect": {
+              "stdout": {
+                "exactly": "MY_VALUE"
+              },
+              "stderr": {
+                "exactly": ""
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Update success variable",
+      "gcp": {
+        "setRuntimeConfigVar": {
+          "runtimeConfigSelfLink": "https://runtimeconfig.googleapis.com/v1beta1/projects/my-project/configs/my-config",
+          "variablePath": "status/success",
+          "base64Value": "c3VjY2Vzcwo="
+        }
+      }
+    }
+  ]
+}
