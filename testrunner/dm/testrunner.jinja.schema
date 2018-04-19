@@ -1,0 +1,62 @@
+# Copyright 2018 Google LLC. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+required:
+- zone
+- network
+- testSpec
+- runnerContainer
+- machineType
+
+properties:
+  zone:
+    type: string
+    description: The zone to deploy test runner resources in. Required.
+  network:
+    type: string
+    description: The network to use for test runner VM. Required.
+  testSpec:
+    type: string
+    description: The test specification in YAML format. Required.
+  name:
+    type: string
+    description: >-
+      Use this as the prefix to name all test runner resources.
+      If not specified, the deployment name will be utilized to generate
+      the prefix.
+  runnerContainer:
+    type: string
+    default: launcher.gcr.io/google/testrunner
+    description: >-
+      The actual test runner binary container. Most of the time the default
+      should be used. Can be overwritten for development or testing, or if
+      a different hosted version is desired.
+  machineType:
+    type: string
+    default: f1-micro
+    description: The machine type of the test runner VM.
+  verbosity:
+    type: integer
+    default: 0
+    description: Can be set to higher value to increase logging verbosity.
+  dependsOn:
+    type: array
+    description: >-
+      List of resources to wait for before the tests start running.
+      For example, this could be a runtime config waiter from the main
+      deployment, the completion of which indicates that the deployment is
+      operational and can be tested.
+
+      More information at about resource dependencies can be found at
+      https://cloud.google.com/deployment-manager/docs/configuration/syntax-reference#metadata

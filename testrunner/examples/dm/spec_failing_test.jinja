@@ -1,0 +1,53 @@
+# Copyright 2018 Google LLC. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# This demonstrates a simple invocation of test runner with some
+# failing tests.
+
+resources:
+- name: testrunner
+  type: testrunner.jinja
+  properties:
+    zone: us-west1-a
+    network: default
+    runnerContainer: gcr.io/{{ env["project"] }}/testrunner
+    testSpec: |
+      actions:
+      - name: GET google.com should be 200 OK
+        httpTest:
+          url: http://www.google.com
+          headers:
+            Cache-Control: no-cache
+          expect:
+            statusCode:
+              equals: 200
+            bodyText:
+              html:
+                title:
+                  contains: Google
+      - name: POST google.com should be rejected
+        httpTest:
+          url: http://www.google.com
+          method: POST
+          headers:
+            Cache-Control: no-cache
+          expect:
+            statusCode:
+              atLeast: 400
+      - name: GET nonexistant.domain (failing test)
+        httpTest:
+          url: http://nonexistant.domain
+          expect:
+            statusCode:
+              equals: 200
