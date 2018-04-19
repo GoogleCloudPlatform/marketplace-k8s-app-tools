@@ -16,7 +16,7 @@
 
 set -eox pipefail
 
-# This is the entry point for the production deployment
+# This is the entry point for the test deployment
 
 # Assert existence of required environment variables.
 [[ -v "APP_INSTANCE_NAME" ]] || exit 1
@@ -29,7 +29,7 @@ application_uid=$(kubectl get "applications/$APP_INSTANCE_NAME" \
 
 ./set_owner_reference_in_cluster.sh --application_uid="$application_uid"
 
-resources_yaml=$(./create_manifests.sh --application_uid="$application_uid")
+resources_yaml=$(./create_manifests.sh --application_uid="$application_uid" --mode=test)
 
 # Apply the manifest.
 kubectl apply --namespace="$NAMESPACE" --filename="$resources_yaml"
