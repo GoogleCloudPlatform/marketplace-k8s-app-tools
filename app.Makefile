@@ -19,7 +19,7 @@ ifdef APP_NAME
 endif
 
 ifndef APP_PARAMETERS
-  APP_PARAMETERS = '{}'
+  APP_PARAMETERS = {"APP_INSTANCE_NAME": "$(APP_INSTANCE_NAME)", "NAMESPACE": "$(NAMESPACE)"}
 endif
 
 APP_BUILD = .build/marketplace-app
@@ -99,7 +99,7 @@ endif
 	$(info ---- APP_REGISTRY       = $(APP_REGISTRY))
 	$(info ---- APP_TAG            = $(APP_TAG))
 	$(info ---- APP_PARAMETERS     = $(APP_PARAMETERS))
-	
+
 	@ [ -n "$$(which jq)" ] || echo 'Please install jq.' || exit 1
 
 endif

@@ -51,7 +51,7 @@ if len(apps) > 1:
 
 kinds = map(lambda x: x['kind'], apps[0]['spec']['componentKinds'])
 
-excluded_kinds = [ "StatefulSet", "PersistentVolumeClaim", "Application" ]
+excluded_kinds = [ "PersistentVolumeClaim", "Application" ]
 included_kinds = [ kind for kind in kinds if kind not in excluded_kinds ]
 
 print("Owner references not set for " + ", ".join(excluded_kinds))
@@ -74,6 +74,6 @@ with open(args.dest, "w") as outfile:
       ownerReference['name'] = args.appname
       ownerReference['uid'] = args.appuid
       resource['metadata']['ownerReferences'].append(ownerReference)
-  
+
     outfile.write(docstart)
     yaml.dump(resource, outfile, default_flow_style=False)
