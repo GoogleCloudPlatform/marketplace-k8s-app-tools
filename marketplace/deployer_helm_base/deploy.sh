@@ -33,3 +33,10 @@ resources_yaml=$(./create_manifests.sh --application_uid="$application_uid")
 
 # Apply the manifest.
 kubectl apply --namespace="$NAMESPACE" --filename="$resources_yaml"
+
+kubectl patch "applications/$APP_INSTANCE_NAME" \
+  --namespace="$NAMESPACE" \
+  --type=merge \
+  --patch "metadata:
+             annotations:
+               kubernetes-engine.cloud.google.com/application-deploy-status: Succeeded"

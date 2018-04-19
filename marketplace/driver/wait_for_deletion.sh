@@ -29,16 +29,16 @@ while [[ "$deleted" = "false" ]]; do
     -o=json \
     | jq -r '.items[] | "\(.kind)/\(.metadata.name)"')
 
-  rescount=$(echo $resources | wc -w)
+  res_count=$(echo $resources | wc -w)
 
-  if [[ "$rescount" = "0" ]]; then
+  if [[ "$res_count" = "0" ]]; then
     deleted=true
   else
     # Ignore service account default
     if [[ "$resources" = "ServiceAccount/default" ]]; then
       deleted=true
     else
-      echo "INFO Remaining: $rescount"
+      echo "INFO Remaining: $res_count"
       echo "INFO $resources"
       sleep 4
     fi

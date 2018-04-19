@@ -20,10 +20,13 @@ set -o pipefail
 for i in "$@"
 do
 case $i in
+<<<<<<< HEAD
   --app_name=*)
     app_name="${i#*=}"
     shift
     ;;
+=======
+>>>>>>> origin
   --deployer=*)
     deployer="${i#*=}"
     shift
@@ -51,7 +54,6 @@ case $i in
 esac
 done
 
-[[ -z "$app_name" ]] && app_name="$APP_INSTANCE_NAME"
 [[ -z "$deployer" ]] && deployer="$APP_DEPLOYER_IMAGE"
 [[ -z "$parameters" ]] && parameters="{}"
 [[ -z "$marketplace_tools" ]] && echo "--marketplace_tools required" && exit 1
@@ -59,11 +61,11 @@ done
 [[ -z "$tester_timeout" ]] && tester_timeout=300
 
 # Getting the directory of the running script
-DIR=$(dirname $0)
+DIR="$(realpath $(dirname $0))"
 echo $DIR
 
 NAMESPACE="apptest-$(uuidgen)"
-APP_INSTANCE_NAME="${app_name}-1"
+APP_INSTANCE_NAME="$(echo $parameters | jq -r '.APP_INSTANCE_NAME')"
 
 echo "INFO Creates namespace \"$NAMESPACE\""
 kubectl create namespace "$NAMESPACE"
@@ -86,12 +88,12 @@ function clean_and_exit() {
 echo "INFO Creates the Application CRD in the namespace"
 kubectl apply -f "$marketplace_tools/crd/app-crd.yaml"
 
+parameters=$(echo "$parameters" | jq ".NAMESPACE=\"$NAMESPACE\"")
+
 echo "Parameters: $parameters"
 
 echo "INFO Initializes the deployer container which will deploy all the application components"
 $marketplace_tools/scripts/start.sh \
-  --name="$APP_INSTANCE_NAME" \
-  --namespace="$NAMESPACE" \
   --deployer="$deployer" \
   --parameters="$parameters" \
   || clean_and_exit "ERROR Failed to start deployer"
@@ -106,8 +108,6 @@ $marketplace_tools/scripts/stop.sh \
   --namespace=$NAMESPACE \
   || clean_and_exit "ERROR Failed to stop application"
 
-exitcode=0
-
 echo "INFO Wait for the applications to be deleted"
 timeout --foreground 20 $DIR/wait_for_deletion.sh $NAMESPACE applications \
   || clean_and_exit "ERROR Some applications where not deleted"
@@ -121,5 +121,3 @@ timeout --foreground 20 $DIR/wait_for_deletion.sh $NAMESPACE serviceaccounts,rol
   || clean_and_exit "ERROR Some service accounts or roles where not deleted"
 
 delete_namespace
-
-exit $exitcode
