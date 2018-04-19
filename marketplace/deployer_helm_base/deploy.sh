@@ -20,15 +20,81 @@ set -eox pipefail
 [[ -v "APP_INSTANCE_NAME" ]] || exit 1
 [[ -v "NAMESPACE" ]] || exit 1
 
+# Assign owner references to the existing kubernates resources tagged with the application name
+APPLICATION_UID=$(kubectl get "applications/$APP_INSTANCE_NAME" \
+  --namespace="$NAMESPACE" \
+  --output=jsonpath='{.metadata.uid}')
+
+top_level_kinds=$(kubectl get "applications/$APP_INSTANCE_NAME" \
+  --namespace="$NAMESPACE" \
+  --output=json \
+  | jq -r '.spec.componentKinds[] | .kind')  
+
+top_level_resources=() 
+for kind in ${top_level_kinds[@]}; do  
+  top_level_resources+=($(kubectl get "$kind" \
+    --selector app.kubernetes.io/name="$APP_INSTANCE_NAME" \
+    --output=json \
+    | jq -r '.items[] | [.kind, .metadata.name] | join("/")')) 
+done
+
+for resource in ${top_level_resources[@]}; do 
+  kubectl patch "$resource" \
+    --namespace="$NAMESPACE" \
+    --type=merge \
+    --patch="metadata: 
+               ownerReferences:  
+               - apiVersion: extensions/v1beta1  
+                 blockOwnerDeletion: true  
+                 controller: true  
+                 kind: Application 
+                 name: $APP_INSTANCE_NAME  
+                 uid: $APPLICATION_UID" || true   
+done
+
+# Perform environment variable expansions.
+# Note: We list out all environment variables and explicitly pass them to
+# envsubst to avoid expanding templated variables that were not defined
+# in this container.
+environment_variables="$(printenv \
+  | sed 's/=.*$//' \
+  | sed 's/^/$/' \
+  | paste -d' ' -s)"
+
+data_dir="/data"
+manifest_dir="$data_dir/manifest-expanded"
+mkdir "$manifest_dir"
+
 # Expand the chart template.
-mkdir "/manifest-expanded"
-for chart in /data/chart/*; do
+for chart in "$data_dir"/chart/*; do
+  # TODO(trironkk): Construct values.yaml directly from ConfigMap, rather than
+  # stitching into values.yaml.template first.
+  tar -xf "$chart" "chart/values.yaml.template"
+  cat "chart/values.yaml.template" \
+    | envsubst "$environment_variables" \
+    > "values.yaml"
   chart_manifest_file=$(basename "$chart" | sed 's/.tar.gz$//').yaml
   helm template "$chart" \
         --name="$APP_INSTANCE_NAME" \
         --namespace="$NAMESPACE" \
-    > "/manifest-expanded/$chart_manifest_file"
+        --values="values.yaml" \
+    > "$manifest_dir/$chart_manifest_file"
+
+  rm "chart/values.yaml.template" "values.yaml"
 done
 
+# Set Application to own all resources defined in its component kinds.
+# by inserting ownerReference in manifest before applying.
+APPLICATION_UID="$(kubectl get "applications/$APP_INSTANCE_NAME" \
+  --namespace="$NAMESPACE" \
+  --output=jsonpath='{.metadata.uid}')"
+
+resources_yaml="$data_dir/resources.yaml"
+python /bin/setownership.py \
+  --appname "$APP_INSTANCE_NAME" \
+  --appuid "$APPLICATION_UID" \
+  --manifests "$manifest_dir" \
+  --dest "$resources_yaml"
+
 # Apply the manifest.
-kubectl apply --namespace="$NAMESPACE" --filename="/manifest-expanded"
+kubectl apply --namespace="$NAMESPACE" --filename="$resources_yaml"

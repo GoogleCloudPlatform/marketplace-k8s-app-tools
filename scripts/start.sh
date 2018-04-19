@@ -20,16 +20,12 @@ set -o pipefail
 for i in "$@"
 do
 case $i in
-  --name=*)
-    name="${i#*=}"
-    shift
-    ;;
-  --namespace=*)
-    namespace="${i#*=}"
-    shift
-    ;;
   --deployer=*)
     deployer="${i#*=}"
+    shift
+    ;;
+  --parameters=*)
+    parameters="${i#*=}"
     shift
     ;;
   *)
@@ -39,38 +35,12 @@ case $i in
 esac
 done
 
-[[ -z "$name" ]] && >&2 echo "--name required" && exit 1
-[[ -z "$namespace" ]] && namespace="default"
 [[ -z "$deployer" ]] && >&2 echo "--deployer required" && exit 1
+[[ -z "$parameters" ]] && >&2 echo "--parameters required" && exit 1
 
-# Create RBAC role, service account, and role-binding.
-# TODO(huyhuynh): Application should define the desired permissions,
-# which should be transated into appropriate rules here instead of
-# granting the role with all permissions.
-kubectl apply --namespace="$namespace" --filename=- <<EOF
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: "${name}-deployer-sa"
-  namespace: "${namespace}"
-  labels:
-    app.kubernetes.io/name: "${name}"
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name: "${name}-deployer-rb"
-  namespace: "${namespace}"
-  labels:
-    app.kubernetes.io/name: "${name}"
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: cluster-admin
-subjects:
-- kind: ServiceAccount
-  name: "${name}-deployer-sa"
-EOF
+# Extract APP_INSTANCE_NAME and NAMESPACE from parameters.
+name=$(echo "$parameters" | jq -r '.APP_INSTANCE_NAME')
+namespace=$(echo "$parameters" | jq -r '.NAMESPACE')
 
 # Create Application instance.
 kubectl apply --namespace="$namespace" --filename=- <<EOF
@@ -89,6 +59,73 @@ spec:
   - kind: Job
 EOF
 
+# Fetch the server assigned uid for owner reference assignment.
+application_uid=$(kubectl get "applications/$name" \
+  --namespace="$NAMESPACE" \
+  --output=jsonpath='{.metadata.uid}')
+
+# Create RBAC role, service account, and role-binding.
+# TODO(huyhuynh): Application should define the desired permissions,
+# which should be transated into appropriate rules here instead of
+# granting the role with all permissions.
+kubectl apply --namespace="$namespace" --filename=- <<EOF
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: "${name}-deployer-sa"
+  namespace: "${namespace}"
+  labels:
+    app.kubernetes.io/name: "${name}"
+  ownerReferences:
+  - apiVersion: "v1alpha"
+    kind: "Application"
+    name: "${name}"
+    uid: "${application_uid}"
+    blockOwnerDeletion: true
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: "${name}-deployer-rb"
+  namespace: "${namespace}"
+  labels:
+    app.kubernetes.io/name: "${name}"
+  ownerReferences:
+  - apiVersion: "v1alpha"
+    kind: "Application"
+    name: "${name}"
+    uid: "${application_uid}"
+    blockOwnerDeletion: true
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- kind: ServiceAccount
+  name: "${name}-deployer-sa"
+EOF
+
+# Create ConfigMap (merging in passed in parameters).
+kubectl apply --filename=- --output=json --dry-run <<EOF \
+  | jq -s '.[0].data += .[1] | .[0]' \
+      - <(echo "$parameters") \
+  | kubectl apply --namespace="$namespace" --filename=-
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "${name}-deployer-config"
+  namespace: "${namespace}"
+  ownerReferences:
+  - apiVersion: "v1alpha"
+    kind: "Application"
+    name: "${name}"
+    uid: "${application_uid}"
+    blockOwnerDeletion: true
+data:
+  APP_INSTANCE_NAME: ${name}
+  NAMESPACE: ${namespace}
+EOF
+
 # Create deployer.
 kubectl apply --namespace="$namespace" --filename=- <<EOF
 apiVersion: batch/v1
@@ -97,17 +134,21 @@ metadata:
   name: "${name}-deployer"
   labels:
     app.kubernetes.io/name: "${name}"
+  ownerReferences:
+  - apiVersion: "v1alpha"
+    kind: "Application"
+    name: "${name}"
+    uid: "${application_uid}"
+    blockOwnerDeletion: true
 spec:
   template:
     spec:
       serviceAccountName: "${name}-deployer-sa"
       containers:
       - name: app
-        image: "$deployer"
-        env:
-        - name: APP_INSTANCE_NAME
-          value: "${name}"
-        - name: NAMESPACE
-          value: "${namespace}"
+        image: "${deployer}"
+        envFrom:
+        - configMapRef:
+            name: "${name}-deployer-config"
       restartPolicy: Never
 EOF
