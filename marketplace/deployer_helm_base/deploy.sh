@@ -64,7 +64,7 @@ environment_variables="$(kubectl get "configmap/$APP_INSTANCE_NAME-deployer-conf
   | jq -r '.data | keys | @csv' \
   | tr -d '"' \
   | sed 's/^/$/' \
-  | sed 's/,/,$/')"
+  | sed 's/,/,$/g')"
 
 data_dir="/data"
 manifest_dir="$data_dir/manifest-expanded"
