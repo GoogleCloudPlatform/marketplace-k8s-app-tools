@@ -63,7 +63,6 @@ app/uninstall: | app/setup
 .PHONY: app/verify
 app/verify: app/build | app/setup
 	$(MARKETPLACE_TOOLS_PATH)/marketplace/driver/driver.sh \
-	    --app_name=$(APP_NAME) \
 	    --deployer=$(APP_DEPLOYER_IMAGE) \
 	    --marketplace_tools=$(MARKETPLACE_TOOLS_PATH) \
 	    --parameters=$(APP_PARAMETERS)

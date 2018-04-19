@@ -67,11 +67,9 @@ function is_healthy() {
 }
 
 echo "INFO Starting control loop for applications/$app..."
-previous_healthy="True"
+previous_healthy="false"
 
-total_time=0
-healthy_time=0
-healthy_time_target=10
+min_time_before_healthy=60
 poll_interval=4
 
 APPLICATION_UID="$(kubectl get "applications/$app" \
@@ -99,11 +97,11 @@ while true; do
     exit 1
   fi
 
-  healthy="True"
+  healthy="true"
   for resource in ${top_level_resources[@]}; do
     resource_health=$(is_healthy "$resource")
     if [[ "$resource_health" == "false" ]]; then
-      healthy="False"
+      healthy="false"
       break
     fi
   done
@@ -111,12 +109,15 @@ while true; do
   if [[ "$previous_healthy" != "$healthy" ]]; then
     echo "INFO Initialization" "Found applications/$app ready status to be $healthy."
     previous_healthy="$healthy"
+
+    if [[ "$healthy" = "true" ]]; then
+      healthy_start_time=$(date +%s)
+    fi
   fi
 
-  total_time=$((total_time+poll_interval))
-  if [[ "$healthy" = "True" ]]; then
-    healthy_time=$((healthy_time+poll_interval))
-    if [[ $healthy_time -ge $healthy_time_target ]];then 
+  if [[ "$healthy" = "true" ]]; then
+    elapsed_healthy_time=$(( $(date +%s) - $healthy_start_time ))
+    if [[ $elapsed_healthy_time -ge $min_time_before_healthy ]]; then 
       exit 0
     fi
   fi
