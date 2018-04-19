@@ -61,7 +61,7 @@ EOF
 
 # Fetch the server assigned uid for owner reference assignment.
 application_uid=$(kubectl get "applications/$name" \
-  --namespace="$NAMESPACE" \
+  --namespace="$namespace" \
   --output=jsonpath='{.metadata.uid}')
 
 # Create RBAC role, service account, and role-binding.
