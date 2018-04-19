@@ -147,6 +147,7 @@ spec:
       containers:
       - name: app
         image: "${deployer}"
+        imagePullPolicy: Always
         envFrom:
         - configMapRef:
             name: "${name}-deployer-config"
