@@ -65,7 +65,7 @@ application_uid=$(kubectl get "applications/$name" \
   --output=jsonpath='{.metadata.uid}')
 
 # Create RBAC role, service account, and role-binding.
-# TODO(huyhuynh): Application should define the desired permissions,
+# TODO(huyhg): Application should define the desired permissions,
 # which should be transated into appropriate rules here instead of
 # granting the role with all permissions.
 kubectl apply --namespace="$namespace" --filename=- <<EOF
