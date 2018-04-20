@@ -19,7 +19,7 @@ ifdef APP_NAME
 endif
 
 ifndef APP_PARAMETERS
-  APP_PARAMETERS = '{}'
+  APP_PARAMETERS = {"APP_INSTANCE_NAME": "$(APP_INSTANCE_NAME)", "NAMESPACE": "$(NAMESPACE)"}
 endif
 
 APP_BUILD = .build/marketplace-app
@@ -59,6 +59,14 @@ app/uninstall: | app/setup
 	    --name='$(APP_INSTANCE_NAME)' \
 	    --namespace='$(NAMESPACE)'
 
+# Runs the verification pipeline.
+.PHONY: app/verify
+app/verify: app/build | app/setup
+	$(MARKETPLACE_TOOLS_PATH)/marketplace/driver/driver.sh \
+	    --deployer='$(APP_DEPLOYER_IMAGE)' \
+	    --marketplace_tools='$(MARKETPLACE_TOOLS_PATH)' \
+	    --parameters='$(APP_PARAMETERS)'
+
 # Monitors resources in the target namespace on the cluster.
 # A convenient way to look at relevant k8s resources on the CLI.
 .PHONY: app/watch
@@ -91,7 +99,7 @@ endif
 	$(info ---- APP_REGISTRY       = $(APP_REGISTRY))
 	$(info ---- APP_TAG            = $(APP_TAG))
 	$(info ---- APP_PARAMETERS     = $(APP_PARAMETERS))
-	
+
 	@ [ -n "$$(which jq)" ] || echo 'Please install jq.' || exit 1
 
 endif

@@ -68,6 +68,14 @@ python /bin/setownership.py \
 # Apply the manifest.
 kubectl apply --namespace="$NAMESPACE" --filename="$resources_yaml"
 
+# Update Application resource with application-deploy-status.
+kubectl patch "applications/$APP_INSTANCE_NAME" \
+  --namespace="$NAMESPACE" \
+  --type=merge \
+  --patch "metadata:
+             annotations:
+               kubernetes-engine.cloud.google.com/application-deploy-status: Succeeded"
+
 # Clean up IAM resources.
 kubectl delete --namespace="$NAMESPACE" --filename=- <<EOF
 apiVersion: v1
