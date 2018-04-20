@@ -22,38 +22,6 @@ set -x
 [[ -v "APP_INSTANCE_NAME" ]] || exit 1
 [[ -v "NAMESPACE" ]] || exit 1
 
-# Assign owner references to the existing kubernates resources tagged with the application name
-APPLICATION_UID=$(kubectl get "applications/$APP_INSTANCE_NAME" \
-  --namespace="$NAMESPACE" \
-  --output=jsonpath='{.metadata.uid}')
-
-top_level_kinds=$(kubectl get "applications/$APP_INSTANCE_NAME" \
-  --namespace="$NAMESPACE" \
-  --output=json \
-  | jq -r '.spec.componentKinds[] | .kind')  
-
-top_level_resources=() 
-for kind in ${top_level_kinds[@]}; do  
-  top_level_resources+=($(kubectl get "$kind" \
-    --selector app.kubernetes.io/name="$APP_INSTANCE_NAME" \
-    --output=json \
-    | jq -r '.items[] | [.kind, .metadata.name] | join("/")')) 
-done
-
-for resource in ${top_level_resources[@]}; do 
-  kubectl patch "$resource" \
-    --namespace="$NAMESPACE" \
-    --type=merge \
-    --patch="metadata: 
-               ownerReferences:  
-               - apiVersion: extensions/v1beta1  
-                 blockOwnerDeletion: true  
-                 controller: true  
-                 kind: Application 
-                 name: $APP_INSTANCE_NAME  
-                 uid: $APPLICATION_UID" || true   
-done
-
 # Perform environment variable expansions.
 # Note: We list out all environment variables and explicitly pass them to
 # envsubst to avoid expanding templated variables that were not defined
@@ -76,8 +44,13 @@ for manifest_template_file in "$data_dir"/manifest/*; do
     > "$manifest_dir/$manifest_file" 
 done
 
+# Fetch Application resource UID.
+APPLICATION_UID="$(kubectl get "applications/$APP_INSTANCE_NAME" \
+  --namespace="$NAMESPACE" \
+  --output=jsonpath='{.metadata.uid}')"
+
 # Set Application to own all resources defined in its component kinds.
-# by inserting ownerReference in manifest before applying.''
+# by inserting ownerReference in manifest before applying.
 resources_yaml="$data_dir/resources.yaml"
 python /bin/setownership.py \
   --appname "$APP_INSTANCE_NAME" \
@@ -88,9 +61,25 @@ python /bin/setownership.py \
 # Apply the manifest.
 kubectl apply --namespace="$NAMESPACE" --filename="$resources_yaml"
 
+# Update Application resource with application-deploy-status.
 kubectl patch "applications/$APP_INSTANCE_NAME" \
   --namespace="$NAMESPACE" \
   --type=merge \
   --patch "metadata:
              annotations:
                kubernetes-engine.cloud.google.com/application-deploy-status: Succeeded"
+
+# Clean up IAM resources.
+kubectl delete --namespace="$NAMESPACE" --filename=- <<EOF
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: "${APP_INSTANCE_NAME}-deployer-sa"
+  namespace: "${NAMESPACE}"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: "${APP_INSTANCE_NAME}-deployer-rb"
+  namespace: "${NAMESPACE}"
+EOF

@@ -107,7 +107,7 @@ EOF
 
 # Create ConfigMap (merging in passed in parameters).
 kubectl apply --filename=- --output=json --dry-run <<EOF \
-  | jq -s '.[0].data += .[1] | .[0]' \
+  | jq -s '.[0].data = .[1] | .[0]' \
       - <(echo "$parameters") \
   | kubectl apply --namespace="$namespace" --filename=-
 apiVersion: v1
@@ -121,9 +121,6 @@ metadata:
     name: "${name}"
     uid: "${application_uid}"
     blockOwnerDeletion: true
-data:
-  APP_INSTANCE_NAME: ${name}
-  NAMESPACE: ${namespace}
 EOF
 
 # Create deployer.
@@ -145,7 +142,7 @@ spec:
     spec:
       serviceAccountName: "${name}-deployer-sa"
       containers:
-      - name: app
+      - name: deployer
         image: "${deployer}"
         imagePullPolicy: Always
         envFrom:
