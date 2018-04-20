@@ -76,6 +76,7 @@ metadata:
   namespace: "${namespace}"
   labels:
     app.kubernetes.io/name: "${name}"
+    marketplace.cloud.google.com: deployer
   ownerReferences:
   - apiVersion: "v1alpha"
     kind: "Application"
@@ -90,6 +91,7 @@ metadata:
   namespace: "${namespace}"
   labels:
     app.kubernetes.io/name: "${name}"
+    marketplace.cloud.google.com: deployer
   ownerReferences:
   - apiVersion: "v1alpha"
     kind: "Application"
@@ -115,6 +117,9 @@ kind: ConfigMap
 metadata:
   name: "${name}-deployer-config"
   namespace: "${namespace}"
+  labels:
+    app.kubernetes.io/name: "${name}"
+    marketplace.cloud.google.com: deployer
   ownerReferences:
   - apiVersion: "v1alpha"
     kind: "Application"

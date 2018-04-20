@@ -69,16 +69,7 @@ python /bin/setownership.py \
 kubectl apply --namespace="$NAMESPACE" --filename="$resources_yaml"
 
 # Clean up IAM resources.
-kubectl delete --namespace="$NAMESPACE" --filename=- <<EOF
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: "${APP_INSTANCE_NAME}-deployer-sa"
-  namespace: "${NAMESPACE}"
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name: "${APP_INSTANCE_NAME}-deployer-rb"
-  namespace: "${NAMESPACE}"
-EOF
+kubectl delete serviceaccount,rolebinding \
+  --namespace="$NAMESPACE" \
+  --selector="app.kubernetes.io/name=$APP_INSTANCE_NAME,
+              marketplace.cloud.google.com=deployer"
