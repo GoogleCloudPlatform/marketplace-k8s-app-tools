@@ -52,6 +52,14 @@ app/install: app/build | app/setup
 	    --deployer='$(APP_DEPLOYER_IMAGE)' \
 	    --parameters='$(APP_PARAMETERS)'
 
+# Installs the application into target namespace on the cluster.
+.PHONY: app/install-test
+app/install-test: app/build-test | app/setup
+	$(MARKETPLACE_TOOLS_PATH)/scripts/start.sh \
+	    --deployer='$(APP_DEPLOYER_IMAGE)' \
+	    --parameters='$(APP_PARAMETERS)' \
+	    --mode='test'
+
 # Uninstalls the application from the target namespace on the cluster.
 .PHONY: app/uninstall
 app/uninstall: | app/setup
@@ -66,15 +74,6 @@ app/verify: app/build | app/setup
 	    --deployer='$(APP_DEPLOYER_IMAGE)' \
 	    --marketplace_tools='$(MARKETPLACE_TOOLS_PATH)' \
 	    --parameters='$(APP_PARAMETERS)'
-
-# Runs the verification pipeline.
-.PHONY: app/verify
-app/verify: app/build | app/setup
-	$(MARKETPLACE_TOOLS_PATH)/marketplace/driver/driver.sh \
-	    --app_name=$(APP_NAME) \
-	    --deployer=$(APP_DEPLOYER_IMAGE) \
-	    --marketplace_tools=$(MARKETPLACE_TOOLS_PATH) \
-	    --parameters=$(APP_PARAMETERS)
 
 # Monitors resources in the target namespace on the cluster.
 # A convenient way to look at relevant k8s resources on the CLI.

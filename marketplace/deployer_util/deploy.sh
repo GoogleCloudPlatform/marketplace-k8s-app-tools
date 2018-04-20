@@ -22,21 +22,15 @@ set -eox pipefail
 [[ -v "APP_INSTANCE_NAME" ]] || exit 1
 [[ -v "NAMESPACE" ]] || exit 1
 
-# Assign owner references to the existing kubernates resources tagged with the application name
+echo "Deploying application \"$APP_INSTANCE_NAME\""
+
 application_uid=$(kubectl get "applications/$APP_INSTANCE_NAME" \
   --namespace="$NAMESPACE" \
   --output=jsonpath='{.metadata.uid}')
 
-./set_owner_reference_in_cluster.sh --application_uid="$application_uid"
-
-resources_yaml=$(./create_manifests.sh --application_uid="$application_uid")
+create_manifests.sh --application_uid="$application_uid"
 
 # Apply the manifest.
-kubectl apply --namespace="$NAMESPACE" --filename="$resources_yaml"
+kubectl apply --namespace="$NAMESPACE" --filename="/data/resources.yaml"
 
-kubectl patch "applications/$APP_INSTANCE_NAME" \
-  --namespace="$NAMESPACE" \
-  --type=merge \
-  --patch "metadata:
-             annotations:
-               kubernetes-engine.cloud.google.com/application-deploy-status: Succeeded"
+app_deployment_succeeded.sh

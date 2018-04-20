@@ -14,6 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+set -x
 set -e
 set -o pipefail
 
@@ -26,6 +27,10 @@ case $i in
     ;;
   --parameters=*)
     parameters="${i#*=}"
+    shift
+    ;;
+  --mode=*)
+    mode="${i#*=}"
     shift
     ;;
   *)
@@ -126,6 +131,11 @@ data:
   NAMESPACE: ${namespace}
 EOF
 
+entrypoint="/bin/deploy.sh"
+if [[ "$mode" = "test" ]]; then
+  entrypoint="/bin/deploy_with_tests.sh"
+fi
+
 # Create deployer.
 kubectl apply --namespace="$namespace" --filename=- <<EOF
 apiVersion: batch/v1
@@ -150,5 +160,7 @@ spec:
         envFrom:
         - configMapRef:
             name: "${name}-deployer-config"
+        command: ["/bin/bash"]
+        args: ["${entrypoint}"]
       restartPolicy: Never
 EOF

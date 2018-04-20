@@ -53,47 +53,20 @@ environment_variables="$(printenv \
 
 data_dir="/data"
 manifest_dir="$data_dir/manifest-expanded"
-mkdir -p "$manifest_dir"
-
-function extract_manifest() {
-  data=$1
-  extracted="$data/extracted"
-  mkdir -p "$extracted"
-
-  # Expand the chart template.
-  for chart in "$data"/chart/*; do
-    # TODO(trironkk): Construct values.yaml directly from ConfigMap, rather than
-    # stitching into values.yaml.template first.
-    chart_manifest_file=$(basename "$chart" | sed 's/.tar.gz$//')
-    mkdir "$extracted/$chart_manifest_file"
-    tar xfC "$chart" "$extracted/$chart_manifest_file"
-    cat "$extracted/$chart_manifest_file/chart/values.yaml.template" \
-      | envsubst "$environment_variables" \
-      > "$extracted/$chart_manifest_file/chart/values.yaml"
-  done
-}
-
-extract_manifest "$data_dir"
+mkdir "$manifest_dir"
 
 # Overwrite the templates using the test templates
 if [[ "$mode" = "test" ]]; then
-  test_data_dir="/data-test"
-
-  extract_manifest "$test_data_dir"
-
-  overlay_test_files.py \
-    --manifest "$data_dir/extracted" \
-    --test_manifest "$test_data_dir/extracted"
+  cp -RT "/data-test" "/data"
 fi
 
-# Run helm expantion on the extracted files
-for chart in "$data_dir/extracted"/*; do
-  chart_manifest_file=$(basename "$chart" | sed 's/.tar.gz$//').yaml
-
-  helm template "$chart/chart" \
-    --name="$APP_INSTANCE_NAME" \
-    --namespace="$NAMESPACE" \
-    > "$manifest_dir/$chart_manifest_file"
+# Replace the environment variables placeholders from the manifest templates
+for manifest_template_file in "$data_dir"/manifest/*; do
+  manifest_file=$(basename "$manifest_template_file" | sed 's/.template$//')
+  
+  cat "$manifest_template_file" \
+    | envsubst "$environment_variables" \
+    > "$manifest_dir/$manifest_file" 
 done
 
 /bin/setownership.py \

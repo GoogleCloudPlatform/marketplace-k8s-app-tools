@@ -16,20 +16,17 @@
 
 set -eox pipefail
 
-# This is the entry point for the test deployment
+# This is the entry point for the production deployment
 
 # Assert existence of required environment variables.
 [[ -v "APP_INSTANCE_NAME" ]] || exit 1
 [[ -v "NAMESPACE" ]] || exit 1
 
-# Assign owner references to the existing kubernates resources tagged with the application name
-application_uid=$(kubectl get "applications/$APP_INSTANCE_NAME" \
+echo "Marking deployment of application \"$APP_INSTANCE_NAME\" as succeeded."
+
+kubectl patch "applications/$APP_INSTANCE_NAME" \
   --namespace="$NAMESPACE" \
-  --output=jsonpath='{.metadata.uid}')
-
-./set_owner_reference_in_cluster.sh --application_uid="$application_uid"
-
-resources_yaml=$(./create_manifests.sh --application_uid="$application_uid" --mode=test)
-
-# Apply the manifest.
-kubectl apply --namespace="$NAMESPACE" --filename="$resources_yaml"
+  --type=merge \
+  --patch "metadata:
+             annotations:
+               kubernetes-engine.cloud.google.com/application-deploy-status: Succeeded"

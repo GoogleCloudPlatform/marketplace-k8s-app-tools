@@ -1,0 +1,78 @@
+#!/bin/bash
+#
+# Copyright 2018 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+set -eox pipefail
+
+# This is the entry point for the test deployment
+
+# Assert existence of required environment variables.
+[[ -v "APP_INSTANCE_NAME" ]] || exit 1
+[[ -v "NAMESPACE" ]] || exit 1
+
+echo "Deploying application \"$APP_INSTANCE_NAME\" in test mode"
+
+application_uid=$(kubectl get "applications/$APP_INSTANCE_NAME" \
+  --namespace="$NAMESPACE" \
+  --output=jsonpath='{.metadata.uid}')
+
+create_manifests.sh --application_uid="$application_uid" --mode="test"
+
+separate_tester_jobs.py \
+  --manifest "/data/resources.yaml" \
+  --test_config "/data-test/config.yaml" \
+  --tester_manifest "/data/tester.yaml"
+
+# Apply the manifest.
+kubectl apply --namespace="$NAMESPACE" --filename="/data/resources.yaml"
+
+app_deployment_succeeded.sh
+
+function print_and_fail() {
+  message=$1
+  echo message
+  exit 1
+}
+
+wait_timeout=300
+
+# TODO(ruela) Consider moving to a separate job
+echo "INFO Wait $wait_timeout seconds for the application to get into ready state"
+timeout --foreground $wait_timeout wait_for_ready.sh $APP_INSTANCE_NAME $NAMESPACE \
+  || print_and_fail "ERROR Application did not get ready before timeout"
+
+tester_manifest="/data/tester.yaml"
+
+# Run test job.
+kubectl apply --namespace="$NAMESPACE" --filename="$tester_manifest"
+
+tester_name=$(cat "$tester_manifest" | yj tojson | jq -r '.metadata.name')
+
+start_time=$(date +%s)
+poll_interval=4
+tester_timeout=30
+while true; do
+  success=$(kubectl get "jobs/$tester_name" -o=json | jq '.status.succeeded')
+  if [[ "$success" = "1" ]]; then
+    echo "INFO Tester job succeeded"
+    break
+  fi
+
+  elapsed_time=$(( $(date +%s) - $start_time ))
+  if [[ elapsed_time -gt tester_timeout ]]; then
+    echo "ERROR Tester job timeout"
+    exit 1
+  fi 
+done

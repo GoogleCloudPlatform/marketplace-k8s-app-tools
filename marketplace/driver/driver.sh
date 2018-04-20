@@ -20,13 +20,6 @@ set -o pipefail
 for i in "$@"
 do
 case $i in
-<<<<<<< HEAD
-  --app_name=*)
-    app_name="${i#*=}"
-    shift
-    ;;
-=======
->>>>>>> origin
   --deployer=*)
     deployer="${i#*=}"
     shift
@@ -43,10 +36,6 @@ case $i in
     wait_timeout="${i#*=}"
     shift
     ;;
-  --tester_timeout=*)
-    tester_timeout="${i#*=}"
-    shift
-    ;;
   *)
     echo "Unrecognized flag: $i"
     exit 1
@@ -58,7 +47,6 @@ done
 [[ -z "$parameters" ]] && parameters="{}"
 [[ -z "$marketplace_tools" ]] && echo "--marketplace_tools required" && exit 1
 [[ -z "$wait_timeout" ]] && wait_timeout=300
-[[ -z "$tester_timeout" ]] && tester_timeout=300
 
 # Getting the directory of the running script
 DIR="$(realpath $(dirname $0))"
@@ -97,10 +85,6 @@ $marketplace_tools/scripts/start.sh \
   --deployer="$deployer" \
   --parameters="$parameters" \
   || clean_and_exit "ERROR Failed to start deployer"
-
-echo "INFO Wait $wait_timeout seconds for the application to get into ready state"
-timeout --foreground $wait_timeout $DIR/wait_for_ready.sh $APP_INSTANCE_NAME $NAMESPACE \
-  || clean_and_exit "ERROR Application did not get ready before timeout"
 
 echo "INFO Stop the application"
 $marketplace_tools/scripts/stop.sh \

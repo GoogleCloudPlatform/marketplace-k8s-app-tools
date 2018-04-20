@@ -70,7 +70,7 @@ echo "INFO Starting control loop for applications/$app..."
 
 previous_healthy="false"
 
-min_time_before_healthy=60
+min_time_before_healthy=5
 poll_interval=4
 
 APPLICATION_UID="$(kubectl get "applications/$app" \
@@ -112,6 +112,7 @@ while true; do
     previous_healthy="$healthy"
 
     if [[ "$healthy" = "true" ]]; then
+      echo "INFO Wait $min_time_before_healthy seconds to make sure app stays in healthy state."
       healthy_start_time=$(date +%s)
     fi
   fi
