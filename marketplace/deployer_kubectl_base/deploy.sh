@@ -22,6 +22,53 @@ set -x
 [[ -v "APP_INSTANCE_NAME" ]] || exit 1
 [[ -v "NAMESPACE" ]] || exit 1
 
+# Generates a random string of a specified length and return its Base-64 encoded version.
+function generate_password_base64() {
+  local length="$1"
+  < /dev/urandom tr -dc 'A-Za-z0-9' | head -c"$length" | base64
+  return 0
+}
+
+# Evaluate password expression passed as the first and only parameter.
+function evaluate_password_expression() {
+  local pwd_expr="$1"
+  local length=10
+  if [[ "$pwd_expr" =~ .*length=[\s]*[0-9]+[\s]*.* ]]; then
+    length="$(echo "$pwd_expr" | sed -n 's/.*length=\([0-9]*\).*/\1/p')"
+  fi
+  generate_password_base64 "$length"
+}
+
+# Replace all occurrences of password-generation expressions
+# in-place in a file specified as the first parameter.
+# Valid password expression:
+# - is specified in a single line,
+# - starts and ends with '%%',
+# - uses a function-like name - generate_password_base64, followed by the list of parameters,
+# - optionally specifies a parameter of password's length - 'length=<number>'.
+#
+# Sample valid password expressions:
+# - %% generated_password_base64() %%,
+# - %% generated_password_base64(length = 12) %%.
+function replace_password_expressions_inplace() {
+  local filename="$1"
+
+  local pwd_expressions
+  local pwd_expression
+
+  IFS=$'\n' pwd_expressions=( $(sed -n 's/.*\(%%.*generate_password_base64(.*).*%%\).*/\1/p' \
+    "$filename") )
+
+  for pwd_expression in "${pwd_expressions[@]}"; do
+    generated_value="$(evaluate_password_expression "$pwd_expression")"
+    echo "print the file from $filename"
+    cat "$filename"
+    sed "0,/$pwd_expression/{s/$pwd_expression/$generated_value/}" "$filename"
+    echo "now replacing contents of $filename..."
+    sed -i "0,/$pwd_expression/{s/$pwd_expression/$generated_value/}" "$filename"
+  done
+}
+
 # Perform environment variable expansions.
 # Note: We list out all environment variables and explicitly pass them to
 # envsubst to avoid expanding templated variables that were not defined
@@ -38,10 +85,12 @@ mkdir "$manifest_dir"
 # Replace the environment variables placeholders from the manifest templates
 for manifest_template_file in "$data_dir"/manifest/*; do
   manifest_file=$(basename "$manifest_template_file" | sed 's/.template$//')
-  
+
   cat "$manifest_template_file" \
     | envsubst "$environment_variables" \
-    > "$manifest_dir/$manifest_file" 
+    > "$manifest_dir/$manifest_file"
+
+  replace_password_expressions_inplace "$manifest_dir/$manifest_file"
 done
 
 # Fetch Application resource UID.
