@@ -16,6 +16,7 @@
 
 from argparse import ArgumentParser
 import os
+import re
 import subprocess
 import sys
 import yaml
@@ -32,27 +33,42 @@ OUTPUT_YAML = 'yaml'
 CODEC_UTF8 = 'UTF-8'
 CODEC_ASCII = 'ASCII'
 
+NAME_RE=re.compile(r'[a-zA-z0-9_]+$')
+
+
+class InvalidName(Exception):
+  pass
+
 
 def main():
   parser = ArgumentParser(description=PROG_HELP)
   parser.add_argument('--output', '-o',
-                      choices=[OUTPUT_SHELL, OUTPUT_YAML], default=OUTPUT_SHELL)
+                      choices=[OUTPUT_SHELL, OUTPUT_YAML],
+                      default=OUTPUT_SHELL)
   parser.add_argument('--values_dir', default='/data/values')
+  parser.add_argument('--param')
   parser.add_argument('--decoding',
                       choices=[CODEC_UTF8, CODEC_ASCII], default='UTF-8')
   parser.add_argument('--encoding',
                       choices=[CODEC_UTF8, CODEC_ASCII], default='UTF-8')
-  parser.add_argument('--no_newline', '-n',
-                      help='Do not include a newline at the end',
-                      action='store_true')
   args = parser.parse_args()
 
   values = read_values_to_dict(args.values_dir, args.decoding)
-  if args.output == OUTPUT_SHELL:
-    sys.stdout.write(output_shell(values, args.no_newline))
-  elif args.output == OUTPUT_YAML:
-    sys.stdout.write(output_yaml(values, args.encoding))
-  sys.stdout.flush()
+
+  try:
+    if args.param:
+      if args.param in values:
+        sys.stdout.write(values[args.param])
+      else:
+        raise InvalidName('No such parameter: {}\n'.format(args.param))
+      return
+
+    if args.output == OUTPUT_SHELL:
+      sys.stdout.write(output_shell(values))
+    elif args.output == OUTPUT_YAML:
+      sys.stdout.write(output_yaml(values, args.encoding))
+  finally:
+    sys.stdout.flush()
 
 
 def read_values_to_dict(values_dir, codec):
@@ -61,6 +77,8 @@ def read_values_to_dict(values_dir, codec):
            if os.path.isfile(os.path.join(values_dir, f))]
   result = {}
   for filename in files:
+    if not NAME_RE.match(filename):
+      raise InvalidName('Invalid config parameter name: {}'.format(filename))
     file_path = os.path.join(values_dir, filename)
     with open(file_path, "r") as f:
       data = f.read().decode(codec)
@@ -68,26 +86,17 @@ def read_values_to_dict(values_dir, codec):
   return result
 
 
-def output_shell(values, no_newline):
-  # Utilize shell's export builtin to properly print out all env variables.
-  # There are a few exports included by default, so we want to exclude
-  # them. Taking advantage of the fact export keeps order of the variables,
-  # we can simply skip the first N default env variables.
-  default_exports_count = len(
-      subprocess.check_output(['export'], env={}, shell=True)
-      .splitlines())
-  all_exports = (
-      subprocess.check_output(['export'], env=values, shell=True)
-      .splitlines())
-  exports = all_exports[default_exports_count:]
-  if not no_newline:
-    exports.append('')
-  return '\n'.join(exports)
+def output_shell(values):
+  escapeds = [
+      (k, subprocess.check_output(['printf', '%q', v], env=values))
+      for k, v in values.iteritems()]
+  escapeds.sort(key=lambda (k, v): k)
+  return '\n'.join(['{}={}'.format(k, v) for k, v in escapeds])
 
 
 def output_yaml(values, encoding):
   return yaml.safe_dump(values,
-                        encoding=args.encoding,
+                        encoding=encoding,
                         default_flow_style=False,
                         indent=2)
 

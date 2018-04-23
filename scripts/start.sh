@@ -145,8 +145,12 @@ spec:
       - name: deployer
         image: "${deployer}"
         imagePullPolicy: Always
-        envFrom:
-        - configMapRef:
-            name: "${name}-deployer-config"
+        volumeMounts:
+        - name: config-volume
+          mountPath: /data/values
       restartPolicy: Never
+      volumes:
+      - name: config-volume
+        configMap:
+          name: "${name}-deployer-config"
 EOF

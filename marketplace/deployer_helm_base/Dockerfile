@@ -22,6 +22,7 @@ RUN mkdir -p /bin/helm-downloaded \
     && rm -rf /bin/helm-downloaded
 
 COPY marketplace/deployer_helm_base/deploy.sh /bin/
+COPY marketplace/deployer_util/print_config.py /bin/
 COPY marketplace/deployer_util/setownership.py /bin/
 COPY marketplace/deployer_util/yaml_util.py /bin/
 

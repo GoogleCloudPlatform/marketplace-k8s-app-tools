@@ -18,18 +18,10 @@ set -e
 set -o pipefail
 set -x
 
-# Assert existence of required environment variables.
-[[ -v "APP_INSTANCE_NAME" ]] || exit 1
-[[ -v "NAMESPACE" ]] || exit 1
-
-# Perform environment variable expansions.
-# Note: We list out all environment variables and explicitly pass them to
-# envsubst to avoid expanding templated variables that were not defined
-# in this container.
-environment_variables="$(printenv \
-  | sed 's/=.*$//' \
-  | sed 's/^/$/' \
-  | paste -d' ' -s)"
+# Extract the config values into VAR=VALUE array.
+env_vars=($(/bin/print_config.py -o shell))
+APP_INSTANCE_NAME="$(/bin/print_config.py --param APP_INSTANCE_NAME)"
+NAMESPACE="$(/bin/print_config.py --param NAMESPACE)"
 
 data_dir="/data"
 manifest_dir="$data_dir/manifest-expanded"
@@ -38,10 +30,10 @@ mkdir "$manifest_dir"
 # Replace the environment variables placeholders from the manifest templates
 for manifest_template_file in "$data_dir"/manifest/*; do
   manifest_file=$(basename "$manifest_template_file" | sed 's/.template$//')
-  
+
   cat "$manifest_template_file" \
-    | envsubst "$environment_variables" \
-    > "$manifest_dir/$manifest_file" 
+    | env -i ${env_vars[@]} envsubst \
+    > "$manifest_dir/$manifest_file"
 done
 
 # Fetch Application resource UID.
