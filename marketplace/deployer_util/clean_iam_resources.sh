@@ -16,23 +16,21 @@
 
 set -eox pipefail
 
-# This is the entry point for the production deployment
-
 # Assert existence of required environment variables.
 [[ -v "APP_INSTANCE_NAME" ]] || exit 1
 [[ -v "NAMESPACE" ]] || exit 1
 
-echo "Deploying application \"$APP_INSTANCE_NAME\""
-
-application_uid=$(kubectl get "applications/$APP_INSTANCE_NAME" \
-  --namespace="$NAMESPACE" \
-  --output=jsonpath='{.metadata.uid}')
-
-create_manifests.sh --application_uid="$application_uid"
-
-# Apply the manifest.
-kubectl apply --namespace="$NAMESPACE" --filename="/data/resources.yaml"
-
-app_deployment_succeeded.sh
-
-clean_iam_resources.sh
+# Clean up IAM resources.
+kubectl delete --namespace="$NAMESPACE" --filename=- <<EOF
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: "${APP_INSTANCE_NAME}-deployer-sa"
+  namespace: "${NAMESPACE}"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: "${APP_INSTANCE_NAME}-deployer-rb"
+  namespace: "${NAMESPACE}"
+EOF
