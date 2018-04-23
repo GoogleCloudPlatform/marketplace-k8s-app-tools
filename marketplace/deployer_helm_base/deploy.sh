@@ -23,11 +23,16 @@ set -eox pipefail
 # Perform environment variable expansions.
 # Note: We list out all environment variables and explicitly pass them to
 # envsubst to avoid expanding templated variables that were not defined
-# in this container.
-environment_variables="$(printenv \
-  | sed 's/=.*$//' \
+# by the config map.
+# Note: We can deserialize this from a mounted volume, rather than
+# fetching the config map independently.
+environment_variables="$(kubectl get "configmap/$APP_INSTANCE_NAME-deployer-config" \
+    --namespace="$NAMESPACE" \
+    --output=json \
+  | jq -r '.data | keys | @csv' \
+  | tr -d '"' \
   | sed 's/^/$/' \
-  | paste -d' ' -s)"
+  | sed 's/,/,$/g')"
 
 data_dir="/data"
 manifest_dir="$data_dir/manifest-expanded"
