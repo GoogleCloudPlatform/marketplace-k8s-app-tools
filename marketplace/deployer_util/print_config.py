@@ -22,10 +22,16 @@ import sys
 import yaml
 
 
-PROG_HELP = """
+_PROG_HELP = """
 Outputs configuration parameters constructed from files in a directory.
 The file names are parameter names, file contents parameter values.
 The program supports several output formats, controlled by --output.
+"""
+
+_OUTPUT_HELP = """
+Choose the format to output paremeter name-value pair.
+shell: lines of VAR=VALUE, where the VALUEs are properly shell escaped.
+yaml: a YAML file.
 """
 
 OUTPUT_SHELL = 'shell'
@@ -41,15 +47,20 @@ class InvalidName(Exception):
 
 
 def main():
-  parser = ArgumentParser(description=PROG_HELP)
-  parser.add_argument('--output', '-o',
+  parser = ArgumentParser(description=_PROG_HELP)
+  parser.add_argument('--output', '-o', help=_OUTPUT_HELP,
                       choices=[OUTPUT_SHELL, OUTPUT_YAML],
                       default=OUTPUT_SHELL)
-  parser.add_argument('--values_dir', default='/data/values')
-  parser.add_argument('--param')
+  parser.add_argument('--values_dir', help='Where to read find value files',
+                      default='/data/values')
+  parser.add_argument('--param',
+                      help='If specified, outputs the value of a single '
+                      'parameter, unescaped.')
   parser.add_argument('--decoding',
+                      help='Codec used for decoding value file contents',
                       choices=[CODEC_UTF8, CODEC_ASCII], default='UTF-8')
   parser.add_argument('--encoding',
+                      help='Codec for encoding output files',
                       choices=[CODEC_UTF8, CODEC_ASCII], default='UTF-8')
   args = parser.parse_args()
 
