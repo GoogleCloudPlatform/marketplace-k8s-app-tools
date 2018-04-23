@@ -1,12 +1,23 @@
 FROM launcher.gcr.io/google/debian9
 
-COPY build/kubectl bin
-COPY marketplace/deployer_kubectl_base/deploy.sh bin
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    bash \
+    ca-certificates \
+    gettext \
+    jq \
+    python \
+    python-yaml \
+    wget \
+    && rm -rf /var/lib/apt/lists/*
 
-RUN apt-get update
-RUN apt-get install -y apt-utils bash gettext jq
+RUN wget -q -O /bin/kubectl \
+        https://storage.googleapis.com/kubernetes-release/release/v1.9.0/bin/linux/amd64/kubectl \
+    && chmod 755 /bin/kubectl
 
-RUN mkdir data
-RUN mkdir data/manifest
+COPY marketplace/deployer_kubectl_base/deploy.sh /bin/
+COPY marketplace/deployer_util/setownership.py /bin/
+COPY marketplace/deployer_util/yaml_util.py /bin/
+
+RUN mkdir -p /data/manifest
 
 ENTRYPOINT ["/bin/bash", "/bin/deploy.sh"]

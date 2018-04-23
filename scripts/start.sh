@@ -20,20 +20,12 @@ set -o pipefail
 for i in "$@"
 do
 case $i in
-  --app-name=*)
-    app_name="${i#*=}"
+  --deployer=*)
+    deployer="${i#*=}"
     shift
     ;;
-  --name=*)
-    name="${i#*=}"
-    shift
-    ;;
-  --namespace=*)
-    namespace="${i#*=}"
-    shift
-    ;;
-  --registry=*)
-    registry="${i#*=}"
+  --parameters=*)
+    parameters="${i#*=}"
     shift
     ;;
   *)
@@ -43,10 +35,34 @@ case $i in
 esac
 done
 
-[[ -z "$app_name" ]] && >&2 echo "--app-name required" && exit 1
-[[ -z "$name" ]] && name="$app_name"-1
-[[ -z "$namespace" ]] && namespace="default"
-[[ -z "$registry" ]] && >&2 echo "--registry required" && exit 1
+[[ -z "$deployer" ]] && >&2 echo "--deployer required" && exit 1
+[[ -z "$parameters" ]] && >&2 echo "--parameters required" && exit 1
+
+# Extract APP_INSTANCE_NAME and NAMESPACE from parameters.
+name=$(echo "$parameters" | jq -r '.APP_INSTANCE_NAME')
+namespace=$(echo "$parameters" | jq -r '.NAMESPACE')
+
+# Create Application instance.
+kubectl apply --namespace="$namespace" --filename=- <<EOF
+apiVersion: app.k8s.io/v1alpha1
+kind: Application
+metadata:
+  name: "${name}"
+  namespace: "${namespace}"
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: "${name}"
+  componentKinds:
+  - kind: ServiceAccount
+  - kind: RoleBinding
+  - kind: Job
+EOF
+
+# Fetch the server assigned uid for owner reference assignment.
+application_uid=$(kubectl get "applications/$name" \
+  --namespace="$namespace" \
+  --output=jsonpath='{.metadata.uid}')
 
 # Create RBAC role, service account, and role-binding.
 # TODO(huyhuynh): Application should define the desired permissions,
@@ -56,52 +72,55 @@ kubectl apply --namespace="$namespace" --filename=- <<EOF
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: ${name}-deployer-sa
-  namespace: $namespace
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  name: ${name}-deployer-role
-  namespace: $namespace
-rules:
-- apiGroups: ['*']
-  resources: ['*']
-  verbs: ['*']
+  name: "${name}-deployer-sa"
+  namespace: "${namespace}"
+  labels:
+    app.kubernetes.io/name: "${name}"
+  ownerReferences:
+  - apiVersion: "v1alpha"
+    kind: "Application"
+    name: "${name}"
+    uid: "${application_uid}"
+    blockOwnerDeletion: true
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: ${name}-deployer-rb
-  namespace: $namespace
+  name: "${name}-deployer-rb"
+  namespace: "${namespace}"
+  labels:
+    app.kubernetes.io/name: "${name}"
+  ownerReferences:
+  - apiVersion: "v1alpha"
+    kind: "Application"
+    name: "${name}"
+    uid: "${application_uid}"
+    blockOwnerDeletion: true
 roleRef:
   apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: ${name}-deployer-role
+  kind: ClusterRole
+  name: cluster-admin
 subjects:
 - kind: ServiceAccount
-  name: ${name}-deployer-sa
+  name: "${name}-deployer-sa"
 EOF
 
-# Create Application instance (stitching in the expanded manifest).
-kubectl apply --namespace="$namespace" --filename=- <<EOF
-apiVersion: marketplace.cloud.google.com/v1
-kind: Application
+# Create ConfigMap (merging in passed in parameters).
+kubectl apply --filename=- --output=json --dry-run <<EOF \
+  | jq -s '.[0].data = .[1] | .[0]' \
+      - <(echo "$parameters") \
+  | kubectl apply --namespace="$namespace" --filename=-
+apiVersion: v1
+kind: ConfigMap
 metadata:
-  name: $name
-  namespace: $namespace
-spec:
-  components:
-  - ${name}-deployer-sa:
-      kind: ServiceAccount
-  - ${name}-deployer-role:
-      apiGroup: rbac.authorization.k8s.io
-      kind: Role
-  - ${name}-deployer-rb:
-      apiGroup: rbac.authorization.k8s.io
-      kind: RoleBinding
-  - ${name}-deployer:
-      kind: Job
+  name: "${name}-deployer-config"
+  namespace: "${namespace}"
+  ownerReferences:
+  - apiVersion: "v1alpha"
+    kind: "Application"
+    name: "${name}"
+    uid: "${application_uid}"
+    blockOwnerDeletion: true
 EOF
 
 # Create deployer.
@@ -110,19 +129,24 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: "${name}-deployer"
+  labels:
+    app.kubernetes.io/name: "${name}"
+  ownerReferences:
+  - apiVersion: "v1alpha"
+    kind: "Application"
+    name: "${name}"
+    uid: "${application_uid}"
+    blockOwnerDeletion: true
 spec:
   template:
     spec:
-      serviceAccountName: ${name}-deployer-sa
+      serviceAccountName: "${name}-deployer-sa"
       containers:
-      - name: app
-        image: "$registry/$app_name/deployer"
-        env:
-        - name: APP_INSTANCE_NAME
-          value: $name
-        - name: NAMESPACE
-          value: $namespace
-        - name: REGISTRY
-          value: $registry
+      - name: deployer
+        image: "${deployer}"
+        imagePullPolicy: Always
+        envFrom:
+        - configMapRef:
+            name: "${name}-deployer-config"
       restartPolicy: Never
 EOF

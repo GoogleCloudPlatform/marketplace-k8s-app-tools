@@ -1,0 +1,134 @@
+# Copyright 2018 Google LLC. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+{% if "name" in properties %}
+{% set NAME = properties["name"] %}
+{% else %}
+{% set NAME = env["deployment"] + "-testrunner" %}
+{% endif %}
+
+{% set CONFIG_NAME = NAME + "-config" %}
+{% set DEPENDS_ON = properties["dependsOn"] %}
+
+resources:
+- name: {{ NAME }}
+  type: compute.v1.instance
+  {% if DEPENDS_ON %}
+  metadata:
+    dependsOn:
+    {% for dependency in DEPENDS_ON %}
+    - {{ dependency }}
+    {% endfor %}
+  {% endif %}
+  properties:
+    zone: {{ properties["zone"] }}
+    machineType: https://www.googleapis.com/compute/v1/projects/{{ env["project"] }}/zones/{{ properties["zone"] }}/machineTypes/{{ properties["machineType"] }}
+    metadata:
+      items:
+      - key: test-spec
+        value: |
+          {{ properties["testSpec"]|indent(10) }}
+      - key: post-test-spec
+        value: |
+          actions:
+          - name: (Internal) Post success status
+            condition:
+              failuresSoFar:
+                equals: 0
+            gcp:
+              setRuntimeConfigVar:
+                runtimeConfigSelfLink: https://runtimeconfig.googleapis.com/v1beta1/projects/{{ env["project"] }}/configs/{{ CONFIG_NAME }}
+                variablePath: status/success/PASSED
+                base64Value: UEFTU0VECg==  # PASSED
+          - name: (Internal) Post failure status
+            condition:
+              failuresSoFar:
+                greaterThan: 0
+            gcp:
+              setRuntimeConfigVar:
+                runtimeConfigSelfLink: https://runtimeconfig.googleapis.com/v1beta1/projects/{{ env["project"] }}/configs/{{ CONFIG_NAME }}
+                variablePath: status/failure/FAILED
+                base64Value: RkFJTEVECg==  # FAILED
+      - key: startup-script
+        value: |
+          #!/bin/bash
+          mkdir -p /tmp/tests
+          curl -H "Metadata-Flavor: Google" \
+            http://metadata.google.internal/computeMetadata/v1/instance/attributes/test-spec \
+            > /tmp/tests/test.yaml
+          curl -H "Metadata-Flavor: Google" \
+            http://metadata.google.internal/computeMetadata/v1/instance/attributes/post-test-spec \
+            > /tmp/tests/post-test.yaml
+      - key: gce-container-declaration
+        value: |
+          spec:
+            containers:
+            - name: testrunner
+              image: {{ properties["runnerContainer"] }}
+              args:
+              - --test_spec=/tests/test.yaml
+              - --test_spec=/tests/post-test.yaml
+              - --alsologtostderr
+              - --v={{ properties["verbosity"] }}
+              volumeMounts:
+              - mountPath: /tests
+                name: testspec
+                readOnly: true
+            volumes:
+            - name: testspec
+              hostPath:
+                path: /tmp/tests
+            restartPolicy: Never
+    disks:
+    - deviceName: boot
+      type: PERSISTENT
+      boot: true
+      autoDelete: true
+      initializeParams:
+        diskName: {{ NAME }}-boot
+        sourceImage: https://www.googleapis.com/compute/v1/projects/cos-cloud/global/images/family/cos-stable
+    networkInterfaces:
+    - network: https://www.googleapis.com/compute/v1/projects/{{ env["project"] }}/global/networks/{{ properties["network"] }}
+      # Access Config required to give the instance a public IP address
+      accessConfigs:
+      - name: External NAT
+        type: ONE_TO_ONE_NAT
+    serviceAccounts:
+    - email: default
+      scopes:
+      - 'https://www.googleapis.com/auth/devstorage.read_only'
+      - 'https://www.googleapis.com/auth/logging.write'
+      - 'https://www.googleapis.com/auth/cloudruntimeconfig'
+- name: {{ CONFIG_NAME }}
+  type: runtimeconfig.v1beta1.config
+  properties:
+    config: {{ CONFIG_NAME }}
+    description: Holds test status
+- name: {{ NAME }}-result
+  type: runtimeconfig.v1beta1.waiter
+  metadata:
+    dependsOn:
+    - {{ NAME }}
+  properties:
+    parent: $(ref.{{ CONFIG_NAME }}.name)
+    failure:
+      cardinality:
+        number: 1
+        path: status/failure
+    success:
+      cardinality:
+        number: 1
+        path: status/success
+    timeout: 120s
+    waiter: software
