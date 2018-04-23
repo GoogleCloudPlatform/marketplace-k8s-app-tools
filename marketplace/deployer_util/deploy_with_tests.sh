@@ -40,8 +40,6 @@ kubectl apply --namespace="$NAMESPACE" --filename="/data/resources.yaml"
 
 app_deployment_succeeded.sh
 
-clean_iam_resources.sh
-
 function print_and_fail() {
   message=$1
   echo message
@@ -78,3 +76,5 @@ while true; do
     exit 1
   fi 
 done
+
+clean_iam_resources.sh
