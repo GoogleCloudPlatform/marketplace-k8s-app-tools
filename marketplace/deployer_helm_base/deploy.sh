@@ -16,18 +16,10 @@
 
 set -eox pipefail
 
-# Assert existence of required environment variables.
-[[ -v "APP_INSTANCE_NAME" ]] || exit 1
-[[ -v "NAMESPACE" ]] || exit 1
-
-# Perform environment variable expansions.
-# Note: We list out all environment variables and explicitly pass them to
-# envsubst to avoid expanding templated variables that were not defined
-# in this container.
-environment_variables="$(printenv \
-  | sed 's/=.*$//' \
-  | sed 's/^/$/' \
-  | paste -d' ' -s)"
+# Extract the config values into VAR=VALUE array.
+env_vars=($(/bin/print_config.py -o shell))
+APP_INSTANCE_NAME="$(/bin/print_config.py --param APP_INSTANCE_NAME)"
+NAMESPACE="$(/bin/print_config.py --param NAMESPACE)"
 
 data_dir="/data"
 manifest_dir="$data_dir/manifest-expanded"
@@ -39,7 +31,7 @@ for chart in "$data_dir"/chart/*; do
   # stitching into values.yaml.template first.
   tar -xf "$chart" "chart/values.yaml.template"
   cat "chart/values.yaml.template" \
-    | envsubst "$environment_variables" \
+    | env -i ${env_vars[@]} envsubst \
     > "values.yaml"
   chart_manifest_file=$(basename "$chart" | sed 's/.tar.gz$//').yaml
   helm template "$chart" \

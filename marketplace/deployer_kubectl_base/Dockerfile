@@ -15,6 +15,7 @@ RUN wget -q -O /bin/kubectl \
     && chmod 755 /bin/kubectl
 
 COPY marketplace/deployer_kubectl_base/deploy.sh /bin/
+COPY marketplace/deployer_util/print_config.py /bin/
 COPY marketplace/deployer_util/setownership.py /bin/
 COPY marketplace/deployer_util/yaml_util.py /bin/
 
