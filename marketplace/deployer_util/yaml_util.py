@@ -15,8 +15,41 @@
 # limitations under the License.
 
 import yaml 
+import copy
 
 docstart = "---\n"
+
+def load_yaml(filename):
+  ''' Helper function for loading a single yaml entry from file '''
+  with open(filename, "r") as stream:
+    content = stream.read()
+    return yaml.load(content)
+
+
+def add_or_replace(orig, dest):
+  for key in orig:
+    if (type(orig[key]) is dict and
+       key in dest and 
+       type(dest[key]) is dict):
+      add_or_replace(orig[key], dest[key])
+    else:
+      dest[key] = copy.deepcopy(orig[key])
+      
+
+def overlay_yaml_file(orig, dest):
+  ''' Helper function for merging origin yaml file into destination yaml file 
+
+  Args:
+    orig: A str, the name of the origin file.
+    dest: A str, the name of the destination file.'''
+
+  y1 = load_yaml(orig)
+  y2 = load_yaml(dest)
+
+  add_or_replace(y1, y2)
+  with open(dest, "w") as out:
+    yaml.dump(y2, out)
+
 
 def load_resources_yaml(filename):
   '''Load kubernetes resources from yaml file and parses
