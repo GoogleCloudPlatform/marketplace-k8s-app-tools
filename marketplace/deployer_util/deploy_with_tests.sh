@@ -38,7 +38,7 @@ separate_tester_jobs.py \
 # Apply the manifest.
 kubectl apply --namespace="$NAMESPACE" --filename="/data/resources.yaml"
 
-app_deployment_succeeded.sh
+post_success_status.sh
 
 function print_and_fail() {
   message=$1
@@ -48,7 +48,7 @@ function print_and_fail() {
 
 wait_timeout=300
 
-# TODO(ruela) Consider moving to a separate job
+# TODO(#53) Consider moving to a separate job
 echo "INFO Wait $wait_timeout seconds for the application to get into ready state"
 timeout --foreground $wait_timeout wait_for_ready.sh $APP_INSTANCE_NAME $NAMESPACE \
   || print_and_fail "ERROR Application did not get ready before timeout"

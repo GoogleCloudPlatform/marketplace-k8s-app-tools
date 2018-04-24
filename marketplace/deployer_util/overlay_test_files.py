@@ -33,14 +33,14 @@ parser.add_argument("-td", "--test_manifest", dest="test_manifest",
 args = parser.parse_args()
 
 for parent, dir_list, file_list in os.walk(args.test_manifest):
-  for file in file_list:
-    orig = os.path.join(parent, file)
+  for filename in file_list:
+    orig = os.path.join(parent, filename)
     dest = parent[len(args.test_manifest) + 1:]
     dest = os.path.join(args.manifest, dest)
     if not os.path.exists(dest):
       os.makedirs(dest)
-    dest = os.path.join(dest, file)
-    if file == "values.yaml":
+    dest = os.path.join(dest, filename)
+    if filename == "values.yaml":
       overlay_yaml_file(orig, dest)
     else:
       os.rename(orig, dest)

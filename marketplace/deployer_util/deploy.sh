@@ -33,6 +33,6 @@ create_manifests.sh --application_uid="$application_uid"
 # Apply the manifest.
 kubectl apply --namespace="$NAMESPACE" --filename="/data/resources.yaml"
 
-app_deployment_succeeded.sh
+post_success_status.sh
 
 clean_iam_resources.sh

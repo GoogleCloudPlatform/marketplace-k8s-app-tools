@@ -27,9 +27,7 @@ def load_yaml(filename):
 
 
 def add_or_replace(orig, dest):
-  print("hi")
   for key in orig:
-    print(key)
     if (type(orig[key]) is dict and
        key in dest and 
        type(dest[key]) is dict):
