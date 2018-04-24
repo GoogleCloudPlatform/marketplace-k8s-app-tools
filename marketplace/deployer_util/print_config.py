@@ -51,7 +51,7 @@ def main():
   parser.add_argument('--output', '-o', help=_OUTPUT_HELP,
                       choices=[OUTPUT_SHELL, OUTPUT_YAML],
                       default=OUTPUT_SHELL)
-  parser.add_argument('--values_dir', help='Where to read find value files',
+  parser.add_argument('--values_dir', help='Where to read value files',
                       default='/data/values')
   parser.add_argument('--param',
                       help='If specified, outputs the value of a single '
