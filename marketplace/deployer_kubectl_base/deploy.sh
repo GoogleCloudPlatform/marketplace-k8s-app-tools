@@ -32,7 +32,7 @@ for manifest_template_file in "$data_dir"/manifest/*; do
   manifest_file=$(basename "$manifest_template_file" | sed 's/.template$//')
 
   cat "$manifest_template_file" \
-    | env -i ${env_vars[@]} envsubst \
+    | eval ${env_vars[@]} envsubst \
     > "$manifest_dir/$manifest_file"
 done
 

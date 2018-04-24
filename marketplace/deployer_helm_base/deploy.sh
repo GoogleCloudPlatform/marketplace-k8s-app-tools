@@ -31,7 +31,7 @@ for chart in "$data_dir"/chart/*; do
   # stitching into values.yaml.template first.
   tar -xf "$chart" "chart/values.yaml.template"
   cat "chart/values.yaml.template" \
-    | env -i ${env_vars[@]} envsubst \
+    | eval ${env_vars[@]} envsubst \
     > "values.yaml"
   chart_manifest_file=$(basename "$chart" | sed 's/.tar.gz$//').yaml
   helm template "$chart" \
