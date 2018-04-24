@@ -45,10 +45,10 @@ endif
 .PHONY: app/build
 app/build:: ;
 
-# Builds the application containers and push them to the registry.
+# Builds the application containers in test mode and push them to the registry.
 # Including Makefile can extend this target. This target is
-# a prerequisite for install.
-.PHONY: app/build-tests
+# a prerequisite for install-test.
+.PHONY: app/build-test
 app/build:: ;
 
 # Installs the application into target namespace on the cluster.
