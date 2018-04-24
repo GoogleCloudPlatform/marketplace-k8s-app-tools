@@ -16,6 +16,7 @@
 
 from argparse import ArgumentParser
 from password import GeneratePassword
+import base64
 import os
 import re
 import yaml
@@ -123,7 +124,11 @@ def validate_required_props(values, schema):
 def generate_password(config):
   length = config.get('length', 10)
   include_symbols = config.get('includeSymbols', False)
-  return GeneratePassword(length, include_symbols)
+  use_base64 = config.get('base64', True)
+  pw = GeneratePassword(length, include_symbols)
+  if use_base64:
+    pw = base64.b64encode(pw)
+  return pw
 
 
 def write_values(values, values_dir, encoding):
