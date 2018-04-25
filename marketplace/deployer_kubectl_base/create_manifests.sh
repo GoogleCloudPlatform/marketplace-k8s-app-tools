@@ -14,18 +14,43 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set -e
-set -o pipefail
-set -x
+set -eox pipefail
+
+for i in "$@"
+do
+case $i in
+  --application_uid=*)
+    application_uid="${i#*=}"
+    shift
+    ;;
+  --mode=*)
+    mode="${i#*=}"
+    shift
+    ;;
+  *)
+    >&2 echo "Unrecognized flag: $i"
+    exit 1
+    ;;
+esac
+done
+
+[[ -z "application_uid" ]] && echo "application_uid required" && exit 1
 
 # Extract the config values into VAR=VALUE array.
 env_vars=($(/bin/print_config.py -o shell))
 APP_INSTANCE_NAME="$(/bin/print_config.py --param APP_INSTANCE_NAME)"
 NAMESPACE="$(/bin/print_config.py --param NAMESPACE)"
 
+echo "Creating the manifests for the kubernetes resources that build the application \"$APP_INSTANCE_NAME\""
+
 data_dir="/data"
 manifest_dir="$data_dir/manifest-expanded"
 mkdir "$manifest_dir"
+
+# Overwrite the templates using the test templates
+if [[ "$mode" = "test" ]]; then
+  cp -RT "/data-test" "/data"
+fi
 
 # Replace the environment variables placeholders from the manifest templates
 for manifest_template_file in "$data_dir"/manifest/*; do
@@ -36,42 +61,8 @@ for manifest_template_file in "$data_dir"/manifest/*; do
     > "$manifest_dir/$manifest_file"
 done
 
-# Fetch Application resource UID.
-APPLICATION_UID="$(kubectl get "applications/$APP_INSTANCE_NAME" \
-  --namespace="$NAMESPACE" \
-  --output=jsonpath='{.metadata.uid}')"
-
-# Set Application to own all resources defined in its component kinds.
-# by inserting ownerReference in manifest before applying.
-resources_yaml="$data_dir/resources.yaml"
-python /bin/setownership.py \
+/bin/setownership.py \
   --appname "$APP_INSTANCE_NAME" \
-  --appuid "$APPLICATION_UID" \
+  --appuid "$application_uid" \
   --manifests "$manifest_dir" \
-  --dest "$resources_yaml"
-
-# Apply the manifest.
-kubectl apply --namespace="$NAMESPACE" --filename="$resources_yaml"
-
-# Update Application resource with application-deploy-status.
-kubectl patch "applications/$APP_INSTANCE_NAME" \
-  --namespace="$NAMESPACE" \
-  --type=merge \
-  --patch "metadata:
-             annotations:
-               kubernetes-engine.cloud.google.com/application-deploy-status: Succeeded"
-
-# Clean up IAM resources.
-kubectl delete --namespace="$NAMESPACE" --filename=- <<EOF
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: "${APP_INSTANCE_NAME}-deployer-sa"
-  namespace: "${NAMESPACE}"
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name: "${APP_INSTANCE_NAME}-deployer-rb"
-  namespace: "${NAMESPACE}"
-EOF
+  --dest "$data_dir/resources.yaml"

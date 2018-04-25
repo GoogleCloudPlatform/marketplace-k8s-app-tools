@@ -21,11 +21,10 @@ RUN mkdir -p /bin/helm-downloaded \
     && mv /bin/helm-downloaded/linux-amd64/helm /bin/ \
     && rm -rf /bin/helm-downloaded
 
-COPY marketplace/deployer_helm_base/deploy.sh /bin/
-COPY marketplace/deployer_util/print_config.py /bin/
-COPY marketplace/deployer_util/setownership.py /bin/
-COPY marketplace/deployer_util/yaml_util.py /bin/
+COPY marketplace/deployer_helm_base/* /bin/
+COPY marketplace/deployer_util/* /bin/
 
 RUN mkdir -p /data/chart
+RUN mkdir -p /data-test/chart
 
 ENTRYPOINT ["/bin/bash", "/bin/deploy.sh"]
