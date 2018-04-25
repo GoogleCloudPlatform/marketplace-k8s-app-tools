@@ -45,7 +45,7 @@ def main():
                       choices=[OUTPUT_SHELL, OUTPUT_YAML],
                       default=OUTPUT_SHELL)
   parser.add_argument('--values_dir', help='Where to read value files',
-                      default='/data/values')
+                      default='/data/final_values')
   parser.add_argument('--param',
                       help='If specified, outputs the value of a single '
                       'parameter, unescaped.')
