@@ -83,7 +83,7 @@ def main():
 
 
 def read_values_to_dict(values_dir, codec):
-  """Returns a dict construted from files in values_dir."""
+  """Returns a dict constructed from files in values_dir."""
   files = [f for f in os.listdir(values_dir)
            if os.path.isfile(os.path.join(values_dir, f))]
   result = {}
