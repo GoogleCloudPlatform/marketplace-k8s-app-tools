@@ -70,7 +70,7 @@ application_uid=$(kubectl get "applications/$name" \
   --output=jsonpath='{.metadata.uid}')
 
 # Create RBAC role, service account, and role-binding.
-# TODO(huyhuynh): Application should define the desired permissions,
+# TODO(huyhg): Application should define the desired permissions,
 # which should be transated into appropriate rules here instead of
 # granting the role with all permissions.
 kubectl apply --namespace="$namespace" --filename=- <<EOF
@@ -155,10 +155,14 @@ spec:
       - name: deployer
         image: "${deployer}"
         imagePullPolicy: Always
-        envFrom:
-        - configMapRef:
-            name: "${name}-deployer-config"
+        volumeMounts:
+        - name: config-volume
+          mountPath: /data/values
         command: ["/bin/bash"]
         args: ["${entrypoint}"]
       restartPolicy: Never
+      volumes:
+      - name: config-volume
+        configMap:
+          name: "${name}-deployer-config"
 EOF
