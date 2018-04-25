@@ -16,11 +16,10 @@
 
 from argparse import ArgumentParser
 import os
-import re
+from config_helper import read_values_to_dict
 import subprocess
 import sys
 import yaml
-
 
 _PROG_HELP = """
 Outputs configuration parameters constructed from files in a directory.
@@ -38,12 +37,6 @@ OUTPUT_SHELL = 'shell'
 OUTPUT_YAML = 'yaml'
 CODEC_UTF8 = 'UTF-8'
 CODEC_ASCII = 'ASCII'
-
-NAME_RE=re.compile(r'[a-zA-z0-9_]+$')
-
-
-class InvalidName(Exception):
-  pass
 
 
 def main():
@@ -80,21 +73,6 @@ def main():
       sys.stdout.write(output_yaml(values, args.encoding))
   finally:
     sys.stdout.flush()
-
-
-def read_values_to_dict(values_dir, codec):
-  """Returns a dict constructed from files in values_dir."""
-  files = [f for f in os.listdir(values_dir)
-           if os.path.isfile(os.path.join(values_dir, f))]
-  result = {}
-  for filename in files:
-    if not NAME_RE.match(filename):
-      raise InvalidName('Invalid config parameter name: {}'.format(filename))
-    file_path = os.path.join(values_dir, filename)
-    with open(file_path, "r") as f:
-      data = f.read().decode(codec)
-      result[filename] = data
-  return result
 
 
 def output_shell(values):

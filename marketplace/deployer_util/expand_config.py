@@ -18,9 +18,8 @@ from argparse import ArgumentParser
 from password import GeneratePassword
 import base64
 import os
-import re
+from config_helper import read_values_to_dict
 import yaml
-
 
 _PROG_HELP = """
 Modifies the configuration parameter files in a directory
@@ -33,8 +32,6 @@ CODEC_ASCII = 'ASCII'
 XGOOGLE = 'x-googleMarketplace'
 XTYPE_PASSWORD = 'GENERATED_PASSWORD'
 XTYPE_PASSWORD_KEY = 'generatedPassword'
-
-NAME_RE=re.compile(r'[a-zA-z0-9_]+$')
 
 
 class InvalidProperty(Exception):
@@ -64,37 +61,22 @@ def main():
   write_values(values, args.values_dir, args.encoding)
 
 
-def read_values_to_dict(values_dir, codec):
-  """Returns a dict construted from files in values_dir."""
-  files = [f for f in os.listdir(values_dir)
-           if os.path.isfile(os.path.join(values_dir, f))]
-  result = {}
-  for filename in files:
-    if not NAME_RE.match(filename):
-      raise InvalidName('Invalid config parameter name: {}'.format(filename))
-    file_path = os.path.join(values_dir, filename)
-    with open(file_path, "r") as f:
-      data = f.read().decode(codec)
-      result[filename] = data
-  return result
-
-
 def read_schema(schema_file):
   """Returns a nest dictionary for the JSON schema content."""
   with open(schema_file, "r") as f:
     return yaml.load(f)
 
 
-def expand(values, schema):
+def expand(values_dict, schema):
   """Returns the expanded values according to schema."""
   props = schema.get('properties', {})
-  all_keys = (list(values) + list(props))
-  result = {}
-  for k in all_keys:
+  for k in values_dict:
     if k not in props:
       raise InvalidProperty('No such property defined in schema: {}'.format(k))
-    prop = props[k]
-    v = values.get(k, None)
+
+  result = {}
+  for k, prop in props.iteritems():
+    v = values_dict.get(k, None)
 
     xgoogle = prop.get(XGOOGLE, {})
     xtype = xgoogle.get('type', None)

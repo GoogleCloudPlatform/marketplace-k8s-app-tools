@@ -11,32 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""A DM template that generates password as an output, namely "password".
-
-An example YAML showing how this template can be used:
-  resources:
-  - name: generated-password
-    type: password.py
-    properties:
-      length: 8
-      includeSymbols: true
-  - name: main-template
-    type: main-template.jinja
-    properties:
-      password: $(ref.generated-password.password)
-
-Input properties to this template:
-  - length: the length of the generated password. At least 8. Default 8.
-  - includeSymbols: true/false whether to include symbol chars. Default false.
-
-The generated password satisfies the following requirements:
-  - The length is as specified,
-  - Containing letters and numbers, and optionally symbols if specified,
-  - Starting with a letter,
-  - Containing characters from at least 3 of the 4 categories: uppercases,
-    lowercases, numbers, and symbols.
-
-"""
 
 import random
 import yaml
@@ -64,25 +38,6 @@ MIN_LENGTH = 8
 
 class InputError(Exception):
   """Raised when input properties are unexpected."""
-
-
-def GenerateConfig(context):
-  """Entry function to generate the DM config."""
-  props = context.properties
-  length = props.setdefault(PROPERTY_LENGTH, MIN_LENGTH)
-  include_symbols = props.setdefault(PROPERTY_INCLUDE_SYMBOLS, False)
-
-  if not isinstance(include_symbols, bool):
-    raise InputError('%s must be a boolean' % PROPERTY_INCLUDE_SYMBOLS)
-
-  content = {
-      'resources': [],
-      'outputs': [{
-          'name': 'password',
-          'value': GeneratePassword(length, include_symbols)
-      }]
-  }
-  return yaml.dump(content)
 
 
 def GeneratePassword(length=8, include_symbols=False):
