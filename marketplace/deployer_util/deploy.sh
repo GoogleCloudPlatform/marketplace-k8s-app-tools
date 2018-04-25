@@ -18,6 +18,7 @@ set -eox pipefail
 
 # This is the entry point for the production deployment
 
+/bin/expand_config.py
 APP_INSTANCE_NAME="$(/bin/print_config.py --param APP_INSTANCE_NAME)"
 NAMESPACE="$(/bin/print_config.py --param NAMESPACE)"
 
