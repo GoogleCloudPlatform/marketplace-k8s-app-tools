@@ -59,6 +59,7 @@ function extract_manifest() {
     chart_manifest_file=$(basename "$chart" | sed 's/.tar.gz$//')
     mkdir "$extracted/$chart_manifest_file"
     tar xfC "$chart" "$extracted/$chart_manifest_file"
+    # TODO(#55): Don't use eval.
     cat "$extracted/$chart_manifest_file/chart/values.yaml.template" \
       | eval ${env_vars[@]} envsubst \
       > "$extracted/$chart_manifest_file/chart/values.yaml"

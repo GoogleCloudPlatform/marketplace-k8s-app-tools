@@ -55,7 +55,7 @@ fi
 # Replace the environment variables placeholders from the manifest templates
 for manifest_template_file in "$data_dir"/manifest/*; do
   manifest_file=$(basename "$manifest_template_file" | sed 's/.template$//')
-
+  # TODO(#55): Don't use eval.
   cat "$manifest_template_file" \
     | eval ${env_vars[@]} envsubst \
     > "$manifest_dir/$manifest_file"
