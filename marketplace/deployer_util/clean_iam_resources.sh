@@ -16,9 +16,8 @@
 
 set -eox pipefail
 
-# Assert existence of required environment variables.
-[[ -v "APP_INSTANCE_NAME" ]] || exit 1
-[[ -v "NAMESPACE" ]] || exit 1
+APP_INSTANCE_NAME="$(/bin/print_config.py --param APP_INSTANCE_NAME)"
+NAMESPACE="$(/bin/print_config.py --param NAMESPACE)"
 
 # Clean up IAM resources.
 kubectl delete --namespace="$NAMESPACE" --filename=- <<EOF
