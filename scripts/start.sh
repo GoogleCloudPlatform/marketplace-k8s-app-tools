@@ -33,6 +33,10 @@ case $i in
     mode="${i#*=}"
     shift
     ;;
+  --test_parameters=*)
+    test_parameters="${i#*=}"
+    shift
+    ;;
   *)
     >&2 echo "Unrecognized flag: $i"
     exit 1
@@ -110,6 +114,12 @@ subjects:
   name: "${name}-deployer-sa"
 EOF
 
+entrypoint="/bin/deploy.sh"
+if [[ "$mode" = "test" ]]; then
+  parameters=$(echo "$parameters" "$test_parameters" | jq -s '.[0] * .[1]')
+  entrypoint="/bin/deploy_with_tests.sh"
+fi
+
 # Create ConfigMap (merging in passed in parameters).
 kubectl apply --filename=- --output=json --dry-run <<EOF \
   | jq -s '.[0].data = .[1] | .[0]' \
@@ -127,11 +137,6 @@ metadata:
     uid: "${application_uid}"
     blockOwnerDeletion: true
 EOF
-
-entrypoint="/bin/deploy.sh"
-if [[ "$mode" = "test" ]]; then
-  entrypoint="/bin/deploy_with_tests.sh"
-fi
 
 # Create deployer.
 kubectl apply --namespace="$namespace" --filename=- <<EOF

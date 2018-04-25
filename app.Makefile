@@ -22,6 +22,10 @@ ifndef APP_PARAMETERS
   APP_PARAMETERS = {"APP_INSTANCE_NAME": "$(APP_INSTANCE_NAME)", "NAMESPACE": "$(NAMESPACE)"}
 endif
 
+ifndef TEST_PARAMETERS
+  TEST_PARAMETERS = {}
+endif
+
 APP_BUILD = .build/marketplace-app
 
 NAMESPACE ?= default
@@ -64,7 +68,8 @@ app/install-test: app/build-test | app/setup
 	$(MARKETPLACE_TOOLS_PATH)/scripts/start.sh \
 	    --deployer='$(APP_DEPLOYER_IMAGE)' \
 	    --parameters='$(APP_PARAMETERS)' \
-	    --mode='test'
+	    --mode='test' \
+	    --test_parameters='$(TEST_PARAMETERS)'
 
 # Uninstalls the application from the target namespace on the cluster.
 .PHONY: app/uninstall
