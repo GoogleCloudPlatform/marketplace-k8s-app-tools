@@ -29,7 +29,7 @@ according to their schema.
 CODEC_UTF8 = 'UTF-8'
 CODEC_ASCII = 'ASCII'
 
-XGOOGLE = 'x-googleMarketplace'
+XGOOGLE = 'x-google-marketplace'
 XTYPE_PASSWORD = 'GENERATED_PASSWORD'
 XTYPE_PASSWORD_KEY = 'generatedPassword'
 
