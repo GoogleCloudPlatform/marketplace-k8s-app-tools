@@ -45,9 +45,11 @@ class MissingRequiredProperty(Exception):
 def main():
   parser = ArgumentParser(description=_PROG_HELP)
   parser.add_argument('--values_dir',
-                      help='Where the value files should be read from '
-                      'and written back to',
+                      help='Where the value files should be read from',
                       default='/data/values')
+  parser.add_argument('--final_values_dir',
+                      help='Where the final value files should be written to',
+                      default='/data/final_values')
   parser.add_argument('--schema_file', help='Path to the schema file',
                       default='/data/schema.yaml')
   parser.add_argument('--encoding',
@@ -58,7 +60,7 @@ def main():
   schema = read_schema(args.schema_file)
   values = read_values_to_dict(args.values_dir, args.encoding)
   values = expand(values, schema)
-  write_values(values, args.values_dir, args.encoding)
+  write_values(values, args.final_values_dir, args.encoding)
 
 
 def read_schema(schema_file):
@@ -114,6 +116,8 @@ def generate_password(config):
 
 
 def write_values(values, values_dir, encoding):
+  if not os.path.exists(values_dir):
+    os.makedirs(values_dir)
   for k, v in values.iteritems():
     file_path = os.path.join(values_dir, k)
     with open(file_path, 'w') as f:
