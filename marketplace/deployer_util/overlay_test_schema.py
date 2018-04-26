@@ -18,7 +18,8 @@ from argparse import ArgumentParser
 from yaml_util import overlay_yaml_file
 
 def main():
-  parser = ArgumentParser()
+  parser = ArgumentParser(
+    )
   parser.add_argument('--orig',
                       help='Original schema file')
   parser.add_argument('--dest',
