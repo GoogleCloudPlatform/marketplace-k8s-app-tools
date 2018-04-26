@@ -18,9 +18,9 @@ set -eox pipefail
 
 # This is the entry point for the test deployment
 
-# Assert existence of required environment variables.
-[[ -v "APP_INSTANCE_NAME" ]] || exit 1
-[[ -v "NAMESPACE" ]] || exit 1
+/bin/expand_config.py
+APP_INSTANCE_NAME="$(/bin/print_config.py --param APP_INSTANCE_NAME)"
+NAMESPACE="$(/bin/print_config.py --param NAMESPACE)"
 
 echo "Deploying application \"$APP_INSTANCE_NAME\" in test mode"
 
@@ -74,7 +74,7 @@ while true; do
   if [[ elapsed_time -gt tester_timeout ]]; then
     echo "ERROR Tester job timeout"
     exit 1
-  fi 
+  fi
 done
 
 clean_iam_resources.sh

@@ -36,20 +36,12 @@ done
 
 [[ -z "application_uid" ]] && echo "application_uid required" && exit 1
 
-# Assert existence of required environment variables.
-[[ -z "APP_INSTANCE_NAME" ]] && echo "APP_INSTANCE_NAME not defined" && exit 1
-[[ -z "NAMESPACE" ]] && echo "NAMESPACE not defined" && exit 1
+# Extract the config values into VAR=VALUE array.
+env_vars=($(/bin/print_config.py -o shell))
+APP_INSTANCE_NAME="$(/bin/print_config.py --param APP_INSTANCE_NAME)"
+NAMESPACE="$(/bin/print_config.py --param NAMESPACE)"
 
 echo "Creating the manifests for the kubernetes resources that build the application \"$APP_INSTANCE_NAME\""
-
-# Perform environment variable expansions.
-# Note: We list out all environment variables and explicitly pass them to
-# envsubst to avoid expanding templated variables that were not defined
-# in this container.
-environment_variables="$(printenv \
-  | sed 's/=.*$//' \
-  | sed 's/^/$/' \
-  | paste -d' ' -s)"
 
 data_dir="/data"
 manifest_dir="$data_dir/manifest-expanded"
@@ -63,10 +55,10 @@ fi
 # Replace the environment variables placeholders from the manifest templates
 for manifest_template_file in "$data_dir"/manifest/*; do
   manifest_file=$(basename "$manifest_template_file" | sed 's/.template$//')
-  
+  # TODO(#55): Don't use eval.
   cat "$manifest_template_file" \
-    | envsubst "$environment_variables" \
-    > "$manifest_dir/$manifest_file" 
+    | eval ${env_vars[@]} envsubst \
+    > "$manifest_dir/$manifest_file"
 done
 
 /bin/setownership.py \

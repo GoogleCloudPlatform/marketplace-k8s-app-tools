@@ -18,9 +18,9 @@ set -eox pipefail
 
 # This is the entry point for the production deployment
 
-# Assert existence of required environment variables.
-[[ -v "APP_INSTANCE_NAME" ]] || exit 1
-[[ -v "NAMESPACE" ]] || exit 1
+/bin/expand_config.py
+APP_INSTANCE_NAME="$(/bin/print_config.py --param APP_INSTANCE_NAME)"
+NAMESPACE="$(/bin/print_config.py --param NAMESPACE)"
 
 echo "Deploying application \"$APP_INSTANCE_NAME\""
 
