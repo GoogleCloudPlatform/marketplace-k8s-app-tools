@@ -53,7 +53,7 @@ app/build:: ;
 # Including Makefile can extend this target. This target is
 # a prerequisite for install-test.
 .PHONY: app/build-test
-app/build:: ;
+app/build-test:: ;
 
 # Installs the application into target namespace on the cluster.
 .PHONY: app/install

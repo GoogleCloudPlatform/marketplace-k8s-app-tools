@@ -18,6 +18,10 @@ set -eox pipefail
 
 # This is the entry point for the test deployment
 
+overlay_test_schema.py \
+  --orig "/data-test/schema.yaml" \
+  --dest "/data/schema.yaml"
+  
 /bin/expand_config.py
 APP_INSTANCE_NAME="$(/bin/print_config.py --param APP_INSTANCE_NAME)"
 NAMESPACE="$(/bin/print_config.py --param NAMESPACE)"
