@@ -65,10 +65,10 @@ app/install: app/build | app/setup
 # Installs the application into target namespace on the cluster.
 .PHONY: app/install-test
 app/install-test: app/build-test | app/setup
-	$(MARKETPLACE_TOOLS_PATH)/scripts/start.sh \
+	$(MARKETPLACE_TOOLS_PATH)/scripts/start_test.sh \
+			--marketplace_tools='$(MARKETPLACE_TOOLS_PATH)' \
 	    --deployer='$(APP_DEPLOYER_IMAGE)' \
 	    --parameters='$(APP_PARAMETERS)' \
-	    --mode='test' \
 	    --test_parameters='$(TEST_PARAMETERS)'
 
 # Uninstalls the application from the target namespace on the cluster.

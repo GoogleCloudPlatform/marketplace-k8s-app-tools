@@ -29,12 +29,8 @@ case $i in
     parameters="${i#*=}"
     shift
     ;;
-  --mode=*)
-    mode="${i#*=}"
-    shift
-    ;;
-  --test_parameters=*)
-    test_parameters="${i#*=}"
+  --entrypoint=*)
+    entrypoint="${i#*=}"
     shift
     ;;
   *)
@@ -46,6 +42,7 @@ done
 
 [[ -z "$deployer" ]] && >&2 echo "--deployer required" && exit 1
 [[ -z "$parameters" ]] && >&2 echo "--parameters required" && exit 1
+[[ -z "$entrypoint" ]] && entrypoint="/bin/deploy.sh"
 
 # Extract APP_INSTANCE_NAME and NAMESPACE from parameters.
 name=$(echo "$parameters" | jq -r '.APP_INSTANCE_NAME')
@@ -114,12 +111,6 @@ subjects:
   name: "${name}-deployer-sa"
 EOF
 
-entrypoint="/bin/deploy.sh"
-if [[ "$mode" = "test" ]]; then
-  parameters=$(echo "$parameters" "$test_parameters" | jq -s '.[0] * .[1]')
-  entrypoint="/bin/deploy_with_tests.sh"
-fi
-
 # Create ConfigMap (merging in passed in parameters).
 kubectl apply --filename=- --output=json --dry-run <<EOF \
   | jq -s '.[0].data = .[1] | .[0]' \
@@ -163,8 +154,7 @@ spec:
         volumeMounts:
         - name: config-volume
           mountPath: /data/values
-        command: ["/bin/bash"]
-        args: ["${entrypoint}"]
+        command: ["${entrypoint}"]
       restartPolicy: Never
       volumes:
       - name: config-volume
