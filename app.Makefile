@@ -66,7 +66,7 @@ app/install: app/build | app/setup
 .PHONY: app/install-test
 app/install-test: app/build-test | app/setup
 	$(MARKETPLACE_TOOLS_PATH)/scripts/start_test.sh \
-			--marketplace_tools='$(MARKETPLACE_TOOLS_PATH)' \
+	    --marketplace_tools='$(MARKETPLACE_TOOLS_PATH)' \
 	    --deployer='$(APP_DEPLOYER_IMAGE)' \
 	    --parameters='$(APP_PARAMETERS)' \
 	    --test_parameters='$(TEST_PARAMETERS)'
