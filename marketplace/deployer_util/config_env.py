@@ -53,7 +53,6 @@ def main():
              ['--unset={}'.format(v) for v in default_vars] +
              [args.command] +
              args.arguments)
-  print command
   p = subprocess.Popen(command,
                        env=values,
                        stdin=subprocess.PIPE,
