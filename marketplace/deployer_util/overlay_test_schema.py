@@ -14,8 +14,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import yaml
+
 from argparse import ArgumentParser
 from yaml_util import overlay_yaml_file
+from yaml_util import load_yaml
+from yaml_util import add_or_replace
 
 def main():
   parser = ArgumentParser()
@@ -25,7 +29,20 @@ def main():
                       help='Destination schema file')
   args = parser.parse_args()
 
-  overlay_yaml_file(args.orig, args.dest)
+  orig = load_yaml(args.orig)
+
+  if 'properties' not in orig:
+    print("No properties found in {}. Ignoring test schema merge.".format(args.orig))
+    return
+
+  dest = load_yaml(args.dest)
+  if 'properties' in dest:
+    add_or_replace(orig['properties'], dest['properties'])
+  else:
+    dest['properties'] = orig['properties']
+  
+  with open(args.dest, 'w') as f:
+    yaml.dump(dest, f)
 
 if __name__ == "__main__":
   main()

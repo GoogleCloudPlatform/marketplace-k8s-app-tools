@@ -154,7 +154,7 @@ spec:
         volumeMounts:
         - name: config-volume
           mountPath: /data/values
-        command: ["${entrypoint}"]
+        $([[ -z "$entrypoint" ]] || echo command: [\""${entrypoint}"\"])
       restartPolicy: Never
       volumes:
       - name: config-volume
