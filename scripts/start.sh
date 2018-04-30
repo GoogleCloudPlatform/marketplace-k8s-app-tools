@@ -29,8 +29,8 @@ case $i in
     parameters="${i#*=}"
     shift
     ;;
-  --mode=*)
-    mode="${i#*=}"
+  --entrypoint=*)
+    entrypoint="${i#*=}"
     shift
     ;;
   *)
@@ -42,6 +42,7 @@ done
 
 [[ -z "$deployer" ]] && >&2 echo "--deployer required" && exit 1
 [[ -z "$parameters" ]] && >&2 echo "--parameters required" && exit 1
+[[ -z "$entrypoint" ]] && entrypoint="/bin/deploy.sh"
 
 # Extract APP_INSTANCE_NAME and NAMESPACE from parameters.
 name=$(echo "$parameters" | jq -r '.APP_INSTANCE_NAME')
@@ -128,11 +129,6 @@ metadata:
     blockOwnerDeletion: true
 EOF
 
-entrypoint="/bin/deploy.sh"
-if [[ "$mode" = "test" ]]; then
-  entrypoint="/bin/deploy_with_tests.sh"
-fi
-
 # Create deployer.
 kubectl apply --namespace="$namespace" --filename=- <<EOF
 apiVersion: batch/v1
@@ -158,8 +154,7 @@ spec:
         volumeMounts:
         - name: config-volume
           mountPath: /data/values
-        command: ["/bin/bash"]
-        args: ["${entrypoint}"]
+        $([[ -z "$entrypoint" ]] || echo -n command: [\""${entrypoint}"\"])
       restartPolicy: Never
       volumes:
       - name: config-volume
