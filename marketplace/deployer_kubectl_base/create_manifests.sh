@@ -36,8 +36,7 @@ done
 
 [[ -z "application_uid" ]] && echo "application_uid required" && exit 1
 
-# Extract the config values into VAR=VALUE array.
-env_vars=($(/bin/print_config.py -o shell))
+env_vars="$(/bin/print_config.py -o shell_vars)"
 APP_INSTANCE_NAME="$(/bin/print_config.py --param APP_INSTANCE_NAME)"
 NAMESPACE="$(/bin/print_config.py --param NAMESPACE)"
 
@@ -55,9 +54,8 @@ fi
 # Replace the environment variables placeholders from the manifest templates
 for manifest_template_file in "$data_dir"/manifest/*; do
   manifest_file=$(basename "$manifest_template_file" | sed 's/.template$//')
-  # TODO(#55): Don't use eval.
   cat "$manifest_template_file" \
-    | eval ${env_vars[@]} envsubst \
+    | /bin/config_env.py envsubst "${env_vars}" \
     > "$manifest_dir/$manifest_file"
 done
 

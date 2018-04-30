@@ -35,6 +35,7 @@ yaml: a YAML file.
 
 OUTPUT_SHELL = 'shell'
 OUTPUT_YAML = 'yaml'
+OUTPUT_SHELL_VARS = 'shell_vars'
 CODEC_UTF8 = 'UTF-8'
 CODEC_ASCII = 'ASCII'
 
@@ -42,7 +43,7 @@ CODEC_ASCII = 'ASCII'
 def main():
   parser = ArgumentParser(description=_PROG_HELP)
   parser.add_argument('--output', '-o', help=_OUTPUT_HELP,
-                      choices=[OUTPUT_SHELL, OUTPUT_YAML],
+                      choices=[OUTPUT_SHELL, OUTPUT_SHELL_VARS, OUTPUT_YAML],
                       default=OUTPUT_SHELL)
   parser.add_argument('--values_dir', help='Where to read value files',
                       default='/data/final_values')
@@ -69,6 +70,8 @@ def main():
 
     if args.output == OUTPUT_SHELL:
       sys.stdout.write(output_shell(values))
+    elif args.output == OUTPUT_SHELL_VARS:
+      sys.stdout.write(output_shell_vars(values))
     elif args.output == OUTPUT_YAML:
       sys.stdout.write(output_yaml(values, args.encoding))
   finally:
@@ -81,6 +84,10 @@ def output_shell(values):
       for k, v in values.iteritems()]
   escapeds.sort(key=lambda (k, v): k)
   return '\n'.join(['{}={}'.format(k, v) for k, v in escapeds])
+
+
+def output_shell_vars(values):
+  return ' '.join(['${}'.format(k) for k in values])
 
 
 def output_yaml(values, encoding):
