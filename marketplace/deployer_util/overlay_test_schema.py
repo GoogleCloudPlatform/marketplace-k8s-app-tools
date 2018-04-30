@@ -37,7 +37,8 @@ def main():
 
   dest = load_yaml(args.dest)
   if 'properties' in dest:
-    add_or_replace(orig['properties'], dest['properties'])
+    for prop in orig['properties']:
+      dest['properties']['prop'] = orig['properties']['prop']
   else:
     dest['properties'] = orig['properties']
   
