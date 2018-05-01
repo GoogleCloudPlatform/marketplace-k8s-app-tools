@@ -16,8 +16,8 @@
 
 set -eox pipefail
 
-APP_INSTANCE_NAME="$(/bin/print_config.py --param APP_INSTANCE_NAME)"
-NAMESPACE="$(/bin/print_config.py --param NAMESPACE)"
+APP_INSTANCE_NAME="$(/bin/print_config.py --param '{"x-google-marketplace": {"type": "NAME"}}')"
+NAMESPACE="$(/bin/print_config.py --param '{"x-google-marketplace": {"type": "NAMESPACE"}}')"
 
 # Clean up IAM resources.
 kubectl delete --namespace="$NAMESPACE" --filename=- <<EOF
