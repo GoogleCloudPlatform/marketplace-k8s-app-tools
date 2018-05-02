@@ -28,6 +28,10 @@ case $i in
     parameters="${i#*=}"
     shift
     ;;
+  --test_parameters=*)
+    test_parameters="${i#*=}"
+    shift
+    ;;
   --marketplace_tools=*)
     marketplace_tools="${i#*=}"
     shift
@@ -78,13 +82,37 @@ kubectl apply -f "$marketplace_tools/crd/app-crd.yaml"
 
 parameters=$(echo "$parameters" | jq ".NAMESPACE=\"$NAMESPACE\"")
 
-echo "Parameters: $parameters"
+echo "INFO Parameters: $parameters"
 
 echo "INFO Initializes the deployer container which will deploy all the application components"
-$marketplace_tools/scripts/start.sh \
+$marketplace_tools/scripts/start_test.sh \
   --deployer="$deployer" \
   --parameters="$parameters" \
+  --test_parameters="$test_parameters" \
+  --marketplace_tools="$marketplace_tools" \
   || clean_and_exit "ERROR Failed to start deployer"
+
+echo "INFO wait for the deployer to succeed"
+deployer_name="${APP_INSTANCE_NAME}-deployer"
+
+start_time=$(date +%s)
+poll_interval=4
+while true; do
+  success=$(kubectl get "jobs/$deployer_name" --namespace="$NAMESPACE" -o=json | jq '.status.succeeded' || echo "0")
+
+  if [[ "$success" = "1" ]]; then
+    echo "INFO Deployer job succeeded"
+    break
+  fi
+
+  elapsed_time=$(( $(date +%s) - $start_time ))
+  echo -ne "Elapsed ${elapsed_time}s\r"
+  if [[ elapsed_time -gt $wait_timeout ]]; then
+    clean_and_exit "ERROR Deployer job timeout"
+  fi
+
+  sleep $poll_interval
+done
 
 echo "INFO Stop the application"
 $marketplace_tools/scripts/stop.sh \
@@ -92,16 +120,17 @@ $marketplace_tools/scripts/stop.sh \
   --namespace=$NAMESPACE \
   || clean_and_exit "ERROR Failed to stop application"
 
+deletion_timeout=60
 echo "INFO Wait for the applications to be deleted"
-timeout --foreground 20 $DIR/wait_for_deletion.sh $NAMESPACE applications \
+timeout --foreground $deletion_timeout "$DIR/wait_for_deletion.sh" "$NAMESPACE" applications \
   || clean_and_exit "ERROR Some applications where not deleted"
 
 echo "INFO Wait for standard resources were deleted."
-timeout --foreground 20 $DIR/wait_for_deletion.sh $NAMESPACE all \
+timeout --foreground $deletion_timeout "$DIR/wait_for_deletion.sh" "$NAMESPACE" all \
   || clean_and_exit "ERROR Some resources where not deleted"
 
 echo "INFO Wait for service accounts to be deleted."
-timeout --foreground 20 $DIR/wait_for_deletion.sh $NAMESPACE serviceaccounts,roles,rolebindings \
+timeout --foreground $deletion_timeout "$DIR/wait_for_deletion.sh" "$NAMESPACE" serviceaccounts,roles,rolebindings \
   || clean_and_exit "ERROR Some service accounts or roles where not deleted"
 
 delete_namespace
