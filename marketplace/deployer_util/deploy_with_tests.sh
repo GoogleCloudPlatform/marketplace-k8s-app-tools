@@ -21,10 +21,11 @@ set -eox pipefail
 overlay_test_schema.py \
   --orig "/data-test/schema.yaml" \
   --dest "/data/schema.yaml"
-  
+rm /data-test/schema.yaml
+
 /bin/expand_config.py
-APP_INSTANCE_NAME="$(/bin/print_config.py --param APP_INSTANCE_NAME)"
-NAMESPACE="$(/bin/print_config.py --param NAMESPACE)"
+APP_INSTANCE_NAME="$(/bin/print_config.py --param '{"x-google-marketplace": {"type": "NAME"}}')"
+NAMESPACE="$(/bin/print_config.py --param '{"x-google-marketplace": {"type": "NAMESPACE"}}')"
 
 echo "Deploying application \"$APP_INSTANCE_NAME\" in test mode"
 

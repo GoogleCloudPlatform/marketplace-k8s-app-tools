@@ -17,21 +17,16 @@
 from argparse import ArgumentParser
 from password import GeneratePassword
 import base64
+import config_helper
 import os
-from config_helper import read_values_to_dict
-import yaml
 
 _PROG_HELP = """
 Modifies the configuration parameter files in a directory
 according to their schema.
 """
 
-CODEC_UTF8 = 'UTF-8'
-CODEC_ASCII = 'ASCII'
-
-XGOOGLE = 'x-google-marketplace'
-XTYPE_PASSWORD = 'GENERATED_PASSWORD'
-XTYPE_PASSWORD_KEY = 'generatedPassword'
+CODEC_UTF8 = 'utf_8'
+CODEC_ASCII = 'ascii'
 
 
 class InvalidProperty(Exception):
@@ -52,43 +47,37 @@ def main():
                       default='/data/final_values')
   parser.add_argument('--schema_file', help='Path to the schema file',
                       default='/data/schema.yaml')
+  parser.add_argument('--schema_file_encoding',
+                      help='Encoding of the schema file',
+                      choices=[CODEC_UTF8, CODEC_ASCII], default=CODEC_UTF8)
   parser.add_argument('--encoding',
                       help='Encoding of the value files',
-                      choices=[CODEC_UTF8, CODEC_ASCII], default='UTF-8')
+                      choices=[CODEC_UTF8, CODEC_ASCII], default=CODEC_UTF8)
   args = parser.parse_args()
 
-  schema = read_schema(args.schema_file)
-  values = read_values_to_dict(args.values_dir, args.encoding)
+  schema = config_helper.Schema.load_yaml_file(args.schema_file,
+                                               args.schema_file_encoding)
+  values = config_helper.read_values_to_dict(args.values_dir, args.encoding)
   values = expand(values, schema)
   write_values(values, args.final_values_dir, args.encoding)
 
 
-def read_schema(schema_file):
-  """Returns a nest dictionary for the JSON schema content."""
-  with open(schema_file, "r") as f:
-    return yaml.load(f)
-
-
 def expand(values_dict, schema):
   """Returns the expanded values according to schema."""
-  props = schema.get('properties', {})
   for k in values_dict:
-    if k not in props:
+    if k not in schema.properties:
       raise InvalidProperty('No such property defined in schema: {}'.format(k))
 
   result = {}
-  for k, prop in props.iteritems():
+  for k, prop in schema.properties.iteritems():
     v = values_dict.get(k, None)
 
-    xgoogle = prop.get(XGOOGLE, {})
-    xtype = xgoogle.get('type', None)
-    if v is None and xtype == XTYPE_PASSWORD:
-      password_config = xgoogle.get(XTYPE_PASSWORD_KEY, {})
-      result[k] = generate_password(password_config)
+    if v is None and prop.password:
+      result[k] = generate_password(prop.password)
       continue
 
-    if v is None and 'default' in prop:
-      v = prop['default']
+    if v is None and prop.default is not None:
+      v = prop.default
 
     if v is not None:
       result[k] = v
@@ -98,19 +87,15 @@ def expand(values_dict, schema):
 
 
 def validate_required_props(values, schema):
-  requireds = schema.get('required', [])
-  for k in requireds:
+  for k in schema.required:
     if k not in values:
       raise MissingRequiredProperty(
           'No value for required property: {}'.format(k))
 
 
 def generate_password(config):
-  length = config.get('length', 10)
-  include_symbols = config.get('includeSymbols', False)
-  use_base64 = config.get('base64', True)
-  pw = GeneratePassword(length, include_symbols)
-  if use_base64:
+  pw = GeneratePassword(config.length, config.include_symbols)
+  if config.base64:
     pw = base64.b64encode(pw)
   return pw
 

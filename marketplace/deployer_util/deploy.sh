@@ -19,8 +19,8 @@ set -eox pipefail
 # This is the entry point for the production deployment
 
 /bin/expand_config.py
-APP_INSTANCE_NAME="$(/bin/print_config.py --param APP_INSTANCE_NAME)"
-NAMESPACE="$(/bin/print_config.py --param NAMESPACE)"
+APP_INSTANCE_NAME="$(/bin/print_config.py --param '{"x-google-marketplace": {"type": "NAME"}}')"
+NAMESPACE="$(/bin/print_config.py --param '{"x-google-marketplace": {"type": "NAMESPACE"}}')"
 
 echo "Deploying application \"$APP_INSTANCE_NAME\""
 
