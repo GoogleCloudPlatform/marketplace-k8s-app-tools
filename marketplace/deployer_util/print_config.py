@@ -15,8 +15,9 @@
 # limitations under the License.
 
 from argparse import ArgumentParser
+import config_helper
+import json
 import os
-from config_helper import read_values_to_dict
 import subprocess
 import sys
 import yaml
@@ -36,8 +37,12 @@ yaml: a YAML file.
 OUTPUT_SHELL = 'shell'
 OUTPUT_YAML = 'yaml'
 OUTPUT_SHELL_VARS = 'shell_vars'
-CODEC_UTF8 = 'UTF-8'
-CODEC_ASCII = 'ASCII'
+CODEC_UTF8 = 'utf_8'
+CODEC_ASCII = 'ascii'
+
+
+class InvalidParameter(Exception):
+  pass
 
 
 def main():
@@ -47,25 +52,40 @@ def main():
                       default=OUTPUT_SHELL)
   parser.add_argument('--values_dir', help='Where to read value files',
                       default='/data/final_values')
+  parser.add_argument('--schema_file', help='Path to the schema file',
+                      default='/data/schema.yaml')
+  parser.add_argument('--schema_file_encoding',
+                      help='Encoding of the schema file',
+                      choices=[CODEC_UTF8, CODEC_ASCII], default=CODEC_UTF8)
   parser.add_argument('--param',
                       help='If specified, outputs the value of a single '
-                      'parameter, unescaped.')
+                      'parameter unescaped. The value here is a JSON '
+                      'which should partially match the parameter schema.')
   parser.add_argument('--decoding',
                       help='Codec used for decoding value file contents',
-                      choices=[CODEC_UTF8, CODEC_ASCII], default='UTF-8')
+                      choices=[CODEC_UTF8, CODEC_ASCII], default=CODEC_UTF8)
   parser.add_argument('--encoding',
                       help='Codec for encoding output files',
-                      choices=[CODEC_UTF8, CODEC_ASCII], default='UTF-8')
+                      choices=[CODEC_UTF8, CODEC_ASCII], default=CODEC_UTF8)
   args = parser.parse_args()
 
-  values = read_values_to_dict(args.values_dir, args.decoding)
+  values = config_helper.read_values_to_dict(args.values_dir, args.decoding)
+  schema = config_helper.Schema.load_yaml_file(args.schema_file,
+                                               args.schema_file_encoding)
 
   try:
     if args.param:
-      if args.param in values:
-        sys.stdout.write(values[args.param])
-      else:
-        raise InvalidName('No such parameter: {}\n'.format(args.param))
+      definition = json.loads(args.param)
+      candidates = [k for k, v in schema.properties.iteritems()
+                    if v.matches_definition(definition)]
+      if len(candidates) != 1:
+        raise InvalidParameter(
+            'There must be exactly one parameter matching but found {}: {}'
+            .format(len(candidates), args.param))
+      key = candidates[0]
+      if key not in values:
+        raise InvalidParameter('Parameter {} has no value'.format(key))
+      sys.stdout.write(values[key])
       return
 
     if args.output == OUTPUT_SHELL:
