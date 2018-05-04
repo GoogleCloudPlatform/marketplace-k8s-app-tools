@@ -18,6 +18,7 @@ import collections
 import io
 import os
 import re
+
 import yaml
 
 NAME_RE = re.compile(r'[a-zA-z0-9_]+$')
@@ -30,7 +31,11 @@ class InvalidName(Exception):
   pass
 
 
-def read_values_to_dict(values_dir, codec):
+class InvalidSchema(Exception):
+  pass
+
+
+def read_values_to_dict(values_dir, codec, schema):
   """Returns a dict constructed from files in values_dir."""
   files = [f for f in os.listdir(values_dir)
            if os.path.isfile(os.path.join(values_dir, f))]
@@ -42,6 +47,11 @@ def read_values_to_dict(values_dir, codec):
     with open(file_path, "r") as f:
       data = f.read().decode(codec)
       result[filename] = data
+
+  # Data read in as strings. Convert them to proper types defined in schema.
+  result = {k: schema.properties[k].str_to_type(v) if k in schema.properties
+            else v
+            for k, v in result.iteritems()}
   return result
 
 
@@ -53,6 +63,10 @@ class Schema:
     with io.open(filepath, 'r', encoding=encoding) as f:
       d = yaml.load(f)
       return Schema(d)
+
+  @staticmethod
+  def load_yaml(yaml_str):
+    return Schema(yaml.load(yaml_str))
 
   def __init__(self, dictionary):
     self._required = dictionary.get('required', [])
@@ -80,6 +94,22 @@ class SchemaProperty:
     self._x = dictionary.get(XGOOGLE, None)
     self._password = None
 
+    if 'type' not in dictionary:
+      raise InvalidSchema('Property {} has no type'.format(name))
+    self._type = {'int': int,
+                  'integer': int,
+                  'string': str,
+                  'number': float,
+                  }.get(dictionary['type'], None)
+    if not self._type:
+      raise InvalidSchema('Property {} has unsupported type: {}'.format(
+        name, dictionary['type']))
+
+    if self._default:
+      if not isinstance(self._default, self._type):
+        raise InvalidSchema('Property {} has a default value of invalid type'.
+                            format(name))
+
     if self._x:
       if 'type' not in self._x:
         raise InvalidSchema(
@@ -103,14 +133,22 @@ class SchemaProperty:
     return self._default
 
   @property
+  def type(self):
+    """Python type of the property."""
+    return self._type
+
+  @property
   def xtype(self):
     if self._x:
-      self._x['type']
+      return self._x['type']
     return None
 
   @property
   def password(self):
     return self._password
+
+  def str_to_type(self, str_val):
+    return self._type(str_val)
 
   def matches_definition(self, definition):
     """Returns true of the definition partially matches.
@@ -136,6 +174,11 @@ class SchemaProperty:
     return _matches(
         dict(list(self._d.iteritems()) + [('name', self._name)]),
         definition)
+
+  def __eq__(self, other):
+    if not isinstance(other, SchemaProperty):
+      return False
+    return other._name == self._name and other._d == self._d
 
 
 SchemaXPassword = collections.namedtuple('SchemaXPassword',
