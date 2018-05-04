@@ -60,6 +60,7 @@ spec:
     matchLabels:
       app.kubernetes.io/name: "${name}"
   componentKinds:
+  - kind: ConfigMap
   - kind: ServiceAccount
   - kind: RoleBinding
   - kind: Job
@@ -120,6 +121,8 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: "${name}-deployer-config"
+  labels:
+    app.kubernetes.io/name: "${name}"
   namespace: "${namespace}"
   ownerReferences:
   - apiVersion: "v1alpha"
