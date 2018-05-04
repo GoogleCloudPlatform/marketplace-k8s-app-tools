@@ -57,7 +57,9 @@ def main():
 
   schema = config_helper.Schema.load_yaml_file(args.schema_file,
                                                args.schema_file_encoding)
-  values = config_helper.read_values_to_dict(args.values_dir, args.encoding)
+  values = config_helper.read_values_to_dict(args.values_dir,
+                                             args.encoding,
+                                             schema)
   values = expand(values, schema)
   write_values(values, args.final_values_dir, args.encoding)
 
@@ -73,6 +75,9 @@ def expand(values_dict, schema):
     v = values_dict.get(k, None)
 
     if v is None and prop.password:
+      if prop.type != str:
+        raise InvalidProperty(
+            'Property {} is expected to be of type string'.format(k))
       result[k] = generate_password(prop.password)
       continue
 
@@ -80,6 +85,10 @@ def expand(values_dict, schema):
       v = prop.default
 
     if v is not None:
+      if not isinstance(v, prop.type):
+        raise InvalidProperty(
+            'Property {} is expected to be of type {}, but has value: {}'
+            .format(k, prop.type, v))
       result[k] = v
 
   validate_required_props(result, schema)
@@ -106,7 +115,7 @@ def write_values(values, values_dir, encoding):
   for k, v in values.iteritems():
     file_path = os.path.join(values_dir, k)
     with open(file_path, 'w') as f:
-      f.write(v.encode(encoding))
+      f.write(str(v).encode(encoding))
 
 
 if __name__ == "__main__":
