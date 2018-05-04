@@ -12,10 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import unittest
+
+import yaml
+
 import config_helper
 import print_config
-import unittest
-import yaml
 
 
 class PrintConfigTest(unittest.TestCase):

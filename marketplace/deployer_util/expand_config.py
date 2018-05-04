@@ -14,11 +14,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from argparse import ArgumentParser
-from password import GeneratePassword
 import base64
-import config_helper
 import os
+from argparse import ArgumentParser
+
+import config_helper
+from password import GeneratePassword
 
 _PROG_HELP = """
 Modifies the configuration parameter files in a directory
