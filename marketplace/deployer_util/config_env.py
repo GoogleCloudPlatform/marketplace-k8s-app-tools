@@ -49,7 +49,7 @@ def main():
   schema = config_helper.Schema.load_yaml_file(args.schema_file,
                                                args.schema_file_encoding)
   values = config_helper.read_values_to_dict(args.values_dir,
-                                             args.decoding,
+                                             args.encoding,
                                              schema)
 
   # Default env vars should NOT be passed on to the new environment.
