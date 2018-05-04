@@ -17,8 +17,6 @@
 from argparse import ArgumentParser
 import config_helper
 import json
-import os
-import subprocess
 import sys
 import yaml
 
@@ -34,7 +32,6 @@ shell: lines of VAR=VALUE, where the VALUEs are properly shell escaped.
 yaml: a YAML file.
 """
 
-OUTPUT_SHELL = 'shell'
 OUTPUT_YAML = 'yaml'
 OUTPUT_SHELL_VARS = 'shell_vars'
 CODEC_UTF8 = 'utf_8'
@@ -48,8 +45,8 @@ class InvalidParameter(Exception):
 def main():
   parser = ArgumentParser(description=_PROG_HELP)
   parser.add_argument('--output', '-o', help=_OUTPUT_HELP,
-                      choices=[OUTPUT_SHELL, OUTPUT_SHELL_VARS, OUTPUT_YAML],
-                      default=OUTPUT_SHELL)
+                      choices=[OUTPUT_SHELL_VARS, OUTPUT_YAML],
+                      default=OUTPUT_YAML)
   parser.add_argument('--values_dir', help='Where to read value files',
                       default='/data/final_values')
   parser.add_argument('--schema_file', help='Path to the schema file',
@@ -69,28 +66,19 @@ def main():
                       choices=[CODEC_UTF8, CODEC_ASCII], default=CODEC_UTF8)
   args = parser.parse_args()
 
-  values = config_helper.read_values_to_dict(args.values_dir, args.decoding)
   schema = config_helper.Schema.load_yaml_file(args.schema_file,
                                                args.schema_file_encoding)
+  values = config_helper.read_values_to_dict(args.values_dir,
+                                             args.decoding,
+                                             schema)
 
   try:
     if args.param:
       definition = json.loads(args.param)
-      candidates = [k for k, v in schema.properties.iteritems()
-                    if v.matches_definition(definition)]
-      if len(candidates) != 1:
-        raise InvalidParameter(
-            'There must be exactly one parameter matching but found {}: {}'
-            .format(len(candidates), args.param))
-      key = candidates[0]
-      if key not in values:
-        raise InvalidParameter('Parameter {} has no value'.format(key))
-      sys.stdout.write(values[key])
+      sys.stdout.write(output_param(values, schema, definition))
       return
 
-    if args.output == OUTPUT_SHELL:
-      sys.stdout.write(output_shell(values))
-    elif args.output == OUTPUT_SHELL_VARS:
+    if args.output == OUTPUT_SHELL_VARS:
       sys.stdout.write(output_shell_vars(values))
     elif args.output == OUTPUT_YAML:
       sys.stdout.write(output_yaml(values, args.encoding))
@@ -98,16 +86,23 @@ def main():
     sys.stdout.flush()
 
 
-def output_shell(values):
-  escapeds = [
-      (k, subprocess.check_output(['printf', '%q', v], env=values))
-      for k, v in values.iteritems()]
-  escapeds.sort(key=lambda (k, v): k)
-  return '\n'.join(['{}={}'.format(k, v) for k, v in escapeds])
+def output_param(values, schema, definition):
+  candidates = [k for k, v in schema.properties.iteritems()
+                if v.matches_definition(definition)]
+  if len(candidates) != 1:
+    raise InvalidParameter(
+        'There must be exactly one parameter matching but found {}: {}'
+        .format(len(candidates), definition))
+  key = candidates[0]
+  if key not in values:
+    raise InvalidParameter('Parameter {} has no value'.format(key))
+  return str(values[key])
 
 
 def output_shell_vars(values):
-  return ' '.join(['${}'.format(k) for k in values])
+  sorted_keys = list(values)
+  sorted_keys.sort()
+  return ' '.join(['${}'.format(k) for k in sorted_keys])
 
 
 def output_yaml(values, encoding):

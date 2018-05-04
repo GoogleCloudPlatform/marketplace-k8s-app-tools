@@ -14,18 +14,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-'''Test for yaml_util'''
+"""Test for yaml_util"""
 
 import unittest
 
 from yaml_util import parse_resources_yaml
 
-class Test_load_resources_yaml(unittest.TestCase):
+
+class YamlUtilTest(unittest.TestCase):
 
   def test_single_entry(self):
-    content =\
-'''---
-# TODO(huyhuynh): Change this to using StatefulSet
+    content = """---
 apiVersion: apps/v1beta2
 kind: Deployment
 metadata:
@@ -54,7 +53,7 @@ spec:
       volumes:
       - name: data
         persistentVolumeClaim:
-          claimName: $APP_INSTANCE_NAME-mysql-pvc'''
+          claimName: $APP_INSTANCE_NAME-mysql-pvc"""
 
     docs = parse_resources_yaml(content)
     self.assertEqual(len(docs), 1)
@@ -65,10 +64,8 @@ spec:
     self.assertEqual(doc['spec']['template']['spec']['containers'][0]['name'],
                      "mysql")
 
-
   def test_multiple_entries_in_content(self):
-    content =\
-'''
+    content = """
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
@@ -101,7 +98,7 @@ spec:
     app.kubernetes.io/component: wordpress-mysql
   clusterIP: None
 ---
-'''
+"""
     docs = parse_resources_yaml(content)
     self.assertEqual(len(docs), 2)
 
