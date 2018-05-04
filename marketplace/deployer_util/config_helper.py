@@ -18,6 +18,7 @@ import collections
 import io
 import os
 import re
+
 import yaml
 
 NAME_RE = re.compile(r'[a-zA-z0-9_]+$')

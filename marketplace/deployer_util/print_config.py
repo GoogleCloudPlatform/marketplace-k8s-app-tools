@@ -14,11 +14,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from argparse import ArgumentParser
-import config_helper
 import json
 import sys
+from argparse import ArgumentParser
+
 import yaml
+
+import config_helper
 
 _PROG_HELP = """
 Outputs configuration parameters constructed from files in a directory.

@@ -12,13 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import config_helper
 import contextlib
-import expand_config
 import re
 import shutil
 import tempfile
 import unittest
+
+import config_helper
+import expand_config
 
 
 class ExpandConfigTest(unittest.TestCase):
