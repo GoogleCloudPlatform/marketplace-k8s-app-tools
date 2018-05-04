@@ -19,8 +19,9 @@ import copy
 
 docstart = "---\n"
 
+
 def load_yaml(filename):
-  ''' Helper function for loading a single yaml entry from file '''
+  """ Helper function for loading a single yaml entry from file """
   with open(filename, "r") as stream:
     content = stream.read()
     return yaml.load(content)
@@ -37,11 +38,11 @@ def add_or_replace(orig, dest):
       
 
 def overlay_yaml_file(orig, dest):
-  ''' Helper function for merging origin yaml file into destination yaml file 
+  """ Helper function for merging origin yaml file into destination yaml file 
 
   Args:
     orig: A str, the name of the origin file.
-    dest: A str, the name of the destination file.'''
+    dest: A str, the name of the destination file."""
 
   y1 = load_yaml(orig)
   y2 = load_yaml(dest)
@@ -52,14 +53,14 @@ def overlay_yaml_file(orig, dest):
 
 
 def load_resources_yaml(filename):
-  '''Load kubernetes resources from yaml file and parses
+  """Load kubernetes resources from yaml file and parses
   into structured format.
 
   Args:
     filename: A str, the name of the manifest file.
 
   Returns:
-    A list of structured kubernetes resources'''
+    A list of structured kubernetes resources"""
 
   print("Reading " + filename)
   with open(filename, "r") as stream:
@@ -68,13 +69,13 @@ def load_resources_yaml(filename):
 
 
 def parse_resources_yaml(content):
-  '''Parses kubernetes resources from yaml format into structured format.
+  """Parses kubernetes resources from yaml format into structured format.
 
   Args:
     content: A str, the yaml content to be parsed..
 
   Returns:
-    A list of structured kubernetes resources'''
+    A list of structured kubernetes resources"""
 
   docs = content.split(docstart)
   docs_yaml = []
@@ -82,10 +83,6 @@ def parse_resources_yaml(content):
     if len(doc) > 0:
       doc_yaml = yaml.load(doc)
       if doc_yaml and 'kind' in doc_yaml:
-        print("  {:s}/{:s}".format(doc_yaml['kind'], doc_yaml['metadata']['name']))
         docs_yaml.append(doc_yaml)
 
   return docs_yaml
-
-if __name__ == '__main__':
-  unittest.main()

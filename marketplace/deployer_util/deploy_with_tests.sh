@@ -69,17 +69,19 @@ start_time=$(date +%s)
 poll_interval=4
 tester_timeout=30
 while true; do
-  success=$(kubectl get "jobs/$tester_name" -o=json | jq '.status.succeeded')
+  success=$(kubectl get "jobs/$tester_name" --namespace="$NAMESPACE" -o=json | jq '.status.succeeded' || echo "0")
   if [[ "$success" = "1" ]]; then
     echo "INFO Tester job succeeded"
     break
   fi
 
   elapsed_time=$(( $(date +%s) - $start_time ))
-  if [[ elapsed_time -gt tester_timeout ]]; then
+  if [[ "$elapsed_time" -gt "$tester_timeout" ]]; then
     echo "ERROR Tester job timeout"
     exit 1
   fi
+
+  sleep "$poll_interval"
 done
 
 clean_iam_resources.sh
