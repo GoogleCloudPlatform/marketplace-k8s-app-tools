@@ -47,6 +47,8 @@ def read_values_to_dict(values_dir, codec, schema):
     with open(file_path, "r") as f:
       data = f.read().decode(codec)
       result[filename] = data
+
+  # Data read in as strings. Convert them to proper types defined in schema.
   result = {k: schema.properties[k].str_to_type(v) if k in schema.properties
             else v
             for k, v in result.iteritems()}
