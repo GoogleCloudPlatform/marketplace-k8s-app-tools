@@ -21,45 +21,15 @@ For examples of how these tools are used, see
 
 ## Authorization
 
+This guide assumes you are using a local development environment. If you need
+run these instructions from a GCE VM or use a service account identity
+(e.g. for testing), see: [Advanced Authorization](#advanced-authorization)
+
 Log in as yourself by running:
 
 ```shell
 gcloud auth login
 ```
-
-### Granting GCE VM userinfo-email scope
-
-If you're running from a GCE VM, your VM must have
-`https://www.googleapis.com/auth/userinfo.email` scope in order for it to
-reveal the correct user name to GKE. No straight forward way to add scopes to a
-VM once it's created. The easiest is to set the scope when creating the VM:
-
-```shell
-gcloud compute instances create \
-  [INSTANCE_NAME] \
-  --machine-type n1-standard-1 \
-  --scopes cloud-platform,userinfo-email
-```
-
-To check the scopes currently granted:
-```shell
-curl "https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=$(gcloud auth print-access-token)"
-```
-
-### Running as a service account
-
-By default, gcloud run from GCE VMs have credentials associated with the
-service account, rather than a user. We recommend configuring it to authorize
-as a user (see command above) to be consistent with the Marketplace end-user
-experience.
-
-If this is not an option (e.g. integration testing), see the following:
-
-#### Granting service account k8s admin privilege
-
-By default, the Compute service account that the VM authorizes as does not have
-k8s engine admin privilege. You need to grant that role to the service account
-via the IAM Admin console.
 
 ## Provisioning a GKE cluster and configuring kubectl to connect to it.
 
@@ -141,3 +111,39 @@ We follow [Google's coding style guides](https://google.github.io/styleguide/).
 
 * `ubbagent.Makefile`: Include this if your application needs to build usage base
   metering agent. See https://github.com/GoogleCloudPlatform/ubbagent
+
+# Appendix
+
+## Advanced Authorization
+
+### Running on a GCE VM
+
+If you're running from a GCE VM, your VM must have
+`https://www.googleapis.com/auth/userinfo.email` scope in order for it to
+reveal the correct user name to GKE. No straight forward way to add scopes to a
+VM once it's created. The easiest is to set the scope when creating the VM:
+
+```shell
+gcloud compute instances create \
+  [INSTANCE_NAME] \
+  --machine-type n1-standard-1 \
+  --scopes cloud-platform,userinfo-email
+```
+
+To check the scopes currently granted:
+```shell
+curl "https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=$(gcloud auth print-access-token)"
+```
+
+### Running as a service account
+
+By default, gcloud run from GCE VMs have credentials associated with the
+service account, rather than a user. We recommend configuring it to authorize
+as a user (see command above) to be consistent with the Marketplace end-user
+experience.
+
+If this is not an option (e.g. integration testing), see the following:
+
+By default, the Compute service account that the VM authorizes as does not have
+k8s engine admin privilege. You need to grant that role to the service account
+via the IAM Admin console.
