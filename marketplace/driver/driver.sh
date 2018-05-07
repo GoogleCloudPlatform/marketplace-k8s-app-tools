@@ -64,11 +64,11 @@ kubectl create namespace "$NAMESPACE"
 
 function delete_namespace() {
   echo "INFO Collecting events for namespace \"$NAMESPACE\""
-  kubectl get events --namespace=$NAMESPACE || echo "Failed to get events for namespace $NAMESPACE"
+  kubectl get events --namespace=$NAMESPACE || echo "ERROR Failed to get events for namespace $NAMESPACE"
 
   if [[ ! -z $deployer_name ]]; then
     echo "INFO Collecting logs for deployer"
-    kubectl logs "jobs/$deployer_name" --namespace="$NAMESPACE" || echo "Failed to get logs for deployet $deployer_name"
+    kubectl logs "jobs/$deployer_name" --namespace="$NAMESPACE" || echo "ERROR Failed to get logs for deployer $deployer_name"
   fi
   
   echo "INFO Deleting namespace \"$NAMESPACE\""
@@ -109,6 +109,15 @@ while true; do
   if [[ "$success" = "1" ]]; then
     echo "INFO Deployer job succeeded"
     break
+  fi
+
+  # Check if any pod is stuck due to errors
+  podState=$(kubectl get po --namespace="$NAMESPACE" -o=json | jq '.items[].status.containerStatuses[].state.waiting')
+  podStateReason=$(echo $podState | jq -r '.reason')
+
+  if [[ "$podStateReason" != "ContainerCreating" ]]; then
+    echo "$podState"
+    clean_and_exit "ERROR $podStateReason - $(echo $podState | jq -r '.message')"
   fi
 
   elapsed_time=$(( $(date +%s) - $start_time ))
