@@ -14,9 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set -x
-set -e
-set -o pipefail
+set -eo pipefail
 
 for i in "$@"
 do
