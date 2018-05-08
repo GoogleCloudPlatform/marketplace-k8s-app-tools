@@ -70,11 +70,13 @@ extract_manifest "$data_dir"
 if [[ "$mode" = "test" ]]; then
   test_data_dir="/data-test"
 
-  extract_manifest "$test_data_dir"
+  if [[ -e "$test_data_dir" ]]; then
+    extract_manifest "$test_data_dir"
 
-  overlay_test_files.py \
-    --manifest "$data_dir/extracted" \
-    --test_manifest "$test_data_dir/extracted"
+    overlay_test_files.py \
+      --manifest "$data_dir/extracted" \
+      --test_manifest "$test_data_dir/extracted"
+  fi 
 fi
 
 # Run helm expantion on the extracted files
