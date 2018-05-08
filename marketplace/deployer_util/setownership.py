@@ -21,59 +21,66 @@ from yaml_util import load_resources_yaml
 from yaml_util import docstart
 from argparse import ArgumentParser
 
-''' Scans the manifest folder kubernetes resources and set the Application to own
-    the ones defined in its list of components kinds '''
+_PROG_HELP = """
+Scans the manifest folder kubernetes resources and set the Application to own
+the ones defined in its list of components kinds.
+"""
+'''  '''
 
-parser = ArgumentParser()
+def main():
+  parser = ArgumentParser(description=_PROG_HELP)
 
-parser.add_argument("-n", "--appname", dest="appname",
-                    help="the name of the applictation instante")
-parser.add_argument("-i", "--appuid", dest="appuid",
-                    help="the uid of the applictation instante")
-parser.add_argument("-m", "--manifests", dest="manifests",
-                    help="the folder containing the manifest templates")
-parser.add_argument("-d", "--dest", dest="dest",
-                    help="the output file for the resulting manifest")
+  parser.add_argument("-n", "--appname", dest="appname",
+                      help="the name of the applictation instante")
+  parser.add_argument("-i", "--appuid", dest="appuid",
+                      help="the uid of the applictation instante")
+  parser.add_argument("-m", "--manifests", dest="manifests",
+                      help="the folder containing the manifest templates")
+  parser.add_argument("-d", "--dest", dest="dest",
+                      help="the output file for the resulting manifest")
 
-args = parser.parse_args()
+  args = parser.parse_args()
 
-resources = []
-for filename in os.listdir(args.manifests):
-  docs = load_resources_yaml(os.path.join(args.manifests, filename))
-  map(lambda doc: resources.append(doc), docs)
+  resources = []
+  for filename in os.listdir(args.manifests):
+    docs = load_resources_yaml(os.path.join(args.manifests, filename))
+    map(lambda doc: resources.append(doc), docs)
 
-apps = [ r for r in resources if r['kind'] == "Application" ]
+  apps = [ r for r in resources if r['kind'] == "Application" ]
 
-if len(apps) == 0:
-  raise Exception("Set of resources in {:s} does not include one of Application kind")
-if len(apps) > 1:
-  raise Exception("Set of resources in {:s} includes more than one of Application kind")
+  if len(apps) == 0:
+    raise Exception("Set of resources in {:s} does not include one of Application kind")
+  if len(apps) > 1:
+    raise Exception("Set of resources in {:s} includes more than one of Application kind")
 
-kinds = map(lambda x: x['kind'], apps[0]['spec']['componentKinds'])
+  kinds = map(lambda x: x['kind'], apps[0]['spec']['componentKinds'])
 
-excluded_kinds = [ "PersistentVolumeClaim", "Application" ]
-included_kinds = [ kind for kind in kinds if kind not in excluded_kinds ]
+  excluded_kinds = [ "PersistentVolumeClaim", "Application" ]
+  included_kinds = [ kind for kind in kinds if kind not in excluded_kinds ]
 
-print("Owner references not set for " + ", ".join(excluded_kinds))
+  print("Owner references not set for " + ", ".join(excluded_kinds))
 
-with open(args.dest, "w") as outfile:
-  for resource in resources:
-    if resource['kind'] in included_kinds:
-      print("Application '{:s}' owns '{:s}/{:s}'".format(
-        args.appname, resource['kind'], resource['metadata']['name']))
-      if 'metadata' not in resource:
-        resource['metadata'] = {}
-      if 'ownerReferences' not in resource['metadata']:
-        resource['metadata']['ownerReferences'] = []
+  with open(args.dest, "w") as outfile:
+    for resource in resources:
+      if resource['kind'] in included_kinds:
+        print("Application '{:s}' owns '{:s}/{:s}'".format(
+          args.appname, resource['kind'], resource['metadata']['name']))
+        if 'metadata' not in resource:
+          resource['metadata'] = {}
+        if 'ownerReferences' not in resource['metadata']:
+          resource['metadata']['ownerReferences'] = []
 
-      ownerReference = {}
-      ownerReference['apiVersion'] = "extensions/v1beta1"
-      ownerReference['kind'] = "Application"
-      ownerReference['controller'] = True # TODO(ruela) Check why we need this
-      ownerReference['blockOwnerDeletion'] = True # TODO(ruela) Check why we need this
-      ownerReference['name'] = args.appname
-      ownerReference['uid'] = args.appuid
-      resource['metadata']['ownerReferences'].append(ownerReference)
+        ownerReference = {}
+        ownerReference['apiVersion'] = "app.k8s.io/v1alpha1"
+        ownerReference['kind'] = "Application"
+        ownerReference['controller'] = True # TODO(ruela) Check why we need this
+        ownerReference['blockOwnerDeletion'] = True # TODO(ruela) Check why we need this
+        ownerReference['name'] = args.appname
+        ownerReference['uid'] = args.appuid
+        resource['metadata']['ownerReferences'].append(ownerReference)
 
-    outfile.write(docstart)
-    yaml.dump(resource, outfile, default_flow_style=False)
+      outfile.write(docstart)
+      yaml.dump(resource, outfile, default_flow_style=False)
+
+if __name__ == "__main__":
+  main()

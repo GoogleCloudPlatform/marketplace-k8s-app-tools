@@ -84,7 +84,7 @@ metadata:
   labels:
     app.kubernetes.io/name: "${name}"
   ownerReferences:
-  - apiVersion: "v1alpha"
+  - apiVersion: "app.k8s.io/v1alpha1"
     kind: "Application"
     name: "${name}"
     uid: "${application_uid}"
@@ -98,7 +98,7 @@ metadata:
   labels:
     app.kubernetes.io/name: "${name}"
   ownerReferences:
-  - apiVersion: "v1alpha"
+  - apiVersion: "app.k8s.io/v1alpha1"
     kind: "Application"
     name: "${name}"
     uid: "${application_uid}"
@@ -125,7 +125,7 @@ metadata:
     app.kubernetes.io/name: "${name}"
   namespace: "${namespace}"
   ownerReferences:
-  - apiVersion: "v1alpha"
+  - apiVersion: "app.k8s.io/v1alpha1"
     kind: "Application"
     name: "${name}"
     uid: "${application_uid}"
@@ -141,7 +141,7 @@ metadata:
   labels:
     app.kubernetes.io/name: "${name}"
   ownerReferences:
-  - apiVersion: "v1alpha"
+  - apiVersion: "app.k8s.io/v1alpha1"
     kind: "Application"
     name: "${name}"
     uid: "${application_uid}"
