@@ -14,8 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set -e
-set -o pipefail
+set -eo pipefail
 
 for i in "$@"
 do
@@ -112,12 +111,10 @@ while true; do
   fi
 
   # Check if any pod is stuck due to errors
-  podState=$(kubectl get po --namespace="$NAMESPACE" -o=json | jq '.items[].status.containerStatuses[].state.waiting')
-  podStateReason=$(echo $podState | jq -r '.reason')
+  podErrorState=$(kubectl get po --namespace="$NAMESPACE" -o=json | jq '.items[].status.containerStatuses[].state.waiting | select(. != null) | select(.reason != "ContainerCreating")' | jq -s '.[0]')
 
-  if [[ "$podStateReason" != "ContainerCreating" ]]; then
-    echo "$podState"
-    clean_and_exit "ERROR $podStateReason - $(echo $podState | jq -r '.message')"
+  if [[ "$podErrorState" != "null" ]]; then
+    clean_and_exit "ERROR $podState"
   fi
 
   elapsed_time=$(( $(date +%s) - $start_time ))
@@ -128,6 +125,10 @@ while true; do
 
   sleep "$poll_interval"
 done
+
+# Get the logs from the deployer before deleting the application. Set deployer name to empty so clean up doesn't try to get its logs again.
+kubectl logs "jobs/$deployer_name" --namespace="$NAMESPACE" || echo "ERROR Failed to get logs for deployer $deployer_name"
+deployer_name=""
 
 echo "INFO Stop the application"
 $marketplace_tools/scripts/stop.sh \
