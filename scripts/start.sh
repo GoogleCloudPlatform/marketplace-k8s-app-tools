@@ -161,4 +161,5 @@ spec:
       - name: config-volume
         configMap:
           name: "${name}-deployer-config"
+  backoffLimit: 0
 EOF

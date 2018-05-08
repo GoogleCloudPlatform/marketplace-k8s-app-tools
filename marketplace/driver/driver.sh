@@ -103,18 +103,16 @@ deployer_name="${APP_INSTANCE_NAME}-deployer"
 start_time=$(date +%s)
 poll_interval=4
 while true; do
-  success=$(kubectl get "jobs/$deployer_name" --namespace="$NAMESPACE" -o=json | jq '.status.succeeded' || echo "0")
-
-  if [[ "$success" = "1" ]]; then
-    echo "INFO Deployer job succeeded"
-    break
+  deployer_status=$(kubectl get "jobs/$deployer_name" --namespace="$NAMESPACE" -o=json | jq '.status' || echo "{}")
+  failure=$(echo $deployer_status | jq '.failed')
+  if [[ "$failure" -gt "0" ]]; then
+    clean_and_exit "ERROR Deployer failed"
   fi
 
-  # Check if any pod is stuck due to errors
-  podErrorState=$(kubectl get po --namespace="$NAMESPACE" -o=json | jq '.items[].status.containerStatuses[].state.waiting | select(. != null) | select(.reason != "ContainerCreating")' | jq -s '.[0]')
-
-  if [[ "$podErrorState" != "null" ]]; then
-    clean_and_exit "ERROR $podState"
+  success=$(echo $deployer_status | jq '.succeeded')
+  if [[ "$success" -gt "0" ]]; then
+    echo "INFO Deployer job succeeded"
+    break
   fi
 
   elapsed_time=$(( $(date +%s) - $start_time ))
