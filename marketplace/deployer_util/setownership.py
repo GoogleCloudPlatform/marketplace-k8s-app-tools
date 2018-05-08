@@ -25,7 +25,6 @@ _PROG_HELP = """
 Scans the manifest folder kubernetes resources and set the Application to own
 the ones defined in its list of components kinds.
 """
-'''  '''
 
 def main():
   parser = ArgumentParser(description=_PROG_HELP)
