@@ -39,6 +39,11 @@ properties:
   propertyNumberWithDefault:
     type: number
     default: 1.0
+  propertyBoolean:
+    type: boolean
+  propertyBooleanWithDefault:
+    type: boolean
+    default: false
   propertyPassword:
     type: string
     x-google-marketplace:
@@ -78,6 +83,8 @@ class ConfigHelperTest(unittest.TestCase):
          'propertyIntegerWithDefault',
          'propertyNumber',
          'propertyNumberWithDefault',
+         'propertyBoolean',
+         'propertyBooleanWithDefault',
          'propertyPassword'},
         set(schema.properties))
     self.assertEqual(str,
@@ -106,6 +113,13 @@ class ConfigHelperTest(unittest.TestCase):
                      schema.properties['propertyNumberWithDefault'].type)
     self.assertEqual(1.0,
                      schema.properties['propertyNumberWithDefault'].default)
+    self.assertEqual(bool,
+                     schema.properties['propertyBoolean'].type)
+    self.assertIsNone(schema.properties['propertyBoolean'].default)
+    self.assertEqual(bool,
+                     schema.properties['propertyBooleanWithDefault'].type)
+    self.assertEqual(False,
+                     schema.properties['propertyBooleanWithDefault'].default)
     self.assertEqual(str, schema.properties['propertyPassword'].type)
     self.assertIsNone(schema.properties['propertyPassword'].default)
     self.assertEqual('GENERATED_PASSWORD',
@@ -197,6 +211,17 @@ class ConfigHelperTest(unittest.TestCase):
          'x-google-marketplace': {
            'type': 'GENERATED_PASSWORD'
          }}))
+
+  def test_defaults_bad_type(self):
+    self.assertRaises(
+        config_helper.InvalidSchema,
+        lambda: config_helper.Schema.load_yaml(
+            """
+            properties:
+              p1:
+                type: string
+                default: 10
+            """))
 
 
 if __name__ == 'main':

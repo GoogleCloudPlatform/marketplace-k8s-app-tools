@@ -100,6 +100,7 @@ class SchemaProperty:
                   'integer': int,
                   'string': str,
                   'number': float,
+                  'boolean': bool,
                   }.get(dictionary['type'], None)
     if not self._type:
       raise InvalidSchema('Property {} has unsupported type: {}'.format(
