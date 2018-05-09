@@ -72,8 +72,8 @@ def main():
         ownerReference = {}
         ownerReference['apiVersion'] = "app.k8s.io/v1alpha1"
         ownerReference['kind'] = "Application"
-        ownerReference['controller'] = True # TODO(ruela) Check why we need this
-        ownerReference['blockOwnerDeletion'] = True # TODO(ruela) Check why we need this
+        ownerReference['controller'] = True
+        ownerReference['blockOwnerDeletion'] = True
         ownerReference['name'] = args.appname
         ownerReference['uid'] = args.appuid
         resource['metadata']['ownerReferences'].append(ownerReference)
