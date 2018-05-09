@@ -43,6 +43,15 @@ ifneq ($(shell [ -e "$(APP_BUILD)/registry_prefix" ] && cat "$(APP_BUILD)/regist
 	@echo "$(APP_REGISTRY)" > "$(APP_BUILD)/registry_prefix"
 endif
 
+# TAG changes.
+$(APP_BUILD)/tag: $(APP_BUILD)/tag_phony ;
+.PHONY: $(APP_BUILD)/tag_phony
+$(APP_BUILD)/tag_phony: | $(APP_BUILD)
+ifneq ($(shell [ -e "$(APP_BUILD)/tag" ] && cat "$(APP_BUILD)/tag" || echo ""),$(APP_TAG))
+	$(info APP_TAG changed to $(APP_TAG))
+	@echo "$(APP_TAG)" > "$(APP_BUILD)/tag"
+endif
+
 # Builds the application containers and push them to the registry.
 # Including Makefile can extend this target. This target is
 # a prerequisite for install.
