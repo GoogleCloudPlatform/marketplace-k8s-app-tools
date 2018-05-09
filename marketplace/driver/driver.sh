@@ -115,13 +115,6 @@ while true; do
     break
   fi
 
-  # Check if any pod is stuck due to errors
-  podErrorState=$(kubectl get po --namespace="$NAMESPACE" -o=json | jq '.items[].status.containerStatuses[].state.waiting | select(. != null) | select(.reason != "ContainerCreating")' | jq -s '.[0]')
-
-  if [[ "$podErrorState" != "null" ]]; then
-    clean_and_exit "ERROR $podState"
-  fi
-
   elapsed_time=$(( $(date +%s) - $start_time ))
   echo -ne "Elapsed ${elapsed_time}s\r"
   if [[ "$elapsed_time" -gt "$wait_timeout" ]]; then
