@@ -172,6 +172,25 @@ class ConfigHelperTest(unittest.TestCase):
         """)
     self.assertEqual(5.2, schema.properties['pn'].str_to_type('5.2'))
 
+  def test_boolean_type(self):
+    schema = config_helper.Schema.load_yaml(
+        """
+        properties:
+          pb:
+            type: boolean
+        """)
+    self.assertEqual(True, schema.properties['pb'].str_to_type('true'))
+    self.assertEqual(True, schema.properties['pb'].str_to_type('True'))
+    self.assertEqual(True, schema.properties['pb'].str_to_type('yes'))
+    self.assertEqual(True, schema.properties['pb'].str_to_type('Yes'))
+    self.assertEqual(False, schema.properties['pb'].str_to_type('false'))
+    self.assertEqual(False, schema.properties['pb'].str_to_type('False'))
+    self.assertEqual(False, schema.properties['pb'].str_to_type('no'))
+    self.assertEqual(False, schema.properties['pb'].str_to_type('No'))
+    self.assertRaises(
+        config_helper.InvalidValue,
+        lambda: schema.properties['pb'].str_to_type('bad'))
+
   def test_invalid_default_type(self):
     self.assertRaises(
         config_helper.InvalidSchema,
