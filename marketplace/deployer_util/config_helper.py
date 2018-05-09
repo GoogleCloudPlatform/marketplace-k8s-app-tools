@@ -31,6 +31,10 @@ class InvalidName(Exception):
   pass
 
 
+class InvalidValue(Exception):
+  pass
+
+
 class InvalidSchema(Exception):
   pass
 
@@ -100,6 +104,7 @@ class SchemaProperty:
                   'integer': int,
                   'string': str,
                   'number': float,
+                  'boolean': bool,
                   }.get(dictionary['type'], None)
     if not self._type:
       raise InvalidSchema('Property {} has unsupported type: {}'.format(
@@ -148,6 +153,14 @@ class SchemaProperty:
     return self._password
 
   def str_to_type(self, str_val):
+    if self._type == bool:
+      if str_val in {'true', 'True', 'yes', 'Yes'}:
+        return True
+      elif str_val in {'false', 'False', 'no', 'No'}:
+        return False
+      else:
+        raise InvalidValue('Bad value for boolean property {}: {}'.format(
+            self._name, str_val))
     return self._type(str_val)
 
   def matches_definition(self, definition):
