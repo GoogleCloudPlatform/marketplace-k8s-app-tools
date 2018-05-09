@@ -64,6 +64,7 @@ spec:
   - kind: ServiceAccount
   - kind: RoleBinding
   - kind: Job
+  assemblyPhase: "Pending"
 EOF
 
 # Fetch the server assigned uid for owner reference assignment.
