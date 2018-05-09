@@ -51,6 +51,8 @@ def main():
   values = config_helper.read_values_to_dict(args.values_dir,
                                              args.encoding,
                                              schema)
+  # Convert values to strings to pass to subprocess.
+  values = {k: str(v) for k, v in values.iteritems()}
 
   # Default env vars should NOT be passed on to the new environment.
   default_vars = [v.split('=')[0]

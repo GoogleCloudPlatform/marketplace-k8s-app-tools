@@ -14,9 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set -x
-set -e
-set -o pipefail
+set -eo pipefail
 
 for i in "$@"
 do
@@ -84,7 +82,7 @@ metadata:
   labels:
     app.kubernetes.io/name: "${name}"
   ownerReferences:
-  - apiVersion: "v1alpha"
+  - apiVersion: "app.k8s.io/v1alpha1"
     kind: "Application"
     name: "${name}"
     uid: "${application_uid}"
@@ -98,7 +96,7 @@ metadata:
   labels:
     app.kubernetes.io/name: "${name}"
   ownerReferences:
-  - apiVersion: "v1alpha"
+  - apiVersion: "app.k8s.io/v1alpha1"
     kind: "Application"
     name: "${name}"
     uid: "${application_uid}"
@@ -125,7 +123,7 @@ metadata:
     app.kubernetes.io/name: "${name}"
   namespace: "${namespace}"
   ownerReferences:
-  - apiVersion: "v1alpha"
+  - apiVersion: "app.k8s.io/v1alpha1"
     kind: "Application"
     name: "${name}"
     uid: "${application_uid}"
@@ -141,7 +139,7 @@ metadata:
   labels:
     app.kubernetes.io/name: "${name}"
   ownerReferences:
-  - apiVersion: "v1alpha"
+  - apiVersion: "app.k8s.io/v1alpha1"
     kind: "Application"
     name: "${name}"
     uid: "${application_uid}"
@@ -163,4 +161,5 @@ spec:
       - name: config-volume
         configMap:
           name: "${name}-deployer-config"
+  backoffLimit: 0
 EOF
