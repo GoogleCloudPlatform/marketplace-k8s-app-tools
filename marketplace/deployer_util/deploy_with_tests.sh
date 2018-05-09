@@ -35,7 +35,7 @@ application_uid=$(kubectl get "applications/$APP_INSTANCE_NAME" \
 
 create_manifests.sh --application_uid="$application_uid" --mode="test"
 
-if [[ -z "/data-test" ]]; then
+if [[ -e "/data-test" ]]; then
   separate_tester_jobs.py \
     --manifest "/data/resources.yaml" \
     --test_config "/data-test/config.yaml" \

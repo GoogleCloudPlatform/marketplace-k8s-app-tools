@@ -69,7 +69,6 @@ extract_manifest "$data_dir"
 # Overwrite the templates using the test templates
 if [[ "$mode" = "test" ]]; then
   test_data_dir="/data-test"
-
   if [[ -e "$test_data_dir" ]]; then
     extract_manifest "$test_data_dir"
 
