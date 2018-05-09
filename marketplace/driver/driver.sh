@@ -103,9 +103,14 @@ deployer_name="${APP_INSTANCE_NAME}-deployer"
 start_time=$(date +%s)
 poll_interval=4
 while true; do
-  success=$(kubectl get "jobs/$deployer_name" --namespace="$NAMESPACE" -o=json | jq '.status.succeeded' || echo "0")
+  deployer_status=$(kubectl get "jobs/$deployer_name" --namespace="$NAMESPACE" -o=json | jq '.status' || echo "{}")
+  failure=$(echo $deployer_status | jq '.failed')
+  if [[ "$failure" -gt "0" ]]; then
+    clean_and_exit "ERROR Deployer failed"
+  fi
 
-  if [[ "$success" = "1" ]]; then
+  success=$(echo $deployer_status | jq '.succeeded')
+  if [[ "$success" -gt "0" ]]; then
     echo "INFO Deployer job succeeded"
     break
   fi

@@ -49,7 +49,7 @@ post_success_status.sh
 
 function print_and_fail() {
   message=$1
-  echo message
+  echo "$message"
   exit 1
 }
 
