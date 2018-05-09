@@ -15,6 +15,7 @@
 # limitations under the License.
 
 import yaml
+import os.path
 
 from argparse import ArgumentParser
 from yaml_util import overlay_yaml_file
@@ -28,6 +29,10 @@ def main():
   parser.add_argument('--dest',
                       help='Destination schema file')
   args = parser.parse_args()
+
+  if not os.path.isfile(args.orig):
+    print("No test schema.yaml defined")
+    return
 
   orig = load_yaml(args.orig)
 
