@@ -46,6 +46,15 @@ done
 name=$(echo "$parameters" | jq -r '.NAME')
 namespace=$(echo "$parameters" | jq -r '.NAMESPACE')
 
+# Fall back to extracting name from APP_INSTANCE_NAME. We should remove
+# this line once dependent repositories have been updated.
+if [[ "$name" = "null" ]]; then
+  echo "=========================================================================="
+  echo "Please pass NAME instead of APP_INSTANCE_NAME in --parameters to start.sh."
+  echo "=========================================================================="
+  name=$(echo "$parameters" | jq -r '.APP_INSTANCE_NAME')
+fi
+
 # Create Application instance.
 kubectl apply --namespace="$namespace" --filename=- <<EOF
 apiVersion: app.k8s.io/v1alpha1
@@ -153,6 +162,11 @@ spec:
       - name: deployer
         image: "${deployer}"
         imagePullPolicy: Always
+        env:
+        - name: NAME
+          value: ${name}
+        - name: NAMESPACE
+          value: ${namespace}
         volumeMounts:
         - name: config-volume
           mountPath: /data/values

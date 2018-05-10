@@ -11,6 +11,9 @@ APP_TAG ?= latest
 
 ifdef APP_NAME
   NAME ?= $(APP_NAME)-1
+  # Some utilities fall back to extracting name from APP_INSTANCE_NAME. We
+  # should remove this line once dependent repositories have been updated.
+  APP_INSTANCE_NAME ?= $(NAME)
 
   ifdef REGISTRY
     APP_REGISTRY ?= $(REGISTRY)/$(APP_NAME)

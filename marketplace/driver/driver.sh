@@ -58,6 +58,15 @@ echo $DIR
 NAMESPACE="apptest-$(uuidgen)"
 NAME="$(echo $parameters | jq -r '.NAME')"
 
+# Fall back to extracting name from APP_INSTANCE_NAME. We should remove
+# this line once dependent repositories have been updated.
+if [[ "$NAME" = "null" ]]; then
+  echo "==========================================================================="
+  echo "Please pass NAME instead of APP_INSTANCE_NAME in --parameters to driver.sh."
+  echo "==========================================================================="
+  NAME=$(echo "$parameters" | jq -r '.APP_INSTANCE_NAME')
+fi
+
 echo "INFO Creates namespace \"$NAMESPACE\""
 kubectl create namespace "$NAMESPACE"
 
