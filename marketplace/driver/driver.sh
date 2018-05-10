@@ -14,8 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set -e
-set -o pipefail
+set -eo pipefail
 
 for i in "$@"
 do
@@ -64,7 +63,13 @@ kubectl create namespace "$NAMESPACE"
 
 function delete_namespace() {
   echo "INFO Collecting events for namespace \"$NAMESPACE\""
-  kubectl get events --namespace=$NAMESPACE
+  kubectl get events --namespace=$NAMESPACE || echo "ERROR Failed to get events for namespace $NAMESPACE"
+
+  if [[ ! -z $deployer_name ]]; then
+    echo "INFO Collecting logs for deployer"
+    kubectl logs "jobs/$deployer_name" --namespace="$NAMESPACE" || echo "ERROR Failed to get logs for deployer $deployer_name"
+  fi
+  
   echo "INFO Deleting namespace \"$NAMESPACE\""
   kubectl delete namespace $NAMESPACE
 }
@@ -98,9 +103,14 @@ deployer_name="${APP_INSTANCE_NAME}-deployer"
 start_time=$(date +%s)
 poll_interval=4
 while true; do
-  success=$(kubectl get "jobs/$deployer_name" --namespace="$NAMESPACE" -o=json | jq '.status.succeeded' || echo "0")
+  deployer_status=$(kubectl get "jobs/$deployer_name" --namespace="$NAMESPACE" -o=json | jq '.status' || echo "{}")
+  failure=$(echo $deployer_status | jq '.failed')
+  if [[ "$failure" -gt "0" ]]; then
+    clean_and_exit "ERROR Deployer failed"
+  fi
 
-  if [[ "$success" = "1" ]]; then
+  success=$(echo $deployer_status | jq '.succeeded')
+  if [[ "$success" -gt "0" ]]; then
     echo "INFO Deployer job succeeded"
     break
   fi
@@ -113,6 +123,10 @@ while true; do
 
   sleep "$poll_interval"
 done
+
+# Get the logs from the deployer before deleting the application. Set deployer name to empty so clean up doesn't try to get its logs again.
+kubectl logs "jobs/$deployer_name" --namespace="$NAMESPACE" || echo "ERROR Failed to get logs for deployer $deployer_name"
+deployer_name=""
 
 echo "INFO Stop the application"
 $marketplace_tools/scripts/stop.sh \

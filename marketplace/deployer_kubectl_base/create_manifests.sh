@@ -48,7 +48,9 @@ mkdir "$manifest_dir"
 
 # Overwrite the templates using the test templates
 if [[ "$mode" = "test" ]]; then
-  cp -RT "/data-test" "/data"
+  if [[ -e "/data-test" ]]; then
+    cp -RT "/data-test" "/data"
+  fi
 fi
 
 # Replace the environment variables placeholders from the manifest templates
