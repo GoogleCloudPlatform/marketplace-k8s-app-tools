@@ -89,7 +89,7 @@ app/uninstall: | app/setup
 
 # Runs the verification pipeline.
 .PHONY: app/verify
-app/verify: app/build | app/setup
+app/verify: app/build app/build-test | app/setup
 	$(MARKETPLACE_TOOLS_PATH)/marketplace/driver/driver.sh \
 	    --deployer='$(APP_DEPLOYER_IMAGE)' \
 	    --marketplace_tools='$(MARKETPLACE_TOOLS_PATH)' \
