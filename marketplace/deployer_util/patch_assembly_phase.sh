@@ -43,7 +43,10 @@ NAMESPACE="$(/bin/print_config.py --param '{"x-google-marketplace": {"type": "NA
 
 echo "Marking deployment of application \"$APP_INSTANCE_NAME\" as \"$status\"."
 
+# --output=json is used to force kubectl to succeed even if the patch command
+# makes not change to the resource. Otherwise, this command exits 1.
 kubectl patch "applications/$APP_INSTANCE_NAME" \
+  --output=json \
   --namespace="$NAMESPACE" \
   --type=merge \
   --patch "{\"spec\": {\"assemblyPhase\": \"$status\"}}"
