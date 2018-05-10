@@ -28,9 +28,9 @@ class YamlUtilTest(unittest.TestCase):
 apiVersion: apps/v1beta2
 kind: Deployment
 metadata:
-  name: $APP_INSTANCE_NAME-mysql
+  name: $NAME-mysql
   labels: &MysqlDeploymentLabels
-    app.kubernetes.io/name: "$APP_INSTANCE_NAME"
+    app.kubernetes.io/name: "$NAME"
     app.kubernetes.io/component: wordpress-mysql
 spec:
   replicas: 1
@@ -53,7 +53,7 @@ spec:
       volumes:
       - name: data
         persistentVolumeClaim:
-          claimName: $APP_INSTANCE_NAME-mysql-pvc"""
+          claimName: $NAME-mysql-pvc"""
 
     docs = parse_resources_yaml(content)
     self.assertEqual(len(docs), 1)
@@ -69,9 +69,9 @@ spec:
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
-  name: $APP_INSTANCE_NAME-mysql-pvc
+  name: $NAME-mysql-pvc
   labels:
-    app.kubernetes.io/name: "$APP_INSTANCE_NAME"
+    app.kubernetes.io/name: "$NAME"
     app.kubernetes.io/component: wordpress-mysql
 spec:
   accessModes: [ReadWriteOnce]
@@ -86,15 +86,15 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: $APP_INSTANCE_NAME-mysql-svc
+  name: $NAME-mysql-svc
   labels:
-    app.kubernetes.io/name: "$APP_INSTANCE_NAME"
+    app.kubernetes.io/name: "$NAME"
     app.kubernetes.io/component: wordpress-mysql
 spec:
   ports:
   - port: 3306
   selector:
-    app.kubernetes.io/name: $APP_INSTANCE_NAME
+    app.kubernetes.io/name: $NAME
     app.kubernetes.io/component: wordpress-mysql
   clusterIP: None
 ---

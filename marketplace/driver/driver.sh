@@ -56,7 +56,7 @@ DIR="$(realpath $(dirname $0))"
 echo $DIR
 
 NAMESPACE="apptest-$(uuidgen)"
-APP_INSTANCE_NAME="$(echo $parameters | jq -r '.APP_INSTANCE_NAME')"
+NAME="$(echo $parameters | jq -r '.NAME')"
 
 echo "INFO Creates namespace \"$NAMESPACE\""
 kubectl create namespace "$NAMESPACE"
@@ -98,7 +98,7 @@ $marketplace_tools/scripts/start_test.sh \
   || clean_and_exit "ERROR Failed to start deployer"
 
 echo "INFO wait for the deployer to succeed"
-deployer_name="${APP_INSTANCE_NAME}-deployer"
+deployer_name="${NAME}-deployer"
 
 start_time=$(date +%s)
 poll_interval=4
@@ -130,7 +130,7 @@ deployer_name=""
 
 echo "INFO Stop the application"
 $marketplace_tools/scripts/stop.sh \
-  --name=$APP_INSTANCE_NAME \
+  --name=$NAME \
   --namespace=$NAMESPACE \
   || clean_and_exit "ERROR Failed to stop application"
 

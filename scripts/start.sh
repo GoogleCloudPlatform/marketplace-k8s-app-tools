@@ -42,8 +42,8 @@ done
 [[ -z "$parameters" ]] && >&2 echo "--parameters required" && exit 1
 [[ -z "$entrypoint" ]] && entrypoint="/bin/deploy.sh"
 
-# Extract APP_INSTANCE_NAME and NAMESPACE from parameters.
-name=$(echo "$parameters" | jq -r '.APP_INSTANCE_NAME')
+# Extract NAME and NAMESPACE from parameters.
+name=$(echo "$parameters" | jq -r '.NAME')
 namespace=$(echo "$parameters" | jq -r '.NAMESPACE')
 
 # Create Application instance.

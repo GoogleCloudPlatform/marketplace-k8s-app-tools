@@ -10,7 +10,7 @@ include $(makefile_dir)/base_containers.Makefile
 APP_TAG ?= latest
 
 ifdef APP_NAME
-  APP_INSTANCE_NAME ?= $(APP_NAME)-1
+  NAME ?= $(APP_NAME)-1
 
   ifdef REGISTRY
     APP_REGISTRY ?= $(REGISTRY)/$(APP_NAME)
@@ -19,7 +19,7 @@ ifdef APP_NAME
 endif
 
 ifndef APP_PARAMETERS
-  APP_PARAMETERS = {"APP_INSTANCE_NAME": "$(APP_INSTANCE_NAME)", "NAMESPACE": "$(NAMESPACE)"}
+  APP_PARAMETERS = {"NAME": "$(NAME)", "NAMESPACE": "$(NAMESPACE)"}
 endif
 
 ifndef TEST_PARAMETERS
@@ -84,7 +84,7 @@ app/install-test: app/build-test | app/setup
 .PHONY: app/uninstall
 app/uninstall: | app/setup
 	$(MARKETPLACE_TOOLS_PATH)/scripts/stop.sh \
-	    --name='$(APP_INSTANCE_NAME)' \
+	    --name='$(NAME)' \
 	    --namespace='$(NAMESPACE)'
 
 # Runs the verification pipeline.
@@ -101,13 +101,13 @@ app/verify: app/build app/build-test | app/setup
 .PHONY: app/watch
 app/watch: | app/setup
 	$(MARKETPLACE_TOOLS_PATH)/scripts/watch.sh \
-	    --name='$(APP_INSTANCE_NAME)' \
+	    --name='$(NAME)' \
 	    --namespace='$(NAMESPACE)'
 
 .PHONY: app/setup
 app/setup: | base/setup $(APP_BUILD)
-ifndef APP_INSTANCE_NAME
-	$(error Must define APP_INSTANCE_NAME)
+ifndef NAME
+	$(error Must define NAME)
 endif
 ifndef NAMESPACE
 	$(error Must define NAMESPACE)
@@ -122,7 +122,7 @@ endif
 ifndef APP_PARAMETERS
 	$(error Must define APP_PARAMETERS)
 endif
-	$(info ---- APP_INSTANCE_NAME  = $(APP_INSTANCE_NAME))
+	$(info ---- NAME  = $(NAME))
 	$(info ---- NAMESPACE          = $(NAMESPACE))
 	$(info ---- APP_DEPLOYER_IMAGE = $(APP_DEPLOYER_IMAGE))
 	$(info ---- APP_REGISTRY       = $(APP_REGISTRY))
