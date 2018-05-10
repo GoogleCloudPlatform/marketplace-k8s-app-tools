@@ -43,7 +43,7 @@ separate_tester_jobs.py \
 # Apply the manifest.
 kubectl apply --namespace="$NAMESPACE" --filename="/data/resources.yaml"
 
-post_success_status.sh
+patch_assembly_phase.sh --status="Success"
 
 function print_and_fail() {
   message=$1
