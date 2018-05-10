@@ -18,6 +18,16 @@ set -eox pipefail
 
 # This is the entry point for the production deployment
 
+# If any command returns with non-zero exit code, set -e will cause the script
+# to exit. Prior to exit, set App assembly status to "Failed".
+handle_failure() {
+  code=$?
+  patch_assembly_phase.sh --status="Failed"
+  exit $code
+}
+trap "handle_failure" EXIT
+
+
 /bin/expand_config.py
 APP_INSTANCE_NAME="$(/bin/print_config.py --param '{"x-google-marketplace": {"type": "NAME"}}')"
 NAMESPACE="$(/bin/print_config.py --param '{"x-google-marketplace": {"type": "NAMESPACE"}}')"
@@ -30,9 +40,16 @@ application_uid=$(kubectl get "applications/$APP_INSTANCE_NAME" \
 
 create_manifests.sh --application_uid="$application_uid"
 
+# Ensure assembly phase is "Pending", until successful kubectl apply.
+/bin/setassemblyphase.py \
+  --manifest "/data/resources.yaml" \
+  --status "Pending"
+
 # Apply the manifest.
 kubectl apply --namespace="$NAMESPACE" --filename="/data/resources.yaml"
 
-post_success_status.sh
+patch_assembly_phase.sh --status="Success"
 
 clean_iam_resources.sh
+
+trap - EXIT

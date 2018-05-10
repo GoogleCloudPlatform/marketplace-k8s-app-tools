@@ -21,15 +21,15 @@ from yaml_util import load_resources_yaml
 from yaml_util import docstart
 from argparse import ArgumentParser
 
-''' Scans the manifest folder kubernetes resources and set the Application to own
-    the ones defined in its list of components kinds '''
+''' Scans the manifest folder for kubernetes resources and set the Application
+    to own the ones defined in its list of components kinds '''
 
 parser = ArgumentParser()
 
 parser.add_argument("-n", "--appname", dest="appname",
-                    help="the name of the applictation instante")
+                    help="the name of the applictation instance")
 parser.add_argument("-i", "--appuid", dest="appuid",
-                    help="the uid of the applictation instante")
+                    help="the uid of the applictation instance")
 parser.add_argument("-m", "--manifests", dest="manifests",
                     help="the folder containing the manifest templates")
 parser.add_argument("-d", "--dest", dest="dest",
