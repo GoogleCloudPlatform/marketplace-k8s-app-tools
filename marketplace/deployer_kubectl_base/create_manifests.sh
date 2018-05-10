@@ -37,8 +37,6 @@ done
 [[ -z "application_uid" ]] && echo "application_uid required" && exit 1
 
 env_vars="$(/bin/print_config.py -o shell_vars)"
-NAME="$(/bin/print_config.py --param '{"x-google-marketplace": {"type": "NAME"}}')"
-NAMESPACE="$(/bin/print_config.py --param '{"x-google-marketplace": {"type": "NAMESPACE"}}')"
 
 echo "Creating the manifests for the kubernetes resources that build the application \"$NAME\""
 
