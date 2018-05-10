@@ -28,12 +28,11 @@ parser = ArgumentParser()
 parser.add_argument("-m", "--manifest", dest="manifest",
                     help="the manifest file")
 parser.add_argument("-s", "--status", dest="status",
+                    choices=['Failure', 'Pending', 'Success'],
                     help="the assembly status to set")
 
 args = parser.parse_args()
 
-assert args.status
-assert args.status in ['Failure', 'Pending', 'Success']
 assert args.manifest
 assert os.path.exists(args.manifest)
 
