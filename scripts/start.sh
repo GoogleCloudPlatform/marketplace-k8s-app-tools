@@ -46,9 +46,28 @@ done
 [[ -z "$parameters" ]] && >&2 echo "--parameters required" && exit 1
 [[ -z "$entrypoint" ]] && entrypoint="/bin/deploy.sh"
 
+# Extract the config schema from the deployer.
+schema="$(docker run --entrypoint="/bin/bash" --rm -it "$deployer" -c 'cat /data/schema.yaml')"
+
+# Parse the config schema for the keys associated with NAME and NAMESPACE.
+name_key=$(echo "$schema" \
+  | "$marketplace_tools/scripts/yaml2json" \
+  | jq -r '.properties
+             | to_entries
+             | .[]
+             | select(.value."x-google-marketplace".type == "NAME")
+             | .key')
+namespace_key=$(echo "$schema" \
+  | "$marketplace_tools/scripts/yaml2json" \
+  | jq -r '.properties
+             | to_entries
+             | .[]
+             | select(.value."x-google-marketplace".type == "NAMESPACE")
+             | .key')
+
 # Extract NAME and NAMESPACE from parameters.
-name=$(echo "$parameters" | jq -r '.NAME')
-namespace=$(echo "$parameters" | jq -r '.NAMESPACE')
+name=$(echo "$parameters" | jq -r --arg key "$name_key" '.[$key]')
+namespace=$(echo "$parameters" | jq -r --arg key "$namespace_key" '.[$key]')
 
 # Fall back to extracting name from APP_INSTANCE_NAME. We should remove
 # this line once dependent repositories have been updated.
