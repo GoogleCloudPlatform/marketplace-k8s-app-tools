@@ -109,6 +109,8 @@ spec:
               type: string
             version:
               type: string
+            assemblyPhase:
+              type: string
           type: object
         status:
           properties:

@@ -21,7 +21,7 @@ set -eox pipefail
 overlay_test_schema.py \
   --orig "/data-test/schema.yaml" \
   --dest "/data/schema.yaml"
-rm /data-test/schema.yaml
+rm -f /data-test/schema.yaml
 
 /bin/expand_config.py
 APP_INSTANCE_NAME="$(/bin/print_config.py --param '{"x-google-marketplace": {"type": "NAME"}}')"
@@ -35,15 +35,17 @@ application_uid=$(kubectl get "applications/$APP_INSTANCE_NAME" \
 
 create_manifests.sh --application_uid="$application_uid" --mode="test"
 
-separate_tester_jobs.py \
-  --manifest "/data/resources.yaml" \
-  --test_config "/data-test/config.yaml" \
-  --tester_manifest "/data/tester.yaml"
+if [[ -e "/data-test" ]]; then
+  separate_tester_jobs.py \
+    --manifest "/data/resources.yaml" \
+    --test_config "/data-test/config.yaml" \
+    --tester_manifest "/data/tester.yaml"
+fi
 
 # Apply the manifest.
 kubectl apply --namespace="$NAMESPACE" --filename="/data/resources.yaml"
 
-post_success_status.sh
+patch_assembly_phase.sh --status="Success"
 
 function print_and_fail() {
   message=$1
@@ -59,29 +61,30 @@ timeout --foreground $wait_timeout wait_for_ready.sh $APP_INSTANCE_NAME $NAMESPA
   || print_and_fail "ERROR Application did not get ready before timeout"
 
 tester_manifest="/data/tester.yaml"
+if [[ -e "$tester_manifest" ]]; then
+  # Run test job.
+  kubectl apply --namespace="$NAMESPACE" --filename="$tester_manifest"
 
-# Run test job.
-kubectl apply --namespace="$NAMESPACE" --filename="$tester_manifest"
+  tester_name=$(cat "$tester_manifest" | yj tojson | jq -r '.metadata.name')
 
-tester_name=$(cat "$tester_manifest" | yj tojson | jq -r '.metadata.name')
+  start_time=$(date +%s)
+  poll_interval=4
+  tester_timeout=30
+  while true; do
+    success=$(kubectl get "jobs/$tester_name" --namespace="$NAMESPACE" -o=json | jq '.status.succeeded' || echo "0")
+    if [[ "$success" = "1" ]]; then
+      echo "INFO Tester job succeeded"
+      break
+    fi
 
-start_time=$(date +%s)
-poll_interval=4
-tester_timeout=30
-while true; do
-  success=$(kubectl get "jobs/$tester_name" --namespace="$NAMESPACE" -o=json | jq '.status.succeeded' || echo "0")
-  if [[ "$success" = "1" ]]; then
-    echo "INFO Tester job succeeded"
-    break
-  fi
+    elapsed_time=$(( $(date +%s) - $start_time ))
+    if [[ "$elapsed_time" -gt "$tester_timeout" ]]; then
+      echo "ERROR Tester job timeout"
+      exit 1
+    fi
 
-  elapsed_time=$(( $(date +%s) - $start_time ))
-  if [[ "$elapsed_time" -gt "$tester_timeout" ]]; then
-    echo "ERROR Tester job timeout"
-    exit 1
-  fi
-
-  sleep "$poll_interval"
-done
+    sleep "$poll_interval"
+  done
+fi
 
 clean_iam_resources.sh
