@@ -19,6 +19,10 @@ set -eo pipefail
 for i in "$@"
 do
 case $i in
+  --marketplace_tools=*)
+    marketplace_tools="${i#*=}"
+    shift
+    ;;
   --deployer=*)
     deployer="${i#*=}"
     shift
@@ -162,11 +166,6 @@ spec:
       - name: deployer
         image: "${deployer}"
         imagePullPolicy: Always
-        env:
-        - name: NAME
-          value: ${name}
-        - name: NAMESPACE
-          value: ${namespace}
         volumeMounts:
         - name: config-volume
           mountPath: /data/values
