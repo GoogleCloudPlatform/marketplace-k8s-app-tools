@@ -16,6 +16,7 @@
 
 import json
 import sys
+
 from argparse import ArgumentParser
 
 import yaml
@@ -108,7 +109,17 @@ def output_shell_vars(values):
 
 
 def output_yaml(values, encoding):
-  return yaml.safe_dump(values,
+  new_values = {}
+  for key, value in values.items():
+    current_new_values = new_values
+    while '.' in key:
+      key_prefix, key = key.split('.', 1)
+      if key_prefix not in current_new_values:
+        current_new_values[key_prefix] = {}
+      current_new_values = current_new_values[key_prefix]
+    current_new_values[key] = value
+
+  return yaml.safe_dump(new_values,
                         encoding=encoding,
                         default_flow_style=False,
                         indent=2)
