@@ -29,10 +29,17 @@ class PrintConfigTest(unittest.TestCase):
 
   def test_output_yaml(self):
     values = {'propertyInt': 1,
-              'propertyString': 'Value'}
-    yaml_out = print_config.output_yaml(values, 'utf_8')
-    actual = yaml.load(yaml_out)
-    self.assertEqual(values, actual)
+              'propertyString': 'Value',
+              'dotted.propertyInt': 2,
+              'dotted.propertyString': 'DottedValue'}
+    actual = print_config.output_yaml(values, 'utf_8')
+    expected = ['dotted:',
+                '  propertyInt: 2',
+                '  propertyString: DottedValue',
+                'propertyInt: 1',
+                'propertyString: Value',
+                '']
+    self.assertEquals(actual.split('\n'), expected)
 
   def test_output_param(self):
     values = {'propertyInt': 1,

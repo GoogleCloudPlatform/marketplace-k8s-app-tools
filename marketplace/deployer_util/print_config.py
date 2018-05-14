@@ -14,11 +14,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import collections
 import json
 import sys
+import yaml
+
 from argparse import ArgumentParser
 
-import yaml
 
 import config_helper
 
@@ -108,10 +110,22 @@ def output_shell_vars(values):
 
 
 def output_yaml(values, encoding):
-  return yaml.safe_dump(values,
+  new_values = {}
+  for key, value in values.items():
+    current_new_values = new_values
+    while '.' in key:
+      key_prefix, key = key.split('.', 1)
+      if key_prefix not in current_new_values:
+        current_new_values[key_prefix] = {}
+
+      current_new_values = current_new_values[key_prefix]
+    current_new_values[key] = value
+
+  return yaml.safe_dump(new_values,
                         encoding=encoding,
                         default_flow_style=False,
                         indent=2)
+
 
 
 if __name__ == "__main__":
