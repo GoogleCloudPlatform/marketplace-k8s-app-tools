@@ -11,9 +11,6 @@ APP_TAG ?= latest
 
 ifdef APP_NAME
   NAME ?= $(APP_NAME)-1
-  # Some utilities fall back to extracting name from APP_INSTANCE_NAME. We
-  # should remove this line once dependent repositories have been updated.
-  APP_INSTANCE_NAME ?= $(NAME)
 
   ifdef REGISTRY
     APP_REGISTRY ?= $(REGISTRY)/$(APP_NAME)
@@ -22,12 +19,10 @@ ifdef APP_NAME
 endif
 
 ifndef APP_PARAMETERS
-  APP_PARAMETERS = {"NAME": "$(NAME)", "NAMESPACE": "$(NAMESPACE)"}
+  $(error Application must define APP_PARAMETERS before including app.Makefile.)
 endif
 
-ifndef TEST_PARAMETERS
-  TEST_PARAMETERS = {}
-endif
+TEST_PARAMETERS ?= {}
 
 APP_BUILD = .build/marketplace-app
 

@@ -69,15 +69,6 @@ namespace_key=$(echo "$schema" \
 name=$(echo "$parameters" | jq -r --arg key "$name_key" '.[$key]')
 namespace=$(echo "$parameters" | jq -r --arg key "$namespace_key" '.[$key]')
 
-# Fall back to extracting name from APP_INSTANCE_NAME. We should remove
-# this line once dependent repositories have been updated.
-if [[ "$name" = "null" ]]; then
-  echo "=========================================================================="
-  echo "Please pass NAME instead of APP_INSTANCE_NAME in --parameters to start.sh."
-  echo "=========================================================================="
-  name=$(echo "$parameters" | jq -r '.APP_INSTANCE_NAME')
-fi
-
 # Create Application instance.
 kubectl apply --namespace="$namespace" --filename=- <<EOF
 apiVersion: app.k8s.io/v1alpha1

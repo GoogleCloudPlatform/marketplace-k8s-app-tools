@@ -55,32 +55,50 @@ done
 DIR="$(realpath $(dirname $0))"
 echo $DIR
 
-NAMESPACE="apptest-$(uuidgen)"
-NAME="$(echo $parameters | jq -r '.NAME')"
+# Extract the config schema from the deployer.
+schema="$(docker run --entrypoint="/bin/bash" --rm "$deployer" -c 'cat /data/schema.yaml')"
 
-# Fall back to extracting name from APP_INSTANCE_NAME. We should remove
-# this line once dependent repositories have been updated.
-if [[ "$NAME" = "null" ]]; then
-  echo "==========================================================================="
-  echo "Please pass NAME instead of APP_INSTANCE_NAME in --parameters to driver.sh."
-  echo "==========================================================================="
-  NAME=$(echo "$parameters" | jq -r '.APP_INSTANCE_NAME')
-fi
+# Parse the config schema for the keys associated with name and namespace.
+name_key=$(echo "$schema" \
+  | "$marketplace_tools/scripts/yaml2json" \
+  | jq -r '.properties
+             | to_entries
+             | .[]
+             | select(.value."x-google-marketplace".type == "NAME")
+             | .key')
+namespace_key=$(echo "$schema" \
+  | "$marketplace_tools/scripts/yaml2json" \
+  | jq -r '.properties
+             | to_entries
+             | .[]
+             | select(.value."x-google-marketplace".type == "NAMESPACE")
+             | .key')
 
-echo "INFO Creates namespace \"$NAMESPACE\""
-kubectl create namespace "$NAMESPACE"
+# Extract the name from parameters and generate a namespace.
+name=$(echo "$parameters" | jq -r --arg key "$name_key" '.[$key]')
+namespace="apptest-$(uuidgen)"
+
+# Update the NAMESPACE property in parameters with the generated value.
+parameters=$(echo "$parameters" \
+  | jq \
+      --arg namespace_key "$namespace_key" \
+      --arg namespace "$namespace" \
+      '.[$namespace_key] = $namespace')
+
+echo "INFO Creates namespace \"$namespace\""
+kubectl create namespace "$namespace"
 
 function delete_namespace() {
-  echo "INFO Collecting events for namespace \"$NAMESPACE\""
-  kubectl get events --namespace=$NAMESPACE || echo "ERROR Failed to get events for namespace $NAMESPACE"
+  echo "INFO Collecting events for namespace \"$namespace\""
+  kubectl get events --namespace=$namespace || echo "ERROR Failed to get events for namespace $namespace"
 
   if [[ ! -z $deployer_name ]]; then
     echo "INFO Collecting logs for deployer"
-    kubectl logs "jobs/$deployer_name" --namespace="$NAMESPACE" || echo "ERROR Failed to get logs for deployer $deployer_name"
+    kubectl logs "jobs/$deployer_name" --namespace="$namespace" || echo "ERROR Failed to get logs for deployer $deployer_name"
   fi
   
-  echo "INFO Deleting namespace \"$NAMESPACE\""
-  kubectl delete namespace $NAMESPACE
+  echo "INFO Deleting namespace \"$namespace\""
+  kubectl delete namespace "$namespace"
 }
 
 function clean_and_exit() {
@@ -94,8 +112,6 @@ function clean_and_exit() {
 echo "INFO Creates the Application CRD in the namespace"
 kubectl apply -f "$marketplace_tools/crd/app-crd.yaml"
 
-parameters=$(echo "$parameters" | jq ".NAMESPACE=\"$NAMESPACE\"")
-
 echo "INFO Parameters: $parameters"
 
 echo "INFO Initializes the deployer container which will deploy all the application components"
@@ -107,12 +123,12 @@ $marketplace_tools/scripts/start_test.sh \
   || clean_and_exit "ERROR Failed to start deployer"
 
 echo "INFO wait for the deployer to succeed"
-deployer_name="${NAME}-deployer"
+deployer_name="${name}-deployer"
 
-start_time=$(date +%s)
+start_time="$(date +%s)"
 poll_interval=4
 while true; do
-  deployer_status=$(kubectl get "jobs/$deployer_name" --namespace="$NAMESPACE" -o=json | jq '.status' || echo "{}")
+  deployer_status=$(kubectl get "jobs/$deployer_name" --namespace="$namespace" -o=json | jq '.status' || echo "{}")
   failure=$(echo $deployer_status | jq '.failed')
   if [[ "$failure" -gt "0" ]]; then
     clean_and_exit "ERROR Deployer failed"
@@ -134,26 +150,26 @@ while true; do
 done
 
 # Get the logs from the deployer before deleting the application. Set deployer name to empty so clean up doesn't try to get its logs again.
-kubectl logs "jobs/$deployer_name" --namespace="$NAMESPACE" || echo "ERROR Failed to get logs for deployer $deployer_name"
+kubectl logs "jobs/$deployer_name" --namespace="$namespace" || echo "ERROR Failed to get logs for deployer $deployer_name"
 deployer_name=""
 
 echo "INFO Stop the application"
 $marketplace_tools/scripts/stop.sh \
-  --name=$NAME \
-  --namespace=$NAMESPACE \
+  --name="$name" \
+  --namespace="$namespace" \
   || clean_and_exit "ERROR Failed to stop application"
 
 deletion_timeout=60
 echo "INFO Wait for the applications to be deleted"
-timeout --foreground $deletion_timeout "$DIR/wait_for_deletion.sh" "$NAMESPACE" applications \
+timeout --foreground $deletion_timeout "$DIR/wait_for_deletion.sh" "$namespace" applications \
   || clean_and_exit "ERROR Some applications where not deleted"
 
 echo "INFO Wait for standard resources were deleted."
-timeout --foreground $deletion_timeout "$DIR/wait_for_deletion.sh" "$NAMESPACE" all \
+timeout --foreground $deletion_timeout "$DIR/wait_for_deletion.sh" "$namespace" all \
   || clean_and_exit "ERROR Some resources where not deleted"
 
 echo "INFO Wait for service accounts to be deleted."
-timeout --foreground $deletion_timeout "$DIR/wait_for_deletion.sh" "$NAMESPACE" serviceaccounts,roles,rolebindings \
+timeout --foreground $deletion_timeout "$DIR/wait_for_deletion.sh" "$namespace" serviceaccounts,roles,rolebindings \
   || clean_and_exit "ERROR Some service accounts or roles where not deleted"
 
 delete_namespace
