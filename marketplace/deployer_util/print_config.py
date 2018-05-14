@@ -14,13 +14,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import collections
 import json
 import sys
-import yaml
 
 from argparse import ArgumentParser
 
+import yaml
 
 import config_helper
 
@@ -117,7 +116,6 @@ def output_yaml(values, encoding):
       key_prefix, key = key.split('.', 1)
       if key_prefix not in current_new_values:
         current_new_values[key_prefix] = {}
-
       current_new_values = current_new_values[key_prefix]
     current_new_values[key] = value
 
@@ -125,7 +123,6 @@ def output_yaml(values, encoding):
                         encoding=encoding,
                         default_flow_style=False,
                         indent=2)
-
 
 
 if __name__ == "__main__":

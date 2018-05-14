@@ -29,17 +29,30 @@ class PrintConfigTest(unittest.TestCase):
 
   def test_output_yaml(self):
     values = {'propertyInt': 1,
-              'propertyString': 'Value',
+              'propertyString': 'unnested',
               'dotted.propertyInt': 2,
-              'dotted.propertyString': 'DottedValue'}
+              'dotted.propertyString': 'nested_1',
+              'double.propertyInt': 3,
+              'double.propertyString': 'nested_2',
+              'double.dotted.propertyInt': 4,
+              'double.dotted.propertyString': 'double_nested_1'}
     actual = print_config.output_yaml(values, 'utf_8')
-    expected = ['dotted:',
-                '  propertyInt: 2',
-                '  propertyString: DottedValue',
-                'propertyInt: 1',
-                'propertyString: Value',
-                '']
-    self.assertEquals(actual.split('\n'), expected)
+    self.assertEquals(yaml.load(actual), {
+      'propertyInt': 1,
+      'propertyString': 'unnested',
+      'dotted': {
+        'propertyInt': 2,
+        'propertyString': 'nested_1'
+      },
+      'double': {
+        'propertyInt': 3,
+        'propertyString': 'nested_2',
+        'dotted': {
+          'propertyInt': 4,
+          'propertyString': 'double_nested_1'
+        },
+      }
+    })
 
   def test_output_param(self):
     values = {'propertyInt': 1,
