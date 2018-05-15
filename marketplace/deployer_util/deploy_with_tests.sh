@@ -55,7 +55,6 @@ function print_and_fail() {
 
 wait_timeout=300
 
-# TODO(#53) Consider moving to a separate job
 echo "INFO Wait $wait_timeout seconds for the application to get into ready state"
 timeout --foreground $wait_timeout wait_for_ready.sh $APP_INSTANCE_NAME $NAMESPACE \
   || print_and_fail "ERROR Application did not get ready before timeout"
@@ -69,17 +68,27 @@ if [[ -e "$tester_manifest" ]]; then
 
   start_time=$(date +%s)
   poll_interval=4
-  tester_timeout=30
+  tester_timeout=300
   while true; do
-    success=$(kubectl get "jobs/$tester_name" --namespace="$NAMESPACE" -o=json | jq '.status.succeeded' || echo "0")
-    if [[ "$success" = "1" ]]; then
+    status=$(kubectl get "jobs/$tester_name" --namespace="$NAMESPACE" -o=json | jq '.status' || echo "{}")
+    failure=$(echo $status | jq '.failed')
+    if [[ "$failure" -gt "0" ]]; then
+      echo "ERROR Tester job failed"
+      kubectl logs "jobs/$tester_name" --namespace="$NAMESPACE"
+      exit 1
+    fi
+
+    success=$(echo $status | jq '.succeeded')
+    if [[ "$success" -gt "0" ]]; then
       echo "INFO Tester job succeeded"
+      kubectl logs "jobs/$tester_name" --namespace="$NAMESPACE"
       break
     fi
 
     elapsed_time=$(( $(date +%s) - $start_time ))
     if [[ "$elapsed_time" -gt "$tester_timeout" ]]; then
       echo "ERROR Tester job timeout"
+      kubectl logs "jobs/$tester_name" --namespace="$NAMESPACE"
       exit 1
     fi
 
