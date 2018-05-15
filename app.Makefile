@@ -81,13 +81,12 @@ endif
 	$(info ---- APP_TEST_PARAMETERS = $(APP_TEST_PARAMETERS))
 	$(info ---- )
 
-# TODO(trironkk/dev/c): To be derived from APP_PARAMETERS.
+# TODO(https://github.com/GoogleCloudPlatform/marketplace-k8s-app-tools/issues/63)
 ifndef APP_INSTANCE_NAME
-	$(error must set APP_INSTANCE_NAME variable (for now...))
+	$(error must set APP_INSTANCE_NAME variable (see https://github.com/GoogleCloudPlatform/marketplace-k8s-app-tools/issues/63))
 endif
-# TODO(trironkk/dev/c): To be derived from APP_PARAMETERS.
 ifndef NAMESPACE
-	$(error must set NAMESPACE variable (for now...))
+	$(error must set NAMESPACE variable (see https://github.com/GoogleCloudPlatform/marketplace-k8s-app-tools/issues/63))
 endif
 	$(info ---- )
 	$(info ---- APP_INSTANCE_NAME   = $(APP_INSTANCE_NAME))
