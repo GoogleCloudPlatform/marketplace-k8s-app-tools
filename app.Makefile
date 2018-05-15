@@ -81,11 +81,11 @@ endif
 	$(info ---- APP_TEST_PARAMETERS = $(APP_TEST_PARAMETERS))
 	$(info ---- )
 
-# TODO(trironkk): To be derived from APP_PARAMETERS.
+# TODO(trironkk/dev/c): To be derived from APP_PARAMETERS.
 ifndef APP_INSTANCE_NAME
 	$(error must set APP_INSTANCE_NAME variable (for now...))
 endif
-# TODO(trironkk): To be derived from APP_PARAMETERS.
+# TODO(trironkk/dev/c): To be derived from APP_PARAMETERS.
 ifndef NAMESPACE
 	$(error must set NAMESPACE variable (for now...))
 endif
