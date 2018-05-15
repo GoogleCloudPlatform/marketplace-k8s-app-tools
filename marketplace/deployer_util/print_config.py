@@ -15,6 +15,7 @@
 # limitations under the License.
 
 import json
+import re
 import sys
 
 from argparse import ArgumentParser
@@ -39,6 +40,7 @@ OUTPUT_YAML = 'yaml'
 OUTPUT_SHELL_VARS = 'shell_vars'
 CODEC_UTF8 = 'utf_8'
 CODEC_ASCII = 'ascii'
+ENV_NAME_RE = re.compile(r'^[a-zA-z0-9_]+$')
 
 
 class InvalidParameter(Exception):
@@ -105,6 +107,9 @@ def output_param(values, schema, definition):
 def output_shell_vars(values):
   sorted_keys = list(values)
   sorted_keys.sort()
+  invalid_keys = [key for key in sorted_keys if not ENV_KEY_RE.match(key)]
+  if invalid_keys:
+    raise InvalidName('Invalid config parameter names: {}'.format(invalid_keys))
   return ' '.join(['${}'.format(k) for k in sorted_keys])
 
 
