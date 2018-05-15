@@ -16,20 +16,17 @@
 
 set -eox pipefail
 
-APP_INSTANCE_NAME="$(/bin/print_config.py --param '{"x-google-marketplace": {"type": "NAME"}}')"
-NAMESPACE="$(/bin/print_config.py --param '{"x-google-marketplace": {"type": "NAMESPACE"}}')"
-
 # Clean up IAM resources.
 kubectl delete --namespace="$NAMESPACE" --filename=- <<EOF
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: "${APP_INSTANCE_NAME}-deployer-sa"
+  name: "${NAME}-deployer-sa"
   namespace: "${NAMESPACE}"
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: "${APP_INSTANCE_NAME}-deployer-rb"
+  name: "${NAME}-deployer-rb"
   namespace: "${NAMESPACE}"
 EOF
