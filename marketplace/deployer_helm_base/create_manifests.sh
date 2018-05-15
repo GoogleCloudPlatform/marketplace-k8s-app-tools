@@ -36,7 +36,6 @@ done
 
 [[ -z "application_uid" ]] && echo "application_uid required" && exit 1
 
-env_vars="$(/bin/print_config.py -o shell_vars)"
 APP_INSTANCE_NAME="$(/bin/print_config.py --param '{"x-google-marketplace": {"type": "NAME"}}')"
 NAMESPACE="$(/bin/print_config.py --param '{"x-google-marketplace": {"type": "NAMESPACE"}}')"
 
@@ -53,14 +52,9 @@ function extract_manifest() {
 
   # Expand the chart template.
   for chart in "$data"/chart/*; do
-    # TODO(trironkk): Construct values.yaml directly from ConfigMap, rather than
-    # stitching into values.yaml.template first.
     chart_manifest_file=$(basename "$chart" | sed 's/.tar.gz$//')
     mkdir "$extracted/$chart_manifest_file"
     tar xfC "$chart" "$extracted/$chart_manifest_file"
-    cat "$extracted/$chart_manifest_file/chart/values.yaml.template" \
-      | /bin/config_env.py envsubst "${env_vars}" \
-      > "$extracted/$chart_manifest_file/chart/values.yaml"
   done
 }
 
@@ -78,13 +72,13 @@ if [[ "$mode" = "test" ]]; then
   fi 
 fi
 
-# Run helm expantion on the extracted files
+# Run helm expansion.
 for chart in "$data_dir/extracted"/*; do
   chart_manifest_file=$(basename "$chart" | sed 's/.tar.gz$//').yaml
-
   helm template "$chart/chart" \
     --name="$APP_INSTANCE_NAME" \
     --namespace="$NAMESPACE" \
+    --values=<(/bin/print_config.py --output=yaml) \
     > "$manifest_dir/$chart_manifest_file"
 done
 
