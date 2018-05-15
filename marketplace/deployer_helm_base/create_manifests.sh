@@ -53,13 +53,9 @@ function extract_manifest() {
 
   # Expand the chart template.
   for chart in "$data"/chart/*; do
-    # TODO(trironkk): Construct values.yaml directly from ConfigMap, rather than
-    # stitching into values.yaml.template first.
     chart_manifest_file=$(basename "$chart" | sed 's/.tar.gz$//')
     mkdir "$extracted/$chart_manifest_file"
     tar xfC "$chart" "$extracted/$chart_manifest_file"
-    cat "$extracted/$chart_manifest_file/chart/values.yaml.template" \
-      > "$extracted/$chart_manifest_file/chart/values.yaml"
   done
 }
 
@@ -77,7 +73,7 @@ if [[ "$mode" = "test" ]]; then
   fi 
 fi
 
-# Run helm expantion on the extracted files
+# Run helm expansion.
 for chart in "$data_dir/extracted"/*; do
   chart_manifest_file=$(basename "$chart" | sed 's/.tar.gz$//').yaml
   helm template "$chart/chart" \
