@@ -55,6 +55,7 @@ function print_and_fail() {
 
 wait_timeout=300
 
+# TODO(#53) Consider moving to a separate job
 echo "INFO Wait $wait_timeout seconds for the application to get into ready state"
 timeout --foreground $wait_timeout wait_for_ready.sh $APP_INSTANCE_NAME $NAMESPACE \
   || print_and_fail "ERROR Application did not get ready before timeout"
