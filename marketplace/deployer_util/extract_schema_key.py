@@ -42,7 +42,7 @@ def main():
 
   schema = config_helper.Schema.load_yaml_file(args.schema_file)
   sys.stdout.write('\n'.join([k for k, v in schema.properties.items()
-                                if v.xtype == args.type]))
+                              if v.xtype == args.type]))
 
 
 if __name__ == "__main__":
