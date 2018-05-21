@@ -74,32 +74,22 @@ func GenerateValues(testSpecsValues *string) *map[string]interface{} {
 
 	for _, valuesFile := range valuesFiles {
 		if valuesFile.IsDir() {
-			fmt.Printf("'%v' is a directory. Ignored.", valuesFile.Name())
+			log.Printf("'%v' is a directory. Ignored.\n", valuesFile.Name())
 			continue
 		}
 
 		var valuesPath = path.Join(*testSpecsValues, valuesFile.Name())
-		fmt.Println(valuesPath)
 		valuesContent, err := ioutil.ReadFile(valuesPath)
-		if err != nil {
-			panic(err)
-		}
-
-		fmt.Println(string(valuesContent))
+		check(err)
 
 		var parsed map[string]interface{}
 
 		err = yaml.Unmarshal(valuesContent, &parsed)
-		if err != nil {
-			panic(err)
-		}
-
-		fmt.Println("parsed: " + fmt.Sprint(parsed))
+		check(err)
 
 		values[valuesFile.Name()] = parsed
 	}
 
-	fmt.Println("parsed: " + fmt.Sprint(values))
 	return &values
 }
 
