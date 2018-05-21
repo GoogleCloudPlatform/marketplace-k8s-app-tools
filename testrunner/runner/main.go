@@ -82,7 +82,7 @@ func GenerateValues(testSpecsValues *string) *map[string]interface{} {
 		valuesContent, err := ioutil.ReadFile(valuesPath)
 		check(err)
 
-		var parsed map[string]interface{}
+		var parsed interface{}
 
 		err = yaml.Unmarshal(valuesContent, &parsed)
 		check(err)
