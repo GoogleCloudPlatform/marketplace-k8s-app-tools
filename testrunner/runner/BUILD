@@ -33,6 +33,7 @@ binary_deps = [
     "//specs:go_default_library",
     "//tests:go_default_library",
     "@com_github_golang_glog//:go_default_library",
+    "@in_gopkg_yaml_v2//:go_default_library",
 ]
 
 go_binary(

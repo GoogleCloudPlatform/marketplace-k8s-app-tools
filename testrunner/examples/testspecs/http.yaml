@@ -13,9 +13,9 @@
 # limitations under the License.
 
 actions:
-- name: GET google.com should be 200 OK
+- name: GET {{.values.url}} should be 200 OK
   httpTest:
-    url: http://www.google.com
+    url: http://{{.values.url}}
     headers:
       Cache-Control: no-cache
     expect:
@@ -25,12 +25,12 @@ actions:
         html:
           title:
             contains: Google
-- name: GET google.com (TLS) should be 200 OK
+- name: GET {{.values.url}} (TLS) should be 200 OK
   condition:
     failuresSoFar:
       equals: 0
   httpTest:
-    url: https://www.google.com
+    url: https://{{.values.url}}
     expect:
       statusCode:
         equals: 200
@@ -43,10 +43,10 @@ actions:
     failuresSoFar:
       greaterThan: 0
   httpTest:
-    url: https://www.google.com
-- name: POST google.com should be rejected
+    url: https://{{.values.url}}
+- name: POST {{.values.url}} should be rejected
   httpTest:
-    url: http://www.google.com
+    url: http://{{.values.url}}
     method: POST
     expect:
       statusCode:

@@ -1,7 +1,7 @@
 actions:
 - name: Can load home page
   httpTest:
-    url: http://{{.Vars.MainVmIp}}:9012
+    url: 'http://{{.Vars.MainVmIp}}:{{.values.port}}'
     expect:
       statusCode:
         equals: 200
@@ -10,7 +10,7 @@ actions:
       bodyText:
         html:
           title:
-            contains: Hello World!
+            contains: '{{.values.title}}'
 - name: Can SSH and do basic queries
   sshTest:
     host: '{{.Vars.MainVmIp}}'

@@ -17,8 +17,10 @@ package main
 import (
 	"flag"
 	"fmt"
+	"gopkg.in/yaml.v2"
 	"net/http"
 	"os"
+	"path"
 
 	"github.com/GoogleCloudPlatform/marketplace-k8s-app-tools/testrunner/asserts"
 	"github.com/GoogleCloudPlatform/marketplace-k8s-app-tools/testrunner/conditions"
@@ -27,6 +29,8 @@ import (
 	"github.com/GoogleCloudPlatform/marketplace-k8s-app-tools/testrunner/specs"
 	"github.com/GoogleCloudPlatform/marketplace-k8s-app-tools/testrunner/tests"
 	"github.com/golang/glog"
+	"io/ioutil"
+	"log"
 )
 
 const outcomeFailed = "FAILED"
@@ -62,18 +66,59 @@ func (t testStatus) FailuresSoFarCount() int {
 	return t.FailureCount
 }
 
+func GenerateValues(testSpecsValues *string) *map[string]interface{} {
+	valuesFiles, err := ioutil.ReadDir(*testSpecsValues)
+	check(err)
+
+	values := make(map[string]interface{})
+
+	for _, valuesFile := range valuesFiles {
+		if valuesFile.IsDir() {
+			fmt.Printf("'%v' is a directory. Ignored.", valuesFile.Name())
+			continue
+		}
+
+		var valuesPath = path.Join(*testSpecsValues, valuesFile.Name())
+		fmt.Println(valuesPath)
+		valuesContent, err := ioutil.ReadFile(valuesPath)
+		if err != nil {
+			panic(err)
+		}
+
+		fmt.Println(string(valuesContent))
+
+		var parsed map[string]interface{}
+
+		err = yaml.Unmarshal(valuesContent, &parsed)
+		if err != nil {
+			panic(err)
+		}
+
+		fmt.Println("parsed: " + fmt.Sprint(parsed))
+
+		values[valuesFile.Name()] = parsed
+	}
+
+	fmt.Println("parsed: " + fmt.Sprint(values))
+	return &values
+}
+
 func main() {
 	testSpecs := flags.FlagStringList("test_spec", "Path to a yaml or json file containing the test spec. Can be specified multiple times")
+	testSpecsValues := flag.String("test_spec_values", "", "Path to template values for substitution in the test specs")
+
 	flag.Parse()
 
 	if len(*testSpecs) <= 0 {
 		glog.Fatal("--test_spec must be specified")
 	}
 
+	values := GenerateValues(testSpecsValues)
+
 	status := testStatus{}
 	for _, testSpec := range *testSpecs {
 		glog.Infof(">>> Running %v", testSpec)
-		suite := specs.LoadSuite(testSpec)
+		suite := specs.LoadSuite(testSpec, values)
 		if len(suite.Actions) <= 0 {
 			glog.Info(" > Nothing to run!")
 			continue
@@ -157,4 +202,10 @@ func doOneAction(index int, action *specs.Action, status *testStatus, results []
 	}
 
 	result.Pass()
+}
+
+func check(err interface{}) {
+	if err != nil {
+		log.Fatalf("Error: %v", err)
+	}
 }
