@@ -70,6 +70,9 @@ ifndef APP_PARAMETERS
 	$(error must set APP_PARAMETERS variable)
 endif
 ifndef APP_TEST_PARAMETERS
+	# TODO(https://github.com/GoogleCloudPlatform/marketplace-k8s-app-tools/issues/102):
+	# APP_TEST_PARAMETERS should not cause failures for make
+	# app/install.
 	$(error must set APP_TEST_PARAMETERS variable)
 endif
 
