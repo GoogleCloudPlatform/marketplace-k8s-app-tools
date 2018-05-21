@@ -67,6 +67,10 @@ func (t testStatus) FailuresSoFarCount() int {
 }
 
 func GenerateValues(testSpecsValues *string) *map[string]interface{} {
+	if testSpecsValues == nil || *testSpecsValues == "" {
+		return nil
+	}
+
 	valuesFiles, err := ioutil.ReadDir(*testSpecsValues)
 	check(err)
 
