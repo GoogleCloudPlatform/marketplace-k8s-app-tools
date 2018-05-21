@@ -65,7 +65,7 @@ if [[ -e "$tester_manifest" ]]; then
   # Run test job.
   kubectl apply --namespace="$NAMESPACE" --filename="$tester_manifest"
 
-  tester_name=$(cat "$tester_manifest" | yj tojson | jq -r '.metadata.name')
+  tester_name=$(cat "$tester_manifest" | yaml2json | jq -r '.metadata.name')
 
   start_time=$(date +%s)
   poll_interval=4
