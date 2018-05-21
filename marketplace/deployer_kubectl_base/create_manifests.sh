@@ -34,13 +34,13 @@ case $i in
 esac
 done
 
-[[ -z "application_uid" ]] && echo "application_uid required" && exit 1
+[[ -z "$application_uid" ]] && echo "application_uid required" && exit 1
+[[ -z "$NAME" ]] && echo "NAME must be set" && exit 1
+[[ -z "$NAMESPACE" ]] && echo "NAMESPACE must be set" && exit 1
 
 env_vars="$(/bin/print_config.py -o shell_vars)"
-APP_INSTANCE_NAME="$(/bin/print_config.py --param '{"x-google-marketplace": {"type": "NAME"}}')"
-NAMESPACE="$(/bin/print_config.py --param '{"x-google-marketplace": {"type": "NAMESPACE"}}')"
 
-echo "Creating the manifests for the kubernetes resources that build the application \"$APP_INSTANCE_NAME\""
+echo "Creating the manifests for the kubernetes resources that build the application \"$NAME\""
 
 data_dir="/data"
 manifest_dir="$data_dir/manifest-expanded"
@@ -62,7 +62,7 @@ for manifest_template_file in "$data_dir"/manifest/*; do
 done
 
 /bin/setownership.py \
-  --appname "$APP_INSTANCE_NAME" \
+  --appname "$NAME" \
   --appuid "$application_uid" \
   --manifests "$manifest_dir" \
   --dest "$data_dir/resources.yaml"

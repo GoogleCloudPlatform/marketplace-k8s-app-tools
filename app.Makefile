@@ -25,6 +25,7 @@ app/build-test:: ;
 .PHONY: app/install
 app/install: app/build | app/setup
 	$(MARKETPLACE_TOOLS_PATH)/scripts/start.sh \
+	    --marketplace_tools='$(MARKETPLACE_TOOLS_PATH)' \
 	    --deployer='$(APP_DEPLOYER_IMAGE)' \
 	    --parameters='$(APP_PARAMETERS)'
 
@@ -41,8 +42,9 @@ app/install-test: app/build-test | app/setup
 .PHONY: app/uninstall
 app/uninstall: | app/setup
 	$(MARKETPLACE_TOOLS_PATH)/scripts/stop.sh \
-	    --name='$(APP_INSTANCE_NAME)' \
-	    --namespace='$(NAMESPACE)'
+	    --marketplace_tools='$(MARKETPLACE_TOOLS_PATH)' \
+	    --deployer='$(APP_DEPLOYER_IMAGE)' \
+	    --parameters='$(APP_PARAMETERS)'
 
 # Runs the verification pipeline.
 .PHONY: app/verify
@@ -58,8 +60,9 @@ app/verify: app/build app/build-test | app/setup
 .PHONY: app/watch
 app/watch: | app/setup
 	$(MARKETPLACE_TOOLS_PATH)/scripts/watch.sh \
-	    --name='$(APP_INSTANCE_NAME)' \
-	    --namespace='$(NAMESPACE)'
+	    --marketplace_tools='$(MARKETPLACE_TOOLS_PATH)' \
+	    --deployer='$(APP_DEPLOYER_IMAGE)' \
+	    --parameters='$(APP_PARAMETERS)'
 
 .PHONY: app/setup
 app/setup: | base/setup .build/marketplace-app
@@ -82,18 +85,6 @@ endif
 	$(info ---- APP_PARAMETERS      = $(APP_PARAMETERS))
 	$(info ---- )
 	$(info ---- APP_TEST_PARAMETERS = $(APP_TEST_PARAMETERS))
-	$(info ---- )
-
-# TODO(https://github.com/GoogleCloudPlatform/marketplace-k8s-app-tools/issues/63)
-ifndef APP_INSTANCE_NAME
-	$(error must set APP_INSTANCE_NAME variable (see https://github.com/GoogleCloudPlatform/marketplace-k8s-app-tools/issues/63))
-endif
-ifndef NAMESPACE
-	$(error must set NAMESPACE variable (see https://github.com/GoogleCloudPlatform/marketplace-k8s-app-tools/issues/63))
-endif
-	$(info ---- )
-	$(info ---- APP_INSTANCE_NAME   = $(APP_INSTANCE_NAME))
-	$(info ---- NAMESPACE           = $(NAMESPACE))
 	$(info ---- )
 
 	@ [ -n "$$(which jq)" ] || (echo 'Please install jq.'; exit 1)

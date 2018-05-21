@@ -55,8 +55,20 @@ done
 DIR="$(realpath $(dirname $0))"
 echo $DIR
 
-NAMESPACE="apptest-$(uuidgen)"
-APP_INSTANCE_NAME="$(echo $parameters | jq -r '.APP_INSTANCE_NAME')"
+# Unpack the deployer schema.
+schema="$("$marketplace_tools/scripts/extract_deployer_config_schema.sh" \
+	--deployer="$deployer")"
+
+# Parse the config schema for the keys associated with namespace.
+name_key=$("$marketplace_tools/marketplace/deployer_util/extract_schema_key.py" \
+		--schema_file=<(echo "$schema") \
+    --type=NAME)
+namespace_key=$("$marketplace_tools/marketplace/deployer_util/extract_schema_key.py" \
+		--schema_file=<(echo "$schema") \
+    --type=NAMESPACE)
+
+export NAMESPACE="apptest-$(uuidgen)"
+export NAME="$(echo "$parameters" | jq --raw-output --arg name_key "$name_key" '.[$name_key]')"
 
 echo "INFO Creates namespace \"$NAMESPACE\""
 kubectl create namespace "$NAMESPACE"
@@ -85,7 +97,11 @@ function clean_and_exit() {
 echo "INFO Creates the Application CRD in the namespace"
 kubectl apply -f "$marketplace_tools/crd/app-crd.yaml"
 
-parameters=$(echo "$parameters" | jq ".NAMESPACE=\"$NAMESPACE\"")
+parameters=$(echo "$parameters" \
+	| jq \
+    --arg namespace_key "$namespace_key" \
+		--arg namespace "$NAMESPACE" \
+    '.[$namespace_key] = $namespace')
 
 echo "INFO Parameters: $parameters"
 
@@ -98,7 +114,7 @@ $marketplace_tools/scripts/start_test.sh \
   || clean_and_exit "ERROR Failed to start deployer"
 
 echo "INFO wait for the deployer to succeed"
-deployer_name="${APP_INSTANCE_NAME}-deployer"
+deployer_name="${NAME}-deployer"
 
 start_time=$(date +%s)
 poll_interval=4
@@ -130,8 +146,9 @@ deployer_name=""
 
 echo "INFO Stop the application"
 $marketplace_tools/scripts/stop.sh \
-  --name=$APP_INSTANCE_NAME \
-  --namespace=$NAMESPACE \
+  --marketplace_tools="$marketplace_tools" \
+  --parameters="$parameters" \
+  --deployer="$deployer" \
   || clean_and_exit "ERROR Failed to stop application"
 
 deletion_timeout=60
