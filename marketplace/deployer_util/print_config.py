@@ -40,7 +40,7 @@ OUTPUT_YAML = 'yaml'
 OUTPUT_SHELL_VARS = 'shell_vars'
 CODEC_UTF8 = 'utf_8'
 CODEC_ASCII = 'ascii'
-ENV_NAME_RE = re.compile(r'^[a-zA-z0-9_]+$')
+ENV_KEY_RE = re.compile(r'^[a-zA-z0-9_]+$')
 
 
 class InvalidParameter(Exception):
