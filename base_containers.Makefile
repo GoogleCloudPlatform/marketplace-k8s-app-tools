@@ -65,6 +65,23 @@ $(MARKETPLACE_BASE_BUILD)/driver: \
 	gcloud docker -- push "$(MARKETPLACE_REGISTRY)/driver"
 	@touch "$@"
 
+.PHONY: base/build/testrunner
+base/build/testrunner: $(MARKETPLACE_BASE_BUILD)/testrunner ;
+
+$(MARKETPLACE_BASE_BUILD)/testrunner: \
+  $(MARKETPLACE_TOOLS_PATH)/testrunner/* \
+  $(MARKETPLACE_TOOLS_PATH)/testrunner/asserts/* \
+  $(MARKETPLACE_TOOLS_PATH)/testrunner/conditions/* \
+  $(MARKETPLACE_TOOLS_PATH)/testrunner/flags/* \
+  $(MARKETPLACE_TOOLS_PATH)/testrunner/gcp/* \
+  $(MARKETPLACE_TOOLS_PATH)/testrunner/runner/* \
+  $(MARKETPLACE_TOOLS_PATH)/testrunner/specs/* \
+  $(MARKETPLACE_TOOLS_PATH)/testrunner/tests/*
+	cd $(MARKETPLACE_TOOLS_PATH)/testrunner \
+	&& bazel run //runner:go_image -- --norun \
+	&& docker tag bazel/runner:go_image gcr.io/$(REGISTRY)/testrunner
+	@touch "$@"
+
 # Using this rule as a prerequisite triggers rebuilding when
 # MARKETPLACE_REGISTRY variable changes its value.
 $(MARKETPLACE_BASE_BUILD)/registry_prefix: $(MARKETPLACE_BASE_BUILD)/registry_prefix_phony ;
