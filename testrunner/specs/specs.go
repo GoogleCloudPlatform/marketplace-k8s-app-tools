@@ -111,7 +111,8 @@ func LoadSuite(path string, values *map[string]interface{}) *Suite {
 	if values != nil {
 		t := template.Must(template.New("mytemplate").Parse(string(data)))
 		buffer := new(bytes.Buffer)
-		t.Execute(buffer, values)
+		err = t.Execute(buffer, values)
+		check(err)
 		data = buffer.Bytes()
 	}
 

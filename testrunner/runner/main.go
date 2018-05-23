@@ -18,6 +18,8 @@ import (
 	"flag"
 	"fmt"
 	"gopkg.in/yaml.v2"
+	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 	"path"
@@ -29,8 +31,6 @@ import (
 	"github.com/GoogleCloudPlatform/marketplace-k8s-app-tools/testrunner/specs"
 	"github.com/GoogleCloudPlatform/marketplace-k8s-app-tools/testrunner/tests"
 	"github.com/golang/glog"
-	"io/ioutil"
-	"log"
 )
 
 const outcomeFailed = "FAILED"

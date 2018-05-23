@@ -1,5 +1,7 @@
 ifndef __BASE_CONTAINERS_MAKEFILE__
 
+dependon=$(shell find $1 -type f | sed -e 's/ /\\ /g')
+
 __BASE_CONTAINERS_MAKEFILE__ := included
 
 
@@ -68,15 +70,7 @@ $(MARKETPLACE_BASE_BUILD)/driver: \
 .PHONY: base/build/testrunner
 base/build/testrunner: $(MARKETPLACE_BASE_BUILD)/testrunner ;
 
-$(MARKETPLACE_BASE_BUILD)/testrunner: \
-  $(MARKETPLACE_TOOLS_PATH)/testrunner/* \
-  $(MARKETPLACE_TOOLS_PATH)/testrunner/asserts/* \
-  $(MARKETPLACE_TOOLS_PATH)/testrunner/conditions/* \
-  $(MARKETPLACE_TOOLS_PATH)/testrunner/flags/* \
-  $(MARKETPLACE_TOOLS_PATH)/testrunner/gcp/* \
-  $(MARKETPLACE_TOOLS_PATH)/testrunner/runner/* \
-  $(MARKETPLACE_TOOLS_PATH)/testrunner/specs/* \
-  $(MARKETPLACE_TOOLS_PATH)/testrunner/tests/*
+$(MARKETPLACE_BASE_BUILD)/testrunner: $(call dependon, $(MARKETPLACE_TOOLS_PATH)/testrunner/)
 	cd $(MARKETPLACE_TOOLS_PATH)/testrunner \
 	&& bazel run //runner:go_image -- --norun \
 	&& docker tag bazel/runner:go_image gcr.io/$(REGISTRY)/testrunner
