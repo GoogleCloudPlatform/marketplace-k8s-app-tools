@@ -29,12 +29,12 @@ trap "handle_failure" EXIT
 
 
 /bin/expand_config.py
-APP_INSTANCE_NAME="$(/bin/print_config.py --param '{"x-google-marketplace": {"type": "NAME"}}')"
-NAMESPACE="$(/bin/print_config.py --param '{"x-google-marketplace": {"type": "NAMESPACE"}}')"
+export NAME="$(/bin/print_config.py --param '{"x-google-marketplace": {"type": "NAME"}}')"
+export NAMESPACE="$(/bin/print_config.py --param '{"x-google-marketplace": {"type": "NAMESPACE"}}')"
 
-echo "Deploying application \"$APP_INSTANCE_NAME\""
+echo "Deploying application \"$NAME\""
 
-application_uid=$(kubectl get "applications/$APP_INSTANCE_NAME" \
+application_uid=$(kubectl get "applications/$NAME" \
   --namespace="$NAMESPACE" \
   --output=jsonpath='{.metadata.uid}')
 

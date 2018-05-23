@@ -46,6 +46,7 @@ parameters=$(echo "$parameters" "$test_parameters" | jq -s '.[0] * .[1]')
 entrypoint="/bin/deploy_with_tests.sh"
 
 "$marketplace_tools"/scripts/start.sh \
+  --marketplace_tools="$marketplace_tools" \
   --deployer="$deployer" \
   --parameters="$parameters" \
   --entrypoint="$entrypoint"
