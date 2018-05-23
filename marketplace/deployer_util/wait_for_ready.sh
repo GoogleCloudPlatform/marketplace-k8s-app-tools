@@ -70,7 +70,7 @@ echo "INFO Starting control loop for applications/$app..."
 
 previous_healthy="false"
 
-min_time_before_healthy=5
+min_time_before_healthy=30
 poll_interval=4
 
 APPLICATION_UID="$(kubectl get "applications/$app" \
