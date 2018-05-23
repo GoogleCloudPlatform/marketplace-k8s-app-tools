@@ -24,9 +24,9 @@ app/build-test:: ;
 # Installs the application into target namespace on the cluster.
 .PHONY: app/install
 app/install: app/build \
-             assert-MARKETPLACE_TOOLS_PATH \
-             assert-APP_DEPLOYER_IMAGE \
-             assert-APP_PARAMETERS
+             assert-var-MARKETPLACE_TOOLS_PATH \
+             assert-var-APP_DEPLOYER_IMAGE \
+             assert-var-APP_PARAMETERS
 	$(MARKETPLACE_TOOLS_PATH)/scripts/start.sh \
 	    --marketplace_tools='$(MARKETPLACE_TOOLS_PATH)' \
 	    --deployer='$(APP_DEPLOYER_IMAGE)' \
@@ -35,10 +35,10 @@ app/install: app/build \
 # Installs the application into target namespace on the cluster.
 .PHONY: app/install-test
 app/install-test: app/build-test \
-                  assert-MARKETPLACE_TOOLS_PATH \
-                  assert-APP_DEPLOYER_IMAGE \
-                  assert-APP_PARAMETERS \
-                  assert-APP_TEST_PARAMETERS
+                  assert-var-MARKETPLACE_TOOLS_PATH \
+                  assert-var-APP_DEPLOYER_IMAGE \
+                  assert-var-APP_PARAMETERS \
+                  assert-var-APP_TEST_PARAMETERS
 	$(MARKETPLACE_TOOLS_PATH)/scripts/start_test.sh \
 	    --marketplace_tools='$(MARKETPLACE_TOOLS_PATH)' \
 	    --deployer='$(APP_DEPLOYER_IMAGE)' \
@@ -47,9 +47,9 @@ app/install-test: app/build-test \
 
 # Uninstalls the application from the target namespace on the cluster.
 .PHONY: app/uninstall
-app/uninstall: assert-MARKETPLACE_TOOLS_PATH \
-               assert-APP_DEPLOYER_IMAGE \
-               assert-APP_PARAMETERS
+app/uninstall: assert-var-MARKETPLACE_TOOLS_PATH \
+               assert-var-APP_DEPLOYER_IMAGE \
+               assert-var-APP_PARAMETERS
 	$(MARKETPLACE_TOOLS_PATH)/scripts/stop.sh \
 	    --marketplace_tools='$(MARKETPLACE_TOOLS_PATH)' \
 	    --deployer='$(APP_DEPLOYER_IMAGE)' \
@@ -58,10 +58,10 @@ app/uninstall: assert-MARKETPLACE_TOOLS_PATH \
 # Runs the verification pipeline.
 .PHONY: app/verify
 app/verify: app/build app/build-test \
-            assert-MARKETPLACE_TOOLS_PATH \
-            assert-APP_DEPLOYER_IMAGE \
-            assert-APP_PARAMETERS \
-            assert-APP_TEST_PARAMETERS
+            assert-var-MARKETPLACE_TOOLS_PATH \
+            assert-var-APP_DEPLOYER_IMAGE \
+            assert-var-APP_PARAMETERS \
+            assert-var-APP_TEST_PARAMETERS
 	$(MARKETPLACE_TOOLS_PATH)/marketplace/driver/driver.sh \
 	    --deployer='$(APP_DEPLOYER_IMAGE)' \
 	    --marketplace_tools='$(MARKETPLACE_TOOLS_PATH)' \
@@ -71,9 +71,9 @@ app/verify: app/build app/build-test \
 # Monitors resources in the target namespace on the cluster.
 # A convenient way to look at relevant k8s resources on the CLI.
 .PHONY: app/watch
-app/watch: assert-MARKETPLACE_TOOLS_PATH \
-           assert-APP_DEPLOYER_IMAGE \
-           assert-APP_PARAMETERS
+app/watch: assert-var-MARKETPLACE_TOOLS_PATH \
+           assert-var-APP_DEPLOYER_IMAGE \
+           assert-var-APP_PARAMETERS
 	$(MARKETPLACE_TOOLS_PATH)/scripts/watch.sh \
 	    --marketplace_tools='$(MARKETPLACE_TOOLS_PATH)' \
 	    --deployer='$(APP_DEPLOYER_IMAGE)' \

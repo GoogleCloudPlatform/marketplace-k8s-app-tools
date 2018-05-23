@@ -49,21 +49,21 @@ done
 
 # Unpack the deployer schema.
 schema="$("$marketplace_tools/scripts/extract_deployer_config_schema.sh" \
-	--deployer="$deployer")"
+  --deployer="$deployer")"
 
 # Parse the config schema for the keys associated with name and namespace.
 name_key=$("$marketplace_tools/marketplace/deployer_util/extract_schema_key.py" \
-		--schema_file=<(echo "$schema") \
+    --schema_file=<(echo "$schema") \
     --type=NAME)
 namespace_key=$("$marketplace_tools/marketplace/deployer_util/extract_schema_key.py" \
-		--schema_file=<(echo "$schema") \
+    --schema_file=<(echo "$schema") \
     --type=NAMESPACE)
 
 # Extract name and namespace from parameters.
 name=$(echo "$parameters" \
-	| jq --raw-output --arg key "$name_key" '.[$key]')
+  | jq --raw-output --arg key "$name_key" '.[$key]')
 namespace=$(echo "$parameters" \
-	| jq --raw-output --arg key "$namespace_key" '.[$key]')
+  | jq --raw-output --arg key "$namespace_key" '.[$key]')
 
 # Create Application instance.
 kubectl apply --namespace="$namespace" --filename=- <<EOF

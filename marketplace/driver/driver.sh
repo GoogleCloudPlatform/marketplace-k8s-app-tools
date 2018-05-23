@@ -57,14 +57,14 @@ echo $DIR
 
 # Unpack the deployer schema.
 schema="$("$marketplace_tools/scripts/extract_deployer_config_schema.sh" \
-	--deployer="$deployer")"
+    --deployer="$deployer")"
 
 # Parse the config schema for the keys associated with namespace.
 name_key=$("$marketplace_tools/marketplace/deployer_util/extract_schema_key.py" \
-		--schema_file=<(echo "$schema") \
+    --schema_file=<(echo "$schema") \
     --type=NAME)
 namespace_key=$("$marketplace_tools/marketplace/deployer_util/extract_schema_key.py" \
-		--schema_file=<(echo "$schema") \
+    --schema_file=<(echo "$schema") \
     --type=NAMESPACE)
 
 export NAMESPACE="apptest-$(uuidgen)"
@@ -98,9 +98,9 @@ echo "INFO Creates the Application CRD in the namespace"
 kubectl apply -f "$marketplace_tools/crd/app-crd.yaml"
 
 parameters=$(echo "$parameters" \
-	| jq \
+  | jq \
     --arg namespace_key "$namespace_key" \
-		--arg namespace "$NAMESPACE" \
+    --arg namespace "$NAMESPACE" \
     '.[$namespace_key] = $namespace')
 
 echo "INFO Parameters: $parameters"
