@@ -27,23 +27,23 @@ $(info ---- NAMESPACE = $(NAMESPACE))
 
 
 # Using this target to trigger rebuilding when REGISTRY changes.
-gcloud/registry_prefix: .build/registry_prefix
-.build/registry_prefix: .build/registry_prefix_phony
-.PHONY: .build/registry_prefix_phony
-.build/registry_prefix_phony: | .build
-ifneq ($(shell [ -e ".build/registry_prefix" ] && cat ".build/registry_prefix" || echo ""),$(REGISTRY))
+.PHONY: gcloud/REGISTRY .build/REGISTRY_phony
+gcloud/REGISTRY: .build/REGISTRY
+.build/REGISTRY: .build/REGISTRY_phony
+.build/REGISTRY_phony: | .build
+ifneq ($(shell [ -e ".build/REGISTRY" ] && cat ".build/REGISTRY" || echo ""),$(REGISTRY))
 	$(info REGISTRY changed to $(REGISTRY))
-	@echo "$(REGISTRY)" > ".build/registry_prefix"
+	@echo "$(REGISTRY)" > ".build/REGISTRY"
 endif
 
 # Using this target to trigger rebuilding when TAG changes.
-gcloud/tag_prefix: .build/tag_prefix
-.build/tag_prefix: .build/tag_prefix_phony
-.PHONY: .build/tag_prefix_phony
-.build/tag_prefix_phony: | .build
-ifneq ($(shell [ -e ".build/tag_prefix" ] && cat ".build/tag_prefix" || echo ""),$(TAG))
+.PHONY: gcloud/TAG .build/TAG_phony
+gcloud/TAG: .build/TAG
+.build/TAG: .build/TAG_phony
+.build/TAG_phony: | .build
+ifneq ($(shell [ -e ".build/TAG" ] && cat ".build/TAG" || echo ""),$(TAG))
 	$(info TAG changed to $(TAG))
-	@echo "$(TAG)" > ".build/tag_prefix"
+	@echo "$(TAG)" > ".build/TAG"
 endif
 
 
