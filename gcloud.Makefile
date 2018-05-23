@@ -26,4 +26,25 @@ $(info ---- REGISTRY = $(REGISTRY))
 $(info ---- NAMESPACE = $(NAMESPACE))
 
 
+# Using this target to trigger rebuilding when REGISTRY changes.
+gcloud/registry_prefix: .build/registry_prefix
+.build/registry_prefix: .build/registry_prefix_phony
+.PHONY: .build/registry_prefix_phony
+.build/registry_prefix_phony: | .build
+ifneq ($(shell [ -e ".build/registry_prefix" ] && cat ".build/registry_prefix" || echo ""),$(REGISTRY))
+	$(info REGISTRY changed to $(REGISTRY))
+	@echo "$(REGISTRY)" > ".build/registry_prefix"
+endif
+
+# Using this target to trigger rebuilding when TAG changes.
+gcloud/tag_prefix: .build/tag_prefix
+.build/tag_prefix: .build/tag_prefix_phony
+.PHONY: .build/tag_prefix_phony
+.build/tag_prefix_phony: | .build
+ifneq ($(shell [ -e ".build/tag_prefix" ] && cat ".build/tag_prefix" || echo ""),$(TAG))
+	$(info TAG changed to $(TAG))
+	@echo "$(TAG)" > ".build/tag_prefix"
+endif
+
+
 endif
