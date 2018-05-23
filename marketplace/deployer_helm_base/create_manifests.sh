@@ -45,6 +45,8 @@ data_dir="/data"
 manifest_dir="$data_dir/manifest-expanded"
 mkdir -p "$manifest_dir"
 
+mkdir -p "$manifest_dir-orig"
+
 function extract_manifest() {
   data=$1
   extracted="$data/extracted"
@@ -80,6 +82,15 @@ for chart in "$data_dir/extracted"/*; do
     --namespace="$NAMESPACE" \
     --values=<(/bin/print_config.py --output=yaml) \
     > "$manifest_dir/$chart_manifest_file"
+
+  if [[ "$mode" != "test" ]]; then
+    echo "Filtering out the Helm tests"
+    cp "$manifest_dir/$chart_manifest_file" "$manifest_dir-orig/$chart_manifest_file"
+    filter_out_helm_tests.py \
+      --manifest "$manifest_dir/$chart_manifest_file"
+  else
+    echo "Not filtering out the tests - it is a test mode"
+  fi
 done
 
 /bin/setownership.py \
