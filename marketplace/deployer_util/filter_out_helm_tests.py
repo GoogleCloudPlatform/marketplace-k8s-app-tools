@@ -25,10 +25,11 @@ from yaml_util import load_resources_yaml
 
 
 _HELM_HOOK_KEY = 'helm.sh/hook'
-_HELM_TEST_HOOKS = ['test-success', 'test-failure']
+_HOOK_SUCCESS = 'test-success'
+_HOOK_FAILURE = 'test-failure'
 
 
-def is_resource_a_helm_test(res):
+def _has_hook(res, hook):
   if not type(res) is dict \
       or not 'metadata' in res.keys():
     return False
@@ -39,20 +40,40 @@ def is_resource_a_helm_test(res):
   annotations = metadata['annotations']
   return type(annotations) is dict \
          and _HELM_HOOK_KEY in annotations.keys() \
-         and annotations[_HELM_HOOK_KEY] in _HELM_TEST_HOOKS
+         and annotations[_HELM_HOOK_KEY] == hook
+
+
+def _is_not_a_test(res):
+  return not _has_hook(res, _HOOK_SUCCESS) \
+         and not _has_hook(res, _HOOK_FAILURE)
+
+
+def _get_all_non_tests(resources):
+  return filter(lambda r: _is_not_a_test(r), resources)
+
+
+def _get_all_success_tests(resources):
+  return filter(lambda r: _has_hook(r, _HOOK_SUCCESS), resources)
 
 
 def main():
   parser = ArgumentParser()
   parser.add_argument("-m", "--manifest", dest="manifest",
                       help="the manifest file location to be cleared of tests")
+  parser.add_argument("-t", "--tests-manifest", dest="tests_manifest",
+                      help="the manifest file to place all the success tests")
   args = parser.parse_args()
   manifest = args.manifest
   resources = load_resources_yaml(manifest)
-  resources = filter(lambda r: not is_resource_a_helm_test(r), resources)
+  non_tests = _get_all_non_tests(resources)
+  success_tests = _get_all_success_tests(resources)
   with open(manifest, "w") as out:
-    yaml.dump_all(resources, out, default_flow_style=False, explicit_start=True)
-  print "FILTER-OUT procedure for Helm tests finished"
+    yaml.dump_all(non_tests, out,
+                  default_flow_style=False, explicit_start=True)
+  if args.tests_manifest:
+    with open(args.tests_manifest, "w") as out:
+      yaml.dump_all(success_tests, out,
+                    default_flow_style=False, explicit_start=True)
 
 
 if __name__ == "__main__":

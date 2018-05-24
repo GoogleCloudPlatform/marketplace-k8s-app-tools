@@ -45,6 +45,11 @@ data_dir="/data"
 manifest_dir="$data_dir/manifest-expanded"
 mkdir -p "$manifest_dir"
 
+if [[ "$mode" = "test" ]]; then
+  test_data_dir="/data-test"
+  mkdir -p "/data-test"
+fi
+
 function extract_manifest() {
   data=$1
   extracted="$data/extracted"
@@ -62,7 +67,6 @@ extract_manifest "$data_dir"
 
 # Overwrite the templates using the test templates
 if [[ "$mode" = "test" ]]; then
-  test_data_dir="/data-test"
   if [[ -e "$test_data_dir" ]]; then
     extract_manifest "$test_data_dir"
 
@@ -84,6 +88,10 @@ for chart in "$data_dir/extracted"/*; do
   if [[ "$mode" != "test" ]]; then
     filter_out_helm_tests.py \
       --manifest "$manifest_dir/$chart_manifest_file"
+  else
+    filter_out_helm_tests.py \
+     --manifest "$manifest_dir/$chart_manifest_file" \
+     --tests-manifest "$test_data_dir/extracted/helm-tests-$chart_manifest_file"
   fi
 done
 
