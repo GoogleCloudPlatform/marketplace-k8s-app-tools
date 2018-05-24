@@ -5,6 +5,7 @@ __BASE_CONTAINERS_MAKEFILE__ := included
 
 makefile_dir := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
 include $(makefile_dir)/common.Makefile
+include $(makefile_dir)/var.Makefile
 
 MARKETPLACE_BASE_BUILD = .build/marketplace-base-containers
 
@@ -21,7 +22,7 @@ $(MARKETPLACE_BASE_BUILD):
 .PHONY: base/build/deployer/kubectl
 base/build/deployer/kubectl: $(MARKETPLACE_BASE_BUILD)/deployer-kubectl ;
 
-$(MARKETPLACE_BASE_BUILD)/deployer-kubectl: $(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_util/* $(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_kubectl_base/* gcloud/REGISTRY | base/setup
+$(MARKETPLACE_BASE_BUILD)/deployer-kubectl: $(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_util/* $(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_kubectl_base/* .build/var/REGISTRY | base/setup
 	cd $(MARKETPLACE_TOOLS_PATH) \
 	&& docker build \
 	      --tag "$(MARKETPLACE_REGISTRY)/deployer_kubectl_base" \
@@ -36,7 +37,7 @@ $(MARKETPLACE_BASE_BUILD)/deployer-kubectl: $(MARKETPLACE_TOOLS_PATH)/marketplac
 .PHONY: base/build/deployer/helm
 base/build/deployer/helm: $(MARKETPLACE_BASE_BUILD)/deployer-helm ;
 
-$(MARKETPLACE_BASE_BUILD)/deployer-helm: $(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_util/* $(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_helm_base/* gcloud/REGISTRY | base/setup
+$(MARKETPLACE_BASE_BUILD)/deployer-helm: $(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_util/* $(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_helm_base/* .build/var/REGISTRY | base/setup
 	cd $(MARKETPLACE_TOOLS_PATH) \
 	&& docker build \
 	      --tag "$(MARKETPLACE_REGISTRY)/deployer_helm_base" \
@@ -52,7 +53,7 @@ $(MARKETPLACE_BASE_BUILD)/deployer-helm: $(MARKETPLACE_TOOLS_PATH)/marketplace/d
 base/build/driver: $(MARKETPLACE_BASE_BUILD)/driver ;
 
 $(MARKETPLACE_BASE_BUILD)/driver: \
-	gcloud/REGISTRY \
+	.build/var/REGISTRY \
 	$(MARKETPLACE_TOOLS_PATH)/marketplace/driver/* \
 	$(MARKETPLACE_TOOLS_PATH)/scripts/* \
 	| base/setup
