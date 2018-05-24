@@ -21,7 +21,7 @@ $(MARKETPLACE_BASE_BUILD):
 .PHONY: base/build/deployer/kubectl
 base/build/deployer/kubectl: $(MARKETPLACE_BASE_BUILD)/deployer-kubectl ;
 
-$(MARKETPLACE_BASE_BUILD)/deployer-kubectl: $(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_util/* $(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_kubectl_base/* $(MARKETPLACE_BASE_BUILD)/registry_prefix | base/setup
+$(MARKETPLACE_BASE_BUILD)/deployer-kubectl: $(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_util/* $(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_kubectl_base/* gcloud/REGISTRY | base/setup
 	cd $(MARKETPLACE_TOOLS_PATH) \
 	&& docker build \
 	      --tag "$(MARKETPLACE_REGISTRY)/deployer_kubectl_base" \
@@ -36,7 +36,7 @@ $(MARKETPLACE_BASE_BUILD)/deployer-kubectl: $(MARKETPLACE_TOOLS_PATH)/marketplac
 .PHONY: base/build/deployer/helm
 base/build/deployer/helm: $(MARKETPLACE_BASE_BUILD)/deployer-helm ;
 
-$(MARKETPLACE_BASE_BUILD)/deployer-helm: $(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_util/* $(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_helm_base/* $(MARKETPLACE_BASE_BUILD)/registry_prefix | base/setup
+$(MARKETPLACE_BASE_BUILD)/deployer-helm: $(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_util/* $(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_helm_base/* gcloud/REGISTRY | base/setup
 	cd $(MARKETPLACE_TOOLS_PATH) \
 	&& docker build \
 	      --tag "$(MARKETPLACE_REGISTRY)/deployer_helm_base" \
@@ -52,7 +52,7 @@ $(MARKETPLACE_BASE_BUILD)/deployer-helm: $(MARKETPLACE_TOOLS_PATH)/marketplace/d
 base/build/driver: $(MARKETPLACE_BASE_BUILD)/driver ;
 
 $(MARKETPLACE_BASE_BUILD)/driver: \
-	$(MARKETPLACE_BASE_BUILD)/registry_prefix \
+	gcloud/REGISTRY \
 	$(MARKETPLACE_TOOLS_PATH)/marketplace/driver/* \
 	$(MARKETPLACE_TOOLS_PATH)/scripts/* \
 	| base/setup
@@ -64,17 +64,6 @@ $(MARKETPLACE_BASE_BUILD)/driver: \
 	      .
 	gcloud docker -- push "$(MARKETPLACE_REGISTRY)/driver"
 	@touch "$@"
-
-# Using this rule as a prerequisite triggers rebuilding when
-# MARKETPLACE_REGISTRY variable changes its value.
-$(MARKETPLACE_BASE_BUILD)/registry_prefix: $(MARKETPLACE_BASE_BUILD)/registry_prefix_phony ;
-
-.PHONY: $(MARKETPLACE_BASE_BUILD)/registry_prefix_phony
-$(MARKETPLACE_BASE_BUILD)/registry_prefix_phony: | $(MARKETPLACE_BASE_BUILD)
-ifneq ($(shell [ -e "$(MARKETPLACE_BASE_BUILD)/registry_prefix" ] && cat "$(MARKETPLACE_BASE_BUILD)/registry_prefix" || echo ""),$(MARKETPLACE_REGISTRY))
-	$(info MARKETPLACE_REGISTRY changed to $(MARKETPLACE_REGISTRY))
-	@echo "$(MARKETPLACE_REGISTRY)" > "$(MARKETPLACE_BASE_BUILD)/registry_prefix"
-endif
 
 .PHONY: base/setup
 base/setup: | common/setup $(MARKETPLACE_BASE_BUILD)

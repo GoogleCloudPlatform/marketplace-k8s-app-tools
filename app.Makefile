@@ -79,4 +79,26 @@ app/watch: assert-var-MARKETPLACE_TOOLS_PATH \
 	    --deployer='$(APP_DEPLOYER_IMAGE)' \
 	    --parameters='$(APP_PARAMETERS)'
 
+#############################################
+# PHONY targets that provide user guidance. #
+#############################################
+
+.PHONY: phony
+
+%/registry_prefix: phony
+	#
+	#
+	# The "$@" target has been replaced by gcloud/REGISTRY.
+	#
+	#
+	$(error replace */registry_prefix target with gcloud/REGISTRY)
+
+%/tag_prefix: phony
+	#
+	#
+	# The "$@" target has been replaced by gcloud/TAG.
+	#
+	#
+	$(error replace */tag_prefix target with gcloud/TAG)
+
 endif
