@@ -7,71 +7,55 @@ makefile_dir := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
 include $(makefile_dir)/common.Makefile
 include $(makefile_dir)/var.Makefile
 
-MARKETPLACE_BASE_BUILD = .build/marketplace-base-containers
+.build/base:
+	mkdir -p "$@"
 
-ifdef REGISTRY
-  MARKETPLACE_REGISTRY ?= $(REGISTRY)/marketplace
-endif
 
-$(MARKETPLACE_BASE_BUILD):
-	mkdir -p $(MARKETPLACE_BASE_BUILD)
+.build/base/deployer: | .build/base
+	mkdir -p "$@"
 
-# Target for invoking directly with make. Don't use this as a prerequisite
-# if your target needs to build kubectl deployer.
-# Use $(MARKETPLACE_BASE_BUILD)/deployer-kubectl instead.
-.PHONY: base/build/deployer/kubectl
-base/build/deployer/kubectl: $(MARKETPLACE_BASE_BUILD)/deployer-kubectl ;
 
-$(MARKETPLACE_BASE_BUILD)/deployer-kubectl: $(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_util/* $(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_kubectl_base/* .build/var/REGISTRY | base/setup
+.build/base/deployer/envsubst: \
+	$(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_util/* \
+	$(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_kubectl_base/* \
+	| base/setup .build/base/deployer
+
 	cd $(MARKETPLACE_TOOLS_PATH) \
 	&& docker build \
-	      --tag "$(MARKETPLACE_REGISTRY)/deployer_kubectl_base" \
+	      --tag "gcr.io/google-marketplace-tools/k8s/deployer_envsubst" \
 	      -f marketplace/deployer_kubectl_base/Dockerfile \
 	      .
-	gcloud docker -- push "$(MARKETPLACE_REGISTRY)/deployer_kubectl_base"
 	@touch "$@"
 
-# Target for invoking directly with make. Don't use this as a prerequisite
-# if your target needs to build helm deployer.
-# Use $(MARKETPLACE_BASE_BUILD)/deployer-helm instead.
-.PHONY: base/build/deployer/helm
-base/build/deployer/helm: $(MARKETPLACE_BASE_BUILD)/deployer-helm ;
 
-$(MARKETPLACE_BASE_BUILD)/deployer-helm: $(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_util/* $(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_helm_base/* .build/var/REGISTRY | base/setup
+.build/base/deployer/helm: \
+	$(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_util/* \
+	$(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_helm_base/* \
+	| base/setup .build/base/deployer
+
 	cd $(MARKETPLACE_TOOLS_PATH) \
 	&& docker build \
-	      --tag "$(MARKETPLACE_REGISTRY)/deployer_helm_base" \
+	      --tag "gcr.io/google-marketplace-tools/k8s/deployer_helm" \
 	      -f marketplace/deployer_helm_base/Dockerfile \
 	      .
-	gcloud docker -- push "$(MARKETPLACE_REGISTRY)/deployer_helm_base"
 	@touch "$@"
 
-# Target for invoking directly with make. Don't use this as a prerequisite
-# if your target needs to build the driver.
-# Use $(MARKETPLACE_BASE_BUILD)/driver instead.
-.PHONY: base/build/driver
-base/build/driver: $(MARKETPLACE_BASE_BUILD)/driver ;
 
-$(MARKETPLACE_BASE_BUILD)/driver: \
-	.build/var/REGISTRY \
+.build/base/driver: \
 	$(MARKETPLACE_TOOLS_PATH)/marketplace/driver/* \
 	$(MARKETPLACE_TOOLS_PATH)/scripts/* \
 	| base/setup
-	
+
 	cd $(MARKETPLACE_TOOLS_PATH) \
 	&& docker build \
-	      --tag "$(MARKETPLACE_REGISTRY)/driver" \
+	      --tag "gcr.io/google-marketplace-tools/k8s/test_driver" \
 	      -f marketplace/driver/Dockerfile \
 	      .
-	gcloud docker -- push "$(MARKETPLACE_REGISTRY)/driver"
 	@touch "$@"
 
+
 .PHONY: base/setup
-base/setup: | common/setup $(MARKETPLACE_BASE_BUILD)
-ifndef MARKETPLACE_REGISTRY
-	$(error Must define MARKETPLACE_REGISTRY);
-endif
-	$(info ---- MARKETPLACE_REGISTRY = $(MARKETPLACE_REGISTRY))
+base/setup: | common/setup .build/base
 
 
 endif

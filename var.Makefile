@@ -17,8 +17,13 @@ var/phony: ;
 .build/var/%: .build/var/%-phony ;
 
 .build/var/%-phony: var/phony | .build/var
-	@var_key="$*" ; \
+	@ \
+	var_key="$*" ; \
 	var_val="${$*}" ; \
+	if [ "var_val" = "" ]; then \
+	  echo -e "\n\e[91mMake variable '$*' is required.\e[39m\n"; \
+	  exit 1; \
+	fi; \
 	var_val_old=$$(cat ".build/var/$$var_key" 2> /dev/null) ; \
 	if [ "$$var_val" != "$$var_val_old" ]; then \
 	  echo -e "\033[93m\033[1m$$var_key has been updated.\033[0m" ; \
