@@ -85,26 +85,28 @@ app/watch: assert-var-MARKETPLACE_TOOLS_PATH \
 
 # Note: Ideally all of these targets would be marked as PHONY, but it's
 # not clear how to achieve that with pattern targets.
-.PHONY: /registry_prefix /tag_prefix app/setup
+.PHONY: /registry_prefix /tag_prefix app/setup registry_prefix_phony tag_prefix_phony
 
 /registry_prefix:
 	@echo "\n\n\033[31m\033[1mThe $@ target has been replaced by gcloud/REGISTRY. Please replace */registry_prefix target with gcloud/REGISTRY.\033[0m\n\n"
 	@exit 1
 
-%/registry_prefix:
-	@echo "\n\n\033[31m\033[1mThe $@ target has been replaced by gcloud/REGISTRY. Please replace */registry_prefix target with gcloud/REGISTRY.\033[0m\n\n"
+registry_prefix_phony: ;
+%/registry_prefix: registry_prefix_phony
+	@echo -e "\n\n\033[31m\033[1mThe $@ target has been replaced by gcloud/REGISTRY. Please replace */registry_prefix target with gcloud/REGISTRY.\033[0m\n\n"
 	@exit 1
 
 /tag_prefix:
-	@echo "\n\n\033[31m\033[1mThe $@ target has been replaced by gcloud/TAG. Please replace */tag_prefix target with gcloud/TAG.\033[0m\n\n"
+	@echo -e "\n\n\033[31m\033[1mThe $@ target has been replaced by gcloud/TAG. Please replace */tag_prefix target with gcloud/TAG.\033[0m\n\n"
 	@exit 1
 
-%/tag_prefix:
-	@echo "\n\n\033[31m\033[1mThe $@ target has been replaced by gcloud/TAG. Please replace */tag_prefix target with gcloud/TAG.\033[0m\n\n"
+tag_prefix_phony: ;
+%/tag_prefix: tag_prefix_phony
+	@echo -e "\n\n\033[31m\033[1mThe $@ target has been replaced by gcloud/TAG. Please replace */tag_prefix target with gcloud/TAG.\033[0m\n\n"
 	@exit 1
 
 app/setup:
-	@echo "\n\n\033[31m\033[1mThe $@ target is deprecated. Please removed.\033[0m\n\n"
+	@echo -e "\n\n\033[31m\033[1mThe $@ target is deprecated. Please removed.\033[0m\n\n"
 	@exit 1
 
 endif
