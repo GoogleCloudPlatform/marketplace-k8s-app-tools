@@ -85,20 +85,24 @@ app/watch: assert-var-MARKETPLACE_TOOLS_PATH \
 
 .PHONY: phony
 
+/registry_prefix: phony
+	@echo "\n\n\033[31m\033[1mThe $@ target has been replaced by gcloud/REGISTRY. Please replace */registry_prefix target with gcloud/REGISTRY.\033[0m\n\n"
+	@exit 1
+
 %/registry_prefix: phony
-	#
-	#
-	# The "$@" target has been replaced by gcloud/REGISTRY.
-	#
-	#
-	$(error replace */registry_prefix target with gcloud/REGISTRY)
+	@echo "\n\n\033[31m\033[1mThe $@ target has been replaced by gcloud/REGISTRY. Please replace */registry_prefix target with gcloud/REGISTRY.\033[0m\n\n"
+	@exit 1
+
+/tag_prefix: phony
+	@echo "\n\n\033[31m\033[1mThe $@ target has been replaced by gcloud/TAG. Please replace */tag_prefix target with gcloud/TAG.\033[0m\n\n"
+	@exit 1
 
 %/tag_prefix: phony
-	#
-	#
-	# The "$@" target has been replaced by gcloud/TAG.
-	#
-	#
-	$(error replace */tag_prefix target with gcloud/TAG)
+	@echo "\n\n\033[31m\033[1mThe $@ target has been replaced by gcloud/TAG. Please replace */tag_prefix target with gcloud/TAG.\033[0m\n\n"
+	@exit 1
+
+app/setup: phony
+	@echo "\n\n\033[31m\033[1mThe $@ target is deprecated. Please removed.\033[0m\n\n"
+	@exit 1
 
 endif
