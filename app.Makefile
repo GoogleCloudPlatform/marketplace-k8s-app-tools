@@ -79,29 +79,31 @@ app/watch: assert-var-MARKETPLACE_TOOLS_PATH \
 	    --deployer='$(APP_DEPLOYER_IMAGE)' \
 	    --parameters='$(APP_PARAMETERS)'
 
-#############################################
-# PHONY targets that provide user guidance. #
-#############################################
+###################################################
+# Placeholder targets that provide user guidance. #
+###################################################
 
-.PHONY: phony
+# Note: Ideally all of these targets would be marked as PHONY, but it's
+# not clear how to achieve that with pattern targets.
+.PHONY: /registry_prefix /tag_prefix app/setup
 
-/registry_prefix: phony
+/registry_prefix:
 	@echo "\n\n\033[31m\033[1mThe $@ target has been replaced by gcloud/REGISTRY. Please replace */registry_prefix target with gcloud/REGISTRY.\033[0m\n\n"
 	@exit 1
 
-%/registry_prefix: phony
+%/registry_prefix:
 	@echo "\n\n\033[31m\033[1mThe $@ target has been replaced by gcloud/REGISTRY. Please replace */registry_prefix target with gcloud/REGISTRY.\033[0m\n\n"
 	@exit 1
 
-/tag_prefix: phony
+/tag_prefix:
 	@echo "\n\n\033[31m\033[1mThe $@ target has been replaced by gcloud/TAG. Please replace */tag_prefix target with gcloud/TAG.\033[0m\n\n"
 	@exit 1
 
-%/tag_prefix: phony
+%/tag_prefix:
 	@echo "\n\n\033[31m\033[1mThe $@ target has been replaced by gcloud/TAG. Please replace */tag_prefix target with gcloud/TAG.\033[0m\n\n"
 	@exit 1
 
-app/setup: phony
+app/setup:
 	@echo "\n\n\033[31m\033[1mThe $@ target is deprecated. Please removed.\033[0m\n\n"
 	@exit 1
 
