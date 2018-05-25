@@ -34,17 +34,17 @@ gcloud auth login
 ## Provisioning a GKE cluster and configuring kubectl to connect to it.
 
 ```
-CLUSTER_NAME=cluster-1
+CLUSTER=cluster-1
 ZONE=us-west1-a
 
 # Create the cluster.
-gcloud beta container clusters create "$CLUSTER_NAME" \
+gcloud beta container clusters create "$CLUSTER" \
     --zone "$ZONE" \
     --machine-type "n1-standard-1" \
     --num-nodes "3"
 
 # Configure kubectl authorization.
-gcloud container clusters get-credentials "$CLUSTER_NAME" --zone "$ZONE"
+gcloud container clusters get-credentials "$CLUSTER" --zone "$ZONE"
 
 # Bootstrap RBAC cluster-admin for your user.
 # More info: https://cloud.google.com/kubernetes-engine/docs/how-to/role-based-access-control
