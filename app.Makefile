@@ -2,6 +2,9 @@ ifndef __APP_MAKEFILE__
 
 __APP_MAKEFILE__ := included
 
+.PHONY: app/phony
+app/phony: ;
+
 makefile_dir := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
 include $(makefile_dir)/common.Makefile
 include $(makefile_dir)/base_containers.Makefile
@@ -78,5 +81,24 @@ app/watch: assert-var-MARKETPLACE_TOOLS_PATH \
 	    --marketplace_tools='$(MARKETPLACE_TOOLS_PATH)' \
 	    --deployer='$(APP_DEPLOYER_IMAGE)' \
 	    --parameters='$(APP_PARAMETERS)'
+
+###################################################
+# Placeholder targets that provide user guidance. #
+###################################################
+
+# Note: Ideally all of these targets would be marked as PHONY, but it's
+# not clear how to achieve that with pattern targets.
+
+%registry_prefix: app/phony
+	@echo -e "\n\n\033[31m\033[1mThe $@ target has been replaced by .build/var/REGISTRY. Please replace */registry_prefix target with .build/var/REGISTRY.\033[0m\n\n"
+	@exit 1
+
+%tag_prefix: app/phony
+	@echo -e "\n\n\033[31m\033[1mThe $@ target has been replaced by .build/var/TAG. Please replace */tag_prefix target with .build/var/TAG.\033[0m\n\n"
+	@exit 1
+
+app/setup: app/phony
+	@echo -e "\n\n\033[31m\033[1mThe $@ target is deprecated. Please removed.\033[0m\n\n"
+	@exit 1
 
 endif
