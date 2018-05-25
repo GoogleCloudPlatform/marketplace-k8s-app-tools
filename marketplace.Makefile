@@ -1,37 +1,37 @@
-ifndef __BASE_CONTAINERS_MAKEFILE__
+ifndef __MARKETPLACE_MAKEFILE__
 
-__BASE_CONTAINERS_MAKEFILE__ := included
+__MARKETPLACE_MAKEFILE__ := included
 
 
 makefile_dir := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
 include $(makefile_dir)/common.Makefile
-include $(makefile_dir)/var.Makefile
 
-.build/base:
+
+.build/marketplace: | .build
 	mkdir -p "$@"
 
 
-.build/base/deployer: | .build/base
+.build/marketplace/deployer: | .build/marketplace
 	mkdir -p "$@"
 
 
-.build/base/deployer/envsubst: \
+.build/marketplace/deployer/envsubst: \
 	$(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_util/* \
-	$(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_kubectl_base/* \
-	| base/setup .build/base/deployer
+	$(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_envsubst_base/* \
+	| .build/marketplace/deployer
 
 	cd $(MARKETPLACE_TOOLS_PATH) \
 	&& docker build \
 	      --tag "gcr.io/google-marketplace-tools/k8s/deployer_envsubst" \
-	      -f marketplace/deployer_kubectl_base/Dockerfile \
+	      -f marketplace/deployer_envsubst_base/Dockerfile \
 	      .
 	@touch "$@"
 
 
-.build/base/deployer/helm: \
+.build/marketplace/deployer/helm: \
 	$(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_util/* \
 	$(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_helm_base/* \
-	| base/setup .build/base/deployer
+	| .build/marketplace/deployer
 
 	cd $(MARKETPLACE_TOOLS_PATH) \
 	&& docker build \
@@ -41,10 +41,10 @@ include $(makefile_dir)/var.Makefile
 	@touch "$@"
 
 
-.build/base/driver: \
+.build/marketplace/driver: \
 	$(MARKETPLACE_TOOLS_PATH)/marketplace/driver/* \
 	$(MARKETPLACE_TOOLS_PATH)/scripts/* \
-	| base/setup
+	| .build/marketplace
 
 	cd $(MARKETPLACE_TOOLS_PATH) \
 	&& docker build \
@@ -52,10 +52,6 @@ include $(makefile_dir)/var.Makefile
 	      -f marketplace/driver/Dockerfile \
 	      .
 	@touch "$@"
-
-
-.PHONY: base/setup
-base/setup: | common/setup .build/base
 
 
 endif
