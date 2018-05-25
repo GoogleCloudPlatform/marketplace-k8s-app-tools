@@ -6,13 +6,14 @@ __UBBAGENT_MAKEFILE__ := included
 makefile_dir := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
 include $(makefile_dir)/common.Makefile
 include $(makefile_dir)/base_containers.Makefile
+include $(makefile_dir)/var.Makefile
 
 UBBAGENT_BUILD = .build/marketplace-ubbagent
 
 $(UBBAGENT_BUILD):
 	mkdir -p $(UBBAGENT_BUILD)
 
-$(UBBAGENT_BUILD)/ubbagent: | ubbagent/setup
+$(UBBAGENT_BUILD)/ubbagent: .build/var/MARKETPLACE_REGISTRY| ubbagent/setup
 	cd $(MARKETPLACE_TOOLS_PATH)/vendor/ubbagent \
 	&& docker build \
 	      --tag "$(MARKETPLACE_REGISTRY)/ubbagent" \

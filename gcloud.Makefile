@@ -25,26 +25,4 @@ endif
 $(info ---- REGISTRY = $(REGISTRY))
 $(info ---- NAMESPACE = $(NAMESPACE))
 
-
-# Using this target to trigger rebuilding when REGISTRY changes.
-.PHONY: gcloud/REGISTRY .build/REGISTRY_phony
-gcloud/REGISTRY: .build/REGISTRY
-.build/REGISTRY: .build/REGISTRY_phony
-.build/REGISTRY_phony: | .build
-ifneq ($(shell [ -e ".build/REGISTRY" ] && cat ".build/REGISTRY" || echo ""),$(REGISTRY))
-	$(info REGISTRY changed to $(REGISTRY))
-	@echo "$(REGISTRY)" > ".build/REGISTRY"
-endif
-
-# Using this target to trigger rebuilding when TAG changes.
-.PHONY: gcloud/TAG .build/TAG_phony
-gcloud/TAG: .build/TAG
-.build/TAG: .build/TAG_phony
-.build/TAG_phony: | .build
-ifneq ($(shell [ -e ".build/TAG" ] && cat ".build/TAG" || echo ""),$(TAG))
-	$(info TAG changed to $(TAG))
-	@echo "$(TAG)" > ".build/TAG"
-endif
-
-
 endif
