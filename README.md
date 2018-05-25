@@ -34,7 +34,7 @@ gcloud auth login
 ## Provisioning a GKE cluster and configuring kubectl to connect to it.
 
 ```
-CLUSTER=cluster-1
+CLUSTER_NAME=cluster-1
 ZONE=us-west1-a
 
 # Create the cluster.
