@@ -58,12 +58,6 @@ endif
 .PHONY: app/build
 app/build:: ;
 
-# Builds the application containers in test mode and push them to the registry.
-# Including Makefile can extend this target. This target is
-# a prerequisite for install-test.
-.PHONY: app/build-test
-app/build-test:: ;
-
 # Installs the application into target namespace on the cluster.
 .PHONY: app/install
 app/install: app/build | app/setup
@@ -73,7 +67,7 @@ app/install: app/build | app/setup
 
 # Installs the application into target namespace on the cluster.
 .PHONY: app/install-test
-app/install-test: app/build-test | app/setup
+app/install-test: app/build | app/setup
 	$(MARKETPLACE_TOOLS_PATH)/scripts/start_test.sh \
 	    --marketplace_tools='$(MARKETPLACE_TOOLS_PATH)' \
 	    --deployer='$(APP_DEPLOYER_IMAGE)' \
@@ -89,7 +83,7 @@ app/uninstall: | app/setup
 
 # Runs the verification pipeline.
 .PHONY: app/verify
-app/verify: app/build app/build-test | app/setup
+app/verify: app/build | app/setup
 	$(MARKETPLACE_TOOLS_PATH)/marketplace/driver/driver.sh \
 	    --deployer='$(APP_DEPLOYER_IMAGE)' \
 	    --marketplace_tools='$(MARKETPLACE_TOOLS_PATH)' \
