@@ -25,5 +25,4 @@ endif
 $(info ---- REGISTRY = $(REGISTRY))
 $(info ---- NAMESPACE = $(NAMESPACE))
 
-
 endif
