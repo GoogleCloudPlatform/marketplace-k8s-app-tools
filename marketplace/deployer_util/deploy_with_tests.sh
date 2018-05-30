@@ -24,12 +24,12 @@ overlay_test_schema.py \
 rm -f /data-test/schema.yaml
 
 /bin/expand_config.py
-APP_INSTANCE_NAME="$(/bin/print_config.py --param '{"x-google-marketplace": {"type": "NAME"}}')"
-NAMESPACE="$(/bin/print_config.py --param '{"x-google-marketplace": {"type": "NAMESPACE"}}')"
+export NAME="$(/bin/print_config.py --param '{"x-google-marketplace": {"type": "NAME"}}')"
+export NAMESPACE="$(/bin/print_config.py --param '{"x-google-marketplace": {"type": "NAMESPACE"}}')"
 
-echo "Deploying application \"$APP_INSTANCE_NAME\" in test mode"
+echo "Deploying application \"$NAME\" in test mode"
 
-application_uid=$(kubectl get "applications/$APP_INSTANCE_NAME" \
+application_uid=$(kubectl get "applications/$NAME" \
   --namespace="$NAMESPACE" \
   --output=jsonpath='{.metadata.uid}')
 
@@ -57,7 +57,7 @@ wait_timeout=300
 
 # TODO(#53) Consider moving to a separate job
 echo "INFO Wait $wait_timeout seconds for the application to get into ready state"
-timeout --foreground $wait_timeout wait_for_ready.sh $APP_INSTANCE_NAME $NAMESPACE \
+timeout --foreground $wait_timeout wait_for_ready.sh $NAME $NAMESPACE \
   || print_and_fail "ERROR Application did not get ready before timeout"
 
 tester_manifest="/data/tester.yaml"
@@ -65,7 +65,7 @@ if [[ -e "$tester_manifest" ]]; then
   # Run test job.
   kubectl apply --namespace="$NAMESPACE" --filename="$tester_manifest"
 
-  tester_name=$(cat "$tester_manifest" | yj tojson | jq -r '.metadata.name')
+  tester_name=$(cat "$tester_manifest" | yaml2json | jq -r '.metadata.name')
 
   start_time=$(date +%s)
   poll_interval=4

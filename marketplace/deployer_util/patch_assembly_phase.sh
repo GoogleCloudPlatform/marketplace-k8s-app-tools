@@ -37,15 +37,15 @@ if ! [[ "$status" =~ ^(Pending|Success|Failed)$ ]]; then
   exit 1
 fi
 
-APP_INSTANCE_NAME="$(/bin/print_config.py --param '{"x-google-marketplace": {"type": "NAME"}}')"
-NAMESPACE="$(/bin/print_config.py --param '{"x-google-marketplace": {"type": "NAMESPACE"}}')"
+[[ -z "$NAME" ]] && echo "NAME must be set" && exit 1
+[[ -z "$NAMESPACE" ]] && echo "NAMESPACE must be set" && exit 1
 
 
-echo "Marking deployment of application \"$APP_INSTANCE_NAME\" as \"$status\"."
+echo "Marking deployment of application \"$NAME\" as \"$status\"."
 
 # --output=json is used to force kubectl to succeed even if the patch command
 # makes not change to the resource. Otherwise, this command exits 1.
-kubectl patch "applications/$APP_INSTANCE_NAME" \
+kubectl patch "applications/$NAME" \
   --output=json \
   --namespace="$NAMESPACE" \
   --type=merge \
