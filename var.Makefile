@@ -6,26 +6,38 @@ __VAR_MAKEFILE__ := included
 # defined and trigger rebuilds when variable values change.
 #
 # Usage:
-
-# .build/my_container: .build/var/REGISTRY
-#   The above target rebuilds when $(REGISTRY) changes.
 #
+# my_target: .build/var/REGISTRY
+#
+#     my_target rebuilds when the value of $(REGISTRY) changes.
+#     .build/var/REGISTRY also ensures that $(REGISTRY) value
+#     is non-empty.
 
 
-.PHONY: var/phony
-var/phony: ;
+# The main target that this Makefile offers.
+# This is a real file that gets updated when a variable value
+# change is detected. This rule does not have a recipe. It
+# relies on the %-phony prerequisite to detect the change and
+# update the file.
+.build/var/%: .build/var/%-required .build/var/%-phony ;
 
 
 .build/var:
 	mkdir -p .build/var
 
 
-.build/var/%: .build/var/%-phony ;
+# Since we can't make pattern targets phony, we make them
+# effectively phony by depending on this phony target.
+.PHONY: var/phony
+var/phony: ;
 
 
-.build/var/%-phony: var/phony \
-                    .build/var/%-required \
-                    | .build/var
+# An effectively phony target that always runs to compare the current
+# value of the variable (say VARNAME) with the content of the
+# corresponding .build/var/VARNAME file. If the contents differ,
+# the recipe updates .build/var/VARNAME, which effectively trigger
+# rebuilding of targets depending on .build/var.VARNAME.
+.build/var/%-phony: var/phony | .build/var
 	@ \
 	var_key="$*" ; \
 	var_val="${$*}" ; \
@@ -38,6 +50,8 @@ var/phony: ;
 	fi
 
 
+# An effectively phony target that verifies that the variable
+# has a non-empty value.
 .build/var/%-required: var/phony
 	@ \
 	var_key="$*" ; \
