@@ -24,12 +24,12 @@ overlay_test_schema.py \
 rm -f /data-test/schema.yaml
 
 /bin/expand_config.py
-APP_INSTANCE_NAME="$(/bin/print_config.py --param '{"x-google-marketplace": {"type": "NAME"}}')"
-NAMESPACE="$(/bin/print_config.py --param '{"x-google-marketplace": {"type": "NAMESPACE"}}')"
+export NAME="$(/bin/print_config.py --param '{"x-google-marketplace": {"type": "NAME"}}')"
+export NAMESPACE="$(/bin/print_config.py --param '{"x-google-marketplace": {"type": "NAMESPACE"}}')"
 
-echo "Deploying application \"$APP_INSTANCE_NAME\" in test mode"
+echo "Deploying application \"$NAME\" in test mode"
 
-application_uid=$(kubectl get "applications/$APP_INSTANCE_NAME" \
+application_uid=$(kubectl get "applications/$NAME" \
   --namespace="$NAMESPACE" \
   --output=jsonpath='{.metadata.uid}')
 
@@ -56,7 +56,7 @@ wait_timeout=300
 
 # TODO(#53) Consider moving to a separate job
 wait_for_ready.py \
-  --name $APP_INSTANCE_NAME \
+  --name $NAME \
   --namespace $NAMESPACE \
   --timeout $wait_timeout
 
@@ -67,7 +67,7 @@ if [[ -e "$tester_manifest" ]]; then
   # Run tester.
   kubectl apply --namespace="$NAMESPACE" --filename="$tester_manifest"
 
-  remaining=$(cat $tester_manifest | yj tojson)
+  remaining=$(cat $tester_manifest | yaml2json)
 
   while [[ "$remaining" != "" ]]; do
     # Get the first entry and remove it from remaining resources
