@@ -81,7 +81,6 @@ if [[ -e "$tester_manifest" ]]; then
     start_time=$(date +%s)
     poll_interval=4
     tester_timeout=300
-    result=""
     while true; do
       status=$(kubectl get "$tester_kind/$tester_name" --namespace="$NAMESPACE" -o=json | jq '.status' || echo "{}")
       result=$(echo $status | jq -r '.phase')

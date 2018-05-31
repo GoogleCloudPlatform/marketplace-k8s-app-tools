@@ -38,6 +38,9 @@ app/install: app/build \
 # Installs the application into target namespace on the cluster.
 .PHONY: app/install-test
 app/install-test: app/build \
+                  .build/var/MARKETPLACE_TOOLS_PATH \
+                  .build/var/APP_DEPLOYER_IMAGE \
+                  .build/var/APP_PARAMETERS \
                   .build/var/APP_TEST_PARAMETERS
 	$(MARKETPLACE_TOOLS_PATH)/scripts/start_test.sh \
 	    --marketplace_tools='$(MARKETPLACE_TOOLS_PATH)' \
@@ -60,6 +63,9 @@ app/uninstall: .build/var/MARKETPLACE_TOOLS_PATH \
 # Runs the verification pipeline.
 .PHONY: app/verify
 app/verify: app/build \
+            .build/var/MARKETPLACE_TOOLS_PATH \
+            .build/var/APP_DEPLOYER_IMAGE \
+            .build/var/APP_PARAMETERS \
             .build/var/APP_TEST_PARAMETERS
 	$(MARKETPLACE_TOOLS_PATH)/marketplace/driver/driver.sh \
 	    --deployer='$(APP_DEPLOYER_IMAGE)' \

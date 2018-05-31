@@ -1,5 +1,3 @@
-#!/usr/bin/env python2
-#
 # Copyright 2018 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,6 +20,7 @@ class CommandException(Exception):
   pass
 
 class Command:
+  """Wrapper around subprocess for simpler syntax in python code for calling other programs"""
 
   def __init__(self, cmd, print_call=False, print_result=False):
     if print_call:
