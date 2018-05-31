@@ -20,9 +20,7 @@ import (
 	"log"
 	"strings"
 
-	"bytes"
 	"github.com/ghodss/yaml"
-	"text/template"
 )
 
 type Suite struct {
@@ -104,17 +102,9 @@ type StringAssert struct {
 	Matches  *string `json:"matches,omitempty"`
 }
 
-func LoadSuite(path string, values *map[string]interface{}) *Suite {
+func LoadSuite(path string) *Suite {
 	data, err := ioutil.ReadFile(path)
 	check(err)
-
-	if values != nil {
-		t := template.Must(template.New("mytemplate").Parse(string(data)))
-		buffer := new(bytes.Buffer)
-		err = t.Execute(buffer, values)
-		check(err)
-		data = buffer.Bytes()
-	}
 
 	if strings.HasSuffix(path, ".json") {
 		return loadJsonSuite(data)

@@ -17,12 +17,8 @@ package main
 import (
 	"flag"
 	"fmt"
-	"gopkg.in/yaml.v2"
-	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
-	"path"
 
 	"github.com/GoogleCloudPlatform/marketplace-k8s-app-tools/testrunner/asserts"
 	"github.com/GoogleCloudPlatform/marketplace-k8s-app-tools/testrunner/conditions"
@@ -66,63 +62,18 @@ func (t testStatus) FailuresSoFarCount() int {
 	return t.FailureCount
 }
 
-func GenerateValues(testSpecsValues *string) *map[string]interface{} {
-	if testSpecsValues == nil || *testSpecsValues == "" {
-		return nil
-	}
-
-	valuesFiles, err := ioutil.ReadDir(*testSpecsValues)
-	check(err)
-
-	values := make(map[string]interface{})
-
-	for _, valuesFile := range valuesFiles {
-		if valuesFile.Name()[0] == '.' {
-			continue
-		}
-
-		var valuesPath = path.Join(*testSpecsValues, valuesFile.Name())
-		log.Printf("Reading '%v'.", valuesPath)
-
-		if valuesFile.IsDir() {
-			log.Printf("'%v' is a directory. Ignored.", valuesFile.Name())
-			continue
-		}
-
-		valuesContent, err := ioutil.ReadFile(valuesPath)
-		if err != nil {
-			log.Fatalf("Failed to read %v. Error: %v", valuesFile.Name(), err)
-		}
-
-		var parsed interface{}
-
-		err = yaml.Unmarshal(valuesContent, &parsed)
-		if err != nil {
-			log.Fatalf("Failed to parse '%v' as yaml. Error: %v", valuesPath, err)
-		}
-
-		values[valuesFile.Name()] = parsed
-	}
-
-	return &values
-}
-
 func main() {
 	testSpecs := flags.FlagStringList("test_spec", "Path to a yaml or json file containing the test spec. Can be specified multiple times")
-	testSpecsValues := flag.String("test_spec_values", "", "Path to template values for substitution in the test specs")
-
 	flag.Parse()
 
 	if len(*testSpecs) <= 0 {
 		glog.Fatal("--test_spec must be specified")
 	}
 
-	values := GenerateValues(testSpecsValues)
-
 	status := testStatus{}
 	for _, testSpec := range *testSpecs {
 		glog.Infof(">>> Running %v", testSpec)
-		suite := specs.LoadSuite(testSpec, values)
+		suite := specs.LoadSuite(testSpec)
 		if len(suite.Actions) <= 0 {
 			glog.Info(" > Nothing to run!")
 			continue
@@ -206,10 +157,4 @@ func doOneAction(index int, action *specs.Action, status *testStatus, results []
 	}
 
 	result.Pass()
-}
-
-func check(err interface{}) {
-	if err != nil {
-		log.Fatalf("Error: %v", err)
-	}
 }

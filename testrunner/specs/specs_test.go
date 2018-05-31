@@ -23,26 +23,14 @@ import (
 )
 
 func TestYamlSuite(t *testing.T) {
-	actual := LoadSuite("testdata/suite.yaml", values())
+	actual := LoadSuite("testdata/suite.yaml")
 	expected := expectedSuite()
-	assertSuitesEqual(t, actual, expected)
-}
-
-func TestYamlSuiteNoValues(t *testing.T) {
-	actual := LoadSuite("testdata/suite.yaml", nil)
-	expected := expectedNoExpansionSuite()
 	assertSuitesEqual(t, actual, expected)
 }
 
 func TestJsonSuite(t *testing.T) {
-	actual := LoadSuite("testdata/suite.json", values())
+	actual := LoadSuite("testdata/suite.json")
 	expected := expectedSuite()
-	assertSuitesEqual(t, actual, expected)
-}
-
-func TestJsonSuiteNoValues(t *testing.T) {
-	actual := LoadSuite("testdata/suite.json", nil)
-	expected := expectedNoExpansionSuite()
 	assertSuitesEqual(t, actual, expected)
 }
 
@@ -55,25 +43,13 @@ func assertSuitesEqual(t *testing.T, actual *Suite, expected *Suite) {
 	}
 }
 
-func values() *map[string]interface{} {
-	return &map[string]interface{}{
-		"values": map[string]interface{}{
-			"port":  9012,
-			"title": "Hello World!",
-		},
-		"Vars": map[string]interface{}{
-			"MainVmIp": "192.168.0.1",
-		},
-	}
-}
-
 func expectedSuite() *Suite {
 	return &Suite{
 		Actions: []Action{
 			{
 				Name: "Can load home page",
 				HttpTest: &HttpTest{
-					Url: "http://192.168.0.1:9012",
+					Url: "http://{{.Vars.MainVmIp}}:9012",
 					Expect: HttpExpect{
 						StatusCode: &IntAssert{
 							Equals: newInt(200),
@@ -94,7 +70,7 @@ func expectedSuite() *Suite {
 			{
 				Name: "Can SSH and do basic queries",
 				SshTest: &SshTest{
-					Host: "192.168.0.1",
+					Host: "{{.Vars.MainVmIp}}",
 					Port: newInt(22),
 					Commands: []CliCommand{
 						{
@@ -137,14 +113,6 @@ redis-cli get MY_KEY`),
 			},
 		},
 	}
-}
-
-func expectedNoExpansionSuite() *Suite {
-	suite := expectedSuite()
-	suite.Actions[0].HttpTest.Url = "http://{{.Vars.MainVmIp}}:{{.values.port}}"
-	suite.Actions[0].HttpTest.Expect.BodyText.Html.Title.Contains = newString("{{.values.title}}")
-	suite.Actions[1].SshTest.Host = "{{.Vars.MainVmIp}}"
-	return suite
 }
 
 func newInt(value int) *int {
