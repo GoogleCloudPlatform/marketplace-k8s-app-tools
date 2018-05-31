@@ -26,8 +26,13 @@ yaml2json = ["yaml2json", "tojson"]
 opt = sys.argv[1]
 content = sys.stdin.read()
 if opt in yaml2json:
-  loaded = yaml.load(content)
-  print(json.dumps(loaded))
+  split_content = content.split("---\n")
+  if len(split_content) == 1:
+    loaded = yaml.load(content)
+    print(json.dumps(loaded))
+  else:
+    for part in split_content:
+      print(json.dumps(yaml.load(part)))
 if opt in json2yaml:
   loaded = json.load(content)
   print(yaml.dump(loaded))

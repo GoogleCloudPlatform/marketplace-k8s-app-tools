@@ -34,6 +34,8 @@ function is_healthy() {
           --output=jsonpath='{.spec.replicas}')
       if [[ "$ready_replicas" == "$total_replicas" ]]; then
         echo "true"; return
+      else
+        echo "INFO Deployment replicas are not ready: $ready_replicas/$total_replicas"
       fi
       ;;
     PersistentVolumeClaim)

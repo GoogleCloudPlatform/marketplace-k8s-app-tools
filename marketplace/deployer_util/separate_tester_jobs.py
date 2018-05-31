@@ -24,11 +24,11 @@ from argparse import ArgumentParser
 
 ''' Separate the tester job from resources manifest into a different manifest'''
 
+_GOOGLE_CLOUD_TEST = 'marketplace.cloud.google.com/verification'
+
 parser = ArgumentParser()
 
 parser.add_argument("-m", "--manifest", dest="manifest",
-                    help="the configuration for tests")
-parser.add_argument("-tc", "--test_config", dest="test_config",
                     help="the configuration for tests")
 parser.add_argument("-tm", "--tester_manifest", dest="tester_manifest",
                     help="the output for test resources")
@@ -36,23 +36,22 @@ parser.add_argument("-tm", "--tester_manifest", dest="tester_manifest",
 args = parser.parse_args()
 
 resources = load_resources_yaml(args.manifest)
-
-test_config = load_yaml(args.test_config)
   
 temp_resources = args.manifest + ".tmp"
 with open(temp_resources, "w") as outfile:
   for resource in resources:
     outfile.write(docstart)
 
-    is_test_resource = False
-    if test_config and test_config['jobname']:
-      if resource['kind'] == "Job" and resource['metadata']['name'] == test_config['jobname']:
-        is_test_resource = True
-
-    if is_test_resource:
-      with open(args.tester_manifest, "w") as test_outfile:
+    if ('metadata' in resource and
+        'annotations' in resource['metadata'] and
+        _GOOGLE_CLOUD_TEST in resource['metadata']['annotations'] and 
+        resource['metadata']['annotations'][_GOOGLE_CLOUD_TEST] == 'test'):
+      with open(args.tester_manifest, "a") as test_outfile:
+        print("INFO Tester resource: {}/{}".format(resource['kind'], resource['metadata']['name']))
+        test_outfile.write(docstart)
         yaml.dump(resource, test_outfile, default_flow_style=False)
     else:
+      print("INFO Prod resource: {}/{}".format(resource['kind'], resource['metadata']['name']))
       yaml.dump(resource, outfile, default_flow_style=False)
 
 os.rename(temp_resources, args.manifest)
