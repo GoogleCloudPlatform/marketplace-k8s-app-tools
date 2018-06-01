@@ -59,8 +59,7 @@ def main():
       top_level_resources.extend(resources['items'])
 
     if len(top_level_resources) == 0:
-      log("ERROR no top level resources found")
-      return 1
+      raise Exception("ERROR no top level resources found")
 
     log("INFO top level resources: {}".format(len(top_level_resources)))
     healthy = True
@@ -79,11 +78,10 @@ def main():
     if healthy:
       elapsed_healthy_time = time.time() - healthy_start_time
       if elapsed_healthy_time > min_time_before_healthy:
-        return 0
+        break
 
     if time.time() - poll_start_time > args.timeout:
-      log("ERROR Application did not get ready before timeout of {} seconds".format(args.timeout))
-      return 1
+      raise Exception("ERROR Application did not get ready before timeout of {} seconds".format(args.timeout))
 
     time.sleep(poll_interval)
 

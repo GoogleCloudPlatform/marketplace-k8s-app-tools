@@ -2,7 +2,11 @@ ifndef __COMMON_MAKEFILE__
 
 __COMMON_MAKEFILE__ := included
 
-SHOW_TARGET ?= echo -e "\n\033[93m\033[1m$@\033[0m\n"
+ifndef print_target
+define print_target
+  echo -e "\n\033[93m\033[1mBuilding$(1)\033[0m\n"
+endef
+endif
 
 makefile_dir := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
 include $(makefile_dir)/var.Makefile

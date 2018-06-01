@@ -36,7 +36,7 @@ application_uid=$(kubectl get "applications/$NAME" \
 create_manifests.sh --application_uid="$application_uid" --mode="test"
 
 if [[ -e "/data-test" ]]; then
-  separate_tester_jobs.py \
+  separate_tester_resources.py \
     --manifest "/data/resources.yaml" \
     --tester_manifest "/data/tester.yaml"
 fi
@@ -64,49 +64,9 @@ tester_manifest="/data/tester.yaml"
 if [[ -e "$tester_manifest" ]]; then
   cat $tester_manifest
 
-  # Run tester.
-  kubectl apply --namespace="$NAMESPACE" --filename="$tester_manifest"
-
-  remaining=$(cat $tester_manifest | yaml2json)
-
-  while [[ "$remaining" != "" ]]; do
-    # Get the first entry and remove it from remaining resources
-    resource=$(echo "$remaining" | jq -c . | head -n 1)
-    remaining=$(echo "$remaining" | sed -n '1!p')
-    tester_kind=$(echo "$resource" | jq -r '.kind')
-    [[ $tester_kind != "Pod" ]] && echo "INFO Skip $tester_kind/$tester_name" && continue
-
-    tester_name=$(echo "$resource" | jq -r '.metadata.name')
-
-    start_time=$(date +%s)
-    poll_interval=4
-    tester_timeout=300
-    while true; do
-      status=$(kubectl get "$tester_kind/$tester_name" --namespace="$NAMESPACE" -o=json | jq '.status' || echo "{}")
-      result=$(echo $status | jq -r '.phase')
-
-      if [[ "$result" == "Failed" ]]; then
-        echo "ERROR Tester $tester_kind failed"
-        kubectl logs "$tester_kind/$tester_name" --namespace="$NAMESPACE"
-        exit 1
-      fi
-
-      if [[ "$result" == "Succeeded" ]]; then
-        echo "INFO Tester $tester_kind succeeded"
-        kubectl logs "$tester_kind/$tester_name" --namespace="$NAMESPACE"
-        break
-      fi
-
-      elapsed_time=$(( $(date +%s) - $start_time ))
-      if [[ "$elapsed_time" -gt "$tester_timeout" ]]; then
-        echo "ERROR Tester $tester_kind timeout"
-        kubectl logs "$tester_kind/$tester_name" --namespace="$NAMESPACE"
-        exit 1
-      fi
-
-      sleep "$poll_interval"
-    done
-  done
+  run_tester.py \
+    --namespace $NAMESPACE \
+    --manifest $tester_manifest
 fi
 
 clean_iam_resources.sh
