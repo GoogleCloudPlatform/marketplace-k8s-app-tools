@@ -46,20 +46,14 @@ done
 schema="$("$marketplace_tools/scripts/extract_deployer_config_schema.sh" \
   --deployer="$deployer")"
 
-# Parse the config schema for the keys associated with name and namespace.
-name_key=$("$marketplace_tools/marketplace/deployer_util/extract_schema_key.py" \
-    --schema_file=<(echo "$schema") \
-    --type=NAME)
+# Parse the config schema for the key associated with namespace.
 namespace_key=$("$marketplace_tools/marketplace/deployer_util/extract_schema_key.py" \
     --schema_file=<(echo "$schema") \
     --type=NAMESPACE)
 
-# Extract name and namespace from parameters.
-name=$(echo "$parameters" \
-  | jq --raw-output --arg key "$name_key" '.[$key]')
+# Extract the namespace from parameters.
 namespace=$(echo "$parameters" \
   | jq --raw-output --arg key "$namespace_key" '.[$key]')
-export name
 export namespace
 
 function print_bar() {
@@ -106,7 +100,7 @@ function watch_function() {
     --output=custom-columns='TIME:.firstTimestamp,NAME:.metadata.name,:.reason,:.message'"
   print_bar -
   echo -e "\n\n"
-  kubectl get events --namespace="$namespace" --selector="app=$name" \
+  kubectl get events --namespace="$namespace" \
     --output=custom-columns='TIME:.firstTimestamp,NAME:.metadata.name,:.reason,:.message'
 }
 export -f watch_function
