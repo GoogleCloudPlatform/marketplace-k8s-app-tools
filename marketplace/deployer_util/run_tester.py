@@ -19,7 +19,8 @@ import time
 
 from argparse import ArgumentParser
 from bash_util import Command
-from dict_util import DictWalker
+from bash_util import CommandException
+from dict_util import deep_get
 from yaml_util import load_resources_yaml
 
 _PROG_HELP = "Deploy and run tester pods and wait for them to finish execution"
@@ -39,8 +40,7 @@ def main():
   resources = load_resources_yaml(args.manifest)
 
   for resource_def in resources:
-    resource_def = DictWalker(resource_def)
-    full_name = "{}/{}".format(resource_def['kind'], resource_def[['metadata', 'name']])
+    full_name = "{}/{}".format(resource_def['kind'], deep_get(resource_def, 'metadata', 'name'))
 
     if resource_def['kind'] != 'Pod':
       log("INFO Skip '{}'".format(full_name))
@@ -51,12 +51,19 @@ def main():
     tester_timeout = 300
 
     while True:
-      resource = Command('''
-        kubectl get "{}"
-        --namespace="{}"
-        -o=json
-        '''.format(full_name, args.namespace)).json()
-      result = resource[['status', 'phase']]
+      try: 
+        resource = Command('''
+          kubectl get "{}"
+          --namespace="{}"
+          -o=json
+          '''.format(full_name, args.namespace)).json()
+      except CommandException as ex:
+        log(str(ex))
+        log("INFO retrying")
+        time.sleep(poll_interval)
+        continue
+
+      result = deep_get(resource, 'status', 'phase')
 
       if result == "Failed":
         print_logs(full_name, args.namespace)
@@ -79,7 +86,7 @@ def print_logs(full_name, namespace):
 
 
 def log(msg):
-  print(msg)
+  sys.stdout.write(msg + "\n")
   sys.stdout.flush()
 
 

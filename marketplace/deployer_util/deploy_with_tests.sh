@@ -46,19 +46,10 @@ kubectl apply --namespace="$NAMESPACE" --filename="/data/resources.yaml"
 
 patch_assembly_phase.sh --status="Success"
 
-function print_and_fail() {
-  message=$1
-  echo "$message"
-  exit 1
-}
-
-wait_timeout=300
-
-# TODO(#53) Consider moving to a separate job
 wait_for_ready.py \
   --name $NAME \
   --namespace $NAMESPACE \
-  --timeout $wait_timeout
+  --timeout 300
 
 tester_manifest="/data/tester.yaml"
 if [[ -e "$tester_manifest" ]]; then

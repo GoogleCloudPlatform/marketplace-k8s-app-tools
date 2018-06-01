@@ -21,10 +21,5 @@ import json
 from subprocess import Popen, PIPE, STDOUT
 
 content = sys.stdin.read()
-split_content = content.split("---\n")
-if len(split_content) == 1:
-  loaded = yaml.load(content)
+for loaded in yaml.load_all(content):
   print(json.dumps(loaded))
-else:
-  for part in split_content:
-    print(json.dumps(yaml.load(part)))

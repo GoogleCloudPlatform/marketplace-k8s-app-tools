@@ -15,7 +15,6 @@
 import json
 import shlex
 import subprocess
-from dict_util import DictWalker
 
 
 class CommandException(Exception):
@@ -69,7 +68,7 @@ class Command:
     return self.output
 
   def json(self):
-    return DictWalker(json.loads(self.text()))
+    return json.loads(self.text())
 
   @property
   def exitcode(self):

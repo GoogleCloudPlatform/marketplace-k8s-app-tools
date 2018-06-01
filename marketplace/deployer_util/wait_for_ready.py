@@ -87,7 +87,7 @@ def main():
 
 
 def log(msg):
-  print(msg)
+  sys.stdout.write(msg + "\n")
   sys.stdout.flush()
 
 

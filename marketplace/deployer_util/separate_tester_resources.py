@@ -21,7 +21,7 @@ from yaml_util import load_resources_yaml
 from yaml_util import load_yaml
 from yaml_util import docstart
 from argparse import ArgumentParser
-from dict_util import DictWalker
+from dict_util import deep_get
 
 _PROG_HELP = "Separate the tester job from resources manifest into a different manifest"
 
@@ -38,18 +38,17 @@ def main():
   temp_resources = args.manifest + ".tmp"
   with open(temp_resources, "w") as outfile:
     for resource in resources:
-      resource = DictWalker(resource)
       outfile.write(docstart)
 
-      full_name = "{}/{}".format(resource['kind'], resource[['metadata', 'name']])
-      if resource[['metadata', 'annotations', _GOOGLE_CLOUD_TEST]] == 'test':
+      full_name = "{}/{}".format(resource['kind'], deep_get(resource, 'metadata', 'name'))
+      if deep_get(resource, 'metadata', 'annotations', _GOOGLE_CLOUD_TEST) == 'test':
         with open(args.tester_manifest, "a") as test_outfile:
           print("INFO Tester resource: {}".format(full_name))
           test_outfile.write(docstart)
-          yaml.dump(resource.dict, test_outfile, default_flow_style=False)
+          yaml.dump(resource, test_outfile, default_flow_style=False)
       else:
         print("INFO Prod resource: {}".format(full_name))
-        yaml.dump(resource.dict, outfile, default_flow_style=False)
+        yaml.dump(resource, outfile, default_flow_style=False)
 
   os.rename(temp_resources, args.manifest)
 
