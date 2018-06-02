@@ -86,10 +86,10 @@ function watch_function() {
   echo -e "\n"
   print_bar =
   echo "Service accounts and roles in the following namespace: \"$namespace\""
-  echo "$ kubectl get serviceaccounts,roles,rolebindings,PersistentVolumeClaims --namespace=\"$namespace\" --show-kind"
+  echo "$ kubectl get serviceaccounts,roles,rolebindings,PersistentVolumeClaims,configmap --namespace=\"$namespace\" --show-kind"
   print_bar -
   echo -e "\n\n"
-  kubectl get serviceaccounts,roles,rolebindings,PersistentVolumeClaims \
+  kubectl get serviceaccounts,roles,rolebindings,PersistentVolumeClaims,configmap \
       --namespace="$namespace" \
       --show-kind
 

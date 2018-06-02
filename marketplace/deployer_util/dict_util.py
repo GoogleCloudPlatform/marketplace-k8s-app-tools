@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 #
 # Copyright 2018 Google LLC
 #
@@ -14,12 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import sys
-import yaml
-import json
-
-from subprocess import Popen, PIPE, STDOUT
-
-content = sys.stdin.read()
-for loaded in yaml.load_all(content):
-  print(json.dumps(loaded))
+def deep_get(d, *keys):
+  while d is not None and len(keys) > 0:
+    d = d.get(keys[0], None)
+    keys = keys[1:]
+  return d
