@@ -23,13 +23,6 @@ app/phony: ;
 app/build:: ;
 
 
-# Builds the application containers in test mode and push them to the registry.
-# Including Makefile can extend this target. This target is
-# a prerequisite for install-test.
-.PHONY: app/build-test
-app/build-test:: ;
-
-
 # Installs the application into target namespace on the cluster.
 .PHONY: app/install
 app/install: app/build \
@@ -44,7 +37,7 @@ app/install: app/build \
 
 # Installs the application into target namespace on the cluster.
 .PHONY: app/install-test
-app/install-test: app/build-test \
+app/install-test: app/build \
                   .build/var/MARKETPLACE_TOOLS_PATH \
                   .build/var/APP_DEPLOYER_IMAGE \
                   .build/var/APP_PARAMETERS \
@@ -69,7 +62,7 @@ app/uninstall: .build/var/MARKETPLACE_TOOLS_PATH \
 
 # Runs the verification pipeline.
 .PHONY: app/verify
-app/verify: app/build app/build-test \
+app/verify: app/build \
             .build/var/MARKETPLACE_TOOLS_PATH \
             .build/var/APP_DEPLOYER_IMAGE \
             .build/var/APP_PARAMETERS \

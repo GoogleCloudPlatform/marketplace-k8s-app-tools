@@ -20,6 +20,7 @@ include $(makefile_dir)/common.Makefile
 	$(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_envsubst_base/* \
 	| .build/marketplace/deployer
 
+	$(call print_target, $@)
 	cd $(MARKETPLACE_TOOLS_PATH) \
 	&& docker build \
 	      --tag "gcr.io/google-marketplace-tools/k8s/deployer_envsubst" \
@@ -33,6 +34,7 @@ include $(makefile_dir)/common.Makefile
 	$(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_helm_base/* \
 	| .build/marketplace/deployer
 
+	$(call print_target, $@)
 	cd $(MARKETPLACE_TOOLS_PATH) \
 	&& docker build \
 	      --tag "gcr.io/google-marketplace-tools/k8s/deployer_helm" \
@@ -46,6 +48,7 @@ include $(makefile_dir)/common.Makefile
 	$(MARKETPLACE_TOOLS_PATH)/scripts/* \
 	| .build/marketplace
 
+	$(call print_target, $@)
 	cd $(MARKETPLACE_TOOLS_PATH) \
 	&& docker build \
 	      --tag "gcr.io/google-marketplace-tools/k8s/test_driver" \
