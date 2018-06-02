@@ -17,11 +17,11 @@
 import os
 import yaml
 
-from yaml_util import load_resources_yaml
-from yaml_util import load_yaml
-from yaml_util import docstart
 from argparse import ArgumentParser
 from dict_util import deep_get
+from yaml_util import docstart
+from yaml_util import load_resources_yaml
+from yaml_util import load_yaml
 
 _PROG_HELP = "Separate the tester job from resources manifest into a different manifest"
 
