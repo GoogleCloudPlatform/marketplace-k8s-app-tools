@@ -91,6 +91,10 @@ for chart in "$data_dir/extracted"/*; do
      --manifest "$manifest_dir/$chart_manifest_file" \
      --tests-manifest "$test_data_dir/extracted/helm-tests-$chart_manifest_file"
   fi
+
+  ensure_k8s_apps_labels.py \
+    --manifest "$manifest_dir/$chart_manifest_file" \
+    --appname "$NAME"
 done
 
 /bin/setownership.py \
