@@ -17,6 +17,8 @@
 import yaml
 
 from argparse import ArgumentParser
+from constants import GOOGLE_CLOUD_TEST
+from dict_util import deep_get
 from yaml_util import load_resources_yaml
 
 
@@ -26,8 +28,6 @@ from yaml_util import load_resources_yaml
 
 _HELM_HOOK_KEY = 'helm.sh/hook'
 _HOOK_SUCCESS = 'test-success'
-_HOOK_FAILURE = 'test-failure'
-
 
 def _has_hook(res, hook):
   if not isinstance(res, dict) or not 'metadata' in res.keys():
@@ -41,37 +41,28 @@ def _has_hook(res, hook):
          and annotations[_HELM_HOOK_KEY] == hook)
 
 
-def _is_test(res):
-  return (_has_hook(res, _HOOK_SUCCESS)
-         or _has_hook(res, _HOOK_FAILURE))
-
-
-def _get_all_non_tests(resources):
-  return filter(lambda r: not _is_test(r), resources)
-
-
-def _get_all_success_tests(resources):
-  return filter(lambda r: _has_hook(r, _HOOK_SUCCESS), resources)
-
-
 def main():
   parser = ArgumentParser()
-  parser.add_argument("-m", "--manifest", dest="manifest",
+  parser.add_argument("--manifest", dest="manifest",
                       help="the manifest file location to be cleared of tests")
-  parser.add_argument("-t", "--tests-manifest", dest="tests_manifest",
-                      help="the manifest file to place all the success tests")
   args = parser.parse_args()
   manifest = args.manifest
   resources = load_resources_yaml(manifest)
-  non_tests = _get_all_non_tests(resources)
-  success_tests = _get_all_success_tests(resources)
+  for resource in resources:
+    helm_hook = deep_get(resource, "metadata", "annotations", _HELM_HOOK_KEY)
+    if helm_hook is None:
+      continue
+
+    if helm_hook == _HOOK_SUCCESS:
+      annotations = deep_get(resource, "metadata", "annotations")
+      del annotations[_HELM_HOOK_KEY]
+      annotations[GOOGLE_CLOUD_TEST] = "test"
+    else:
+      raise Exception("Helm hook {} is not supported".format(helm_hook))
+
   with open(manifest, "w") as out:
-    yaml.dump_all(non_tests, out,
+    yaml.dump_all(resources, out,
                   default_flow_style=False, explicit_start=True)
-  if args.tests_manifest:
-    with open(args.tests_manifest, "w") as out:
-      yaml.dump_all(success_tests, out,
-                    default_flow_style=False, explicit_start=True)
 
 
 if __name__ == "__main__":

@@ -18,6 +18,7 @@ import os
 import yaml
 
 from argparse import ArgumentParser
+from constants import GOOGLE_CLOUD_TEST
 from dict_util import deep_get
 from yaml_util import docstart
 from yaml_util import load_resources_yaml
@@ -26,7 +27,6 @@ from yaml_util import load_yaml
 _PROG_HELP = "Separate the tester job from resources manifest into a different manifest"
 
 def main():
-  _GOOGLE_CLOUD_TEST = 'marketplace.cloud.google.com/verification'
 
   parser = ArgumentParser(description=_PROG_HELP)
   parser.add_argument("--manifest", help="the configuration for tests")
@@ -41,7 +41,7 @@ def main():
       outfile.write(docstart)
 
       full_name = "{}/{}".format(resource['kind'], deep_get(resource, 'metadata', 'name'))
-      if deep_get(resource, 'metadata', 'annotations', _GOOGLE_CLOUD_TEST) == 'test':
+      if deep_get(resource, 'metadata', 'annotations', GOOGLE_CLOUD_TEST) == 'test':
         with open(args.tester_manifest, "a") as test_outfile:
           print("INFO Tester resource: {}".format(full_name))
           test_outfile.write(docstart)

@@ -83,14 +83,8 @@ for chart in "$data_dir/extracted"/*; do
     --values=<(/bin/print_config.py --output=yaml) \
     > "$manifest_dir/$chart_manifest_file"
 
-  if [[ "$mode" != "test" ]]; then
-    filter_out_helm_tests.py \
-      --manifest "$manifest_dir/$chart_manifest_file"
-  else
-    filter_out_helm_tests.py \
-     --manifest "$manifest_dir/$chart_manifest_file" \
-     --tests-manifest "$test_data_dir/extracted/helm-tests-$chart_manifest_file"
-  fi
+  filter_out_helm_tests.py \
+    --manifest "$manifest_dir/$chart_manifest_file"
 
   ensure_k8s_apps_labels.py \
     --manifest "$manifest_dir/$chart_manifest_file" \
