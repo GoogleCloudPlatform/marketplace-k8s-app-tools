@@ -24,16 +24,12 @@ from yaml_util import load_resources_yaml
 _K8S_APP_LABEL_KEY = 'app.kubernetes.io/name'
 
 
-def _ensure_resource_has_app_label(resource, app_name):
-  if not type(resource) is dict:
-    raise Exception('Unexpected resource type - {0}'.format(type(resource)))
+def ensure_resource_has_app_label(resource, app_name):
   res = copy.deepcopy(resource)
-  if not 'metadata' in res.keys():
-    res['metadata'] = {}
-  metadata = res['metadata']
-  if not 'labels' in metadata.keys():
-    metadata['labels'] = {}
-  labels = metadata['labels']
+  metadata = res.get('metadata', {})
+  res['metadata'] = metadata
+  labels = metadata.get('labels', {})
+  metadata['labels'] = labels
   if not _K8S_APP_LABEL_KEY in labels.keys():
     labels[_K8S_APP_LABEL_KEY] = app_name
   return res
@@ -50,7 +46,7 @@ def main():
   app_name = args.application_name
   resources = load_resources_yaml(manifest)
   resources = map(
-      lambda r: _ensure_resource_has_app_label(r, app_name) , resources)
+      lambda r: ensure_resource_has_app_label(r, app_name) , resources)
   with open(manifest, "w") as out:
     yaml.dump_all(resources, out,
                   default_flow_style=False, explicit_start=True)
