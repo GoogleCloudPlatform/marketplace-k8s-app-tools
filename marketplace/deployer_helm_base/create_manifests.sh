@@ -67,13 +67,11 @@ extract_manifest "$data_dir"
 
 # Overwrite the templates using the test templates
 if [[ "$mode" = "test" ]]; then
-  if [[ -e "$test_data_dir" ]]; then
-    extract_manifest "$test_data_dir"
+  extract_manifest "$test_data_dir"
 
-    overlay_test_files.py \
-      --manifest "$data_dir/extracted" \
-      --test_manifest "$test_data_dir/extracted"
-  fi 
+  overlay_test_files.py \
+    --manifest "$data_dir/extracted" \
+    --test_manifest "$test_data_dir/extracted"
 fi
 
 # Run helm expansion.
