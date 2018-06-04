@@ -30,13 +30,13 @@ _HOOK_FAILURE = 'test-failure'
 
 
 def _has_hook(res, hook):
-  if not isInstance(res, dict) or not 'metadata' in res.keys():
+  if not isinstance(res, dict) or not 'metadata' in res.keys():
     return False
   metadata = res['metadata']
-  if not isInstance(metadata, dict) or not 'annotations' in metadata.keys():
+  if not isinstance(metadata, dict) or not 'annotations' in metadata.keys():
     return False
   annotations = metadata['annotations']
-  return (isInstance(annotations, dict)
+  return (isinstance(annotations, dict)
          and _HELM_HOOK_KEY in annotations.keys()
          and annotations[_HELM_HOOK_KEY] == hook)
 
