@@ -22,23 +22,11 @@ from dict_util import deep_get
 from yaml_util import load_resources_yaml
 
 
-''' Remove all resources considered to be Kuberenetes Helm tests from
-    a given manifest file. '''
+''' Convert the helm tests into google-marketplace tests. '''
 
 
 _HELM_HOOK_KEY = 'helm.sh/hook'
 _HOOK_SUCCESS = 'test-success'
-
-def _has_hook(res, hook):
-  if not isinstance(res, dict) or not 'metadata' in res.keys():
-    return False
-  metadata = res['metadata']
-  if not isinstance(metadata, dict) or not 'annotations' in metadata.keys():
-    return False
-  annotations = metadata['annotations']
-  return (isinstance(annotations, dict)
-         and _HELM_HOOK_KEY in annotations.keys()
-         and annotations[_HELM_HOOK_KEY] == hook)
 
 
 def main():

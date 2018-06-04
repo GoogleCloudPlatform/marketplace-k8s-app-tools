@@ -83,7 +83,7 @@ for chart in "$data_dir/extracted"/*; do
     --values=<(/bin/print_config.py --output=yaml) \
     > "$manifest_dir/$chart_manifest_file"
 
-  filter_out_helm_tests.py \
+  convert_helm_tests.py \
     --manifest "$manifest_dir/$chart_manifest_file"
 
   ensure_k8s_apps_labels.py \
