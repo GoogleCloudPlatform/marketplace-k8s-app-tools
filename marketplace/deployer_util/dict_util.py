@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 #
 # Copyright 2018 Google LLC
 #
@@ -14,20 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import sys
-import yaml
-import json
-
-from subprocess import Popen, PIPE, STDOUT
-
-json2yaml = ["json2yaml", "toyaml"]
-yaml2json = ["yaml2json", "tojson"]
-
-opt = sys.argv[1]
-content = sys.stdin.read()
-if opt in yaml2json:
-  loaded = yaml.load(content)
-  print(json.dumps(loaded))
-if opt in json2yaml:
-  loaded = json.load(content)
-  print(yaml.dump(loaded))
+def deep_get(d, *keys):
+  while d is not None and len(keys) > 0:
+    d = d.get(keys[0], None)
+    keys = keys[1:]
+  return d

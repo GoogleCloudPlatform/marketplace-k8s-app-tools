@@ -30,26 +30,24 @@ _HOOK_FAILURE = 'test-failure'
 
 
 def _has_hook(res, hook):
-  if not type(res) is dict \
-      or not 'metadata' in res.keys():
+  if not isinstance(res, dict) or not 'metadata' in res.keys():
     return False
   metadata = res['metadata']
-  if not type(metadata) is dict \
-      or not 'annotations' in metadata.keys():
+  if not isinstance(metadata, dict) or not 'annotations' in metadata.keys():
     return False
   annotations = metadata['annotations']
-  return type(annotations) is dict \
-         and _HELM_HOOK_KEY in annotations.keys() \
-         and annotations[_HELM_HOOK_KEY] == hook
+  return (isinstance(annotations, dict)
+         and _HELM_HOOK_KEY in annotations.keys()
+         and annotations[_HELM_HOOK_KEY] == hook)
 
 
-def _is_not_a_test(res):
-  return not _has_hook(res, _HOOK_SUCCESS) \
-         and not _has_hook(res, _HOOK_FAILURE)
+def _is_test(res):
+  return (_has_hook(res, _HOOK_SUCCESS)
+         or _has_hook(res, _HOOK_FAILURE))
 
 
 def _get_all_non_tests(resources):
-  return filter(lambda r: _is_not_a_test(r), resources)
+  return filter(lambda r: not _is_test(r), resources)
 
 
 def _get_all_success_tests(resources):
@@ -78,3 +76,4 @@ def main():
 
 if __name__ == "__main__":
   main()
+
