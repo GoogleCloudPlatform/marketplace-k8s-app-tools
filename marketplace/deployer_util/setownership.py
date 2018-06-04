@@ -17,27 +17,23 @@
 import os
 import yaml
 
+from argparse import ArgumentParser
+from resources import set_resource_ownership
 from yaml_util import load_resources_yaml
 from yaml_util import docstart
-from argparse import ArgumentParser
 
 _PROG_HELP = """
 Scans the manifest folder kubernetes resources and set the Application to own
 the ones defined in its list of components kinds.
 """
 
+
 def main():
   parser = ArgumentParser(description=_PROG_HELP)
-
-  parser.add_argument("-n", "--appname", dest="appname",
-                      help="the name of the applictation instante")
-  parser.add_argument("-i", "--appuid", dest="appuid",
-                      help="the uid of the applictation instante")
-  parser.add_argument("-m", "--manifests", dest="manifests",
-                      help="the folder containing the manifest templates")
-  parser.add_argument("-d", "--dest", dest="dest",
-                      help="the output file for the resulting manifest")
-
+  parser.add_argument("--appname", help="the name of the applictation instance")
+  parser.add_argument("--appuid", help="the uid of the applictation instance")
+  parser.add_argument("--manifests", help="the folder containing the manifest templates")
+  parser.add_argument("--dest", help="the output file for the resulting manifest")
   args = parser.parse_args()
 
   resources = []
@@ -48,9 +44,9 @@ def main():
   apps = [ r for r in resources if r['kind'] == "Application" ]
 
   if len(apps) == 0:
-    raise Exception("Set of resources in {:s} does not include one of Application kind")
+    raise Exception("Set of resources in {:s} does not include one of Application kind".format(args.manifests))
   if len(apps) > 1:
-    raise Exception("Set of resources in {:s} includes more than one of Application kind")
+    raise Exception("Set of resources in {:s} includes more than one of Application kind".format(args.manifests))
 
   kinds = map(lambda x: x['kind'], apps[0]['spec']['componentKinds'])
 
@@ -59,27 +55,15 @@ def main():
 
   print("Owner references not set for " + ", ".join(excluded_kinds))
 
-  with open(args.dest, "w") as outfile:
+  with open(args.dest, "w") as outfile: 
     for resource in resources:
       if resource['kind'] in included_kinds:
         print("Application '{:s}' owns '{:s}/{:s}'".format(
           args.appname, resource['kind'], resource['metadata']['name']))
-        if 'metadata' not in resource:
-          resource['metadata'] = {}
-        if 'ownerReferences' not in resource['metadata']:
-          resource['metadata']['ownerReferences'] = []
-
-        ownerReference = {}
-        ownerReference['apiVersion'] = "app.k8s.io/v1alpha1"
-        ownerReference['kind'] = "Application"
-        ownerReference['controller'] = True
-        ownerReference['blockOwnerDeletion'] = True
-        ownerReference['name'] = args.appname
-        ownerReference['uid'] = args.appuid
-        resource['metadata']['ownerReferences'].append(ownerReference)
-
+        set_resource_ownership(args.appuid, args.appname, resource)
       outfile.write(docstart)
-      yaml.dump(resource, outfile, default_flow_style=False)
+      yaml.dump(resource, outfile, default_flow_style=False)    
+
 
 if __name__ == "__main__":
   main()

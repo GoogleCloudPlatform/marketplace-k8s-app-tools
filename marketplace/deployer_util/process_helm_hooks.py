@@ -22,34 +22,42 @@ from dict_util import deep_get
 from yaml_util import load_resources_yaml
 
 
-''' Convert the helm tests into google-marketplace tests. '''
+''' Remove all resources considered to be Kuberenetes Helm tests from
+    a given manifest file. '''
 
 
 _HELM_HOOK_KEY = 'helm.sh/hook'
 _HOOK_SUCCESS = 'test-success'
+_HOOK_FAILURE = 'test-failure'
 
 
 def main():
   parser = ArgumentParser()
-  parser.add_argument("--manifest", dest="manifest",
-                      help="the manifest file location to be cleared of tests")
+  parser.add_argument("--manifest", help="the manifest file location to be cleared of tests")
+  parser.add_argument("--deploy_tests", action="store_true", help="indicates whether tests should be deployed")
   args = parser.parse_args()
+
   manifest = args.manifest
   resources = load_resources_yaml(manifest)
+  filtered_resources = []
   for resource in resources:
     helm_hook = deep_get(resource, "metadata", "annotations", _HELM_HOOK_KEY)
     if helm_hook is None:
-      continue
-
-    if helm_hook == _HOOK_SUCCESS:
-      annotations = deep_get(resource, "metadata", "annotations")
-      del annotations[_HELM_HOOK_KEY]
-      annotations[GOOGLE_CLOUD_TEST] = "test"
+      filtered_resources.append(resource)
+    elif helm_hook == _HOOK_SUCCESS:
+      if args.deploy_tests:
+        annotations = deep_get(resource, "metadata", "annotations")
+        del annotations[_HELM_HOOK_KEY]
+        annotations[GOOGLE_CLOUD_TEST] = "test"
+        filtered_resources.append(resource)
+    elif helm_hook == _HOOK_FAILURE:
+      if args.deploy_tests:
+        raise Exception("Helm hook {} is not supported".format(helm_hook))
     else:
       raise Exception("Helm hook {} is not supported".format(helm_hook))
 
   with open(manifest, "w") as out:
-    yaml.dump_all(resources, out,
+    yaml.dump_all(filtered_resources, out,
                   default_flow_style=False, explicit_start=True)
 
 

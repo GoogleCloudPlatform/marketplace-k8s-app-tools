@@ -20,6 +20,7 @@ import yaml
 from argparse import ArgumentParser
 from constants import GOOGLE_CLOUD_TEST
 from dict_util import deep_get
+from resources import set_resource_ownership
 from yaml_util import docstart
 from yaml_util import load_resources_yaml
 from yaml_util import load_yaml
@@ -29,6 +30,8 @@ _PROG_HELP = "Separate the tester job from resources manifest into a different m
 def main():
 
   parser = ArgumentParser(description=_PROG_HELP)
+  parser.add_argument("--appname", help="the name of the applictation instance")
+  parser.add_argument("--appuid", help="the uid of the applictation instance")
   parser.add_argument("--manifest", help="the configuration for tests")
   parser.add_argument("--tester_manifest", help="the output for test resources")
   args = parser.parse_args()
@@ -45,6 +48,7 @@ def main():
         with open(args.tester_manifest, "a") as test_outfile:
           print("INFO Tester resource: {}".format(full_name))
           test_outfile.write(docstart)
+          set_resource_ownership(args.appuid, args.appname, resource)
           yaml.dump(resource, test_outfile, default_flow_style=False)
       else:
         print("INFO Prod resource: {}".format(full_name))
