@@ -45,6 +45,11 @@ data_dir="/data"
 manifest_dir="$data_dir/manifest-expanded"
 mkdir -p "$manifest_dir"
 
+if [[ "$mode" = "test" ]]; then
+  test_data_dir="/data-test"
+  mkdir -p "/data-test"
+fi
+
 function extract_manifest() {
   data=$1
   extracted="$data/extracted"
@@ -62,14 +67,11 @@ extract_manifest "$data_dir"
 
 # Overwrite the templates using the test templates
 if [[ "$mode" = "test" ]]; then
-  test_data_dir="/data-test"
-  if [[ -e "$test_data_dir" ]]; then
-    extract_manifest "$test_data_dir"
+  extract_manifest "$test_data_dir"
 
-    overlay_test_files.py \
-      --manifest "$data_dir/extracted" \
-      --test_manifest "$test_data_dir/extracted"
-  fi 
+  overlay_test_files.py \
+    --manifest "$data_dir/extracted" \
+    --test_manifest "$test_data_dir/extracted"
 fi
 
 # Run helm expansion.
@@ -80,6 +82,15 @@ for chart in "$data_dir/extracted"/*; do
     --namespace="$NAMESPACE" \
     --values=<(/bin/print_config.py --output=yaml) \
     > "$manifest_dir/$chart_manifest_file"
+
+  if [[ "$mode" != "test" ]]; then
+    filter_out_helm_tests.py \
+      --manifest "$manifest_dir/$chart_manifest_file"
+  else
+    filter_out_helm_tests.py \
+     --manifest "$manifest_dir/$chart_manifest_file" \
+     --tests-manifest "$test_data_dir/extracted/helm-tests-$chart_manifest_file"
+  fi
 done
 
 /bin/setownership.py \
