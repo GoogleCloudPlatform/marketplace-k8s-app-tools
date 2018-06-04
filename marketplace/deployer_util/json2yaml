@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env python
 #
 # Copyright 2018 Google LLC
 #
@@ -14,22 +14,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set -eox pipefail
+import sys
+import yaml
+import json
 
-[[ -z "$NAME" ]] && echo "NAME must be set" && exit 1
-[[ -z "$NAMESPACE" ]] && echo "NAMESPACE must be set" && exit 1
+from subprocess import Popen, PIPE, STDOUT
 
-# Clean up IAM resources.
-kubectl delete --namespace="$NAMESPACE" --filename=- <<EOF
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: "${NAME}-deployer-sa"
-  namespace: "${NAMESPACE}"
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name: "${NAME}-deployer-rb"
-  namespace: "${NAMESPACE}"
-EOF
+content = sys.stdin.read()
+loaded = json.loads(content)
+print(yaml.safe_dump(loaded, default_flow_style=False))

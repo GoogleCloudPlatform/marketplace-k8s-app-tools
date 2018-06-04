@@ -19,20 +19,8 @@ set -eo pipefail
 for i in "$@"
 do
 case $i in
-  --marketplace_tools=*)
-    marketplace_tools="${i#*=}"
-    shift
-    ;;
   --deployer=*)
     deployer="${i#*=}"
-    shift
-    ;;
-  --parameters=*)
-    parameters="${i#*=}"
-    shift
-    ;;
-  --test_parameters=*)
-    test_parameters="${i#*=}"
     shift
     ;;
   *)
@@ -42,11 +30,6 @@ case $i in
 esac
 done
 
-parameters=$(echo "$parameters" "$test_parameters" | jq -s '.[0] * .[1]')
-entrypoint="/bin/deploy_with_tests.sh"
+[[ -z "$deployer" ]] && >&2 echo "--deployer required" && exit 1
 
-"$marketplace_tools"/scripts/start.sh \
-  --marketplace_tools="$marketplace_tools" \
-  --deployer="$deployer" \
-  --parameters="$parameters" \
-  --entrypoint="$entrypoint"
+docker run --entrypoint="/bin/bash" --rm "$deployer" -c 'cat /data/schema.yaml'
