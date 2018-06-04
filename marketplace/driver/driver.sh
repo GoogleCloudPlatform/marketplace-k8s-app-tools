@@ -153,7 +153,7 @@ $marketplace_tools/scripts/stop.sh \
   --deployer="$deployer" \
   || clean_and_exit "ERROR Failed to stop application"
 
-deletion_timeout=60
+deletion_timeout=180
 echo "INFO Wait for the applications to be deleted"
 timeout --foreground $deletion_timeout "$DIR/wait_for_deletion.sh" "$NAMESPACE" applications \
   || clean_and_exit "ERROR Some applications where not deleted"
