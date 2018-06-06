@@ -84,12 +84,11 @@ for chart in "$data_dir/extracted"/*; do
     > "$manifest_dir/$chart_manifest_file"
 
   if [[ "$mode" != "test" ]]; then
-    filter_out_helm_tests.py \
+    process_helm_hooks.py \
       --manifest "$manifest_dir/$chart_manifest_file"
   else
-    filter_out_helm_tests.py \
-     --manifest "$manifest_dir/$chart_manifest_file" \
-     --tests-manifest "$test_data_dir/extracted/helm-tests-$chart_manifest_file"
+    process_helm_hooks.py --deploy_tests \
+     --manifest "$manifest_dir/$chart_manifest_file"
   fi
 
   ensure_k8s_apps_labels.py \
