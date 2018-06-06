@@ -35,11 +35,11 @@ application_uid=$(kubectl get "applications/$NAME" \
 
 create_manifests.sh --application_uid="$application_uid" --mode="test"
 
-if [[ -e "/data-test" ]]; then
-  separate_tester_resources.py \
-    --manifest "/data/resources.yaml" \
-    --tester_manifest "/data/tester.yaml"
-fi
+separate_tester_resources.py \
+  --appuid "$application_uid" \
+  --appname "$NAME" \
+  --manifest "/data/resources.yaml" \
+  --tester_manifest "/data/tester.yaml"
 
 # Apply the manifest.
 kubectl apply --namespace="$NAMESPACE" --filename="/data/resources.yaml"

@@ -70,6 +70,8 @@ namespace_key=$("$marketplace_tools/marketplace/deployer_util/extract_schema_key
 export NAMESPACE="apptest-$(uuidgen)"
 export NAME="$(echo "$parameters" | jq --raw-output --arg name_key "$name_key" '.[$name_key]')"
 
+kubectl version
+
 echo "INFO Creates namespace \"$NAMESPACE\""
 kubectl create namespace "$NAMESPACE"
 
