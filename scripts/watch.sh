@@ -72,8 +72,8 @@ function watch_function() {
 
   echo -e "\n"
   print_bar =
-  echo "Events with the following label: app=\"$NAME\""
-  echo "$ kubectl get events --namespace="$namespace" --selector="app=$NAME" \\
+  echo "Events in the namespace"
+  echo "$ kubectl get events --namespace="$namespace" \
     --output=custom-columns='TIME:.firstTimestamp,NAME:.metadata.name,:.reason,:.message'"
   print_bar -
   echo -e "\n\n"
