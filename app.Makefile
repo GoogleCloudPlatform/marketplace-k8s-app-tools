@@ -52,7 +52,7 @@ app/install: app/build \
              .build/var/APP_PARAMETERS
 	$(MARKETPLACE_TOOLS_PATH)/scripts/start.sh \
 	    --namespace='$(call namespace_parameter)' \
-	    --name='$(call name_parameter)'
+	    --name='$(call name_parameter)' \
 	    --deployer='$(APP_DEPLOYER_IMAGE)' \
 	    --parameters='$(APP_PARAMETERS)'
 
