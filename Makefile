@@ -35,13 +35,13 @@ $(PYTHON_TEST_DIRS): %: .build/testing/py
 
 
 .build:
-	mkdir -p $@
+	mkdir -p "$@"
 
 
 .build/testing: | .build
-	mkdir -p $@
+	mkdir -p "$@"
 
 
 .build/testing/py: testing/py/Dockerfile | .build/testing
 	docker build -t testing/py testing/py
-	@touch $@
+	@touch "$@"
