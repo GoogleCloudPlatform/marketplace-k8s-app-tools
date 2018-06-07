@@ -102,9 +102,9 @@ def load_values(values_file, values_dir, decoding, schema):
   if values_file and os.path.isfile(values_file):
     with open(values_file, 'r') as f:
       return yaml.safe_load(f.read())
-  config_helper.read_values_to_dict(values_dir,
-                                    decoding,
-                                    schema)
+  return config_helper.read_values_to_dict(values_dir,
+                                           decoding,
+                                           schema)
 
 
 def output_param(values, schema, definition):
