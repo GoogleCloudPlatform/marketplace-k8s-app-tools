@@ -20,16 +20,12 @@ set -o pipefail
 for i in "$@"
 do
 case $i in
-  --marketplace_tools=*)
-    marketplace_tools="${i#*=}"
+  --name=*)
+    name="${i#*=}"
     shift
     ;;
-  --deployer=*)
-    deployer="${i#*=}"
-    shift
-    ;;
-  --parameters=*)
-    parameters="${i#*=}"
+  --namespace=*)
+    namespace="${i#*=}"
     shift
     ;;
   *)
@@ -39,26 +35,7 @@ case $i in
 esac
 done
 
-[[ -z "$marketplace_tools" ]] && >&2 echo "--marketplace_tools required" && exit 1
-[[ -z "$deployer" ]] && >&2 echo "--deployer required" && exit 1
-[[ -z "$parameters" ]] && >&2 echo "--parameters required" && exit 1
-
-# Unpack the deployer schema.
-schema="$("$marketplace_tools/scripts/extract_deployer_config_schema.sh" \
-  --deployer="$deployer")"
-
-# Parse the config schema for the keys associated with name and namespace.
-name_key=$("$marketplace_tools/marketplace/deployer_util/extract_schema_key.py" \
-    --schema_file=<(echo "$schema") \
-    --type=NAME)
-namespace_key=$("$marketplace_tools/marketplace/deployer_util/extract_schema_key.py" \
-    --schema_file=<(echo "$schema") \
-    --type=NAMESPACE)
-
-# Extract name and namespace from parameters.
-name=$(echo "$parameters" \
-  | jq --raw-output --arg key "$name_key" '.[$key]')
-namespace=$(echo "$parameters" \
-  | jq --raw-output --arg key "$namespace_key" '.[$key]')
+[[ -z "$name" ]] && >&2 echo "--name required" && exit 1
+[[ -z "$namespace" ]] && >&2 echo "--namespace required" && exit 1
 
 kubectl delete "application/$name" --namespace="$namespace" --ignore-not-found

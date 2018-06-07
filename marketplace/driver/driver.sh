@@ -27,10 +27,6 @@ case $i in
     parameters="${i#*=}"
     shift
     ;;
-  --test_parameters=*)
-    test_parameters="${i#*=}"
-    shift
-    ;;
   --marketplace_tools=*)
     marketplace_tools="${i#*=}"
     shift
@@ -55,20 +51,13 @@ done
 DIR="$(realpath $(dirname $0))"
 echo $DIR
 
-# Unpack the deployer schema.
-schema="$("$marketplace_tools/scripts/extract_deployer_config_schema.sh" \
-    --deployer="$deployer")"
-
-# Parse the config schema for the keys associated with namespace.
-name_key=$("$marketplace_tools/marketplace/deployer_util/extract_schema_key.py" \
-    --schema_file=<(echo "$schema") \
-    --type=NAME)
-namespace_key=$("$marketplace_tools/marketplace/deployer_util/extract_schema_key.py" \
-    --schema_file=<(echo "$schema") \
-    --type=NAMESPACE)
+namespace_key="$(docker run --entrypoint=/bin/extract_schema_key.py --rm "$deployer" --type NAMESPACE)"
+NAME="$(echo "$parameters" \
+    | docker run -i --entrypoint=/bin/print_config.py --rm "$deployer" \
+    --values_file=- --param '{"x-google-marketplace": {"type": "NAME"}}')"
 
 export NAMESPACE="apptest-$(uuidgen)"
-export NAME="$(echo "$parameters" | jq --raw-output --arg name_key "$name_key" '.[$name_key]')"
+export NAME
 
 kubectl version
 
@@ -83,7 +72,7 @@ function delete_namespace() {
     echo "INFO Collecting logs for deployer"
     kubectl logs "jobs/$deployer_name" --namespace="$NAMESPACE" || echo "ERROR Failed to get logs for deployer $deployer_name"
   fi
-  
+
   echo "INFO Deleting namespace \"$NAMESPACE\""
   kubectl delete namespace $NAMESPACE
 }
@@ -108,11 +97,12 @@ parameters=$(echo "$parameters" \
 echo "INFO Parameters: $parameters"
 
 echo "INFO Initializes the deployer container which will deploy all the application components"
-$marketplace_tools/scripts/start_test.sh \
+$marketplace_tools/scripts/start.sh \
+  --name="$NAME" \
+  --namespace="$NAMESPACE" \
   --deployer="$deployer" \
   --parameters="$parameters" \
-  --test_parameters="$test_parameters" \
-  --marketplace_tools="$marketplace_tools" \
+  --entrypoint='/bin/deploy_with_tests.sh' \
   || clean_and_exit "ERROR Failed to start deployer"
 
 echo "INFO wait for the deployer to succeed"
@@ -148,9 +138,8 @@ deployer_name=""
 
 echo "INFO Stop the application"
 $marketplace_tools/scripts/stop.sh \
-  --marketplace_tools="$marketplace_tools" \
-  --parameters="$parameters" \
-  --deployer="$deployer" \
+  --name="$NAME" \
+  --namespace="$NAMESPACE" \
   || clean_and_exit "ERROR Failed to stop application"
 
 deletion_timeout=180
