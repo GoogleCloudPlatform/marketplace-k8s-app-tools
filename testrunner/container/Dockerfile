@@ -12,15 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-steps:
-# Build binary
-- name: gcr.io/cloud-builders/bazel
-  args: ['build', '//runner:main']
-# Copy binary from symlinked directory and rename it
-- name: launcher.gcr.io/google/debian9
-  args: ['cp', 'bazel-bin/runner/main', 'container/testrunner']
-# Build an image
-- name: gcr.io/cloud-builders/docker
-  args: ['build', '--tag=gcr.io/$PROJECT_ID/testrunner',"container"]
-# Push the image.
-images: ['gcr.io/$PROJECT_ID/testrunner']
+FROM launcher.gcr.io/google/debian9
+
+COPY testrunner /testrunner
+
+ENTRYPOINT ["/testrunner"]
