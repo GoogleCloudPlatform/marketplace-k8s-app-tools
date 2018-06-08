@@ -23,6 +23,7 @@ load(
 go_library(
     name = "go_default_library",
     srcs = [
+        "bash.go",
         "http.go",
     ],
     deps = [
@@ -35,6 +36,7 @@ go_test(
     name = "go_default_test",
     size = "small",
     srcs = [
+        "bash_test.go",
         "http_test.go",
     ],
     deps = [

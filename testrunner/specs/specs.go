@@ -33,6 +33,7 @@ type Action struct {
 	HttpTest  *HttpTest  `json:"httpTest,omitempty"`
 	SshTest   *SshTest   `json:"sshTest,omitempty"`
 	Gcp       *GcpAction `json:"gcp,omitempty"`
+	BashTest  *BashTest  `json:"bashTest,omitempty"`
 }
 
 type Condition struct {
@@ -56,6 +57,11 @@ type GcpAction struct {
 	SetRuntimeConfigVar *SetRuntimeConfigVarGcpAction `json:"setRuntimeConfigVar,omitempty"`
 }
 
+type BashTest struct {
+	Script string      `json:"script"`
+	Expect *BashExpect `json:"expect"`
+}
+
 type CliCommand struct {
 	Command []string   `json:"command,omitempty"`
 	Script  *string    `json:"script,omitempty"`
@@ -71,6 +77,12 @@ type HttpExpect struct {
 type CliExpect struct {
 	Stdout *StringAssert `json:"stdout,omitempty"`
 	Stderr *StringAssert `json:"stderr,omitempty"`
+}
+
+type BashExpect struct {
+	StatusCode *[]IntAssert    `json:"statusCode,omitempty"`
+	Stdout     *[]StringAssert `json:"stdout,omitempty"`
+	Stderr     *[]StringAssert `json:"stderr,omitempty"`
 }
 
 type SetRuntimeConfigVarGcpAction struct {
@@ -93,9 +105,11 @@ type IntAssert struct {
 	AtMost      *int `json:"atMost,omitempty"`
 	LessThan    *int `json:"lessThan,omitempty"`
 	GreaterThan *int `json:"greaterThan,omitempty"`
+	NotEquals   *int `json:"notEquals,omitempty"`
 }
 
 type StringAssert struct {
+	Exclude  *string `json:"exclude,omitempty"`
 	Exactly  *string `json:"exactly,omitempty"`
 	Equals   *string `json:"equals,omitempty"`
 	Contains *string `json:"contains,omitempty"`

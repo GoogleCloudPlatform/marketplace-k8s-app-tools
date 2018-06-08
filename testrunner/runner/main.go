@@ -43,9 +43,9 @@ type testStatus struct {
 	FailureCount int
 }
 
-func (r *testResult) Fail(msg string) {
+func (r *testResult) Fail(testType, msg string) {
 	r.Passed = false
-	r.Message = asserts.MessageWithContext(msg, fmt.Sprintf("%s: HTTP test failed", outcomeFailed))
+	r.Message = asserts.MessageWithContext(msg, fmt.Sprintf("%s: %s", outcomeFailed, testType))
 }
 
 func (r *testResult) Pass() {
@@ -145,16 +145,21 @@ func doOneAction(index int, action *specs.Action, status *testStatus, results []
 	if action.HttpTest != nil {
 		msg := tests.RunHttpTest(action.HttpTest, &http.Client{})
 		if len(msg) > 0 {
-			result.Fail(msg)
+			result.Fail("HTTP test failed", msg)
 			return
 		}
 	} else if action.Gcp != nil {
 		msg := gcp.RunAction(action.Gcp)
 		if len(msg) > 0 {
-			result.Fail(msg)
+			result.Fail("GCP action failed", msg)
+			return
+		}
+	} else if action.BashTest != nil {
+		msg := tests.RunBashTest(action.BashTest)
+		if len(msg) > 0 {
+			result.Fail("Bash test failed", msg)
 			return
 		}
 	}
-
 	result.Pass()
 }
