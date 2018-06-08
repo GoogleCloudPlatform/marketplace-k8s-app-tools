@@ -30,9 +30,8 @@ properties that match the provided type.
 def main():
   parser = ArgumentParser(description=_PROG_HELP)
   parser.add_argument('--schema_file',
-                      help='Path to the schema file.\n'
-                           'Example: /data/schema.yaml',
-                      required=True)
+                      help='Path to the schema file',
+                      default='/data/schema.yaml')
   parser.add_argument('--type',
                       help='The x-google-marketplace type for which '
                            'configuration keys will be printed.\n'

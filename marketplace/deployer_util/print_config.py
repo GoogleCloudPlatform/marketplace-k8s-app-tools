@@ -15,6 +15,7 @@
 # limitations under the License.
 
 import json
+import os
 import re
 import sys
 
@@ -52,7 +53,13 @@ def main():
   parser.add_argument('--output', '-o', help=_OUTPUT_HELP,
                       choices=[OUTPUT_SHELL_VARS, OUTPUT_YAML],
                       default=OUTPUT_YAML)
-  parser.add_argument('--values_dir', help='Where to read value files',
+  parser.add_argument('--values_file',
+                      help='Yaml file to read values from. Takes precendence '
+                      'over --values_dir if the file exists. '
+                      'Use "-" to specify reading from stdin',
+                      default='/data/final_values.yaml')
+  parser.add_argument('--values_dir',
+                      help='Where to read value files',
                       default='/data/final_values')
   parser.add_argument('--schema_file', help='Path to the schema file',
                       default='/data/schema.yaml')
@@ -73,9 +80,7 @@ def main():
 
   schema = config_helper.Schema.load_yaml_file(args.schema_file,
                                                args.schema_file_encoding)
-  values = config_helper.read_values_to_dict(args.values_dir,
-                                             args.decoding,
-                                             schema)
+  values = load_values(args.values_file, args.values_dir, args.decoding, schema)
 
   try:
     if args.param:
@@ -89,6 +94,17 @@ def main():
       sys.stdout.write(output_yaml(values, args.encoding))
   finally:
     sys.stdout.flush()
+
+
+def load_values(values_file, values_dir, decoding, schema):
+  if values_file == '-':
+    return yaml.safe_load(sys.stdin.read())
+  if values_file and os.path.isfile(values_file):
+    with open(values_file, 'r') as f:
+      return yaml.safe_load(f.read())
+  return config_helper.read_values_to_dict(values_dir,
+                                           decoding,
+                                           schema)
 
 
 def output_param(values, schema, definition):

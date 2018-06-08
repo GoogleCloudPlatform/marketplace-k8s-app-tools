@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 #
 # Copyright 2018 Google LLC
 #
@@ -14,11 +14,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import sys
-import yaml
 import json
+import sys
 
-from subprocess import Popen, PIPE, STDOUT
+import yaml
 
 content = sys.stdin.read()
 loaded = json.loads(content)

@@ -28,7 +28,7 @@ properties:
     type: int
   propertyIntWithDefault:
     type: int
-    default: 3   
+    default: 3
   propertyInteger:
     type: integer
   propertyIntegerWithDefault:
@@ -124,6 +124,16 @@ class ConfigHelperTest(unittest.TestCase):
     self.assertIsNone(schema.properties['propertyPassword'].default)
     self.assertEqual('GENERATED_PASSWORD',
                      schema.properties['propertyPassword'].xtype)
+
+  def test_invalid_name(self):
+    self.assertRaises(
+        config_helper.InvalidSchema,
+        lambda: config_helper.Schema.load_yaml(
+        """
+        properties:
+          bad/name:
+            type: string
+        """))
 
   def test_password(self):
     schema = config_helper.Schema.load_yaml(
