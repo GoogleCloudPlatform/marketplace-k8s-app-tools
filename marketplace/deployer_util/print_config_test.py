@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import tempfile
 import unittest
 
 import yaml
@@ -21,6 +22,25 @@ import print_config
 
 
 class PrintConfigTest(unittest.TestCase):
+  def test_load_yaml_file(self):
+    schema = config_helper.Schema.load_yaml(
+        """
+        properties:
+          propertyInt:
+            type: int
+          propertyString:
+            type: string
+        """)
+    with tempfile.NamedTemporaryFile('w') as f:
+      f.write("""
+              propertyInt: 3
+              propertyString: abc
+              """.encode('utf_8'))
+      f.flush()
+
+      values = print_config.load_values(f.name, '/', 'utf_8', schema)
+      self.assertEqual({'propertyInt': 3, 'propertyString': 'abc'}, values)
+
   def test_output_shell_vars(self):
     self.assertEqual(
         '$propertyInt $propertyString',

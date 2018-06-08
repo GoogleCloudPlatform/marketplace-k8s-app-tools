@@ -15,45 +15,49 @@ include $(makefile_dir)/common.Makefile
 	mkdir -p "$@"
 
 
-.build/marketplace/deployer/envsubst: \
-	$(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_util/* \
-	$(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_envsubst_base/* \
-	| .build/marketplace/deployer
-
+.build/marketplace/deployer/envsubst: $(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_util/* \
+                                      $(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_envsubst_base/* \
+                                      | .build/marketplace/deployer
 	$(call print_target, $@)
 	cd $(MARKETPLACE_TOOLS_PATH) \
 	&& docker build \
-	      --tag "gcr.io/google-marketplace-tools/k8s/deployer_envsubst" \
-	      -f marketplace/deployer_envsubst_base/Dockerfile \
-	      .
+	    --tag "gcr.io/google-marketplace-tools/k8s/deployer_envsubst" \
+	    -f marketplace/deployer_envsubst_base/Dockerfile \
+	    .
 	@touch "$@"
 
 
-.build/marketplace/deployer/helm: \
-	$(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_util/* \
-	$(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_helm_base/* \
-	| .build/marketplace/deployer
-
+.build/marketplace/deployer/helm: $(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_util/* \
+                                  $(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_helm_base/* \
+                                  | .build/marketplace/deployer
 	$(call print_target, $@)
 	cd $(MARKETPLACE_TOOLS_PATH) \
 	&& docker build \
-	      --tag "gcr.io/google-marketplace-tools/k8s/deployer_helm" \
-	      -f marketplace/deployer_helm_base/Dockerfile \
-	      .
+	    --tag "gcr.io/google-marketplace-tools/k8s/deployer_helm" \
+	    -f marketplace/deployer_helm_base/Dockerfile \
+	    .
 	@touch "$@"
 
 
-.build/marketplace/driver: \
-	$(MARKETPLACE_TOOLS_PATH)/marketplace/driver/* \
-	$(MARKETPLACE_TOOLS_PATH)/scripts/* \
-	| .build/marketplace
+.build/marketplace/deployer/util: $(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_util/* \
+                                  | .build/marketplace/deployer
+	$(call print_target, $@)
+	cd $(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_util \
+	&& docker build \
+	    --tag "gcr.io/google-marketplace-tools/k8s/deployer_util" \
+	    .
+	@touch "$@"
 
+
+.build/marketplace/driver: $(MARKETPLACE_TOOLS_PATH)/marketplace/driver/* \
+                           $(MARKETPLACE_TOOLS_PATH)/scripts/* \
+                           .build/marketplace
 	$(call print_target, $@)
 	cd $(MARKETPLACE_TOOLS_PATH) \
 	&& docker build \
-	      --tag "gcr.io/google-marketplace-tools/k8s/test_driver" \
-	      -f marketplace/driver/Dockerfile \
-	      .
+	    --tag "gcr.io/google-marketplace-tools/k8s/test_driver" \
+	    -f marketplace/driver/Dockerfile \
+	    .
 	@touch "$@"
 
 

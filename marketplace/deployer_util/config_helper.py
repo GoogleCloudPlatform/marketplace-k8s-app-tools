@@ -98,6 +98,8 @@ class SchemaProperty:
     self._x = dictionary.get(XGOOGLE, None)
     self._password = None
 
+    if not NAME_RE.match(name):
+      raise InvalidSchema('Invalid property name: {}'.format(name))
     if 'type' not in dictionary:
       raise InvalidSchema('Property {} has no type'.format(name))
     self._type = {'int': int,
