@@ -21,6 +21,6 @@ steps:
   args: ['cp', 'bazel-bin/runner/main', 'container/testrunner']
 # Build an image
 - name: gcr.io/cloud-builders/docker
-  args: ['build', '--tag=gcr.io/$PROJECT_ID/testrunner',"container"]
+  args: ['build', '--tag=gcr.io/$PROJECT_ID/testrunner','container']
 # Push the image.
 images: ['gcr.io/$PROJECT_ID/testrunner']

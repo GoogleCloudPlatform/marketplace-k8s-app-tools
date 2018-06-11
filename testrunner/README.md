@@ -9,19 +9,24 @@ install dependencies separately as they are not vendored.
 
 # How to build locally
 
+
+## Binary
+
 Build and run the binary:
 
   ```
   bazel run runner:main -- -logtostderr --test_spec=$PWD/examples/http.yaml
   ```
 
-After that, one can build and run the docker container:
+## Container
+
+To build and run the docker container:
 
   ```
-  # Build binary.
+  # Build binary
   bazel build runner:main
 
-  # Copy the file and rename ir
+  # Copy the file and rename it
   cp bazel-bin/runner/main container/testrunner
 
   # Build container
