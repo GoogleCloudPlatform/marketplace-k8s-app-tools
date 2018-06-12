@@ -15,7 +15,7 @@ install dependencies separately as they are not vendored.
 Build and run the binary:
 
   ```
-  bazel run runner:main -- -logtostderr --test_spec=$PWD/examples/http.yaml
+  bazel run //runner:main -- -logtostderr --test_spec=$PWD/examples/testspecs/http.yaml
   ```
 
 ## Container
@@ -24,13 +24,16 @@ To build and run the docker container:
 
   ```
   # Build binary
-  bazel build runner:main
+  bazel build //runner:main
+
+  # Make temporary directory
+  mkdir -p tmp
 
   # Copy the file and rename it
-  cp bazel-bin/runner/main container/testrunner
+  cp bazel-bin/runner/main tmp/testrunner
 
   # Build container
-  docker build -t testrunner container
+  docker build --tag=testrunner --file=runner/Dockerfile tmp
 
   # Run the installed container, mounting the test definition
   # files as a volume.

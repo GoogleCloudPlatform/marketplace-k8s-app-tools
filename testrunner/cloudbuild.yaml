@@ -16,11 +16,20 @@ steps:
 # Build binary
 - name: gcr.io/cloud-builders/bazel
   args: ['build', '//runner:main']
+# Create tmp directory to keep binary
+- name: gcr.io/google-appengine/debian9
+  args: ['mkdir', '-p', 'tmp']
 # Copy binary from symlinked directory and rename it
-- name: launcher.gcr.io/google/debian9
-  args: ['cp', 'bazel-bin/runner/main', 'container/testrunner']
+- name: gcr.io/google-appengine/debian9
+  args: ['cp', 'bazel-bin/runner/main', 'tmp/testrunner']
+# Copy Dockerfile
+- name: gcr.io/google-appengine/debian9
+  args: ['cp', 'runner/Dockerfile', 'tmp/Dockerfile']
 # Build an image
 - name: gcr.io/cloud-builders/docker
-  args: ['build', '--tag=gcr.io/$PROJECT_ID/testrunner','container']
+  args:
+  - 'build'
+  - '--tag=gcr.io/$PROJECT_ID/testrunner'
+  - 'tmp'
 # Push the image.
 images: ['gcr.io/$PROJECT_ID/testrunner']

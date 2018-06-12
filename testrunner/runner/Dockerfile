@@ -14,6 +14,6 @@
 
 FROM launcher.gcr.io/google/debian9
 
-COPY testrunner /testrunner
+COPY testrunner /bin/testrunner
 
-ENTRYPOINT ["/testrunner"]
+ENTRYPOINT ["/bin/testrunner"]
