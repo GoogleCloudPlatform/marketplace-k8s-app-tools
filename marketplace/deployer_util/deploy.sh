@@ -22,15 +22,26 @@ set -eox pipefail
 # to exit. Prior to exit, set App assembly status to "Failed".
 handle_failure() {
   code=$?
+  if [[ -z "$NAME" ]] || [[ -z "$NAMESPACE" ]]; then
+    # /bin/expand_config.py might have failed.
+    # We fall back to the unexpanded params to get the name and namespace.
+    NAME="$(/bin/print_config.py --param '{"x-google-marketplace": {"type": "NAME"}}' \
+            --values_file /data/values.yaml --values_dir /data/values)"
+    NAMESPACE="$(/bin/print_config.py --param '{"x-google-marketplace": {"type": "NAMESPACE"}}' \
+                 --values_file /data/values.yaml --values_dir /data/values)"
+    export NAME
+    export NAMESPACE
+  fi
   patch_assembly_phase.sh --status="Failed"
   exit $code
 }
 trap "handle_failure" EXIT
 
-
 /bin/expand_config.py
-export NAME="$(/bin/print_config.py --param '{"x-google-marketplace": {"type": "NAME"}}')"
-export NAMESPACE="$(/bin/print_config.py --param '{"x-google-marketplace": {"type": "NAMESPACE"}}')"
+NAME="$(/bin/print_config.py --param '{"x-google-marketplace": {"type": "NAME"}}')"
+NAMESPACE="$(/bin/print_config.py --param '{"x-google-marketplace": {"type": "NAMESPACE"}}')"
+export NAME
+export NAMESPACE
 
 echo "Deploying application \"$NAME\""
 
