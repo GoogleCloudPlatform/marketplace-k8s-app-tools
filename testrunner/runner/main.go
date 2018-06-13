@@ -155,7 +155,7 @@ func doOneAction(index int, action *specs.Action, status *testStatus, results []
 			return
 		}
 	} else if action.BashTest != nil {
-		msg := tests.RunBashTest(action.BashTest)
+		msg := tests.RunBashTest(action.BashTest, &tests.RealExecutor{})
 		if len(msg) > 0 {
 			result.Fail("Bash test failed", msg)
 			return
