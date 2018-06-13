@@ -13,11 +13,23 @@
 # limitations under the License.
 
 steps:
-# Build and load the image into local registry.
+# Build binary
 - name: gcr.io/cloud-builders/bazel
-  args: ['run', '//runner:go_image', '--', '--norun']
-# Re-tag the image to the current project's gcr.io repository.
+  args: ['build', '//runner:main']
+# Create tmp directory to keep binary
+- name: gcr.io/google-appengine/debian9
+  args: ['mkdir', '-p', 'tmp']
+# Copy binary from symlinked directory and rename it
+- name: gcr.io/google-appengine/debian9
+  args: ['cp', 'bazel-bin/runner/main', 'tmp/testrunner']
+# Copy Dockerfile
+- name: gcr.io/google-appengine/debian9
+  args: ['cp', 'runner/Dockerfile', 'tmp/Dockerfile']
+# Build an image
 - name: gcr.io/cloud-builders/docker
-  args: ['tag', 'bazel/runner:go_image', 'gcr.io/$PROJECT_ID/testrunner']
+  args:
+  - 'build'
+  - '--tag=gcr.io/$PROJECT_ID/testrunner'
+  - 'tmp'
 # Push the image.
 images: ['gcr.io/$PROJECT_ID/testrunner']
