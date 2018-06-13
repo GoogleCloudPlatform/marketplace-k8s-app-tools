@@ -9,25 +9,37 @@ install dependencies separately as they are not vendored.
 
 # How to build locally
 
+
+## Binary
+
 Build and run the binary:
 
   ```
-  bazel run runner:main -- -logtostderr --test_spec=$PWD/examples/http.yaml
+  bazel run //runner:main -- -logtostderr --test_spec=$PWD/examples/testspecs/http.yaml
   ```
 
-Or build and run the docker container (see
-[docker bazel rules](https://github.com/bazelbuild/rules_docker)
-for more details):
+## Container
+
+To build and run the docker container:
 
   ```
-  # Build and load the image, but don't run it.
-  bazel run runner:go_image -- --norun
+  # Build binary
+  bazel build //runner:main
+
+  # Make temporary directory
+  mkdir -p tmp
+
+  # Copy the file and rename it
+  cp bazel-bin/runner/main tmp/testrunner
+
+  # Build container
+  docker build --tag=testrunner --file=runner/Dockerfile tmp
 
   # Run the installed container, mounting the test definition
   # files as a volume.
   docker run --rm \
     -v=$PWD/examples:/examples \
-    bazel/runner:go_image -logtostderr --test_spec=/examples/http.yaml
+    testrunner -logtostderr --test_spec=/examples/testspecs/http.yaml
   ```
 
 # Build GCP container
@@ -46,7 +58,7 @@ Two workarounds before running the command below:
   them being uploaded to cloudbuild.
 
   ```
-  rm bazel-*
+  rm -r bazel-*
   ```
 
 Then execute the following.
