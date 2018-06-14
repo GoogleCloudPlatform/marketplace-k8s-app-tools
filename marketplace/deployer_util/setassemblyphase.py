@@ -18,7 +18,6 @@ import os
 import yaml
 
 from yaml_util import load_resources_yaml
-from yaml_util import docstart
 from argparse import ArgumentParser
 
 '''Scans a manifest for an Application resource and sets the assembly phase.'''
@@ -42,13 +41,13 @@ for r in load_resources_yaml(args.manifest):
 apps = [ r for r in resources if r['kind'] == "Application" ]
 
 if len(apps) == 0:
-  raise Exception("Set of resources in {:s} does not include one of Application kind")
+  raise Exception("Set of resources in {:s} does not include one of "
+                  "Application kind".format(args.manifest))
 if len(apps) > 1:
-  raise Exception("Set of resources in {:s} includes more than one of Application kind")
+  raise Exception("Set of resources in {:s} includes more than one of "
+                  "Application kind".format(args.manifest))
 
 apps[0]['spec']['assemblyPhase'] = args.status
 
 with open(args.manifest, "w") as outfile:
-  for resource in resources:
-    outfile.write(docstart)
-    yaml.dump(resource, outfile, default_flow_style=False)
+  yaml.safe_dump_all(resources, outfile, default_flow_style=False, indent=2)

@@ -14,31 +14,31 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import yaml 
 import copy
+import sys
 
-docstart = "---\n"
+import yaml
 
 
 def load_yaml(filename):
   """ Helper function for loading a single yaml entry from file """
   with open(filename, "r") as stream:
     content = stream.read()
-    return yaml.load(content)
+    return yaml.safe_load(content)
 
 
 def add_or_replace(orig, dest):
   for key in orig:
     if (type(orig[key]) is dict and
-       key in dest and 
+       key in dest and
        type(dest[key]) is dict):
       add_or_replace(orig[key], dest[key])
     else:
       dest[key] = copy.deepcopy(orig[key])
-      
+
 
 def overlay_yaml_file(orig, dest):
-  """ Helper function for merging origin yaml file into destination yaml file 
+  """ Helper function for merging origin yaml file into destination yaml file
 
   Args:
     orig: A str, the name of the origin file.
@@ -62,7 +62,7 @@ def load_resources_yaml(filename):
   Returns:
     A list of structured kubernetes resources"""
 
-  print("Reading " + filename)
+  log("Reading " + filename)
   with open(filename, "r") as stream:
     content = stream.read()
     return parse_resources_yaml(content)
@@ -77,12 +77,13 @@ def parse_resources_yaml(content):
   Returns:
     A list of structured kubernetes resources"""
 
-  docs = content.split(docstart)
   docs_yaml = []
-  for doc in docs:
-    if len(doc) > 0:
-      doc_yaml = yaml.load(doc)
-      if doc_yaml and 'kind' in doc_yaml:
-        docs_yaml.append(doc_yaml)
-
+  for doc_yaml in yaml.safe_load_all(content):
+    if doc_yaml and 'kind' in doc_yaml:
+      docs_yaml.append(doc_yaml)
   return docs_yaml
+
+
+def log(msg):
+  sys.stderr.write("{}\n".format(msg))
+  sys.stderr.flush()
