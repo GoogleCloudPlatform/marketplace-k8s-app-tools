@@ -98,8 +98,6 @@ echo "INFO Parameters: $parameters"
 
 echo "INFO Initializes the deployer container which will deploy all the application components"
 $marketplace_tools/scripts/start.sh \
-  --name="$NAME" \
-  --namespace="$NAMESPACE" \
   --deployer="$deployer" \
   --parameters="$parameters" \
   --entrypoint='/bin/deploy_with_tests.sh' \

@@ -24,8 +24,8 @@ endef
 
 # Combines APP_PARAMETERS and APP_TEST_PARAMETERS.
 define combined_parameters
-$(shell echo '$(APP_PARAMETERS)' '$(APP_TEST_PARAMETERS)'
-    | docker run -i --entrypoint=usr/bin/jq --rm $(APP_DEPLOYER_IMAGE) -s '.[0] * .[1]')
+$(shell echo '$(APP_PARAMETERS)' '$(APP_TEST_PARAMETERS)' \
+    | docker run -i --entrypoint=/usr/bin/jq --rm $(APP_DEPLOYER_IMAGE) -s '.[0] * .[1]')
 endef
 
 
@@ -46,27 +46,23 @@ app/build:: ;
 
 # Installs the application into target namespace on the cluster.
 .PHONY: app/install
-app/install: app/build \
-             .build/var/MARKETPLACE_TOOLS_PATH \
-             .build/var/APP_DEPLOYER_IMAGE \
-             .build/var/APP_PARAMETERS
+app/install:: app/build \
+              .build/var/MARKETPLACE_TOOLS_PATH \
+              .build/var/APP_DEPLOYER_IMAGE \
+              .build/var/APP_PARAMETERS
 	$(MARKETPLACE_TOOLS_PATH)/scripts/start.sh \
-	    --namespace='$(call namespace_parameter)' \
-	    --name='$(call name_parameter)' \
 	    --deployer='$(APP_DEPLOYER_IMAGE)' \
 	    --parameters='$(APP_PARAMETERS)'
 
 
 # Installs the application into target namespace on the cluster.
 .PHONY: app/install-test
-app/install-test: app/build \
-                  .build/var/MARKETPLACE_TOOLS_PATH \
-                  .build/var/APP_DEPLOYER_IMAGE \
-                  .build/var/APP_PARAMETERS \
-                  .build/var/APP_TEST_PARAMETERS
+app/install-test:: app/build \
+                   .build/var/MARKETPLACE_TOOLS_PATH \
+                   .build/var/APP_DEPLOYER_IMAGE \
+                   .build/var/APP_PARAMETERS \
+                   .build/var/APP_TEST_PARAMETERS
 	$(MARKETPLACE_TOOLS_PATH)/scripts/start.sh \
-	    --namespace='$(call namespace_parameter)' \
-	    --name='$(call name_parameter)' \
 	    --deployer='$(APP_DEPLOYER_IMAGE)' \
 	    --parameters='$(call combined_parameters)' \
 	    --entrypoint='/bin/deploy_with_tests.sh'
