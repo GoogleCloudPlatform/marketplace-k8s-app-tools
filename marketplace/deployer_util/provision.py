@@ -200,6 +200,30 @@ def provision_service_account(schema, values, prop):
   return sa_name, manifests
 
 
+def provision_storage_class(schema, values, prop):
+  name = get_name(schema, values)
+  namespace = get_namespace(schema, values)
+  if prop.storage_class.ssd:
+    sc_name = dns1123_name('{}-{}-{}'.format(namespace, name, prop.name))
+    manifests = [{
+        'apiVersion': 'storage.k8s.io/v1',
+        'kind': 'StorageClass',
+        'metadata': {
+            'name': sc_name,
+        },
+        # Some intelligence might go here to determine what
+        # provisioner and configuration to use here and below.
+        'provisioner': 'kubernetes.io/gce-pd',
+        'parameters': {
+            'type': 'pd-ssd',
+        }
+    }]
+    return sc_name, manifests
+  else:
+    raise Exception(
+        'Do not know how to provision for property {}'.format(prop.name))
+
+
 def get_name(schema, values):
   for prop in schema.properties.values():
     if prop.xtype == 'NAME':
