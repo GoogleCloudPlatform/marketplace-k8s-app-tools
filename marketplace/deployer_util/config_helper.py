@@ -18,6 +18,7 @@ import collections
 import io
 import os
 import re
+import sys
 
 import yaml
 
@@ -41,7 +42,21 @@ class InvalidSchema(Exception):
   pass
 
 
-def read_values_to_dict(values_dir, codec, schema):
+def load_values(values_file,
+                values_dir,
+                values_dir_encoding,
+                schema):
+  if values_file == '-':
+    return yaml.safe_load(sys.stdin.read())
+  if values_file and os.path.isfile(values_file):
+    with open(values_file, 'r') as f:
+      return yaml.safe_load(f.read())
+  return _read_values_to_dict(values_dir,
+                              values_dir_encoding,
+                              schema)
+
+
+def _read_values_to_dict(values_dir, codec, schema):
   """Returns a dict constructed from files in values_dir."""
   files = [f for f in os.listdir(values_dir)
            if os.path.isfile(os.path.join(values_dir, f))]
@@ -65,8 +80,8 @@ class Schema:
   """Wrapper class providing convenient access to a JSON schema."""
 
   @staticmethod
-  def load_yaml_file(filepath, encoding='utf_8'):
-    with io.open(filepath, 'r', encoding=encoding) as f:
+  def load_yaml_file(filepath):
+    with io.open(filepath, 'r') as f:
       d = yaml.load(f)
       return Schema(d)
 
