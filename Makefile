@@ -29,7 +29,7 @@ test/py: $(PYTHON_TEST_DIRS)
 $(PYTHON_TEST_DIRS): %: .build/testing/py
 	$(info === Running tests in directory $@ ===)
 	@docker run --rm \
-	  -v $(PWD):/data \
+	  -v $(PWD):/data:ro \
 	  testing/py \
 	  python2 -m unittest discover -s "/data/$@" -p "*_test.py"
 
