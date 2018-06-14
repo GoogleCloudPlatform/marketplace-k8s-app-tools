@@ -72,6 +72,21 @@ class ConfigHelperTest(unittest.TestCase):
     self.assertEqual({'propertyString', 'propertyPassword'},
                      set(schema.required))
 
+  def test_bad_required(self):
+    schema_yaml = """
+                  properties:
+                    propertyA:
+                      type: string
+                  required:
+                  - propertyA
+                  - propertyB
+                  - propertyC
+                  """
+    self.assertRaisesRegexp(config_helper.InvalidSchema,
+                            r'propertyB, propertyC',
+                            config_helper.Schema.load_yaml,
+                            schema_yaml)
+
   def test_types_and_defaults(self):
     schema = config_helper.Schema.load_yaml(SCHEMA)
     self.assertEqual(
@@ -251,6 +266,91 @@ class ConfigHelperTest(unittest.TestCase):
                 type: string
                 default: 10
             """))
+
+  def test_service_account(self):
+    schema = config_helper.Schema.load_yaml(
+        """
+        properties:
+          sa:
+            type: string
+            x-google-marketplace:
+              type: SERVICE_ACCOUNT
+              serviceAccount:
+                roles:
+                - type: ClusterRole
+                  rulesType: PREDEFINED
+                  rulesFromRoleName: cluster-admin
+                - type: ClusterRole
+                  rulesType: PREDEFINED
+                  rulesFromRoleName: admin
+                - type: Role
+                  rulesType: PREDEFINED
+                  rulesFromRoleName: edit
+                - type: Role
+                  rulesType: PREDEFINED
+                  rulesFromRoleName: view
+                - type: ClusterRole
+                  rulesType: CUSTOM
+                  rules:
+                  - apiGroups: ['v1']
+                    resources: ['Secret']
+                    verbs: ['*']
+                  - apiGroups: ['v1']
+                    resources: ['ConfigMap']
+                    verbs: ['*']
+                - type: Role
+                  rulesType: CUSTOM
+                  rules:
+                  - apiGroups: ['apps/v1']
+                    resources: ['Deployment']
+                    verbs: ['*']
+                  - apiGroups: ['apps/v1']
+                    resources: ['StatefulSet']
+                    verbs: ['*']
+        """)
+    self.assertIsNotNone(schema.properties['sa'].service_account)
+    sa = schema.properties['sa'].service_account
+    self.assertListEqual(['cluster-admin', 'admin'],
+                         sa.predefined_cluster_roles())
+    self.assertListEqual(['edit', 'view'],
+                         sa.predefined_roles())
+    self.assertListEqual(
+        [
+            [{'apiGroups': ['v1'],
+              'resources': ['Secret'],
+              'verbs': ['*']},
+             {'apiGroups': ['v1'],
+              'resources': ['ConfigMap'],
+              'verbs': ['*']},
+            ]
+        ],
+        sa.custom_cluster_role_rules())
+    self.assertListEqual(
+        [
+            [{'apiGroups': ['apps/v1'],
+              'resources': ['Deployment'],
+              'verbs': ['*']},
+             {'apiGroups': ['apps/v1'],
+              'resources': ['StatefulSet'],
+              'verbs': ['*']},
+            ]
+        ],
+        sa.custom_role_rules())
+
+  def test_storage_class(self):
+    schema = config_helper.Schema.load_yaml(
+        """
+        properties:
+          sc:
+            type: string
+            x-google-marketplace:
+              type: STORAGE_CLASS
+              storageClass:
+                type: SSD
+        """)
+    self.assertIsNotNone(schema.properties['sc'].storage_class)
+    sc = schema.properties['sc'].storage_class
+    self.assertTrue(sc.ssd)
 
 
 if __name__ == 'main':
