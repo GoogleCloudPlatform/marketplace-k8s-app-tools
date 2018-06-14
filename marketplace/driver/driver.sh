@@ -45,7 +45,7 @@ done
 [[ -z "$deployer" ]] && deployer="$APP_DEPLOYER_IMAGE"
 [[ -z "$parameters" ]] && parameters="{}"
 [[ -z "$marketplace_tools" ]] && echo "--marketplace_tools required" && exit 1
-[[ -z "$wait_timeout" ]] && wait_timeout=300
+[[ -z "$wait_timeout" ]] && wait_timeout=600
 
 # Getting the directory of the running script
 DIR="$(realpath $(dirname $0))"
