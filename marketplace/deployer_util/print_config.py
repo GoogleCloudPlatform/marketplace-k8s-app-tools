@@ -24,6 +24,7 @@ from argparse import ArgumentParser
 import yaml
 
 import config_helper
+import schema_values_common
 
 _PROG_HELP = """
 Outputs configuration parameters constructed from files in a directory.
@@ -39,8 +40,7 @@ yaml: a YAML file.
 
 OUTPUT_YAML = 'yaml'
 OUTPUT_SHELL_VARS = 'shell_vars'
-CODEC_UTF8 = 'utf_8'
-CODEC_ASCII = 'ascii'
+
 ENV_KEY_RE = re.compile(r'^[a-zA-z0-9_]+$')
 
 
@@ -50,37 +50,18 @@ class InvalidParameter(Exception):
 
 def main():
   parser = ArgumentParser(description=_PROG_HELP)
+  schema_values_common.add_to_argument_parser(parser)
   parser.add_argument('--output', '-o', help=_OUTPUT_HELP,
                       choices=[OUTPUT_SHELL_VARS, OUTPUT_YAML],
                       default=OUTPUT_YAML)
-  parser.add_argument('--values_file',
-                      help='Yaml file to read values from. Takes precendence '
-                      'over --values_dir if the file exists. '
-                      'Use "-" to specify reading from stdin',
-                      default='/data/final_values.yaml')
-  parser.add_argument('--values_dir',
-                      help='Where to read value files',
-                      default='/data/final_values')
-  parser.add_argument('--schema_file', help='Path to the schema file',
-                      default='/data/schema.yaml')
-  parser.add_argument('--schema_file_encoding',
-                      help='Encoding of the schema file',
-                      choices=[CODEC_UTF8, CODEC_ASCII], default=CODEC_UTF8)
   parser.add_argument('--param',
                       help='If specified, outputs the value of a single '
                       'parameter unescaped. The value here is a JSON '
                       'which should partially match the parameter schema.')
-  parser.add_argument('--decoding',
-                      help='Codec used for decoding value file contents',
-                      choices=[CODEC_UTF8, CODEC_ASCII], default=CODEC_UTF8)
-  parser.add_argument('--encoding',
-                      help='Codec for encoding output files',
-                      choices=[CODEC_UTF8, CODEC_ASCII], default=CODEC_UTF8)
   args = parser.parse_args()
 
-  schema = config_helper.Schema.load_yaml_file(args.schema_file,
-                                               args.schema_file_encoding)
-  values = load_values(args.values_file, args.values_dir, args.decoding, schema)
+  schema = schema_values_common.load_schema(args)
+  values = schema_values_common.load_values(args)
 
   try:
     if args.param:
@@ -91,20 +72,9 @@ def main():
     if args.output == OUTPUT_SHELL_VARS:
       sys.stdout.write(output_shell_vars(values))
     elif args.output == OUTPUT_YAML:
-      sys.stdout.write(output_yaml(values, args.encoding))
+      sys.stdout.write(output_yaml(values))
   finally:
     sys.stdout.flush()
-
-
-def load_values(values_file, values_dir, decoding, schema):
-  if values_file == '-':
-    return yaml.safe_load(sys.stdin.read())
-  if values_file and os.path.isfile(values_file):
-    with open(values_file, 'r') as f:
-      return yaml.safe_load(f.read())
-  return config_helper.read_values_to_dict(values_dir,
-                                           decoding,
-                                           schema)
 
 
 def output_param(values, schema, definition):
@@ -129,7 +99,7 @@ def output_shell_vars(values):
   return ' '.join(['${}'.format(k) for k in sorted_keys])
 
 
-def output_yaml(values, encoding):
+def output_yaml(values):
   new_values = {}
   for key, value in values.items():
     current_new_values = new_values
@@ -141,7 +111,6 @@ def output_yaml(values, encoding):
     current_new_values[key] = value
 
   return yaml.safe_dump(new_values,
-                        encoding=encoding,
                         default_flow_style=False,
                         indent=2)
 
