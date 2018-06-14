@@ -31,6 +31,10 @@ class ProvisionTest(unittest.TestCase):
                             'abc.def')
     self.assertModifiedName(dns1123_name('-123.456.'),
                             '123.456')
+    self.assertModifiedName(
+        dns1123_name('very-long-Name-that-gets-chopped-at-a-dash-'
+                     '-------------------------------------------'),
+        'very-long-name-that-gets-chopped-at-a-dash')
 
   def assertModifiedName(self, text, expected):
     self.assertEqual(text[:-5], expected)

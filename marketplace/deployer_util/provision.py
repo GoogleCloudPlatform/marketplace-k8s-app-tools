@@ -250,14 +250,16 @@ def dns1123_name(name):
   fixed = name.lower()
   fixed = re.sub(r'[^a-z0-9.-]', '', fixed)
   fixed = fixed.strip('.-')
+  if len(fixed) > 64:
+    fixed = fixed[:59]
 
   # Add a hash at the end if the name has been modified.
-  if fixed != name or len(fixed) > 59:
+  if fixed != name:
     # Hash and get the first 4 characters of the hash.
     m = hashlib.sha256()
     m.update(name)
     h4sh = m.hexdigest()[:4]
-    fixed = '{}-{}'.format(fixed[:59], h4sh)
+    fixed = '{}-{}'.format(fixed, h4sh)
   return fixed
 
 
