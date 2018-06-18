@@ -78,13 +78,12 @@ def main():
 
 
 def output_param(values, schema, definition):
-  candidates = [k for k, v in schema.properties.iteritems()
-                if v.matches_definition(definition)]
+  candidates = schema.properties_matching(definition)
   if len(candidates) != 1:
     raise InvalidParameter(
         'There must be exactly one parameter matching but found {}: {}'
         .format(len(candidates), definition))
-  key = candidates[0]
+  key = candidates[0].name
   if key not in values:
     raise InvalidParameter('Parameter {} has no value'.format(key))
   return str(values[key])

@@ -150,6 +150,28 @@ class ConfigHelperTest(unittest.TestCase):
             type: string
         """))
 
+  def test_required(self):
+    schema = config_helper.Schema.load_yaml(SCHEMA)
+    self.assertTrue(schema.properties['propertyString'].required)
+    self.assertTrue(schema.properties['propertyPassword'].required)
+    self.assertFalse(schema.properties['propertyInt'].required)
+    self.assertFalse(schema.properties['propertyNumberWithDefault'].required)
+
+  def test_schema_properties_matching(self):
+    schema = config_helper.Schema.load_yaml(SCHEMA)
+    self.assertEqual([schema.properties['propertyPassword']],
+                     schema.properties_matching({
+                         'x-google-marketplace': {
+                             'type':
+                             'GENERATED_PASSWORD'
+                         }
+                     }))
+    self.assertEqual([schema.properties['propertyInt'],
+                      schema.properties['propertyIntWithDefault']],
+                     schema.properties_matching({
+                         'type': 'int',
+                     }))
+
   def test_password(self):
     schema = config_helper.Schema.load_yaml(
         """
@@ -308,8 +330,8 @@ class ConfigHelperTest(unittest.TestCase):
                     resources: ['StatefulSet']
                     verbs: ['*']
         """)
-    self.assertIsNotNone(schema.properties['sa'].service_account)
     sa = schema.properties['sa'].service_account
+    self.assertIsNotNone(sa)
     self.assertListEqual(['cluster-admin', 'admin'],
                          sa.predefined_cluster_roles())
     self.assertListEqual(['edit', 'view'],
