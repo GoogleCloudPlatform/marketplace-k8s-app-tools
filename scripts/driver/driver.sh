@@ -27,10 +27,6 @@ case $i in
     parameters="${i#*=}"
     shift
     ;;
-  --marketplace_tools=*)
-    marketplace_tools="${i#*=}"
-    shift
-    ;;
   --wait_timeout=*)
     wait_timeout="${i#*=}"
     shift
@@ -44,7 +40,6 @@ done
 
 [[ -z "$deployer" ]] && deployer="$APP_DEPLOYER_IMAGE"
 [[ -z "$parameters" ]] && parameters="{}"
-[[ -z "$marketplace_tools" ]] && echo "--marketplace_tools required" && exit 1
 [[ -z "$wait_timeout" ]] && wait_timeout=600
 
 # Getting the directory of the running script
@@ -85,9 +80,6 @@ function clean_and_exit() {
   exit 1
 }
 
-echo "INFO Creates the Application CRD in the namespace"
-kubectl apply -f "$marketplace_tools/crd/app-crd.yaml"
-
 parameters=$(echo "$parameters" \
   | jq \
     --arg namespace_key "$namespace_key" \
@@ -97,7 +89,7 @@ parameters=$(echo "$parameters" \
 echo "INFO Parameters: $parameters"
 
 echo "INFO Initializes the deployer container which will deploy all the application components"
-$marketplace_tools/scripts/start.sh \
+$DIR/../start.sh \
   --deployer="$deployer" \
   --parameters="$parameters" \
   --entrypoint='/bin/deploy_with_tests.sh' \
@@ -135,7 +127,7 @@ kubectl logs "jobs/$deployer_name" --namespace="$NAMESPACE" || echo "ERROR Faile
 deployer_name=""
 
 echo "INFO Stop the application"
-$marketplace_tools/scripts/stop.sh \
+$DIR/../stop.sh \
   --name="$NAME" \
   --namespace="$NAMESPACE" \
   || clean_and_exit "ERROR Failed to stop application"

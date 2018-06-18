@@ -85,9 +85,8 @@ app/verify: app/build \
             .build/var/APP_DEPLOYER_IMAGE \
             .build/var/APP_PARAMETERS \
             .build/var/APP_TEST_PARAMETERS
-	$(MARKETPLACE_TOOLS_PATH)/marketplace/driver/driver.sh \
+	$(MARKETPLACE_TOOLS_PATH)/scripts/driver/driver.sh \
 	    --deployer='$(APP_DEPLOYER_IMAGE)' \
-	    --marketplace_tools='$(MARKETPLACE_TOOLS_PATH)' \
 	    --parameters='$(call combined_parameters)'
 
 
