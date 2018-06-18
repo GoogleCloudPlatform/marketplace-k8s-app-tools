@@ -50,6 +50,9 @@ def process(schema, values):
   props = {}
   manifests = []
   for prop in schema.properties.values():
+    if prop.name in values:
+      # The value has been explicitly specified. Skip.
+      continue
     if prop.service_account:
       value, sa_manifests = provision_service_account(schema, values, prop)
       props[prop.name] = value
@@ -59,6 +62,7 @@ def process(schema, values):
       props[prop.name] = value
       manifests += sc_manifests
 
+  # Merge input and provisioned properties.
   data = dict(list(values.iteritems()) + list(props.iteritems()))
   data = {k: str(v) for k, v in data.iteritems()}
   manifests.append({
@@ -77,6 +81,8 @@ def process(schema, values):
 
 
 def provision_service_account(schema, values, prop):
+  # TODO(#136): Drop labels, move it to start.sh by introducing
+  # a utility similar to setownership.py.
   name = get_name(schema, values)
   namespace = get_namespace(schema, values)
   sa_name = dns1123_name('{}-{}'.format(name, prop.name))
@@ -225,19 +231,24 @@ def provision_storage_class(schema, values, prop):
 
 
 def get_name(schema, values):
-  for prop in schema.properties.values():
-    if prop.xtype == 'NAME':
-      return values[prop.name]
-  raise Exception(
-      'Unable to find property with x-google-marketplace.type=NAME')
+  return get_property_value(schema, values, 'NAME')
 
 
 def get_namespace(schema, values):
-  for prop in schema.properties.values():
-    if prop.xtype == 'NAMESPACE':
-      return values[prop.name]
-  raise Exception(
-      'Unable to find property with x-google-marketplace.type=NAMESPACE')
+  return get_property_value(schema, values, 'NAMESPACE')
+
+
+def get_property_value(schema, values, xtype):
+  candidates = schema.properties_matching(
+      {
+          'x-google-marketplace': {
+              'type': xtype,
+          },
+      })
+  if len(candidates) != 1:
+    raise Exception('Unable to find exactly one property with '
+                    'x-google-marketplace.type={}'.format(xtype))
+  return values[candidates[0].name]
 
 
 def dns1123_name(name):
