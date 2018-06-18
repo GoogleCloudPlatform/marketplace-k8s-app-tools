@@ -92,7 +92,7 @@ class Schema:
   def __init__(self, dictionary):
     self._required = dictionary.get('required', [])
     self._properties = {
-        k: SchemaProperty(k, v)
+        k: SchemaProperty(k, v, k in self._required)
         for k, v in dictionary.get('properties', {}).iteritems()
     }
 
@@ -110,13 +110,18 @@ class Schema:
   def properties(self):
     return self._properties
 
+  def properties_matching(self, definition):
+    return [v for k, v in self._properties.iteritems()
+            if v.matches_definition(definition)]
+
 
 class SchemaProperty:
   """Wrapper class providing convenient access to a JSON schema property."""
 
-  def __init__(self, name, dictionary):
+  def __init__(self, name, dictionary, required):
     self._name = name
     self._d = dictionary
+    self._required = required
     self._default = dictionary.get('default', None)
     self._x = dictionary.get(XGOOGLE, None)
     self._password = None
@@ -166,6 +171,10 @@ class SchemaProperty:
   @property
   def name(self):
     return self._name
+
+  @property
+  def required(self):
+    return self._required
 
   @property
   def default(self):
