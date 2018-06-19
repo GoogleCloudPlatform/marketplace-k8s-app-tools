@@ -19,14 +19,6 @@ set -eo pipefail
 for i in "$@"
 do
 case $i in
-  --name=*)
-    name="${i#*=}"
-    shift
-    ;;
-  --namespace=*)
-    namespace="${i#*=}"
-    shift
-    ;;
   --deployer=*)
     deployer="${i#*=}"
     shift
@@ -46,11 +38,18 @@ case $i in
 esac
 done
 
-[[ -z "$name" ]] && >&2 echo "--name required" && exit 1
-[[ -z "$namespace" ]] && >&2 echo "--namespace required" && exit 1
 [[ -z "$deployer" ]] && >&2 echo "--deployer required" && exit 1
 [[ -z "$parameters" ]] && >&2 echo "--parameters required" && exit 1
 [[ -z "$entrypoint" ]] && entrypoint="/bin/deploy.sh"
+
+name="$( \
+    echo "${parameters}" \
+    | docker run -i --entrypoint=/bin/print_config.py --rm "${deployer}" \
+      --values_file=- --param '{"x-google-marketplace": {"type": "NAME"}}')"
+namespace="$( \
+    echo "${parameters}"\
+    | docker run -i --entrypoint=/bin/print_config.py --rm "${deployer}" \
+      --values_file=- --param '{"x-google-marketplace": {"type": "NAMESPACE"}}')"
 
 # Create Application instance.
 kubectl apply --namespace="$namespace" --filename=- <<EOF
@@ -75,6 +74,15 @@ EOF
 application_uid=$(kubectl get "applications/$name" \
   --namespace="$namespace" \
   --output=jsonpath='{.metadata.uid}')
+
+# Provisions the ConfigMap as well as any other external resource dependencies.
+# We set the application as the owner for all of these resources.
+echo "${parameters}" \
+    | docker run -i --entrypoint=/bin/provision.py --rm "${deployer}" --values_file=- \
+    | docker run -i --entrypoint=/bin/setownership.py --rm "${deployer}" \
+      --manifests=- --dest=- --appname="${name}" --appuid="${application_uid}" --noapp \
+    | kubectl apply --namespace="$namespace" --filename=-
+
 
 # Create RBAC role, service account, and role-binding.
 # TODO(huyhg): Application should define the desired permissions,
@@ -115,26 +123,6 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: "${name}-deployer-sa"
-EOF
-
-# Create ConfigMap (merging in passed in parameters).
-kubectl apply --filename=- --output=json --dry-run <<EOF \
-  | jq -s '.[0].data = .[1] | .[0]' \
-      - <(echo "$parameters") \
-  | kubectl apply --namespace="$namespace" --filename=-
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: "${name}-deployer-config"
-  labels:
-    app.kubernetes.io/name: "${name}"
-  namespace: "${namespace}"
-  ownerReferences:
-  - apiVersion: "app.k8s.io/v1alpha1"
-    kind: "Application"
-    name: "${name}"
-    uid: "${application_uid}"
-    blockOwnerDeletion: true
 EOF
 
 # Create deployer.

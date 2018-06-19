@@ -18,16 +18,16 @@ import base64
 import os
 from argparse import ArgumentParser
 
+import yaml
+
 import config_helper
+import schema_values_common
 from password import GeneratePassword
 
 _PROG_HELP = """
 Modifies the configuration parameter files in a directory
 according to their schema.
 """
-
-CODEC_UTF8 = 'utf_8'
-CODEC_ASCII = 'ascii'
 
 
 class InvalidProperty(Exception):
@@ -40,29 +40,17 @@ class MissingRequiredProperty(Exception):
 
 def main():
   parser = ArgumentParser(description=_PROG_HELP)
-  parser.add_argument('--values_dir',
-                      help='Where the value files should be read from',
-                      default='/data/values')
-  parser.add_argument('--final_values_dir',
-                      help='Where the final value files should be written to',
-                      default='/data/final_values')
-  parser.add_argument('--schema_file', help='Path to the schema file',
-                      default='/data/schema.yaml')
-  parser.add_argument('--schema_file_encoding',
-                      help='Encoding of the schema file',
-                      choices=[CODEC_UTF8, CODEC_ASCII], default=CODEC_UTF8)
-  parser.add_argument('--encoding',
-                      help='Encoding of the value files',
-                      choices=[CODEC_UTF8, CODEC_ASCII], default=CODEC_UTF8)
+  schema_values_common.add_to_argument_parser(
+      parser, values_file='/data/values.yaml', values_dir='/data/values')
+  parser.add_argument('--final_values_file',
+                      help='Where the final value file should be written to',
+                      default='/data/final_values.yaml')
   args = parser.parse_args()
 
-  schema = config_helper.Schema.load_yaml_file(args.schema_file,
-                                               args.schema_file_encoding)
-  values = config_helper.read_values_to_dict(args.values_dir,
-                                             args.encoding,
-                                             schema)
+  schema = schema_values_common.load_schema(args)
+  values = schema_values_common.load_values(args)
   values = expand(values, schema)
-  write_values(values, args.final_values_dir, args.encoding)
+  write_values(values, args.final_values_file)
 
 
 def expand(values_dict, schema):
@@ -110,13 +98,14 @@ def generate_password(config):
   return pw
 
 
-def write_values(values, values_dir, encoding):
-  if not os.path.exists(values_dir):
-    os.makedirs(values_dir)
-  for k, v in values.iteritems():
-    file_path = os.path.join(values_dir, k)
-    with open(file_path, 'w') as f:
-      f.write(str(v).encode(encoding))
+def write_values(values, values_file):
+  if not os.path.exists(os.path.dirname(values_file)):
+    os.makedirs(os.path.dirname(values_file))
+  with open(values_file, 'w') as f:
+    data = yaml.safe_dump(values,
+                          default_flow_style=False,
+                          indent=2)
+    f.write(data)
 
 
 if __name__ == "__main__":

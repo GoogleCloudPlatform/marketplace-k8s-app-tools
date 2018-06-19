@@ -19,38 +19,22 @@ import sys
 from argparse import ArgumentParser
 
 import config_helper
+import schema_values_common
 
 _PROG_HELP = """
 Runs a specified command within an environment with env variables
 setup from the config parameters.
 """
 
-CODEC_UTF8 = 'UTF-8'
-CODEC_ASCII = 'ASCII'
-
 
 def main():
   parser = ArgumentParser(description=_PROG_HELP)
-  parser.add_argument('--values_dir',
-                      help='Where the value files should be read from',
-                      default='/data/final_values')
-  parser.add_argument('--encoding',
-                      help='Encoding of the value files',
-                      choices=[CODEC_UTF8, CODEC_ASCII], default='UTF-8')
-  parser.add_argument('--schema_file', help='Path to the schema file',
-                      default='/data/schema.yaml')
-  parser.add_argument('--schema_file_encoding',
-                      help='Encoding of the schema file',
-                      choices=[CODEC_UTF8, CODEC_ASCII], default=CODEC_UTF8)
+  schema_values_common.add_to_argument_parser(parser)
   parser.add_argument('command', help='Command to run')
   parser.add_argument('arguments', nargs='*', help='Arguments to the command')
   args = parser.parse_args()
 
-  schema = config_helper.Schema.load_yaml_file(args.schema_file,
-                                               args.schema_file_encoding)
-  values = config_helper.read_values_to_dict(args.values_dir,
-                                             args.encoding,
-                                             schema)
+  values = schema_values_common.load_values(args)
   # Convert values to strings to pass to subprocess.
   values = {k: str(v) for k, v in values.iteritems()}
 

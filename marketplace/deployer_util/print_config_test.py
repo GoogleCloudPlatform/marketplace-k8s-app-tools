@@ -38,7 +38,8 @@ class PrintConfigTest(unittest.TestCase):
               """.encode('utf_8'))
       f.flush()
 
-      values = print_config.load_values(f.name, '/', 'utf_8', schema)
+      values = config_helper.load_values(f.name, '/non/existence/dir', 'utf_8',
+                                         schema)
       self.assertEqual({'propertyInt': 3, 'propertyString': 'abc'}, values)
 
   def test_output_shell_vars(self):
@@ -56,7 +57,7 @@ class PrintConfigTest(unittest.TestCase):
               'double.propertyString': 'nested_2',
               'double.dotted.propertyInt': 4,
               'double.dotted.propertyString': 'double_nested_1'}
-    actual = print_config.output_yaml(values, 'utf_8')
+    actual = print_config.output_yaml(values)
     self.assertEquals(yaml.load(actual), {
       'propertyInt': 1,
       'propertyString': 'unnested',
