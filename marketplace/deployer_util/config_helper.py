@@ -18,6 +18,7 @@ import collections
 import io
 import os
 import re
+import sys
 
 import yaml
 
@@ -25,6 +26,8 @@ NAME_RE = re.compile(r'[a-zA-z0-9_\.]+$')
 
 XGOOGLE = 'x-google-marketplace'
 XTYPE_PASSWORD = 'GENERATED_PASSWORD'
+XTYPE_SERVICE_ACCOUNT = 'SERVICE_ACCOUNT'
+XTYPE_STORAGE_CLASS = 'STORAGE_CLASS'
 
 
 class InvalidName(Exception):
@@ -39,7 +42,21 @@ class InvalidSchema(Exception):
   pass
 
 
-def read_values_to_dict(values_dir, codec, schema):
+def load_values(values_file,
+                values_dir,
+                values_dir_encoding,
+                schema):
+  if values_file == '-':
+    return yaml.safe_load(sys.stdin.read())
+  if values_file and os.path.isfile(values_file):
+    with open(values_file, 'r') as f:
+      return yaml.safe_load(f.read())
+  return _read_values_to_dict(values_dir,
+                              values_dir_encoding,
+                              schema)
+
+
+def _read_values_to_dict(values_dir, codec, schema):
   """Returns a dict constructed from files in values_dir."""
   files = [f for f in os.listdir(values_dir)
            if os.path.isfile(os.path.join(values_dir, f))]
@@ -63,8 +80,8 @@ class Schema:
   """Wrapper class providing convenient access to a JSON schema."""
 
   @staticmethod
-  def load_yaml_file(filepath, encoding='utf_8'):
-    with io.open(filepath, 'r', encoding=encoding) as f:
+  def load_yaml_file(filepath):
+    with io.open(filepath, 'r') as f:
       d = yaml.load(f)
       return Schema(d)
 
@@ -75,9 +92,15 @@ class Schema:
   def __init__(self, dictionary):
     self._required = dictionary.get('required', [])
     self._properties = {
-        k: SchemaProperty(k, v)
+        k: SchemaProperty(k, v, k in self._required)
         for k, v in dictionary.get('properties', {}).iteritems()
     }
+
+    bad_required_names = [x for x in self._required
+                          if x not in self._properties]
+    if bad_required_names:
+      raise InvalidSchema('Undefined property names found in required: {}'
+                          .format(', '.join(bad_required_names)))
 
   @property
   def required(self):
@@ -87,16 +110,23 @@ class Schema:
   def properties(self):
     return self._properties
 
+  def properties_matching(self, definition):
+    return [v for k, v in self._properties.iteritems()
+            if v.matches_definition(definition)]
+
 
 class SchemaProperty:
   """Wrapper class providing convenient access to a JSON schema property."""
 
-  def __init__(self, name, dictionary):
+  def __init__(self, name, dictionary, required):
     self._name = name
     self._d = dictionary
+    self._required = required
     self._default = dictionary.get('default', None)
     self._x = dictionary.get(XGOOGLE, None)
     self._password = None
+    self._service_account = None
+    self._storage_class = None
 
     if not NAME_RE.match(name):
       raise InvalidSchema('Invalid property name: {}'.format(name))
@@ -130,10 +160,21 @@ class SchemaProperty:
             'base64': d.get('base64', True),
         }
         self._password = SchemaXPassword(**spec)
+      elif xt == XTYPE_SERVICE_ACCOUNT:
+        d = self._x.get('serviceAccount', {})
+        self._service_account = SchemaXServiceAccount(d)
+      elif xt == XTYPE_STORAGE_CLASS:
+        d = self._x.get('storageClass', {})
+        self._storage_class = SchemaXStorageClass(d)
+
 
   @property
   def name(self):
     return self._name
+
+  @property
+  def required(self):
+    return self._required
 
   @property
   def default(self):
@@ -153,6 +194,14 @@ class SchemaProperty:
   @property
   def password(self):
     return self._password
+
+  @property
+  def service_account(self):
+    return self._service_account
+
+  @property
+  def storage_class(self):
+    return self._storage_class
 
   def str_to_type(self, str_val):
     if self._type == bool:
@@ -200,3 +249,49 @@ SchemaXPassword = collections.namedtuple('SchemaXPassword',
                                          ['length',
                                           'include_symbols',
                                           'base64'])
+
+
+class SchemaXServiceAccount:
+  """Wrapper class providing convenient access to SERVICE_ACCOUNT property."""
+
+  def __init__(self, dictionary):
+    self._roles = dictionary.get('roles', [])
+
+  def custom_role_rules(self):
+    """Returns a list of rules for custom Roles."""
+    return [role.get('rules', [])
+            for role in self._roles
+            if role['type'] == 'Role'
+            and role['rulesType'] == 'CUSTOM']
+
+  def custom_cluster_role_rules(self):
+    """Returns a list of rules for custom ClusterRoles."""
+    return [role.get('rules', [])
+            for role in self._roles
+            if role['type'] == 'ClusterRole'
+            and role['rulesType'] == 'CUSTOM']
+
+  def predefined_roles(self):
+    """Returns a list of predefined Roles."""
+    return [role.get('rulesFromRoleName')
+            for role in self._roles
+            if role['type'] == 'Role'
+            and role['rulesType'] == 'PREDEFINED']
+
+  def predefined_cluster_roles(self):
+    """Returns a list of predefined ClusterRoles."""
+    return [role.get('rulesFromRoleName')
+            for role in self._roles
+            if role['type'] == 'ClusterRole'
+            and role['rulesType'] == 'PREDEFINED']
+
+
+class SchemaXStorageClass:
+  """Wrapper class providing convenient access to STORAGE_CLASS property"""
+
+  def __init__(self, dictionary):
+    self._type = dictionary['type']
+
+  @property
+  def ssd(self):
+    return self._type == 'SSD'

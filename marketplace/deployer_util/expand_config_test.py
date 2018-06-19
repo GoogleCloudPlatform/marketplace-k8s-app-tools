@@ -12,9 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import contextlib
 import re
-import shutil
 import tempfile
 import unittest
 
@@ -76,16 +74,10 @@ class ExpandConfigTest(unittest.TestCase):
             type: number
         """)
     values = {'propertyInt': 4, 'propertyStr': 'Value', 'propertyNum': 1.0}
-    with tempdir() as dir_path:
-      expand_config.write_values(values, dir_path, encoding='utf_8')
-      actual = config_helper.read_values_to_dict(dir_path, 'utf_8', schema)
+    with tempfile.NamedTemporaryFile('w') as tf:
+      expand_config.write_values(values, tf.name)
+      actual = config_helper.load_values(tf.name,
+                                         '/non/existent/dir',
+                                         'utf_8',
+                                         schema)
       self.assertEqual(values, actual)
-
-
-@contextlib.contextmanager
-def tempdir():
-  dir_path = tempfile.mkdtemp()
-  try:
-    yield dir_path
-  finally:
-    shutil.rmtree(dir_path)
