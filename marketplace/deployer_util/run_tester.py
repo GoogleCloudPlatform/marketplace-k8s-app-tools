@@ -31,11 +31,12 @@ def main():
   parser.add_argument('--manifest')
   args = parser.parse_args()
 
-  Command('''
+  kubectl_apply = Command('''
     kubectl apply
     --namespace="{}"
     --filename="{}"
-    '''.format(args.namespace, args.manifest))
+    '''.format(args.namespace, args.manifest)).text()
+  print(kubectl_apply)
 
   resources = load_resources_yaml(args.manifest)
 
