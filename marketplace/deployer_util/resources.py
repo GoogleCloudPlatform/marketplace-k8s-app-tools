@@ -21,11 +21,19 @@ def set_resource_ownership(appuid, appname, resource):
   if 'ownerReferences' not in resource['metadata']:
     resource['metadata']['ownerReferences'] = []
 
-  ownerReference = {}
-  ownerReference['apiVersion'] = "app.k8s.io/v1alpha1"
-  ownerReference['kind'] = "Application"
-  ownerReference['controller'] = True
-  ownerReference['blockOwnerDeletion'] = True
-  ownerReference['name'] = appname
-  ownerReference['uid'] = appuid
-  resource['metadata']['ownerReferences'].append(ownerReference)
+  owner_reference = None
+  for existing_owner_reference in resource['metadata']['ownerReferences']:
+    if existing_owner_reference['uid'] == appuid:
+      owner_reference = existing_owner_reference
+      break
+
+  if not owner_reference:
+    owner_reference = {}
+    resource['metadata']['ownerReferences'].append(owner_reference)
+
+  owner_reference['apiVersion'] = "app.k8s.io/v1alpha1"
+  owner_reference['kind'] = "Application"
+  owner_reference['controller'] = True
+  owner_reference['blockOwnerDeletion'] = True
+  owner_reference['name'] = appname
+  owner_reference['uid'] = appuid
