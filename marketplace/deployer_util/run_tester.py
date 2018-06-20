@@ -35,8 +35,7 @@ def main():
     kubectl apply
     --namespace="{}"
     --filename="{}"
-    '''.format(args.namespace, args.manifest)).text()
-  print(kubectl_apply)
+    '''.format(args.namespace, args.manifest), print_call=True)
 
   resources = load_resources_yaml(args.manifest)
 
@@ -57,7 +56,7 @@ def main():
           kubectl get "{}"
           --namespace="{}"
           -o=json
-          '''.format(full_name, args.namespace)).json()
+          '''.format(full_name, args.namespace), print_call=True).json()
       except CommandException as ex:
         log(str(ex))
         log("INFO retrying")
@@ -83,7 +82,7 @@ def main():
 
 
 def print_logs(full_name, namespace):
-  log(Command('''kubectl logs {} --namespace="{}"'''.format(full_name, namespace)).text())
+  log(Command('''kubectl logs {} --namespace="{}"'''.format(full_name, namespace)).output)
 
 
 def log(msg):
