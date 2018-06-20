@@ -31,7 +31,7 @@ while [[ "$deleted" = "false" ]]; do
 
   res_count=$(echo $resources | wc -w)
 
-  if [[ "$res_count" = "0" ]]; then
+  if [[ "$res_count" -eq 0 ]]; then
     deleted=true
   else
     # Ignore service account default
