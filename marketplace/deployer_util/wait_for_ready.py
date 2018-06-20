@@ -39,7 +39,7 @@ def main():
     kubectl get "applications/{}"
       --namespace="{}" 
       --output=json
-    '''.format(args.name, args.namespace)).json()
+    '''.format(args.name, args.namespace), print_call=True).json()
 
   application_uid = application['metadata']['uid']
 
