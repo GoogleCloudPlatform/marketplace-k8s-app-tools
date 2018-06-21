@@ -21,7 +21,7 @@ include $(makefile_dir)/common.Makefile
 	$(call print_target, $@)
 	cd $(MARKETPLACE_TOOLS_PATH) \
 	&& docker build \
-	    --tag "gcr.io/google-marketplace-tools/k8s/deployer_envsubst" \
+	    --tag "gcr.io/cloud-marketplace-tools/k8s/deployer_envsubst" \
 	    -f marketplace/deployer_envsubst_base/Dockerfile \
 	    .
 	@touch "$@"
@@ -33,7 +33,7 @@ include $(makefile_dir)/common.Makefile
 	$(call print_target, $@)
 	cd $(MARKETPLACE_TOOLS_PATH) \
 	&& docker build \
-	    --tag "gcr.io/google-marketplace-tools/k8s/deployer_helm" \
+	    --tag "gcr.io/cloud-marketplace-tools/k8s/deployer_helm" \
 	    -f marketplace/deployer_helm_base/Dockerfile \
 	    .
 	@touch "$@"
@@ -44,7 +44,7 @@ include $(makefile_dir)/common.Makefile
 	$(call print_target, $@)
 	cd $(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_util \
 	&& docker build \
-	    --tag "gcr.io/google-marketplace-tools/k8s/deployer_util" \
+	    --tag "gcr.io/cloud-marketplace-tools/k8s/deployer_util" \
 	    .
 	@touch "$@"
 
@@ -55,7 +55,7 @@ include $(makefile_dir)/common.Makefile
 	$(call print_target, $@)
 	cd $(MARKETPLACE_TOOLS_PATH) \
 	&& docker build \
-	    --tag "gcr.io/google-marketplace-tools/k8s/test_driver" \
+	    --tag "gcr.io/cloud-marketplace-tools/k8s/test_driver" \
 	    -f marketplace/driver/Dockerfile \
 	    .
 	@touch "$@"
