@@ -3,7 +3,7 @@ ifndef __COMMON_MAKEFILE__
 __COMMON_MAKEFILE__ := included
 
 define print_target
-  echo -e "\n\033[93m\033[1mBuilding$(1)\033[0m\n"
+  @printf '\n\033[93m\033[1mBuilding$(1)\033[0m\n\n'
 endef
 
 makefile_dir := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
