@@ -116,20 +116,20 @@ redis-cli get MY_KEY`),
 				BashTest: &BashTest{
 					Script: "echo \"Text1\"\n>2& echo \"Text2\"",
 					Expect: &BashExpect{
-						StatusCode: &[]IntAssert{
+						ExitCode: &[]IntAssert{
 							{Equals: newInt(0)},
 							{NotEquals: newInt(1)},
 						},
 						Stdout: &[]StringAssert{
 							{Contains: newString("Text1")},
-							{Exclude: newString("Foo")},
-							{Exclude: newString("Bar")},
+							{NotContains: newString("Foo")},
+							{NotContains: newString("Bar")},
 							{Matches: newString("T.xt1")},
 						},
 						Stderr: &[]StringAssert{
 							{Contains: newString("Text2")},
-							{Exclude: newString("Foo")},
-							{Exclude: newString("Bar")},
+							{NotContains: newString("Foo")},
+							{NotContains: newString("Bar")},
 							{Matches: newString("T.xt2")},
 						},
 					},

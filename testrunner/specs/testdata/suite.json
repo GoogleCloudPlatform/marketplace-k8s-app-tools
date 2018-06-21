@@ -70,7 +70,7 @@
       "bashTest": {
         "script": "echo \"Text1\"\n>2& echo \"Text2\"",
         "expect": {
-           "statusCode": [{
+           "exitCode": [{
              "equals": 0
            },{
              "notEquals": 1
@@ -78,18 +78,18 @@
           "stdout": [{
             "contains": "Text1"
           },{
-            "exclude": "Foo"
+            "notcontains": "Foo"
           },{
-            "exclude": "Bar"
+            "notcontains": "Bar"
           },{
             "matches": "T.xt1"
           }],
           "stderr": [{
             "contains": "Text2"
           },{
-            "exclude": "Foo"
+            "notcontains": "Foo"
           },{
-            "exclude": "Bar"
+            "notcontains": "Bar"
           },{
             "matches": "T.xt2"
           }]

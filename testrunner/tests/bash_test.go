@@ -30,9 +30,9 @@ func (e *SimpleSetupExecutor) RunTest(test *specs.BashTest) (int, string, string
 }
 
 func TestSimpleSetup(t *testing.T) {
-	shouldSuccess(t, &specs.BashTest{
+	shouldPass(t, &specs.BashTest{
 		Expect: &specs.BashExpect{
-			StatusCode: &[]specs.IntAssert{
+			ExitCode: &[]specs.IntAssert{
 				{Equals: newInt(0)},
 			},
 			Stdout: &[]specs.StringAssert{
@@ -54,7 +54,7 @@ func (e *FailingExecutor) RunTest(test *specs.BashTest) (int, string, string, er
 func TestFailingExecutor(t *testing.T) {
 	shouldFail(t, &specs.BashTest{
 		Expect: &specs.BashExpect{
-			StatusCode: &[]specs.IntAssert{
+			ExitCode: &[]specs.IntAssert{
 				{Equals: newInt(0)},
 			},
 			Stdout: &[]specs.StringAssert{
@@ -67,24 +67,24 @@ func TestFailingExecutor(t *testing.T) {
 	}, &FailingExecutor{})
 }
 
-type StatusCodeExecutor struct{}
+type ExitCodeExecutor struct{}
 
-func (e *StatusCodeExecutor) RunTest(test *specs.BashTest) (int, string, string, error) {
+func (e *ExitCodeExecutor) RunTest(test *specs.BashTest) (int, string, string, error) {
 	return 42, "", "", nil
 }
 
-func TestStatusCodeParsing(t *testing.T) {
-	shouldSuccess(t, &specs.BashTest{
+func TestExitCodeParsing(t *testing.T) {
+	shouldPass(t, &specs.BashTest{
 		Expect: &specs.BashExpect{
-			StatusCode: &[]specs.IntAssert{
+			ExitCode: &[]specs.IntAssert{
 				{Equals: newInt(42)},
 			},
 		},
-	}, &StatusCodeExecutor{})
+	}, &ExitCodeExecutor{})
 
-	shouldSuccess(t, &specs.BashTest{
+	shouldPass(t, &specs.BashTest{
 		Expect: &specs.BashExpect{
-			StatusCode: &[]specs.IntAssert{
+			ExitCode: &[]specs.IntAssert{
 				{Equals: newInt(42)},
 				{Equals: newInt(42)},
 				{NotEquals: newInt(41)},
@@ -97,23 +97,23 @@ func TestStatusCodeParsing(t *testing.T) {
 				{Exactly: newString("")},
 			},
 		},
-	}, &StatusCodeExecutor{})
+	}, &ExitCodeExecutor{})
 
 	shouldFail(t, &specs.BashTest{
 		Expect: &specs.BashExpect{
-			StatusCode: &[]specs.IntAssert{
+			ExitCode: &[]specs.IntAssert{
 				{Equals: newInt(0)},
 			},
 		},
-	}, &StatusCodeExecutor{})
+	}, &ExitCodeExecutor{})
 
 	shouldFail(t, &specs.BashTest{
 		Expect: &specs.BashExpect{
-			StatusCode: &[]specs.IntAssert{
+			ExitCode: &[]specs.IntAssert{
 				{LessThan: newInt(40)},
 			},
 		},
-	}, &StatusCodeExecutor{})
+	}, &ExitCodeExecutor{})
 }
 
 type StdoutExecutor struct{}
@@ -123,7 +123,7 @@ func (e *StdoutExecutor) RunTest(test *specs.BashTest) (int, string, string, err
 }
 
 func TestStdoutParsing(t *testing.T) {
-	shouldSuccess(t, &specs.BashTest{
+	shouldPass(t, &specs.BashTest{
 		Expect: &specs.BashExpect{
 			Stdout: &[]specs.StringAssert{
 				{Exactly: newString("Lorem ipsum dolor sit amet, consectetur adipiscing elit.\nProin nibh augue, suscipit a, scelerisque sed, lacinia in, mi.")},
@@ -131,9 +131,9 @@ func TestStdoutParsing(t *testing.T) {
 		},
 	}, &StdoutExecutor{})
 
-	shouldSuccess(t, &specs.BashTest{
+	shouldPass(t, &specs.BashTest{
 		Expect: &specs.BashExpect{
-			StatusCode: &[]specs.IntAssert{
+			ExitCode: &[]specs.IntAssert{
 				{Equals: newInt(0)},
 			},
 			Stdout: &[]specs.StringAssert{
@@ -158,14 +158,14 @@ func TestStdoutParsing(t *testing.T) {
 	shouldFail(t, &specs.BashTest{
 		Expect: &specs.BashExpect{
 			Stdout: &[]specs.StringAssert{
-				{Exclude: newString("Lorem")},
+				{NotContains: newString("Lorem")},
 			},
 		},
 	}, &StdoutExecutor{})
 }
 
-func shouldSuccess(t *testing.T, test *specs.BashTest, executor tests.CommandExecutor) {
-	outcome := runBashTest_Test(t, test, executor)
+func shouldPass(t *testing.T, test *specs.BashTest, executor tests.CommandExecutor) {
+	outcome := runBashTest(t, test, executor)
 	if len(outcome) > 0 {
 		t.Errorf("Expected to pass but was failing: %s", outcome)
 	} else {
@@ -174,7 +174,7 @@ func shouldSuccess(t *testing.T, test *specs.BashTest, executor tests.CommandExe
 }
 
 func shouldFail(t *testing.T, test *specs.BashTest, executor tests.CommandExecutor) {
-	outcome := runBashTest_Test(t, test, executor)
+	outcome := runBashTest(t, test, executor)
 	if len(outcome) == 0 {
 		t.Errorf("Expected to fail but was passing")
 	} else {
@@ -182,7 +182,7 @@ func shouldFail(t *testing.T, test *specs.BashTest, executor tests.CommandExecut
 	}
 }
 
-func runBashTest_Test(t *testing.T, test *specs.BashTest, executor tests.CommandExecutor) string {
+func runBashTest(t *testing.T, test *specs.BashTest, executor tests.CommandExecutor) string {
 	testRule, _ := yaml.Marshal(test)
 	t.Logf("---\nTest rule:\n%s", testRule)
 	return tests.RunBashTest(test, executor)

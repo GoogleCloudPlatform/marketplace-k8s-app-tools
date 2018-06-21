@@ -74,19 +74,9 @@ func (e *RealExecutor) transformExitErrorToCode(exitErr *exec.ExitError) (int, e
 // RunBashTest executes a BashTest rule, returning an empty string if
 // the test passes, otherwise the error message.
 func RunBashTest(test *specs.BashTest, executor CommandExecutor) string {
-	if test == nil {
-		return "Missing test specification"
-	}
-	if executor == nil {
-		return "Missing executor"
-	}
-	return doBashTest(test, executor)
-}
-
-func doBashTest(test *specs.BashTest, executor CommandExecutor) string {
 	status, stdout, stderr, err := executor.RunTest(test)
 	if err != nil {
-		return fmt.Sprintf("Executor runTest error: %v", err)
+		return asserts.MessageWithContext(fmt.Sprintf("%v", err), "Failed to execute bash script")
 	}
 	return validateResult(status, stdout, stderr, test)
 }
@@ -95,7 +85,7 @@ func validateResult(status int, stdout, stderr string, test *specs.BashTest) str
 	if test.Expect == nil {
 		return ""
 	}
-	if msg := validateErrorCode(status, test.Expect.StatusCode); msg != "" {
+	if msg := validateErrorCode(status, test.Expect.ExitCode); msg != "" {
 		return asserts.MessageWithContext(msg, "Unexpected exit status code")
 	}
 	if msg := validateBufferedOutput(stdout, test.Expect.Stdout); msg != "" {

@@ -80,9 +80,9 @@ type CliExpect struct {
 }
 
 type BashExpect struct {
-	StatusCode *[]IntAssert    `json:"statusCode,omitempty"`
-	Stdout     *[]StringAssert `json:"stdout,omitempty"`
-	Stderr     *[]StringAssert `json:"stderr,omitempty"`
+	ExitCode *[]IntAssert    `json:"exitCode,omitempty"`
+	Stdout   *[]StringAssert `json:"stdout,omitempty"`
+	Stderr   *[]StringAssert `json:"stderr,omitempty"`
 }
 
 type SetRuntimeConfigVarGcpAction struct {
@@ -109,11 +109,11 @@ type IntAssert struct {
 }
 
 type StringAssert struct {
-	Exclude  *string `json:"exclude,omitempty"`
-	Exactly  *string `json:"exactly,omitempty"`
-	Equals   *string `json:"equals,omitempty"`
-	Contains *string `json:"contains,omitempty"`
-	Matches  *string `json:"matches,omitempty"`
+	Exactly     *string `json:"exactly,omitempty"`
+	Equals      *string `json:"equals,omitempty"`
+	Contains    *string `json:"contains,omitempty"`
+	Matches     *string `json:"matches,omitempty"`
+	NotContains *string `json:"notcontains,omitempty"`
 }
 
 func LoadSuite(path string) *Suite {
