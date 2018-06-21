@@ -6,6 +6,7 @@ __MARKETPLACE_MAKEFILE__ := included
 makefile_dir := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
 include $(makefile_dir)/common.Makefile
 
+DRIVER_IMAGE ?= gcr.io/google-marketplace-tools/k8s/test_driver
 
 .build/marketplace: | .build
 	mkdir -p "$@"
@@ -55,7 +56,7 @@ include $(makefile_dir)/common.Makefile
 	$(call print_target, $@)
 	cd $(MARKETPLACE_TOOLS_PATH) \
 	&& docker build \
-	    --tag "gcr.io/google-marketplace-tools/k8s/test_driver" \
+	    --tag "$(DRIVER_IMAGE)" \
 	    -f marketplace/driver/Dockerfile \
 	    .
 	@touch "$@"
