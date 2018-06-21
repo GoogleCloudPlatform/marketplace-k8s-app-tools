@@ -23,12 +23,14 @@ submodule/init-force:
 
 include marketplace.Makefile
 
+
 # Get the tag associated with the current commit of the repo.
 # If there is no tag, use the abbreviated commit hash.
 TAG ?= $(shell \
     tag="$(shell git tag --points-at HEAD | head -n 1)"; \
     commit="$(shell git rev-parse HEAD | fold -w 12 | head -n 1)"; \
     echo "$${tag:-$$commit}")
+
 
 .PHONY: images/deployer
 images/deployer: .build/marketplace/deployer/envsubst \
