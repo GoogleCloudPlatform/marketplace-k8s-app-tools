@@ -7,11 +7,11 @@ define print_target
 endef
 
 define print_notice
-  printf '\n\033[93m\033[1m$(1)\033[0m\n'
+  printf "\n\033[93m\033[1m$(1)\033[0m\n"
 endef
 
 define print_error
-  printf '\n\033[93m\033[1m$(1)\033[0m\n'
+  printf "\n\033[93m\033[1m$(1)\033[0m\n"
 endef
 
 makefile_dir := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
