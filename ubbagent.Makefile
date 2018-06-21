@@ -14,7 +14,7 @@ include $(makefile_dir)/common.Makefile
 .build/ubbagent/ubbagent: | .build/ubbagent
 	cd $(MARKETPLACE_TOOLS_PATH)/vendor/ubbagent \
 	&& docker build \
-	      --tag "gcr.io/google-marketplace-tools/ubbagent" \
+	      --tag "gcr.io/cloud-marketplace-tools/ubbagent" \
 	      .
 	@touch "$@"
 
