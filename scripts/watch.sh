@@ -45,38 +45,34 @@ function watch_function() {
   echo "Application resources in the following namespace: \"$namespace\""
   echo "$ kubectl get applications --namespace=\"$namespace\" --show-kind"
   print_bar -
-  echo -e "\n\n"
   kubectl get applications \
       --namespace="$namespace" \
       --show-kind
 
-  echo -e "\n"
+  echo
   print_bar =
   echo "Standard resources in the following namespace: \"$namespace\""
   echo "$ kubectl get all --namespace=\"$namespace\" --show-kind"
   print_bar -
-  echo -e "\n\n"
   kubectl get all \
       --namespace="$namespace" \
       --show-kind
 
-  echo -e "\n"
+  echo
   print_bar =
   echo "Service accounts and roles in the following namespace: \"$namespace\""
   echo "$ kubectl get serviceaccounts,roles,rolebindings,PersistentVolumeClaims,configmap --namespace=\"$namespace\" --show-kind"
   print_bar -
-  echo -e "\n\n"
   kubectl get serviceaccounts,roles,rolebindings,PersistentVolumeClaims,configmap \
       --namespace="$namespace" \
       --show-kind
 
-  echo -e "\n"
+  echo
   print_bar =
   echo "Events in the namespace"
   echo "$ kubectl get events --namespace="$namespace" \
     --output=custom-columns='TIME:.firstTimestamp,NAME:.metadata.name,:.reason,:.message'"
   print_bar -
-  echo -e "\n\n"
   kubectl get events --namespace="$namespace" \
     --output=custom-columns='TIME:.firstTimestamp,NAME:.metadata.name,:.reason,:.message'
 }
