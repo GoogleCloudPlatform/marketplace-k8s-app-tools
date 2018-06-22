@@ -9,15 +9,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     make \
     python \
     python-dev \
-    python-pip \
     python-setuptools \
     python-yaml \
     uuid-runtime \
     wget \
     && rm -rf /var/lib/apt/lists/*
-
-RUN pip install pyjwt
-RUN pip install cryptography
 
 RUN wget -q -O /usr/bin/kubectl \
         https://storage.googleapis.com/kubernetes-release/release/v1.9.0/bin/linux/amd64/kubectl \

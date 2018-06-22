@@ -78,9 +78,9 @@ app/uninstall: .build/var/MARKETPLACE_TOOLS_PATH \
 	    --name='$(call name_parameter)'
 
 
-# Runs the verification pipeline.
-.PHONY: app/verify_cloudbuild
-app/verify_cloudbuild: app/build \
+# Runs the verification pipeline in the os
+.PHONY: app/verify_bash
+app/verify_bash: app/build \
             .build/var/MARKETPLACE_TOOLS_PATH \
             .build/var/APP_DEPLOYER_IMAGE \
             .build/var/APP_PARAMETERS \
@@ -89,7 +89,7 @@ app/verify_cloudbuild: app/build \
 	    --deployer='$(APP_DEPLOYER_IMAGE)' \
 	    --parameters='$(call combined_parameters)'
 
-# Runs the verification pipeline.
+# Runs the verification pipeline using the driver image
 .PHONY: app/verify
 app/verify: app/build \
             .build/marketplace/driver \
@@ -97,15 +97,14 @@ app/verify: app/build \
             .build/var/APP_DEPLOYER_IMAGE \
             .build/var/APP_PARAMETERS \
             .build/var/APP_TEST_PARAMETERS
-	docker run --entrypoint=/marketplace_tools/marketplace/driver/driver.sh -v \
-	    /var/run/docker.sock:/var/run/docker.sock \
+	docker run --entrypoint=/marketplace_tools/marketplace/driver/driver.sh \
+	    -v /var/run/docker.sock:/var/run/docker.sock \
 	    -v $(MARKETPLACE_TOOLS_PATH):/marketplace_tools \
-	    -v ${HOME}/.kube/config:/.kube/config \
+	    -v ${HOME}/.kube/config:/.kube/config \   
 	    -v ${HOME}/.config/gcloud:/root/.config/gcloud \
-	    --rm $(DRIVER_IMAGE) \
-      --deployer='$(APP_DEPLOYER_IMAGE)' \
-      --marketplace_tools='/marketplace_tools' \
-      --parameters='$(call combined_parameters)'
+	    --rm "gcr.io/marketplace-tools/k8s/test_driver \
+	    --deployer='$(APP_DEPLOYER_IMAGE)' \
+	    --parameters='$(call combined_parameters)'
 
 
 # Monitors resources in the target namespace on the cluster.
