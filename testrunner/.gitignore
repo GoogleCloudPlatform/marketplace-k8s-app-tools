@@ -1,1 +1,3 @@
 **/bazel-*
+# If binary is copied, we should ignore it in Git
+tmp/*

@@ -38,6 +38,7 @@ class Command:
     self._error = None
     self._print_call = print_call
     self._print_result = print_result
+    self._run()
 
   def jq(self, query):
     return self.pipe("jq {}".format(query))
@@ -53,22 +54,20 @@ class Command:
       stderr=subprocess.PIPE)
 
     self._process = p2
+    self._run()
     return self
 
-  def text(self):
-    if self._exitcode is None:
-      self.output, self._error = self._process.communicate()
-      self._exitcode = self._process.returncode
-      if self._print_result:
-        print "result: " + str((self._exitcode, self.output, self._error))
+  def _run(self):
+    self._output, self._error = self._process.communicate()
+    self._exitcode = self._process.returncode
+    if self._print_result:
+      print "result: " + str((self._exitcode, self._output, self._error))
 
     if self._exitcode > 0:
       raise CommandException(self._error)
 
-    return self.output
-
   def json(self):
-    return json.loads(self.text())
+    return json.loads(self._output)
 
   @property
   def exitcode(self):

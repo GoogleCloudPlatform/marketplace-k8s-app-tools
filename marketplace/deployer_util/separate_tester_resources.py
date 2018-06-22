@@ -21,7 +21,6 @@ from argparse import ArgumentParser
 from constants import GOOGLE_CLOUD_TEST
 from dict_util import deep_get
 from resources import set_resource_ownership
-from yaml_util import docstart
 from yaml_util import load_resources_yaml
 from yaml_util import load_yaml
 
@@ -38,23 +37,27 @@ def main():
 
   resources = load_resources_yaml(args.manifest)
 
-  temp_resources = args.manifest + ".tmp"
-  with open(temp_resources, "w") as outfile:
-    for resource in resources:
-      outfile.write(docstart)
+  test_resources = []
+  nontest_resources = []
+  for resource in resources:
+    full_name = "{}/{}".format(resource['kind'], deep_get(resource, 'metadata', 'name'))
+    if deep_get(resource, 'metadata', 'annotations', GOOGLE_CLOUD_TEST) == 'test':
+      print("INFO Tester resource: {}".format(full_name))
+      set_resource_ownership(args.appuid, args.appname, resource)
+      test_resources.append(resource)
+    else:
+      print("INFO Prod resource: {}".format(full_name))
+      nontest_resources.append(resource)
 
-      full_name = "{}/{}".format(resource['kind'], deep_get(resource, 'metadata', 'name'))
-      if deep_get(resource, 'metadata', 'annotations', GOOGLE_CLOUD_TEST) == 'test':
-        with open(args.tester_manifest, "a") as test_outfile:
-          print("INFO Tester resource: {}".format(full_name))
-          test_outfile.write(docstart)
-          set_resource_ownership(args.appuid, args.appname, resource)
-          yaml.dump(resource, test_outfile, default_flow_style=False)
-      else:
-        print("INFO Prod resource: {}".format(full_name))
-        yaml.dump(resource, outfile, default_flow_style=False)
+  temp_manifest = args.manifest + ".tmp"
+  if nontest_resources:
+    with open(temp_manifest, "w") as outfile:
+      yaml.safe_dump_all(nontest_resources, outfile, default_flow_style=False)
+  os.rename(temp_manifest, args.manifest)
 
-  os.rename(temp_resources, args.manifest)
+  if test_resources:
+    with open(args.tester_manifest, "a") as test_outfile:
+      yaml.safe_dump_all(test_resources, test_outfile, default_flow_style=False)
 
 
 if __name__ == "__main__":
