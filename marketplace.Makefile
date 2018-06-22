@@ -19,7 +19,7 @@ include $(makefile_dir)/common.Makefile
                                       $(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_envsubst_base/* \
                                       .build/marketplace/delete_deprecated \
                                       | .build/marketplace/deployer
-	$(call print_target, $@)
+	$(call print_target)
 	cd $(MARKETPLACE_TOOLS_PATH) \
 	&& docker build \
 	    --tag "gcr.io/cloud-marketplace-tools/k8s/deployer_envsubst" \
@@ -32,7 +32,7 @@ include $(makefile_dir)/common.Makefile
                                   $(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_helm_base/* \
                                   .build/marketplace/delete_deprecated \
                                   | .build/marketplace/deployer
-	$(call print_target, $@)
+	$(call print_target)
 	cd $(MARKETPLACE_TOOLS_PATH) \
 	&& docker build \
 	    --tag "gcr.io/cloud-marketplace-tools/k8s/deployer_helm" \
