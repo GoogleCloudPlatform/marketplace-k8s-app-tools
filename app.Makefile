@@ -126,17 +126,17 @@ app/watch: .build/var/MARKETPLACE_TOOLS_PATH \
 # not clear how to achieve that with pattern targets.
 
 %registry_prefix: app/phony
-	@echo -e "\n\n\033[31m\033[1mThe $@ target has been replaced by .build/var/REGISTRY. Please replace */registry_prefix target with .build/var/REGISTRY.\033[0m\n\n"
+	@$(call print_notice,The $@ target has been replaced by .build/var/REGISTRY. Please replace */registry_prefix target with .build/var/REGISTRY.)
 	@exit 1
 
 
 %tag_prefix: app/phony
-	@echo -e "\n\n\033[31m\033[1mThe $@ target has been replaced by .build/var/TAG. Please replace */tag_prefix target with .build/var/TAG.\033[0m\n\n"
+	@$(call print_notice,The $@ target has been replaced by .build/var/TAG. Please replace */tag_prefix target with .build/var/TAG.)
 	@exit 1
 
 
 app/setup: app/phony
-	@echo -e "\n\n\033[31m\033[1mThe $@ target is deprecated. Please removed.\033[0m\n\n"
+	@$(call print_notice,The $@ target is deprecated. Please removed.)
 	@exit 1
 
 
