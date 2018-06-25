@@ -65,10 +65,12 @@ spec:
   assemblyPhase: "Pending"
 EOF
 
-# Fetch the server assigned uid for owner reference assignment.
-application_uid=$(kubectl get "applications/$name" \
+app_uid=$(kubectl get "applications/$name" \
   --namespace="$namespace" \
   --output=jsonpath='{.metadata.uid}')
+app_api_version=$(kubectl get "applications/$name" \
+  --namespace="$NAMESPACE" \
+  --output=jsonpath='{.apiVersion}')
 
 # Provisions external resource dependencies and the deployer resources.
 # We set the application as the owner for all of these resources.
@@ -78,5 +80,6 @@ echo "${parameters}" \
   | docker run -i --entrypoint=/bin/set_app_labels.py --rm "${deployer}" \
     --manifests=- --dest=- --name="${name}" --namespace="${namespace}"\
   | docker run -i --entrypoint=/bin/set_ownership.py --rm "${deployer}" \
-    --manifests=- --dest=- --appname="${name}" --appuid="${application_uid}" --noapp \
+    --manifests=- --dest=- --noapp \
+    --app_name="${name}" --app_uid="${app_uid}" --app_api_version="${app_api_version}" \
   | kubectl apply --namespace="$namespace" --filename=-
