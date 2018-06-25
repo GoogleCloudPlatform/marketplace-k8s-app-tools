@@ -61,7 +61,7 @@ for manifest_template_file in "$data_dir"/manifest/*; do
     > "$manifest_dir/$manifest_file"
 done
 
-/bin/setownership.py \
+/bin/set_ownership.py \
   --appname "$NAME" \
   --appuid "$application_uid" \
   --manifests "$manifest_dir" \

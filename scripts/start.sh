@@ -77,6 +77,6 @@ echo "${parameters}" \
     --values_file=- --deployer_image="${deployer}" --deployer_entrypoint="${entrypoint}" \
   | docker run -i --entrypoint=/bin/set_app_labels.py --rm "${deployer}" \
     --manifests=- --dest=- --name="${name}" --namespace="${namespace}"\
-  | docker run -i --entrypoint=/bin/setownership.py --rm "${deployer}" \
+  | docker run -i --entrypoint=/bin/set_ownership.py --rm "${deployer}" \
     --manifests=- --dest=- --appname="${name}" --appuid="${application_uid}" --noapp \
   | kubectl apply --namespace="$namespace" --filename=-

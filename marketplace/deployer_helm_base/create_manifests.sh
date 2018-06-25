@@ -96,7 +96,7 @@ for chart in "$data_dir/extracted"/*; do
     --appname "$NAME"
 done
 
-/bin/setownership.py \
+/bin/set_ownership.py \
   --appname "$NAME" \
   --appuid "$application_uid" \
   --manifests "$manifest_dir" \
