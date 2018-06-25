@@ -351,7 +351,7 @@ def add_preprovisioned_labels(manifests, prop_name):
     labels = r['metadata'].get('labels', {})
     labels['application.k8s.io/component'] = (
       'auto-provisioned.marketplace.cloud.google.com')
-    labels['marketplace.cloud.google.com/auto-provisioned/for-property'] = (
+    labels['marketplace.cloud.google.com/auto-provisioned-for-property'] = (
         prop_name)
     r['metadata']['labels'] = labels
   return manifests
