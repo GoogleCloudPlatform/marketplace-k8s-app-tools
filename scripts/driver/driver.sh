@@ -114,7 +114,7 @@ while true; do
   fi
 
   elapsed_time=$(( $(date +%s) - $start_time ))
-  echo -ne "Elapsed ${elapsed_time}s\r"
+  printf "Elapsed ${elapsed_time}s\r"
   if [[ "$elapsed_time" -gt "$wait_timeout" ]]; then
     clean_and_exit "ERROR Deployer job timeout"
   fi
