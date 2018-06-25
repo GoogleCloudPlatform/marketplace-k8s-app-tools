@@ -26,66 +26,164 @@ from config_helper import Schema
 _PROG_HELP = """
 Reads the schemas and writes k8s manifests for objects
 that need provisioning outside of the deployer to stdout.
-The manifests include the deployer ConfigMap.
+The manifests include the deployer-related resources.
 """
-
-APP_NAME_LABEL = 'application.k8s.io/name'
-APP_NAMESPACE_LABEL = 'application.k8s.io/namespace'
-
 
 def main():
   parser = ArgumentParser(description=_PROG_HELP)
   schema_values_common.add_to_argument_parser(parser)
+  parser.add_argument('--deployer_image', required=True)
+  parser.add_argument('--deployer_entrypoint', default=None)
   args = parser.parse_args()
 
   schema = schema_values_common.load_schema(args)
   values = schema_values_common.load_values(args)
-  manifests = process(schema, values)
+  manifests = process(schema,
+                      values,
+                      deployer_image=args.deployer_image,
+                      deployer_entrypoint=args.deployer_entrypoint)
   print yaml.safe_dump_all(manifests,
                            default_flow_style=False,
                            indent=2)
 
 
-def process(schema, values):
+def process(schema, values, deployer_image, deployer_entrypoint):
   props = {}
   manifests = []
+  app_name = get_name(schema, values)
+  namespace = get_namespace(schema, values)
+
   for prop in schema.properties.values():
     if prop.name in values:
       # The value has been explicitly specified. Skip.
       continue
     if prop.service_account:
-      value, sa_manifests = provision_service_account(schema, values, prop)
+      value, sa_manifests = provision_service_account(
+          schema, prop, app_name=app_name, namespace=namespace)
       props[prop.name] = value
       manifests += sa_manifests
     elif prop.storage_class:
-      value, sc_manifests = provision_storage_class(schema, values, prop)
+      value, sc_manifests = provision_storage_class(
+          schema, prop, app_name=app_name, namespace=namespace)
       props[prop.name] = value
       manifests += sc_manifests
 
   # Merge input and provisioned properties.
-  data = dict(list(values.iteritems()) + list(props.iteritems()))
-  data = {k: str(v) for k, v in data.iteritems()}
-  manifests.append({
-      'apiVersion': 'v1',
-      'kind': 'ConfigMap',
-      'metadata': {
-          'name': '{}-deployer-config'.format(get_name(schema, values)),
-          'namespace': get_namespace(schema, values),
-          'labels': {
-              APP_NAME_LABEL: get_name(schema, values),
-          },
-      },
-      'data': data,
-  })
+  app_params = dict(list(values.iteritems()) + list(props.iteritems()))
+  app_params = {k: str(v) for k, v in app_params.iteritems()}
+  manifests += provision_deployer(schema,
+                                  app_name=app_name,
+                                  namespace=namespace,
+                                  deployer_image=deployer_image,
+                                  deployer_entrypoint=deployer_entrypoint,
+                                  app_params=app_params)
   return manifests
 
 
-def provision_service_account(schema, values, prop):
-  # TODO(#136): Drop labels, move it to start.sh by introducing
-  # a utility similar to setownership.py.
-  name = get_name(schema, values)
-  namespace = get_namespace(schema, values)
-  sa_name = dns1123_name('{}-{}'.format(name, prop.name))
+def provision_deployer(schema,
+                       app_name,
+                       namespace,
+                       deployer_image,
+                       deployer_entrypoint,
+                       app_params):
+  """Provisions resources to run the deployer."""
+  sa_name = dns1123_name('{}-deployer-sa'.format(app_name))
+  pod_spec = {
+      'serviceAccountName': sa_name,
+      'containers': [
+          {
+              'name': 'deployer',
+              'image': deployer_image,
+              'imagePullPolicy': 'Always',
+              'volumeMounts': [
+                  {
+                      'name': 'config-volume',
+                      'mountPath': '/data/values',
+                  },
+              ],
+          },
+      ],
+      'restartPolicy': 'Never',
+      'volumes': [
+          {
+              'name': 'config-volume',
+              'configMap': {
+                  'name': "{}-deployer-config".format(app_name),
+              },
+          },
+      ],
+  }
+  if deployer_entrypoint:
+    pod_spec['containers'][0]['command'] = [deployer_entrypoint]
+  labels = {
+      'application.k8s.io/component': 'deployer.marketplace.cloud.google.com',
+      'marketplace.cloud.google.com/deployer': 'Dependent',
+  }
+  job_labels = {
+      'application.k8s.io/component': 'deployer.marketplace.cloud.google.com',
+      'marketplace.cloud.google.com/deployer': 'Main',
+  }
+
+  return [
+      {
+          'apiVersion': 'v1',
+          'kind': 'ServiceAccount',
+          'metadata': {
+              'name': sa_name,
+              'namespace': namespace,
+              'labels': labels,
+          },
+      },
+      {
+          'apiVersion': 'rbac.authorization.k8s.io/v1',
+          'kind': 'RoleBinding',
+          'metadata': {
+              'name': '{}-deployer-rb'.format(app_name),
+              'namespace': namespace,
+              'labels': labels,
+          },
+          'roleRef': {
+              'apiGroup': 'rbac.authorization.k8s.io',
+              'kind': 'ClusterRole',
+              'name': 'cluster-admin',
+          },
+          'subjects': [
+              {
+                  'kind': 'ServiceAccount',
+                  'name': sa_name,
+              },
+          ]
+      },
+      {
+          'apiVersion': 'v1',
+          'kind': 'ConfigMap',
+          'metadata': {
+              'name': '{}-deployer-config'.format(app_name),
+              'namespace': namespace,
+              'labels': labels,
+          },
+          'data': app_params,
+      },
+      {
+          'apiVersion': 'batch/v1',
+          'kind': 'Job',
+          'metadata': {
+              'name': "{}-deployer".format(app_name),
+              'namespace': namespace,
+              'labels': job_labels,
+          },
+          'spec': {
+              'template': {
+                  'spec': pod_spec,
+              },
+              'backoffLimit': 0,
+          },
+      },
+  ]
+
+
+def provision_service_account(schema, prop, app_name, namespace):
+  sa_name = dns1123_name('{}-{}'.format(app_name, prop.name))
   subjects = [{
       'kind': 'ServiceAccount',
       'name': sa_name,
@@ -97,22 +195,16 @@ def provision_service_account(schema, values, prop):
       'metadata': {
           'name': sa_name,
           'namespace': namespace,
-          'labels': {
-              APP_NAME_LABEL: name,
-          },
       },
   }]
   for i, rules in prop.service_account.custom_role_rules():
-    role_name = '{}:{}-r{}'.format(name, prop.name, i)
+    role_name = '{}:{}-r{}'.format(app_name, prop.name, i)
     manifests.append({
         'apiVersion': 'rbac.authorization.k8s.io/v1',
         'kind': 'Role',
         'metadata': {
             'name': role_name,
             'namespace': namespace,
-            'labels': {
-                APP_NAME_LABEL: name,
-            },
         },
         'rules': rules,
     })
@@ -120,11 +212,8 @@ def provision_service_account(schema, values, prop):
         'apiVersion': 'rbac.authorization.k8s.io/v1',
         'kind': 'RoleBinding',
         'metadata': {
-            'name': '{}:{}-rb{}'.format(name, prop.name, i),
+            'name': '{}:{}-rb{}'.format(app_name, prop.name, i),
             'namespace': namespace,
-            'labels': {
-                APP_NAME_LABEL: name,
-            },
         },
         'roleRef': {
             'apiGroup': 'rbac.authorization.k8s.io',
@@ -134,16 +223,12 @@ def provision_service_account(schema, values, prop):
         'subjects': subjects,
     })
   for i, rules in prop.service_account.custom_cluster_role_rules():
-    role_name = '{}:{}:{}-r{}'.format(namespace, name, prop.name, i)
+    role_name = '{}:{}:{}-r{}'.format(namespace, app_name, prop.name, i)
     manifests.append({
         'apiVersion': 'rbac.authorization.k8s.io/v1',
         'kind': 'ClusterRole',
         'metadata': {
             'name': role_name,
-            'labels': {
-                APP_NAME_LABEL: name,
-                APP_NAMESPACE_LABEL: namespace,
-            },
         },
         'rules': rules,
     })
@@ -151,12 +236,8 @@ def provision_service_account(schema, values, prop):
         'apiVersion': 'rbac.authorization.k8s.io/v1',
         'kind': 'ClusterRoleBinding',
         'metadata': {
-            'name': '{}:{}:{}-rb{}'.format(namespace, name, prop.name, i),
+            'name': '{}:{}:{}-rb{}'.format(namespace, app_name, prop.name, i),
             'namespace': namespace,
-            'labels': {
-                APP_NAME_LABEL: name,
-                APP_NAMESPACE_LABEL: namespace,
-            },
         },
         'roleRef': {
             'apiGroup': 'rbac.authorization.k8s.io',
@@ -170,11 +251,8 @@ def provision_service_account(schema, values, prop):
         'apiVersion': 'rbac.authorization.k8s.io/v1',
         'kind': 'RoleBinding',
         'metadata': {
-            'name': '{}:{}:{}-rb'.format(name, prop.name, role),
+            'name': '{}:{}:{}-rb'.format(app_name, prop.name, role),
             'namespace': namespace,
-            'labels': {
-                APP_NAME_LABEL: name,
-            },
         },
         'roleRef': {
             'apiGroup': 'rbac.authorization.k8s.io',
@@ -188,12 +266,9 @@ def provision_service_account(schema, values, prop):
         'apiVersion': 'rbac.authorization.k8s.io/v1',
         'kind': 'ClusterRoleBinding',
         'metadata': {
-            'name': '{}:{}:{}:{}-rb'.format(namespace, name, prop.name, role),
+            'name':
+                '{}:{}:{}:{}-rb'.format(namespace, app_name, prop.name, role),
             'namespace': namespace,
-            'labels': {
-                APP_NAME_LABEL: name,
-                APP_NAMESPACE_LABEL: namespace,
-            },
         },
         'roleRef': {
             'apiGroup': 'rbac.authorization.k8s.io',
@@ -206,11 +281,9 @@ def provision_service_account(schema, values, prop):
   return sa_name, manifests
 
 
-def provision_storage_class(schema, values, prop):
-  name = get_name(schema, values)
-  namespace = get_namespace(schema, values)
+def provision_storage_class(schema, prop, app_name, namespace):
   if prop.storage_class.ssd:
-    sc_name = dns1123_name('{}-{}-{}'.format(namespace, name, prop.name))
+    sc_name = dns1123_name('{}-{}-{}'.format(namespace, app_name, prop.name))
     manifests = [{
         'apiVersion': 'storage.k8s.io/v1',
         'kind': 'StorageClass',

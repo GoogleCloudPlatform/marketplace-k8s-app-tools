@@ -43,13 +43,13 @@ done
 [[ -z "$entrypoint" ]] && entrypoint="/bin/deploy.sh"
 
 name="$( \
-    echo "${parameters}" \
-    | docker run -i --entrypoint=/bin/print_config.py --rm "${deployer}" \
-      --values_file=- --param '{"x-google-marketplace": {"type": "NAME"}}')"
+  echo "${parameters}" \
+  | docker run -i --entrypoint=/bin/print_config.py --rm "${deployer}" \
+    --values_file=- --param '{"x-google-marketplace": {"type": "NAME"}}')"
 namespace="$( \
-    echo "${parameters}"\
-    | docker run -i --entrypoint=/bin/print_config.py --rm "${deployer}" \
-      --values_file=- --param '{"x-google-marketplace": {"type": "NAMESPACE"}}')"
+  echo "${parameters}"\
+  | docker run -i --entrypoint=/bin/print_config.py --rm "${deployer}" \
+    --values_file=- --param '{"x-google-marketplace": {"type": "NAMESPACE"}}')"
 
 # Create Application instance.
 kubectl apply --namespace="$namespace" --filename=- <<EOF
@@ -62,11 +62,6 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: "${name}"
-  componentKinds:
-  - kind: ConfigMap
-  - kind: ServiceAccount
-  - kind: RoleBinding
-  - kind: Job
   assemblyPhase: "Pending"
 EOF
 
@@ -75,86 +70,13 @@ application_uid=$(kubectl get "applications/$name" \
   --namespace="$namespace" \
   --output=jsonpath='{.metadata.uid}')
 
-# Provisions the ConfigMap as well as any other external resource dependencies.
+# Provisions external resource dependencies and the deployer resources.
 # We set the application as the owner for all of these resources.
 echo "${parameters}" \
-    | docker run -i --entrypoint=/bin/provision.py --rm "${deployer}" --values_file=- \
-    | docker run -i --entrypoint=/bin/setownership.py --rm "${deployer}" \
-      --manifests=- --dest=- --appname="${name}" --appuid="${application_uid}" --noapp \
-    | kubectl apply --namespace="$namespace" --filename=-
-
-
-# Create RBAC role, service account, and role-binding.
-# TODO(huyhg): Application should define the desired permissions,
-# which should be transated into appropriate rules here instead of
-# granting the role with all permissions.
-kubectl apply --namespace="$namespace" --filename=- <<EOF
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: "${name}-deployer-sa"
-  namespace: "${namespace}"
-  labels:
-    app.kubernetes.io/name: "${name}"
-  ownerReferences:
-  - apiVersion: "app.k8s.io/v1alpha1"
-    kind: "Application"
-    name: "${name}"
-    uid: "${application_uid}"
-    blockOwnerDeletion: true
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name: "${name}-deployer-rb"
-  namespace: "${namespace}"
-  labels:
-    app.kubernetes.io/name: "${name}"
-  ownerReferences:
-  - apiVersion: "app.k8s.io/v1alpha1"
-    kind: "Application"
-    name: "${name}"
-    uid: "${application_uid}"
-    blockOwnerDeletion: true
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: cluster-admin
-subjects:
-- kind: ServiceAccount
-  name: "${name}-deployer-sa"
-EOF
-
-# Create deployer.
-kubectl apply --namespace="$namespace" --filename=- <<EOF
-apiVersion: batch/v1
-kind: Job
-metadata:
-  name: "${name}-deployer"
-  labels:
-    app.kubernetes.io/name: "${name}"
-  ownerReferences:
-  - apiVersion: "app.k8s.io/v1alpha1"
-    kind: "Application"
-    name: "${name}"
-    uid: "${application_uid}"
-    blockOwnerDeletion: true
-spec:
-  template:
-    spec:
-      serviceAccountName: "${name}-deployer-sa"
-      containers:
-      - name: deployer
-        image: "${deployer}"
-        imagePullPolicy: Always
-        volumeMounts:
-        - name: config-volume
-          mountPath: /data/values
-        $([[ -z "$entrypoint" ]] || printf "command: [\"${entrypoint}\"]")
-      restartPolicy: Never
-      volumes:
-      - name: config-volume
-        configMap:
-          name: "${name}-deployer-config"
-  backoffLimit: 0
-EOF
+  | docker run -i --entrypoint=/bin/provision.py --rm "${deployer}" \
+    --values_file=- --deployer_image="${deployer}" --deployer_entrypoint="${entrypoint}" \
+  | docker run -i --entrypoint=/bin/set_app_labels.py --rm "${deployer}" \
+    --manifests=- --dest=- --name="${name}" --namespace="${namespace}"\
+  | docker run -i --entrypoint=/bin/setownership.py --rm "${deployer}" \
+    --manifests=- --dest=- --appname="${name}" --appuid="${application_uid}" --noapp \
+  | kubectl apply --namespace="$namespace" --filename=-
