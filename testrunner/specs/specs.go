@@ -31,7 +31,6 @@ type Action struct {
 	Name      string     `json:"name,omitempty"`
 	Condition *Condition `json:"condition,omitempty"`
 	HttpTest  *HttpTest  `json:"httpTest,omitempty"`
-	SshTest   *SshTest   `json:"sshTest,omitempty"`
 	Gcp       *GcpAction `json:"gcp,omitempty"`
 	BashTest  *BashTest  `json:"bashTest,omitempty"`
 }
@@ -47,25 +46,13 @@ type HttpTest struct {
 	Expect  HttpExpect        `json:"expect"`
 }
 
-type SshTest struct {
-	Host     string       `json:"host"`
-	Port     *int         `json:"port,omitempty"`
-	Commands []CliCommand `json:"commands,omitempty"`
-}
-
 type GcpAction struct {
 	SetRuntimeConfigVar *SetRuntimeConfigVarGcpAction `json:"setRuntimeConfigVar,omitempty"`
 }
 
 type BashTest struct {
 	Script string      `json:"script"`
-	Expect *BashExpect `json:"expect"`
-}
-
-type CliCommand struct {
-	Command []string   `json:"command,omitempty"`
-	Script  *string    `json:"script,omitempty"`
-	Expect  *CliExpect `json:"expect,omitempty"`
+	Expect *CliExpect `json:"expect"`
 }
 
 type HttpExpect struct {
@@ -75,11 +62,6 @@ type HttpExpect struct {
 }
 
 type CliExpect struct {
-	Stdout *StringAssert `json:"stdout,omitempty"`
-	Stderr *StringAssert `json:"stderr,omitempty"`
-}
-
-type BashExpect struct {
 	ExitCode *[]IntAssert    `json:"exitCode,omitempty"`
 	Stdout   *[]StringAssert `json:"stdout,omitempty"`
 	Stderr   *[]StringAssert `json:"stderr,omitempty"`
@@ -113,7 +95,7 @@ type StringAssert struct {
 	Equals      *string `json:"equals,omitempty"`
 	Contains    *string `json:"contains,omitempty"`
 	Matches     *string `json:"matches,omitempty"`
-	NotContains *string `json:"notcontains,omitempty"`
+	NotContains *string `json:"notContains,omitempty"`
 }
 
 func LoadSuite(path string) *Suite {

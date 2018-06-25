@@ -68,40 +68,6 @@ func expectedSuite() *Suite {
 				},
 			},
 			{
-				Name: "Can SSH and do basic queries",
-				SshTest: &SshTest{
-					Host: "{{.Vars.MainVmIp}}",
-					Port: newInt(22),
-					Commands: []CliCommand{
-						{
-							Command: []string{"redis", "ping"},
-							Expect: &CliExpect{
-								Stdout: &StringAssert{
-									Exactly: newString("PONG"),
-								},
-								Stderr: &StringAssert{
-									Exactly: newString(""),
-								},
-							},
-						},
-						{
-							Script: newString(
-								`#!/bin/bash -eu
-redis-cli put MY_KEY MY_VALUE
-redis-cli get MY_KEY`),
-							Expect: &CliExpect{
-								Stdout: &StringAssert{
-									Exactly: newString("MY_VALUE"),
-								},
-								Stderr: &StringAssert{
-									Exactly: newString(""),
-								},
-							},
-						},
-					},
-				},
-			},
-			{
 				Name: "Update success variable",
 				Gcp: &GcpAction{
 					SetRuntimeConfigVar: &SetRuntimeConfigVarGcpAction{
@@ -115,7 +81,7 @@ redis-cli get MY_KEY`),
 				Name: "Can echo to stdout and stderr",
 				BashTest: &BashTest{
 					Script: "echo \"Text1\"\n>2& echo \"Text2\"",
-					Expect: &BashExpect{
+					Expect: &CliExpect{
 						ExitCode: &[]IntAssert{
 							{Equals: newInt(0)},
 							{NotEquals: newInt(1)},

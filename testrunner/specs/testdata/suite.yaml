@@ -11,25 +11,6 @@ actions:
         html:
           title:
             contains: Hello World!
-- name: Can SSH and do basic queries
-  sshTest:
-    host: '{{.Vars.MainVmIp}}'
-    port: 22
-    commands:
-    - command: [redis, ping]
-      expect:
-        stdout:
-          exactly: PONG
-        stderr: &empty
-          exactly: ''
-    - script: |-
-        #!/bin/bash -eu
-        redis-cli put MY_KEY MY_VALUE
-        redis-cli get MY_KEY
-      expect:
-        stdout:
-          exactly: MY_VALUE
-        stderr: *empty
 - name: Update success variable
   gcp:
     setRuntimeConfigVar:
@@ -47,11 +28,11 @@ actions:
         - notEquals: 1
       stdout:
         - contains: "Text1"
-        - notcontains: "Foo"
-        - notcontains: "Bar"
+        - notContains: "Foo"
+        - notContains: "Bar"
         - matches: "T.xt1"
       stderr:
         - contains: "Text2"
-        - notcontains: "Foo"
-        - notcontains: "Bar"
+        - notContains: "Foo"
+        - notContains: "Bar"
         - matches: "T.xt2"

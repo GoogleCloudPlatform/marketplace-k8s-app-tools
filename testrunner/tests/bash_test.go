@@ -31,7 +31,7 @@ func (e *SimpleSetupExecutor) RunTest(test *specs.BashTest) (int, string, string
 
 func TestSimpleSetup(t *testing.T) {
 	shouldPass(t, &specs.BashTest{
-		Expect: &specs.BashExpect{
+		Expect: &specs.CliExpect{
 			ExitCode: &[]specs.IntAssert{
 				{Equals: newInt(0)},
 			},
@@ -53,7 +53,7 @@ func (e *FailingExecutor) RunTest(test *specs.BashTest) (int, string, string, er
 
 func TestFailingExecutor(t *testing.T) {
 	shouldFail(t, &specs.BashTest{
-		Expect: &specs.BashExpect{
+		Expect: &specs.CliExpect{
 			ExitCode: &[]specs.IntAssert{
 				{Equals: newInt(0)},
 			},
@@ -75,7 +75,7 @@ func (e *ExitCodeExecutor) RunTest(test *specs.BashTest) (int, string, string, e
 
 func TestExitCodeParsing(t *testing.T) {
 	shouldPass(t, &specs.BashTest{
-		Expect: &specs.BashExpect{
+		Expect: &specs.CliExpect{
 			ExitCode: &[]specs.IntAssert{
 				{Equals: newInt(42)},
 			},
@@ -83,7 +83,7 @@ func TestExitCodeParsing(t *testing.T) {
 	}, &ExitCodeExecutor{})
 
 	shouldPass(t, &specs.BashTest{
-		Expect: &specs.BashExpect{
+		Expect: &specs.CliExpect{
 			ExitCode: &[]specs.IntAssert{
 				{Equals: newInt(42)},
 				{Equals: newInt(42)},
@@ -100,7 +100,7 @@ func TestExitCodeParsing(t *testing.T) {
 	}, &ExitCodeExecutor{})
 
 	shouldFail(t, &specs.BashTest{
-		Expect: &specs.BashExpect{
+		Expect: &specs.CliExpect{
 			ExitCode: &[]specs.IntAssert{
 				{Equals: newInt(0)},
 			},
@@ -108,7 +108,7 @@ func TestExitCodeParsing(t *testing.T) {
 	}, &ExitCodeExecutor{})
 
 	shouldFail(t, &specs.BashTest{
-		Expect: &specs.BashExpect{
+		Expect: &specs.CliExpect{
 			ExitCode: &[]specs.IntAssert{
 				{LessThan: newInt(40)},
 			},
@@ -124,7 +124,7 @@ func (e *StdoutExecutor) RunTest(test *specs.BashTest) (int, string, string, err
 
 func TestStdoutParsing(t *testing.T) {
 	shouldPass(t, &specs.BashTest{
-		Expect: &specs.BashExpect{
+		Expect: &specs.CliExpect{
 			Stdout: &[]specs.StringAssert{
 				{Exactly: newString("Lorem ipsum dolor sit amet, consectetur adipiscing elit.\nProin nibh augue, suscipit a, scelerisque sed, lacinia in, mi.")},
 			},
@@ -132,7 +132,7 @@ func TestStdoutParsing(t *testing.T) {
 	}, &StdoutExecutor{})
 
 	shouldPass(t, &specs.BashTest{
-		Expect: &specs.BashExpect{
+		Expect: &specs.CliExpect{
 			ExitCode: &[]specs.IntAssert{
 				{Equals: newInt(0)},
 			},
@@ -147,7 +147,7 @@ func TestStdoutParsing(t *testing.T) {
 	}, &StdoutExecutor{})
 
 	shouldFail(t, &specs.BashTest{
-		Expect: &specs.BashExpect{
+		Expect: &specs.CliExpect{
 			Stdout: &[]specs.StringAssert{
 				{Exactly: newString("Proin nibh augue, suscipit a, scelerisque sed, lacinia in, mi.")},
 				{Contains: newString("consecteturadipiscingadipiscing")},
@@ -156,7 +156,7 @@ func TestStdoutParsing(t *testing.T) {
 	}, &StdoutExecutor{})
 
 	shouldFail(t, &specs.BashTest{
-		Expect: &specs.BashExpect{
+		Expect: &specs.CliExpect{
 			Stdout: &[]specs.StringAssert{
 				{NotContains: newString("Lorem")},
 			},

@@ -22,40 +22,6 @@
       }
     },
     {
-      "name": "Can SSH and do basic queries",
-      "sshTest": {
-        "host": "{{.Vars.MainVmIp}}",
-        "port": 22,
-        "commands": [
-          {
-            "command": [
-              "redis",
-              "ping"
-            ],
-            "expect": {
-              "stdout": {
-                "exactly": "PONG"
-              },
-              "stderr": {
-                "exactly": ""
-              }
-            }
-          },
-          {
-            "script": "#!/bin/bash -eu\nredis-cli put MY_KEY MY_VALUE\nredis-cli get MY_KEY",
-            "expect": {
-              "stdout": {
-                "exactly": "MY_VALUE"
-              },
-              "stderr": {
-                "exactly": ""
-              }
-            }
-          }
-        ]
-      }
-    },
-    {
       "name": "Update success variable",
       "gcp": {
         "setRuntimeConfigVar": {
@@ -78,18 +44,18 @@
           "stdout": [{
             "contains": "Text1"
           },{
-            "notcontains": "Foo"
+            "notContains": "Foo"
           },{
-            "notcontains": "Bar"
+            "notContains": "Bar"
           },{
             "matches": "T.xt1"
           }],
           "stderr": [{
             "contains": "Text2"
           },{
-            "notcontains": "Foo"
+            "notContains": "Foo"
           },{
-            "notcontains": "Bar"
+            "notContains": "Bar"
           },{
             "matches": "T.xt2"
           }]
