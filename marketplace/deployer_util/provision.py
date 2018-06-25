@@ -61,12 +61,12 @@ def process(schema, values, deployer_image, deployer_entrypoint):
       value, sa_manifests = provision_service_account(
           schema, prop, app_name=app_name, namespace=namespace)
       props[prop.name] = value
-      manifests += sa_manifests
+      manifests += add_preprovisioned_labels(sa_manifests, prop.name)
     elif prop.storage_class:
       value, sc_manifests = provision_storage_class(
           schema, prop, app_name=app_name, namespace=namespace)
       props[prop.name] = value
-      manifests += sc_manifests
+      manifests += add_preprovisioned_labels(sc_manifests, prop.name)
 
   # Merge input and provisioned properties.
   app_params = dict(list(values.iteritems()) + list(props.iteritems()))
@@ -277,7 +277,6 @@ def provision_service_account(schema, prop, app_name, namespace):
         },
         'subjects': subjects,
     })
-
   return sa_name, manifests
 
 
@@ -345,6 +344,17 @@ def dns1123_name(name):
     h4sh = m.hexdigest()[:4]
     fixed = '{}-{}'.format(fixed, h4sh)
   return fixed
+
+
+def add_preprovisioned_labels(manifests, prop_name):
+  for r in manifests:
+    labels = r['metadata'].get('labels', {})
+    labels['application.k8s.io/component'] = (
+      'auto-provisioned.marketplace.cloud.google.com')
+    labels['marketplace.cloud.google.com/auto-provisioned/for-property'] = (
+        prop_name)
+    r['metadata']['labels'] = labels
+  return manifests
 
 
 if __name__ == '__main__':
