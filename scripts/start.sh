@@ -78,7 +78,7 @@ echo "${parameters}" \
   | docker run -i --entrypoint=/bin/provision.py --rm "${deployer}" \
     --values_file=- --deployer_image="${deployer}" --deployer_entrypoint="${entrypoint}" \
   | docker run -i --entrypoint=/bin/set_app_labels.py --rm "${deployer}" \
-    --manifests=- --dest=- --name="${name}" --namespace="${namespace}"\
+    --manifests=- --dest=- --name="${name}" --namespace="${namespace}" \
   | docker run -i --entrypoint=/bin/set_ownership.py --rm "${deployer}" \
     --manifests=- --dest=- --noapp \
     --app_name="${name}" --app_uid="${app_uid}" --app_api_version="${app_api_version}" \
