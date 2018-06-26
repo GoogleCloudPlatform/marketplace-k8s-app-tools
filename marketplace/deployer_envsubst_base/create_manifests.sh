@@ -19,10 +19,6 @@ set -eox pipefail
 for i in "$@"
 do
 case $i in
-  --application_uid=*)
-    application_uid="${i#*=}"
-    shift
-    ;;
   --mode=*)
     mode="${i#*=}"
     shift
@@ -34,7 +30,6 @@ case $i in
 esac
 done
 
-[[ -z "$application_uid" ]] && echo "application_uid required" && exit 1
 [[ -z "$NAME" ]] && echo "NAME must be set" && exit 1
 [[ -z "$NAMESPACE" ]] && echo "NAMESPACE must be set" && exit 1
 
@@ -60,9 +55,3 @@ for manifest_template_file in "$data_dir"/manifest/*; do
     | /bin/config_env.py envsubst "${env_vars}" \
     > "$manifest_dir/$manifest_file"
 done
-
-/bin/setownership.py \
-  --appname "$NAME" \
-  --appuid "$application_uid" \
-  --manifests "$manifest_dir" \
-  --dest "$data_dir/resources.yaml"

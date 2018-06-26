@@ -22,46 +22,43 @@
       }
     },
     {
-      "name": "Can SSH and do basic queries",
-      "sshTest": {
-        "host": "{{.Vars.MainVmIp}}",
-        "port": 22,
-        "commands": [
-          {
-            "command": [
-              "redis",
-              "ping"
-            ],
-            "expect": {
-              "stdout": {
-                "exactly": "PONG"
-              },
-              "stderr": {
-                "exactly": ""
-              }
-            }
-          },
-          {
-            "script": "#!/bin/bash -eu\nredis-cli put MY_KEY MY_VALUE\nredis-cli get MY_KEY",
-            "expect": {
-              "stdout": {
-                "exactly": "MY_VALUE"
-              },
-              "stderr": {
-                "exactly": ""
-              }
-            }
-          }
-        ]
-      }
-    },
-    {
       "name": "Update success variable",
       "gcp": {
         "setRuntimeConfigVar": {
           "runtimeConfigSelfLink": "https://runtimeconfig.googleapis.com/v1beta1/projects/my-project/configs/my-config",
           "variablePath": "status/success",
           "base64Value": "c3VjY2Vzcwo="
+        }
+      }
+    },
+    {
+      "name": "Can echo to stdout and stderr",
+      "bashTest": {
+        "script": "echo \"Text1\"\n>2& echo \"Text2\"",
+        "expect": {
+           "exitCode": [{
+             "equals": 0
+           },{
+             "notEquals": 1
+           }],
+          "stdout": [{
+            "contains": "Text1"
+          },{
+            "notContains": "Foo"
+          },{
+            "notContains": "Bar"
+          },{
+            "matches": "T.xt1"
+          }],
+          "stderr": [{
+            "contains": "Text2"
+          },{
+            "notContains": "Foo"
+          },{
+            "notContains": "Bar"
+          },{
+            "matches": "T.xt2"
+          }]
         }
       }
     }

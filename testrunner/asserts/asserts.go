@@ -70,12 +70,18 @@ func doIntAssert(value int, rule specs.IntAssert) string {
 	if rule.GreaterThan != nil && value <= *rule.GreaterThan {
 		return fmt.Sprintf("Should have been greater than %d, but was %d", *rule.GreaterThan, value)
 	}
+	if rule.NotEquals != nil && value == *rule.NotEquals {
+		return fmt.Sprintf("Should have been different from %d, but was %d", *rule.NotEquals, value)
+	}
 	return ""
 }
 
 func doStringAssert(value string, rule specs.StringAssert) string {
 	if rule.Exactly != nil && value != *rule.Exactly {
 		return fmt.Sprintf("Should have matched exactly:\n%s\n... but was:\n%s", *rule.Exactly, value)
+	}
+	if rule.NotContains != nil && strings.Contains(value, *rule.NotContains) {
+		return fmt.Sprintf("Should have not contained:\n%s\n... but was:\n%s", *rule.NotContains, value)
 	}
 	if rule.Equals != nil {
 		trimmed := strings.TrimSpace(value)

@@ -53,14 +53,19 @@ include $(makefile_dir)/common.Makefile
 
 
 .build/marketplace/delete_deprecated: | .build/marketplace
-	@docker images --format '{{.Repository}}' \
+# For BSD compatibility, we can't use xargs -r.
+	@ \
+	for image in $$(docker images --format '{{.Repository}}' \
 	    | sort | uniq \
-	    | grep gcr.io/google-marketplace-tools/ \
-	    | xargs -I {} -r -n 1 printf '\n\033[93m\033[1m{} is DEPRECATED. Please update your Dockerfile\033[0m\n\n'
-	@docker images --format '{{.Repository}}:{{.Tag}}' \
-	    | grep gcr.io/google-marketplace-tools/ \
-	    | grep -v -e '<[Nn]one>' \
-	    | xargs -r docker rmi
+	    | grep 'gcr.io/google-marketplace-tools/'); do \
+	  printf "\n\033[93m\033[1m$${image} is DEPRECATED. Please update your Dockerfile\033[0m\n\n"; \
+	done
+	@ \
+	for image in $$(docker images --format '{{.Repository}}:{{.Tag}}' \
+	    | grep 'gcr.io/google-marketplace-tools/' \
+	    | grep -v -e '<[Nn]one>'); do \
+	  docker rmi "$${image}"; \
+	done
 	@touch "$@"
 
 
