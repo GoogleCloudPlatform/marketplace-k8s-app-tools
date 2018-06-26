@@ -97,7 +97,7 @@ app/verify: app/build \
             .build/var/APP_DEPLOYER_IMAGE \
             .build/var/APP_PARAMETERS \
             .build/var/APP_TEST_PARAMETERS
-	docker run --entrypoint=/marketplace_tools/marketplace/scripts/river/driver.sh \
+	docker run --entrypoint=/marketplace_tools/scripts/driver/driver.sh \
 	    -v /var/run/docker.sock:/var/run/docker.sock \
 	    -v $(MARKETPLACE_TOOLS_PATH):/marketplace_tools \
 	    -v ${HOME}/.kube/config:/.kube/config \
