@@ -6,7 +6,6 @@ __MARKETPLACE_MAKEFILE__ := included
 makefile_dir := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
 include $(makefile_dir)/common.Makefile
 
-
 .build/marketplace: | .build
 	mkdir -p "$@"
 
@@ -37,6 +36,18 @@ include $(makefile_dir)/common.Makefile
 	&& docker build \
 	    --tag "gcr.io/cloud-marketplace-tools/k8s/deployer_helm" \
 	    -f marketplace/deployer_helm_base/Dockerfile \
+	    .
+	@touch "$@"
+
+
+.build/marketplace/driver: $(MARKETPLACE_TOOLS_PATH)/marketplace/driver/* \
+                           $(MARKETPLACE_TOOLS_PATH)/scripts/* \
+                           | .build/marketplace
+	$(call print_target)
+	cd $(MARKETPLACE_TOOLS_PATH) \
+	&& docker build \
+	    --tag "gcr.io/marketplace-tools/k8s/test_driver" \
+	    -f marketplace/driver/Dockerfile \
 	    .
 	@touch "$@"
 
