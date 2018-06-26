@@ -80,7 +80,7 @@ app/uninstall: .build/var/MARKETPLACE_TOOLS_PATH \
 
 # Runs the verification pipeline in the os
 .PHONY: app/driver.sh
-app/verify_bash: app/build \
+app/driver.sh: app/build \
             .build/var/MARKETPLACE_TOOLS_PATH \
             .build/var/APP_DEPLOYER_IMAGE \
             .build/var/APP_PARAMETERS \
@@ -88,6 +88,7 @@ app/verify_bash: app/build \
 	$(MARKETPLACE_TOOLS_PATH)/scripts/driver/driver.sh \
 	    --deployer='$(APP_DEPLOYER_IMAGE)' \
 	    --parameters='$(call combined_parameters)'
+
 
 # Runs the verification pipeline using the driver image
 .PHONY: app/verify
@@ -97,9 +98,8 @@ app/verify: app/build \
             .build/var/APP_DEPLOYER_IMAGE \
             .build/var/APP_PARAMETERS \
             .build/var/APP_TEST_PARAMETERS
-	docker run --entrypoint=/marketplace_tools/scripts/driver/driver.sh \
+	docker run -t --entrypoint=/marketplace_tools/scripts/driver/driver.sh \
 	    -v /var/run/docker.sock:/var/run/docker.sock \
-	    -v $(MARKETPLACE_TOOLS_PATH):/marketplace_tools \
 	    -v ${HOME}/.kube/config:/.kube/config \
 	    -v ${HOME}/.config/gcloud:/root/.config/gcloud \
 	    --rm "gcr.io/marketplace-tools/k8s/test_driver" \
