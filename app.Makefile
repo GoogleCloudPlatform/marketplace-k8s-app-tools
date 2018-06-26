@@ -97,12 +97,12 @@ app/verify: app/build \
             .build/var/APP_DEPLOYER_IMAGE \
             .build/var/APP_PARAMETERS \
             .build/var/APP_TEST_PARAMETERS
-	docker run --entrypoint=/marketplace_tools/marketplace/driver/driver.sh \
+	docker run --entrypoint=/marketplace_tools/marketplace/scripts/river/driver.sh \
 	    -v /var/run/docker.sock:/var/run/docker.sock \
 	    -v $(MARKETPLACE_TOOLS_PATH):/marketplace_tools \
-	    -v ${HOME}/.kube/config:/.kube/config \   
+	    -v ${HOME}/.kube/config:/.kube/config \
 	    -v ${HOME}/.config/gcloud:/root/.config/gcloud \
-	    --rm "gcr.io/marketplace-tools/k8s/test_driver \
+	    --rm "gcr.io/marketplace-tools/k8s/test_driver" \
 	    --deployer='$(APP_DEPLOYER_IMAGE)' \
 	    --parameters='$(call combined_parameters)'
 
