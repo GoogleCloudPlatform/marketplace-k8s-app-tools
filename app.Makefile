@@ -79,7 +79,7 @@ app/uninstall: .build/var/MARKETPLACE_TOOLS_PATH \
 
 
 # Runs the verification pipeline in the os
-.PHONY: app/verify_bash
+.PHONY: app/driver.sh
 app/verify_bash: app/build \
             .build/var/MARKETPLACE_TOOLS_PATH \
             .build/var/APP_DEPLOYER_IMAGE \
