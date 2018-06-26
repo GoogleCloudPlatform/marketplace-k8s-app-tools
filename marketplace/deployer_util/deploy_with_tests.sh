@@ -29,17 +29,30 @@ export NAMESPACE="$(/bin/print_config.py --param '{"x-google-marketplace": {"typ
 
 echo "Deploying application \"$NAME\" in test mode"
 
-application_uid=$(kubectl get "applications/$NAME" \
+app_uid=$(kubectl get "applications/$NAME" \
   --namespace="$NAMESPACE" \
   --output=jsonpath='{.metadata.uid}')
+app_api_version=$(kubectl get "applications/$NAME" \
+  --namespace="$NAMESPACE" \
+  --output=jsonpath='{.apiVersion}')
 
-create_manifests.sh --application_uid="$application_uid" --mode="test"
+create_manifests.sh --mode="test"
+
+# Assign owner references for the resources.
+/bin/set_ownership.py \
+  --app_name "$NAME" \
+  --app_uid "$app_uid" \
+  --app_api_version "$app_api_version" \
+  --manifests "/data/manifest-expanded" \
+  --dest "/data/resources.yaml"
 
 separate_tester_resources.py \
-  --appuid "$application_uid" \
-  --appname "$NAME" \
-  --manifest "/data/resources.yaml" \
-  --tester_manifest "/data/tester.yaml"
+  --app_uid "$app_uid" \
+  --app_name "$NAME" \
+  --app_api_version "$app_api_version" \
+  --manifests "/data/resources.yaml" \
+  --out_manifests "/data/resources.yaml" \
+  --out_test_manifests "/data/tester.yaml"
 
 # Apply the manifest.
 kubectl apply --namespace="$NAMESPACE" --filename="/data/resources.yaml"
