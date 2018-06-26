@@ -29,13 +29,32 @@ _PROG_HELP = "Separate the tester job from resources manifest into a different m
 def main():
 
   parser = ArgumentParser(description=_PROG_HELP)
-  parser.add_argument("--appname", help="the name of the applictation instance")
-  parser.add_argument("--appuid", help="the uid of the applictation instance")
-  parser.add_argument("--manifest", help="the configuration for tests")
-  parser.add_argument("--tester_manifest", help="the output for test resources")
+  parser.add_argument("--app_name",
+                      required=True,
+                      help="the name of the applictation instance")
+  parser.add_argument("--app_uid",
+                      required=True,
+                      help="the uid of the applictation instance")
+  parser.add_argument("--app_api_version",
+                      required=True,
+                      help="apiVersion of the Application CRD")
+  parser.add_argument("--manifests",
+                      required=True,
+                      help="the configuration for tests")
+  parser.add_argument("--out_manifests",
+                      required=True,
+                      help="the file to write non-test resources to")
+  parser.add_argument("--out_test_manifests",
+                      required=True,
+                      help="the file to write test resources to")
   args = parser.parse_args()
 
-  resources = load_resources_yaml(args.manifest)
+  if os.path.isfile(args.manifests):
+    resources = load_resources_yaml(args.manifests)
+  else:
+    resources = []
+    for filename in os.listdir(args.manifests):
+      resources += load_resources_yaml(os.path.join(args.manifests, filename))
 
   test_resources = []
   nontest_resources = []
@@ -43,21 +62,20 @@ def main():
     full_name = "{}/{}".format(resource['kind'], deep_get(resource, 'metadata', 'name'))
     if deep_get(resource, 'metadata', 'annotations', GOOGLE_CLOUD_TEST) == 'test':
       print("INFO Tester resource: {}".format(full_name))
-      set_resource_ownership(args.appuid, args.appname, resource)
+      set_resource_ownership(app_uid=args.app_uid,
+                             app_name=args.app_name,
+                             app_api_version=args.app_api_version,
+                             resource=resource)
       test_resources.append(resource)
     else:
       print("INFO Prod resource: {}".format(full_name))
       nontest_resources.append(resource)
 
-  temp_manifest = args.manifest + ".tmp"
-  if nontest_resources:
-    with open(temp_manifest, "w") as outfile:
-      yaml.safe_dump_all(nontest_resources, outfile, default_flow_style=False)
-  os.rename(temp_manifest, args.manifest)
+  with open(args.out_manifests, "w") as outfile:
+    yaml.safe_dump_all(nontest_resources, outfile, default_flow_style=False)
 
-  if test_resources:
-    with open(args.tester_manifest, "a") as test_outfile:
-      yaml.safe_dump_all(test_resources, test_outfile, default_flow_style=False)
+  with open(args.out_test_manifests, "a") as test_outfile:
+    yaml.safe_dump_all(test_resources, test_outfile, default_flow_style=False)
 
 
 if __name__ == "__main__":

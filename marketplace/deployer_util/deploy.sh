@@ -45,11 +45,22 @@ export NAMESPACE
 
 echo "Deploying application \"$NAME\""
 
-application_uid=$(kubectl get "applications/$NAME" \
+app_uid=$(kubectl get "applications/$NAME" \
   --namespace="$NAMESPACE" \
   --output=jsonpath='{.metadata.uid}')
+app_api_version=$(kubectl get "applications/$NAME" \
+  --namespace="$NAMESPACE" \
+  --output=jsonpath='{.apiVersion}')
 
-create_manifests.sh --application_uid="$application_uid"
+create_manifests.sh
+
+# Assign owner references for the resources.
+/bin/set_ownership.py \
+  --app_name "$NAME" \
+  --app_uid "$app_uid" \
+  --app_api_version "$app_api_version" \
+  --manifests "/data/manifest-expanded" \
+  --dest "/data/resources.yaml"
 
 # Ensure assembly phase is "Pending", until successful kubectl apply.
 /bin/setassemblyphase.py \

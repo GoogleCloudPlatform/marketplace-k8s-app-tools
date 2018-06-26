@@ -68,46 +68,36 @@ func expectedSuite() *Suite {
 				},
 			},
 			{
-				Name: "Can SSH and do basic queries",
-				SshTest: &SshTest{
-					Host: "{{.Vars.MainVmIp}}",
-					Port: newInt(22),
-					Commands: []CliCommand{
-						{
-							Command: []string{"redis", "ping"},
-							Expect: &CliExpect{
-								Stdout: &StringAssert{
-									Exactly: newString("PONG"),
-								},
-								Stderr: &StringAssert{
-									Exactly: newString(""),
-								},
-							},
-						},
-						{
-							Script: newString(
-								`#!/bin/bash -eu
-redis-cli put MY_KEY MY_VALUE
-redis-cli get MY_KEY`),
-							Expect: &CliExpect{
-								Stdout: &StringAssert{
-									Exactly: newString("MY_VALUE"),
-								},
-								Stderr: &StringAssert{
-									Exactly: newString(""),
-								},
-							},
-						},
-					},
-				},
-			},
-			{
 				Name: "Update success variable",
 				Gcp: &GcpAction{
 					SetRuntimeConfigVar: &SetRuntimeConfigVarGcpAction{
 						RuntimeConfigSelfLink: "https://runtimeconfig.googleapis.com/v1beta1/projects/my-project/configs/my-config",
 						VariablePath:          "status/success",
 						Base64Value:           "c3VjY2Vzcwo=",
+					},
+				},
+			},
+			{
+				Name: "Can echo to stdout and stderr",
+				BashTest: &BashTest{
+					Script: "echo \"Text1\"\n>2& echo \"Text2\"",
+					Expect: &CliExpect{
+						ExitCode: &[]IntAssert{
+							{Equals: newInt(0)},
+							{NotEquals: newInt(1)},
+						},
+						Stdout: &[]StringAssert{
+							{Contains: newString("Text1")},
+							{NotContains: newString("Foo")},
+							{NotContains: newString("Bar")},
+							{Matches: newString("T.xt1")},
+						},
+						Stderr: &[]StringAssert{
+							{Contains: newString("Text2")},
+							{NotContains: newString("Foo")},
+							{NotContains: newString("Bar")},
+							{Matches: newString("T.xt2")},
+						},
 					},
 				},
 			},
