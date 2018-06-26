@@ -31,8 +31,8 @@ type Action struct {
 	Name      string     `json:"name,omitempty"`
 	Condition *Condition `json:"condition,omitempty"`
 	HttpTest  *HttpTest  `json:"httpTest,omitempty"`
-	SshTest   *SshTest   `json:"sshTest,omitempty"`
 	Gcp       *GcpAction `json:"gcp,omitempty"`
+	BashTest  *BashTest  `json:"bashTest,omitempty"`
 }
 
 type Condition struct {
@@ -46,20 +46,13 @@ type HttpTest struct {
 	Expect  HttpExpect        `json:"expect"`
 }
 
-type SshTest struct {
-	Host     string       `json:"host"`
-	Port     *int         `json:"port,omitempty"`
-	Commands []CliCommand `json:"commands,omitempty"`
-}
-
 type GcpAction struct {
 	SetRuntimeConfigVar *SetRuntimeConfigVarGcpAction `json:"setRuntimeConfigVar,omitempty"`
 }
 
-type CliCommand struct {
-	Command []string   `json:"command,omitempty"`
-	Script  *string    `json:"script,omitempty"`
-	Expect  *CliExpect `json:"expect,omitempty"`
+type BashTest struct {
+	Script string      `json:"script"`
+	Expect *CliExpect `json:"expect"`
 }
 
 type HttpExpect struct {
@@ -69,8 +62,9 @@ type HttpExpect struct {
 }
 
 type CliExpect struct {
-	Stdout *StringAssert `json:"stdout,omitempty"`
-	Stderr *StringAssert `json:"stderr,omitempty"`
+	ExitCode *[]IntAssert    `json:"exitCode,omitempty"`
+	Stdout   *[]StringAssert `json:"stdout,omitempty"`
+	Stderr   *[]StringAssert `json:"stderr,omitempty"`
 }
 
 type SetRuntimeConfigVarGcpAction struct {
@@ -93,13 +87,15 @@ type IntAssert struct {
 	AtMost      *int `json:"atMost,omitempty"`
 	LessThan    *int `json:"lessThan,omitempty"`
 	GreaterThan *int `json:"greaterThan,omitempty"`
+	NotEquals   *int `json:"notEquals,omitempty"`
 }
 
 type StringAssert struct {
-	Exactly  *string `json:"exactly,omitempty"`
-	Equals   *string `json:"equals,omitempty"`
-	Contains *string `json:"contains,omitempty"`
-	Matches  *string `json:"matches,omitempty"`
+	Exactly     *string `json:"exactly,omitempty"`
+	Equals      *string `json:"equals,omitempty"`
+	Contains    *string `json:"contains,omitempty"`
+	Matches     *string `json:"matches,omitempty"`
+	NotContains *string `json:"notContains,omitempty"`
 }
 
 func LoadSuite(path string) *Suite {
