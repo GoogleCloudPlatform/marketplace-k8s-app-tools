@@ -48,7 +48,7 @@ resources:
           # Posts success to config waiter
           readonly access_token="$(curl -s -H "Metadata-Flavor: Google" http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token | awk -F\" '{ print $4 }')"
           readonly runtime_config_path="projects/{{ env["project"] }}/configs/{{ CONFIG_NAME }}"
-          readonly value_base64="$(echo -n "OK" | base64)"
+          readonly value_base64="$(printf "OK" | base64)"
           readonly payload="$(printf '{"name": "%s", "value": "%s"}' "${runtime_config_path}/variables/status/success/OK" "${value_base64}")"
           curl -s \
             -X POST \

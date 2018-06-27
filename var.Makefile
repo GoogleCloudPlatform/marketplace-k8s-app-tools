@@ -43,10 +43,10 @@ var/phony: ;
 	var_val="${$*}" ; \
 	var_val_old=$$(cat ".build/var/$$var_key" 2> /dev/null) ; \
 	if [ "$$var_val" != "$$var_val_old" ]; then \
-	  echo -e "\033[93m\033[1m$$var_key has been updated.\033[0m" ; \
-	  echo -e "\033[93m\033[1m  old value: $$var_val_old\033[0m" ; \
-	  echo -e "\033[93m\033[1m  new value: $$var_val\033[0m" ; \
-	  echo -n "$$var_val" > .build/var/$$var_key ; \
+	  $(call print_notice,$$var_key has been updated) ; \
+	  printf "  old value: $$var_val_old\n" ; \
+	  printf "  new value: $$var_val\n" ; \
+	  printf "$$var_val" > .build/var/$$var_key ; \
 	fi
 
 
@@ -57,7 +57,7 @@ var/phony: ;
 	var_key="$*" ; \
 	var_val="${$*}" ; \
 	if [ "$$var_val" = "" ]; then \
-	  echo -e "\n\e[91mMake variable '$*' is required.\e[39m\n"; \
+	  $(call print_notice,Make variable '$*' is required); \
 	  exit 1; \
 	fi
 

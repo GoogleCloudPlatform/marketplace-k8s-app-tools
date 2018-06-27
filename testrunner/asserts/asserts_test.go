@@ -66,6 +66,26 @@ func TestStringAssertMatches(t *testing.T) {
 	assertShouldFail(t, "ad", rule)
 }
 
+func TestStringAssertNotContains(t *testing.T) {
+	rule := specs.StringAssert{NotContains: newString("to be excluded")}
+	assertShouldFail(t, "to be excluded", rule)
+	assertShouldFail(t, "\nto be excluded", rule)
+	assertShouldFail(t, "to be excluded\n", rule)
+	assertShouldFail(t, " to be excluded", rule)
+	assertShouldFail(t, "to be excluded ", rule)
+
+	rule = specs.StringAssert{NotContains: newString("")}
+	assertShouldFail(t, "\n", rule)
+	assertShouldFail(t, "a", rule)
+
+	rule = specs.StringAssert{NotContains: newString("more")}
+	assertShouldFail(t, "Jane is more fun", rule)
+	assertShouldFail(t, "more is less", rule)
+	assertShouldFail(t, "less is more", rule)
+	assertShouldFail(t, "lessmoreless", rule)
+	assertShouldPass(t, "Jane is fun", rule)
+}
+
 func TestStringAssertMatchesBadRegex(t *testing.T) {
 	rule := specs.StringAssert{Matches: newString(`\`)}
 	assertShouldFail(t, `\`, rule)
@@ -75,6 +95,12 @@ func TestIntAssertEquals(t *testing.T) {
 	rule := specs.IntAssert{Equals: newInt(10)}
 	assertShouldPass(t, 10, rule)
 	assertShouldFail(t, 12, rule)
+}
+
+func TestIntAssertNotEquals(t *testing.T) {
+	rule := specs.IntAssert{NotEquals: newInt(10)}
+	assertShouldFail(t, 10, rule)
+	assertShouldPass(t, 12, rule)
 }
 
 func TestIntAssertAtLeast(t *testing.T) {
