@@ -172,16 +172,6 @@ class ConfigHelperTest(unittest.TestCase):
                          'type': 'int',
                      }))
 
-  def test_namespace_type(self):
-    schema = config_helper.Schema.load_yaml(
-        """
-        properties:
-          ns:
-            type: string
-            x-google-marketplace:
-              type: NAMESPACE
-        """)
-
   def test_name_type(self):
     schema = config_helper.Schema.load_yaml(
         """
@@ -191,6 +181,18 @@ class ConfigHelperTest(unittest.TestCase):
             x-google-marketplace:
               type: NAME
         """)
+    self.assertIsNotNone(schema.properties['n'])
+
+  def test_namespace_type(self):
+    schema = config_helper.Schema.load_yaml(
+        """
+        properties:
+          ns:
+            type: string
+            x-google-marketplace:
+              type: NAMESPACE
+        """)
+    self.assertIsNotNone(schema.properties['ns'])
 
   def test_image_type(self):
     schema = config_helper.Schema.load_yaml(
@@ -201,6 +203,7 @@ class ConfigHelperTest(unittest.TestCase):
             x-google-marketplace:
               type: IMAGE
         """)
+    self.assertIsNotNone(schema.properties['i'])
 
   def test_password(self):
     schema = config_helper.Schema.load_yaml(
