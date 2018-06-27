@@ -1,0 +1,12 @@
+{
+  "deployer": "gcr.io/ruela-test/example/wordpress/deployer:latest",
+  "parameters": {
+    "name": "wordpress-1",
+    "imageWordpress": "gcr.io/ruela-test/example/wordpress:latest",
+    "imageInit": "gcr.io/ruela-test/example/wordpress/init:latest",
+    "imageMysql": "gcr.io/ruela-test/example/wordpress/mysql:latest",
+    "imageUbbagent": "gcr.io/ruela-test/example/wordpress/ubbagent:latest",
+    "reportingSecret": "wordpress-1-reporting-secret",
+    "imageTester": "gcr.io/ruela-test/example/wordpress/tester:latest"
+  }
+}
