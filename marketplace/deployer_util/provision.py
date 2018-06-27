@@ -197,7 +197,7 @@ def provision_service_account(schema, prop, app_name, namespace):
           'namespace': namespace,
       },
   }]
-  for i, rules in prop.service_account.custom_role_rules():
+  for i, rules in enumerate(prop.service_account.custom_role_rules()):
     role_name = '{}:{}-r{}'.format(app_name, prop.name, i)
     manifests.append({
         'apiVersion': 'rbac.authorization.k8s.io/v1',
@@ -222,7 +222,7 @@ def provision_service_account(schema, prop, app_name, namespace):
         },
         'subjects': subjects,
     })
-  for i, rules in prop.service_account.custom_cluster_role_rules():
+  for i, rules in enumerate(prop.service_account.custom_cluster_role_rules()):
     role_name = '{}:{}:{}-r{}'.format(namespace, app_name, prop.name, i)
     manifests.append({
         'apiVersion': 'rbac.authorization.k8s.io/v1',
