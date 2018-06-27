@@ -1,0 +1,6 @@
+{
+  "deployer": "gcr.io/kasten-cloudlauncher/kasten-k10",
+  "parameters": {
+    "name": "kasten-k10-1"
+  }
+}
