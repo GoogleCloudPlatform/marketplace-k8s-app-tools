@@ -172,6 +172,39 @@ class ConfigHelperTest(unittest.TestCase):
                          'type': 'int',
                      }))
 
+  def test_name_type(self):
+    schema = config_helper.Schema.load_yaml(
+        """
+        properties:
+          n:
+            type: string
+            x-google-marketplace:
+              type: NAME
+        """)
+    self.assertIsNotNone(schema.properties['n'])
+
+  def test_namespace_type(self):
+    schema = config_helper.Schema.load_yaml(
+        """
+        properties:
+          ns:
+            type: string
+            x-google-marketplace:
+              type: NAMESPACE
+        """)
+    self.assertIsNotNone(schema.properties['ns'])
+
+  def test_image_type(self):
+    schema = config_helper.Schema.load_yaml(
+        """
+        properties:
+          i:
+            type: string
+            x-google-marketplace:
+              type: IMAGE
+        """)
+    self.assertIsNotNone(schema.properties['i'])
+
   def test_password(self):
     schema = config_helper.Schema.load_yaml(
         """
@@ -373,6 +406,29 @@ class ConfigHelperTest(unittest.TestCase):
     self.assertIsNotNone(schema.properties['sc'].storage_class)
     sc = schema.properties['sc'].storage_class
     self.assertTrue(sc.ssd)
+
+  def test_reporting_secret(self):
+    schema = config_helper.Schema.load_yaml(
+        """
+        properties:
+          rs:
+            type: string
+            x-google-marketplace:
+              type: REPORTING_SECRET
+        """)
+    self.assertIsNotNone(schema.properties['rs'].reporting_secret)
+
+  def test_unknown_type(self):
+    self.assertRaises(
+        config_helper.InvalidSchema,
+        lambda: config_helper.Schema.load_yaml(
+        """
+        properties:
+          unk:
+            type: string
+            x-google-marketplace:
+              type: UNKNOWN
+        """))
 
 
 if __name__ == 'main':

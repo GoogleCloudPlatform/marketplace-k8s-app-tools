@@ -25,9 +25,13 @@ import yaml
 NAME_RE = re.compile(r'[a-zA-z0-9_\.]+$')
 
 XGOOGLE = 'x-google-marketplace'
+XTYPE_NAME = 'NAME'
+XTYPE_NAMESPACE = 'NAMESPACE'
+XTYPE_IMAGE = 'IMAGE'
 XTYPE_PASSWORD = 'GENERATED_PASSWORD'
 XTYPE_SERVICE_ACCOUNT = 'SERVICE_ACCOUNT'
 XTYPE_STORAGE_CLASS = 'STORAGE_CLASS'
+XTYPE_REPORTING_SECRET = 'REPORTING_SECRET'
 
 
 class InvalidName(Exception):
@@ -127,6 +131,7 @@ class SchemaProperty:
     self._password = None
     self._service_account = None
     self._storage_class = None
+    self._reporting_secret = None
 
     if not NAME_RE.match(name):
       raise InvalidSchema('Invalid property name: {}'.format(name))
@@ -152,7 +157,9 @@ class SchemaProperty:
         raise InvalidSchema(
             'Property {} has {} without a type'.format(name, XGOOGLE))
       xt = self._x['type']
-      if xt == XTYPE_PASSWORD:
+      if xt in (XTYPE_IMAGE, XTYPE_NAME, XTYPE_NAMESPACE):
+        pass
+      elif xt == XTYPE_PASSWORD:
         d = self._x.get('generatedPassword', {})
         spec = {
             'length': d.get('length', 10),
@@ -166,6 +173,11 @@ class SchemaProperty:
       elif xt == XTYPE_STORAGE_CLASS:
         d = self._x.get('storageClass', {})
         self._storage_class = SchemaXStorageClass(d)
+      elif xt == XTYPE_REPORTING_SECRET:
+        d = self._x.get('reportingSecret', {})
+        self._reporting_secret = SchemaXReportingSecret(d)
+      else:
+        raise InvalidSchema('Property {} has an unknown type: {}'.format(name, xt))
 
 
   @property
@@ -202,6 +214,10 @@ class SchemaProperty:
   @property
   def storage_class(self):
     return self._storage_class
+
+  @property
+  def reporting_secret(self):
+    return self._reporting_secret
 
   def str_to_type(self, str_val):
     if self._type == bool:
@@ -295,3 +311,10 @@ class SchemaXStorageClass:
   @property
   def ssd(self):
     return self._type == 'SSD'
+
+
+class SchemaXReportingSecret:
+  """Wrapper class providing convenient access to REPORTING_SECRET property"""
+
+  def __init__(self, dictionary):
+    pass
