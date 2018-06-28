@@ -43,7 +43,7 @@ done
 [[ -z "$wait_timeout" ]] && wait_timeout=600
 
 # Getting the directory of the running script
-DIR="$(realpath $(dirname $0))"
+DIR="$(dirname $0)"
 echo $DIR
 
 namespace_key="$(docker run --entrypoint=/bin/extract_schema_key.py --rm "$deployer" --type NAMESPACE)"
