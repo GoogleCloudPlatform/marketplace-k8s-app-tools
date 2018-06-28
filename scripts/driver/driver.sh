@@ -51,7 +51,7 @@ NAME="$(echo "$parameters" \
     | docker run -i --entrypoint=/bin/print_config.py --rm "$deployer" \
     --values_file=- --param '{"x-google-marketplace": {"type": "NAME"}}')"
 
-export NAMESPACE="apptest-$(uuidgen)"
+export NAMESPACE="apptest-$(cat /dev/urandom | xxd -l 4 -ps -c 4)"
 export NAME
 
 kubectl version
@@ -134,15 +134,24 @@ $DIR/../stop.sh \
 
 deletion_timeout=180
 echo "INFO Wait for the applications to be deleted"
-timeout --foreground $deletion_timeout "$DIR/wait_for_deletion.sh" "$NAMESPACE" applications \
+"$DIR/wait_for_deletion.sh" \
+  --namespace="$NAMESPACE" \
+  --kind=applications \
+  --timeout="$deletion_timeout" \
   || clean_and_exit "ERROR Some applications where not deleted"
 
 echo "INFO Wait for standard resources were deleted."
-timeout --foreground $deletion_timeout "$DIR/wait_for_deletion.sh" "$NAMESPACE" all \
+"$DIR/wait_for_deletion.sh" \
+  --namespace="$NAMESPACE" \
+  --kind=all \
+  --timeout="$deletion_timeout" \
   || clean_and_exit "ERROR Some resources where not deleted"
 
 echo "INFO Wait for service accounts to be deleted."
-timeout --foreground $deletion_timeout "$DIR/wait_for_deletion.sh" "$NAMESPACE" serviceaccounts,roles,rolebindings \
+"$DIR/wait_for_deletion.sh" \
+  --namespace="$NAMESPACE" \
+  --kind=serviceaccounts,roles,rolebindings \
+  --timeout="$deletion_timeout" \
   || clean_and_exit "ERROR Some service accounts or roles where not deleted"
 
 delete_namespace
