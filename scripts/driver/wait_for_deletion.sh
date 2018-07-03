@@ -14,14 +14,34 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set -e
-set -o pipefail
+set -eo pipefail
 
-namespace=$1
-kind=$2
-deleted=false
+for i in "$@"
+do
+case $i in
+  --namespace=*)
+    namespace="${i#*=}"
+    shift
+    ;;
+  --kind=*)
+    kind="${i#*=}"
+    shift
+    ;;
+  --timeout=*)
+    timeout="${i#*=}"
+    shift
+    ;;
+  *)
+    echo "Unrecognized flag: $i"
+    exit 1
+    ;;
+esac
+done
 
-while [[ "$deleted" = "false" ]]; do
+start_time=$(date +%s)
+poll_interval=4
+
+while true; do
   # Everything under the namespace needs to be removed after app/uninstall
   echo "INFO Checking if $kind were deleted"
   resources=$(kubectl get $kind \
@@ -32,15 +52,21 @@ while [[ "$deleted" = "false" ]]; do
   res_count=$(echo $resources | wc -w)
 
   if [[ "$res_count" -eq 0 ]]; then
-    deleted=true
+    break
   else
     # Ignore service account default
     if [[ "$resources" = "ServiceAccount/default" ]]; then
-      deleted=true
+      break
     else
       echo "INFO Remaining: $res_count"
       echo "INFO $resources"
-      sleep 4
+
+      elapsed_time=$(( $(date +%s) - $start_time ))
+      if [[ "$elapsed_time" -gt "$timeout" ]]; then
+        exit 1
+      fi
+
+      sleep "$poll_interval"
     fi
   fi
 done
