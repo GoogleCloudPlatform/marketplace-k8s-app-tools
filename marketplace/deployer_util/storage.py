@@ -40,12 +40,13 @@ def _gcs_client():
   """Returns a google cloud storage client."""
   return google.cloud.storage.client.Client()
 
+
 def _parse_gs_path(path):
   """Returns (bucket, blob_name) for a provided gs:/ path."""
   if not path.startswith('gs://'):
     raise InvalidPath('Invalid path: {}'.format(path))
 
-  # Example:  gs://trironkk-testing/tmp/reporting-secret.yaml
+  # Example: gs://trironkk-testing/tmp/reporting-secret.yaml
   _, _, bucket, blob_name = path.split('/', 3)
 
   return bucket, blob_name

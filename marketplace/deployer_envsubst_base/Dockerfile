@@ -11,7 +11,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python-yaml \
     wget \
     && rm -rf /var/lib/apt/lists/* \
-    && pip install wheel \
+
+RUN pip install wheel \
     && pip install google-cloud-storage
 
 RUN wget -q -O /bin/kubectl \
