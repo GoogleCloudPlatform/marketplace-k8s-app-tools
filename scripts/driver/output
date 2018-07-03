@@ -1,0 +1,3964 @@
+.
+Client Version: version.Info{Major:"1", Minor:"9", GitVersion:"v1.9.7", GitCommit:"dd5e1a2978fd0b97d9b78e1564398aeea7e7fe92", GitTreeState:"clean", BuildDate:"2018-04-19T00:05:56Z", GoVersion:"go1.9.3", Compiler:"gc", Platform:"linux/amd64"}
+Server Version: version.Info{Major:"1", Minor:"8+", GitVersion:"v1.8.10-gke.0", GitCommit:"16ebd0de8e0ab2d1ef86d5b16ab1899b624a77cd", GitTreeState:"clean", BuildDate:"2018-03-20T20:21:01Z", GoVersion:"go1.8.3b4", Compiler:"gc", Platform:"linux/amd64"}
+INFO Creates namespace "apptest-8f0887bb"
+namespace "apptest-8f0887bb" created
+INFO Parameters: {
+  "name": "kasten-k10-1",
+  "reportingSecret": "reportingSecret",
+  "namespace": "apptest-8f0887bb"
+}
+INFO Initializes the deployer container which will deploy all the application components
+application "kasten-k10-1" created
+serviceaccount "kasten-k10-1-serviceaccount-cab5" created
+clusterrolebinding "apptest-8f0887bb:kasten-k10-1:serviceAccount:cluster-admin-rb" created
+serviceaccount "kasten-k10-1-deployer-sa" created
+rolebinding "kasten-k10-1-deployer-rb" created
+configmap "kasten-k10-1-deployer-config" created
+job "kasten-k10-1-deployer" created
+INFO wait for the deployer to succeed
+Elapsed 1sElapsed 5sElapsed 9sElapsed 13sERROR Deployer failed
+INFO Collecting events for namespace "apptest-8f0887bb"
+LAST SEEN   FIRST SEEN   COUNT     NAME                                                                   KIND                    SUBOBJECT                                TYPE      REASON                  SOURCE                                              MESSAGE
+10s         10s          1         ambassador-77c5fd8cf5-zzmrh.153da6b099771447                           Pod                                                              Normal    Scheduled               default-scheduler                                   Successfully assigned ambassador-77c5fd8cf5-zzmrh to gke-cluster-1-pool-1-a289a9fe-wcvw
+9s          9s           1         ambassador-77c5fd8cf5-zzmrh.153da6b0a81206f0                           Pod                                                              Normal    SuccessfulMountVolume   kubelet, gke-cluster-1-pool-1-a289a9fe-wcvw         MountVolume.SetUp succeeded for volume "kasten-k10-1-serviceaccount-cab5-token-wf2c7" 
+9s          9s           1         ambassador-77c5fd8cf5-zzmrh.153da6b0bf2d0b4b                           Pod                     spec.containers{ambassador}              Normal    Pulled                  kubelet, gke-cluster-1-pool-1-a289a9fe-wcvw         Container image "quay.io/datawire/ambassador:0.34.3" already present on machine
+9s          9s           1         ambassador-77c5fd8cf5-zzmrh.153da6b0c2406fcd                           Pod                     spec.containers{ambassador}              Normal    Created                 kubelet, gke-cluster-1-pool-1-a289a9fe-wcvw         Created container
+9s          9s           1         ambassador-77c5fd8cf5-zzmrh.153da6b0c825f711                           Pod                     spec.containers{ambassador}              Normal    Started                 kubelet, gke-cluster-1-pool-1-a289a9fe-wcvw         Started container
+9s          9s           1         ambassador-77c5fd8cf5-zzmrh.153da6b0c847e324                           Pod                     spec.containers{statsd}                  Normal    Pulled                  kubelet, gke-cluster-1-pool-1-a289a9fe-wcvw         Container image "quay.io/datawire/statsd:0.34.3" already present on machine
+9s          9s           1         ambassador-77c5fd8cf5-zzmrh.153da6b0d02a3f3d                           Pod                     spec.containers{statsd}                  Normal    Created                 kubelet, gke-cluster-1-pool-1-a289a9fe-wcvw         Created container
+8s          8s           1         ambassador-77c5fd8cf5-zzmrh.153da6b0e2397979                           Pod                     spec.containers{statsd}                  Normal    Started                 kubelet, gke-cluster-1-pool-1-a289a9fe-wcvw         Started container
+10s         10s          1         ambassador-77c5fd8cf5.153da6b0980992e8                                 ReplicaSet                                                       Normal    SuccessfulCreate        replicaset-controller                               Created pod: ambassador-77c5fd8cf5-zzmrh
+10s         10s          1         ambassador.153da6b096f27640                                            Deployment                                                       Normal    ScalingReplicaSet       deployment-controller                               Scaled up replica set ambassador-77c5fd8cf5 to 1
+8s          8s           1         api-policies-svc-7fbb4c585f-7jqhj.153da6b0e48f6cd2                     Pod                                                              Normal    Scheduled               default-scheduler                                   Successfully assigned api-policies-svc-7fbb4c585f-7jqhj to gke-cluster-1-pool-1-a289a9fe-wcvw
+8s          8s           1         api-policies-svc-7fbb4c585f-7jqhj.153da6b0faa119c1                     Pod                                                              Normal    SuccessfulMountVolume   kubelet, gke-cluster-1-pool-1-a289a9fe-wcvw         MountVolume.SetUp succeeded for volume "kasten-k10-1-serviceaccount-cab5-token-wf2c7" 
+6s          6s           1         api-policies-svc-7fbb4c585f-7jqhj.153da6b15b5610e6                     Pod                     spec.containers{api-policies-svc}        Normal    Pulling                 kubelet, gke-cluster-1-pool-1-a289a9fe-wcvw         pulling image "gcr.io/kasten-images/api-policies:1.1.13"
+6s          6s           1         api-policies-svc-7fbb4c585f-7jqhj.153da6b16a2683e9                     Pod                     spec.containers{api-policies-svc}        Normal    Pulled                  kubelet, gke-cluster-1-pool-1-a289a9fe-wcvw         Successfully pulled image "gcr.io/kasten-images/api-policies:1.1.13"
+6s          6s           1         api-policies-svc-7fbb4c585f-7jqhj.153da6b18c43a6c7                     Pod                     spec.containers{api-policies-svc}        Normal    Created                 kubelet, gke-cluster-1-pool-1-a289a9fe-wcvw         Created container
+5s          5s           1         api-policies-svc-7fbb4c585f-7jqhj.153da6b1a5a78240                     Pod                     spec.containers{api-policies-svc}        Normal    Started                 kubelet, gke-cluster-1-pool-1-a289a9fe-wcvw         Started container
+5s          5s           1         api-policies-svc-7fbb4c585f-7jqhj.153da6b1a67c87da                     Pod                     spec.containers{proxy}                   Normal    Pulling                 kubelet, gke-cluster-1-pool-1-a289a9fe-wcvw         pulling image "gcr.io/kasten-images/service-proxy:hash-bc17b40"
+5s          5s           1         api-policies-svc-7fbb4c585f-7jqhj.153da6b1c73dbf87                     Pod                     spec.containers{proxy}                   Normal    Pulled                  kubelet, gke-cluster-1-pool-1-a289a9fe-wcvw         Successfully pulled image "gcr.io/kasten-images/service-proxy:hash-bc17b40"
+4s          4s           1         api-policies-svc-7fbb4c585f-7jqhj.153da6b1daae8c04                     Pod                     spec.containers{proxy}                   Normal    Created                 kubelet, gke-cluster-1-pool-1-a289a9fe-wcvw         Created container
+3s          3s           1         api-policies-svc-7fbb4c585f-7jqhj.153da6b2299a8295                     Pod                     spec.containers{proxy}                   Normal    Started                 kubelet, gke-cluster-1-pool-1-a289a9fe-wcvw         Started container
+8s          8s           1         api-policies-svc-7fbb4c585f.153da6b0e2e12a22                           ReplicaSet                                                       Normal    SuccessfulCreate        replicaset-controller                               Created pod: api-policies-svc-7fbb4c585f-7jqhj
+8s          8s           1         api-policies-svc.153da6b0e28ab2ed                                      Deployment                                                       Normal    ScalingReplicaSet       deployment-controller                               Scaled up replica set api-policies-svc-7fbb4c585f to 1
+8s          8s           1         api-profiles-svc-7d4d44dcff-fc4dc.153da6b0e9b37cfd                     Pod                                                              Normal    Scheduled               default-scheduler                                   Successfully assigned api-profiles-svc-7d4d44dcff-fc4dc to gke-cluster-1-pool-1-a289a9fe-v8jt
+8s          8s           1         api-profiles-svc-7d4d44dcff-fc4dc.153da6b0f70ebb6f                     Pod                                                              Normal    SuccessfulMountVolume   kubelet, gke-cluster-1-pool-1-a289a9fe-v8jt         MountVolume.SetUp succeeded for volume "kasten-k10-1-serviceaccount-cab5-token-wf2c7" 
+7s          7s           1         api-profiles-svc-7d4d44dcff-fc4dc.153da6b11fb2c030                     Pod                     spec.containers{api-profiles-svc}        Normal    Pulling                 kubelet, gke-cluster-1-pool-1-a289a9fe-v8jt         pulling image "gcr.io/kasten-images/api-profiles:1.1.13"
+7s          7s           1         api-profiles-svc-7d4d44dcff-fc4dc.153da6b13118754e                     Pod                     spec.containers{api-profiles-svc}        Normal    Pulled                  kubelet, gke-cluster-1-pool-1-a289a9fe-v8jt         Successfully pulled image "gcr.io/kasten-images/api-profiles:1.1.13"
+7s          7s           1         api-profiles-svc-7d4d44dcff-fc4dc.153da6b13e2d2794                     Pod                     spec.containers{api-profiles-svc}        Normal    Created                 kubelet, gke-cluster-1-pool-1-a289a9fe-v8jt         Created container
+7s          7s           1         api-profiles-svc-7d4d44dcff-fc4dc.153da6b14c5721e7                     Pod                     spec.containers{api-profiles-svc}        Normal    Started                 kubelet, gke-cluster-1-pool-1-a289a9fe-v8jt         Started container
+7s          7s           1         api-profiles-svc-7d4d44dcff-fc4dc.153da6b14caf203d                     Pod                     spec.containers{proxy}                   Normal    Pulling                 kubelet, gke-cluster-1-pool-1-a289a9fe-v8jt         pulling image "gcr.io/kasten-images/service-proxy:hash-bc17b40"
+6s          6s           1         api-profiles-svc-7d4d44dcff-fc4dc.153da6b15a1b3b01                     Pod                     spec.containers{proxy}                   Normal    Pulled                  kubelet, gke-cluster-1-pool-1-a289a9fe-v8jt         Successfully pulled image "gcr.io/kasten-images/service-proxy:hash-bc17b40"
+6s          6s           1         api-profiles-svc-7d4d44dcff-fc4dc.153da6b15cbc1f01                     Pod                     spec.containers{proxy}                   Normal    Created                 kubelet, gke-cluster-1-pool-1-a289a9fe-v8jt         Created container
+6s          6s           1         api-profiles-svc-7d4d44dcff-fc4dc.153da6b1679312e8                     Pod                     spec.containers{proxy}                   Normal    Started                 kubelet, gke-cluster-1-pool-1-a289a9fe-v8jt         Started container
+8s          8s           1         api-profiles-svc-7d4d44dcff.153da6b0e7244fe2                           ReplicaSet                                                       Normal    SuccessfulCreate        replicaset-controller                               Created pod: api-profiles-svc-7d4d44dcff-fc4dc
+8s          8s           1         api-profiles-svc.153da6b0e6212620                                      Deployment                                                       Normal    ScalingReplicaSet       deployment-controller                               Scaled up replica set api-profiles-svc-7d4d44dcff to 1
+8s          8s           1         auth-svc-6fc49cf997-ljfr6.153da6b0eed3c732                             Pod                                                              Normal    Scheduled               default-scheduler                                   Successfully assigned auth-svc-6fc49cf997-ljfr6 to gke-cluster-1-pool-1-a289a9fe-wcvw
+8s          8s           1         auth-svc-6fc49cf997-ljfr6.153da6b10c500144                             Pod                                                              Normal    SuccessfulMountVolume   kubelet, gke-cluster-1-pool-1-a289a9fe-wcvw         MountVolume.SetUp succeeded for volume "k10-api-key" 
+8s          8s           1         auth-svc-6fc49cf997-ljfr6.153da6b11221c096                             Pod                                                              Normal    SuccessfulMountVolume   kubelet, gke-cluster-1-pool-1-a289a9fe-wcvw         MountVolume.SetUp succeeded for volume "kasten-k10-1-serviceaccount-cab5-token-wf2c7" 
+6s          6s           1         auth-svc-6fc49cf997-ljfr6.153da6b15b707235                             Pod                     spec.containers{auth-svc}                Normal    Pulling                 kubelet, gke-cluster-1-pool-1-a289a9fe-wcvw         pulling image "gcr.io/kasten-images/auth:1.1.13"
+6s          6s           1         auth-svc-6fc49cf997-ljfr6.153da6b1771342e9                             Pod                     spec.containers{auth-svc}                Normal    Pulled                  kubelet, gke-cluster-1-pool-1-a289a9fe-wcvw         Successfully pulled image "gcr.io/kasten-images/auth:1.1.13"
+5s          5s           1         auth-svc-6fc49cf997-ljfr6.153da6b1c3463f2a                             Pod                     spec.containers{auth-svc}                Normal    Created                 kubelet, gke-cluster-1-pool-1-a289a9fe-wcvw         Created container
+3s          3s           1         auth-svc-6fc49cf997-ljfr6.153da6b21db6a840                             Pod                     spec.containers{auth-svc}                Normal    Started                 kubelet, gke-cluster-1-pool-1-a289a9fe-wcvw         Started container
+3s          3s           1         auth-svc-6fc49cf997-ljfr6.153da6b21dfe0de1                             Pod                     spec.containers{proxy}                   Normal    Pulling                 kubelet, gke-cluster-1-pool-1-a289a9fe-wcvw         pulling image "gcr.io/kasten-images/service-proxy:hash-bc17b40"
+3s          3s           1         auth-svc-6fc49cf997-ljfr6.153da6b230462a6b                             Pod                     spec.containers{proxy}                   Normal    Pulled                  kubelet, gke-cluster-1-pool-1-a289a9fe-wcvw         Successfully pulled image "gcr.io/kasten-images/service-proxy:hash-bc17b40"
+3s          3s           1         auth-svc-6fc49cf997-ljfr6.153da6b23e5d5af0                             Pod                     spec.containers{proxy}                   Normal    Created                 kubelet, gke-cluster-1-pool-1-a289a9fe-wcvw         Created container
+2s          2s           1         auth-svc-6fc49cf997-ljfr6.153da6b25612c92f                             Pod                     spec.containers{proxy}                   Normal    Started                 kubelet, gke-cluster-1-pool-1-a289a9fe-wcvw         Started container
+8s          8s           1         auth-svc-6fc49cf997.153da6b0ed4f15b1                                   ReplicaSet                                                       Normal    SuccessfulCreate        replicaset-controller                               Created pod: auth-svc-6fc49cf997-ljfr6
+8s          8s           1         auth-svc.153da6b0ec2e5637                                              Deployment                                                       Normal    ScalingReplicaSet       deployment-controller                               Scaled up replica set auth-svc-6fc49cf997 to 1
+4s          4s           1         catalog-pv-claim.153da6b1f1efeae0                                      PersistentVolumeClaim                                            Normal    ProvisioningSucceeded   persistentvolume-controller                         Successfully provisioned volume pvc-2021ada2-7e35-11e8-a573-42010a8a01a6 using kubernetes.io/gce-pd
+5s          8s           4         catalog-svc-7fcc8584df-kklmf.153da6b0f8962bdc                          Pod                                                              Warning   FailedScheduling        default-scheduler                                   PersistentVolumeClaim is not bound: "catalog-pv-claim" (repeated 4 times)
+1s          1s           1         catalog-svc-7fcc8584df-kklmf.153da6b29d40d13e                          Pod                                                              Normal    Scheduled               default-scheduler                                   Successfully assigned catalog-svc-7fcc8584df-kklmf to gke-cluster-1-default-pool-c050e571-zx5c
+1s          1s           1         catalog-svc-7fcc8584df-kklmf.153da6b2b7e5d7cc                          Pod                                                              Normal    SuccessfulMountVolume   kubelet, gke-cluster-1-default-pool-c050e571-zx5c   MountVolume.SetUp succeeded for volume "kasten-k10-1-serviceaccount-cab5-token-wf2c7" 
+8s          8s           1         catalog-svc-7fcc8584df.153da6b0f8ccb32d                                ReplicaSet                                                       Normal    SuccessfulCreate        replicaset-controller                               Created pod: catalog-svc-7fcc8584df-kklmf
+8s          8s           1         catalog-svc.153da6b0f7c538b8                                           Deployment                                                       Normal    ScalingReplicaSet       deployment-controller                               Scaled up replica set catalog-svc-7fcc8584df to 1
+8s          8s           1         compliance-svc-5cdc4c4b95-9ft6k.153da6b100b7828d                       Pod                                                              Normal    Scheduled               default-scheduler                                   Successfully assigned compliance-svc-5cdc4c4b95-9ft6k to gke-cluster-1-pool-1-a289a9fe-v8jt
+7s          7s           1         compliance-svc-5cdc4c4b95-9ft6k.153da6b12466a7be                       Pod                                                              Normal    SuccessfulMountVolume   kubelet, gke-cluster-1-pool-1-a289a9fe-v8jt         MountVolume.SetUp succeeded for volume "kasten-k10-1-serviceaccount-cab5-token-wf2c7" 
+6s          6s           1         compliance-svc-5cdc4c4b95-9ft6k.153da6b1590f4100                       Pod                     spec.containers{compliance-svc}          Normal    Pulling                 kubelet, gke-cluster-1-pool-1-a289a9fe-v8jt         pulling image "gcr.io/kasten-images/compliance:1.1.13"
+6s          6s           1         compliance-svc-5cdc4c4b95-9ft6k.153da6b16d78227f                       Pod                     spec.containers{compliance-svc}          Normal    Pulled                  kubelet, gke-cluster-1-pool-1-a289a9fe-v8jt         Successfully pulled image "gcr.io/kasten-images/compliance:1.1.13"
+6s          6s           1         compliance-svc-5cdc4c4b95-9ft6k.153da6b193540a49                       Pod                     spec.containers{compliance-svc}          Normal    Created                 kubelet, gke-cluster-1-pool-1-a289a9fe-v8jt         Created container
+5s          5s           1         compliance-svc-5cdc4c4b95-9ft6k.153da6b19a672f3c                       Pod                     spec.containers{compliance-svc}          Normal    Started                 kubelet, gke-cluster-1-pool-1-a289a9fe-v8jt         Started container
+5s          5s           1         compliance-svc-5cdc4c4b95-9ft6k.153da6b19a86e412                       Pod                     spec.containers{proxy}                   Normal    Pulling                 kubelet, gke-cluster-1-pool-1-a289a9fe-v8jt         pulling image "gcr.io/kasten-images/service-proxy:hash-bc17b40"
+5s          5s           1         compliance-svc-5cdc4c4b95-9ft6k.153da6b1a898ace7                       Pod                     spec.containers{proxy}                   Normal    Pulled                  kubelet, gke-cluster-1-pool-1-a289a9fe-v8jt         Successfully pulled image "gcr.io/kasten-images/service-proxy:hash-bc17b40"
+5s          5s           1         compliance-svc-5cdc4c4b95-9ft6k.153da6b1b157389d                       Pod                     spec.containers{proxy}                   Normal    Created                 kubelet, gke-cluster-1-pool-1-a289a9fe-v8jt         Created container
+4s          4s           1         compliance-svc-5cdc4c4b95-9ft6k.153da6b1d02d09bb                       Pod                     spec.containers{proxy}                   Normal    Started                 kubelet, gke-cluster-1-pool-1-a289a9fe-v8jt         Started container
+8s          8s           1         compliance-svc-5cdc4c4b95.153da6b0fecb53a5                             ReplicaSet                                                       Normal    SuccessfulCreate        replicaset-controller                               Created pod: compliance-svc-5cdc4c4b95-9ft6k
+8s          8s           1         compliance-svc.153da6b0fd7d5702                                        Deployment                                                       Normal    ScalingReplicaSet       deployment-controller                               Scaled up replica set compliance-svc-5cdc4c4b95 to 1
+3s          3s           1         credentials-pv-claim.153da6b20d818e70                                  PersistentVolumeClaim                                            Normal    ProvisioningSucceeded   persistentvolume-controller                         Successfully provisioned volume pvc-2066fd7d-7e35-11e8-a573-42010a8a01a6 using kubernetes.io/gce-pd
+4s          7s           4         credentials-svc-54f644fcb-qnv4k.153da6b139760d48                       Pod                                                              Warning   FailedScheduling        default-scheduler                                   PersistentVolumeClaim is not bound: "credentials-pv-claim" (repeated 4 times)
+0s          0s           1         credentials-svc-54f644fcb-qnv4k.153da6b2df03ecb3                       Pod                                                              Normal    Scheduled               default-scheduler                                   Successfully assigned credentials-svc-54f644fcb-qnv4k to gke-cluster-1-default-pool-c050e571-5gq9
+7s          7s           1         credentials-svc-54f644fcb.153da6b139e054a2                             ReplicaSet                                                       Normal    SuccessfulCreate        replicaset-controller                               Created pod: credentials-svc-54f644fcb-qnv4k
+7s          7s           1         credentials-svc.153da6b13772cf81                                       Deployment                                                       Normal    ScalingReplicaSet       deployment-controller                               Scaled up replica set credentials-svc-54f644fcb to 1
+5s          5s           1         dashboardbff-svc-58bff8b94c-mgsh2.153da6b1b40c3d6b                     Pod                                                              Normal    Scheduled               default-scheduler                                   Successfully assigned dashboardbff-svc-58bff8b94c-mgsh2 to gke-cluster-1-default-pool-c050e571-zx5c
+3s          3s           1         dashboardbff-svc-58bff8b94c-mgsh2.153da6b21880daa9                     Pod                                                              Normal    SuccessfulMountVolume   kubelet, gke-cluster-1-default-pool-c050e571-zx5c   MountVolume.SetUp succeeded for volume "kasten-k10-1-serviceaccount-cab5-token-wf2c7" 
+3s          3s           1         dashboardbff-svc-58bff8b94c-mgsh2.153da6b234c16943                     Pod                     spec.containers{dashboardbff-svc}        Normal    Pulling                 kubelet, gke-cluster-1-default-pool-c050e571-zx5c   pulling image "gcr.io/kasten-images/dashboardbff:1.1.13"
+0s          0s           1         dashboardbff-svc-58bff8b94c-mgsh2.153da6b2cd5c88a8                     Pod                     spec.containers{dashboardbff-svc}        Normal    Pulled                  kubelet, gke-cluster-1-default-pool-c050e571-zx5c   Successfully pulled image "gcr.io/kasten-images/dashboardbff:1.1.13"
+0s          0s           1         dashboardbff-svc-58bff8b94c-mgsh2.153da6b2d26ae899                     Pod                     spec.containers{dashboardbff-svc}        Normal    Created                 kubelet, gke-cluster-1-default-pool-c050e571-zx5c   Created container
+5s          5s           1         dashboardbff-svc-58bff8b94c.153da6b1b28d899b                           ReplicaSet                                                       Normal    SuccessfulCreate        replicaset-controller                               Created pod: dashboardbff-svc-58bff8b94c-mgsh2
+5s          5s           1         dashboardbff-svc.153da6b1b1e335fd                                      Deployment                                                       Normal    ScalingReplicaSet       deployment-controller                               Scaled up replica set dashboardbff-svc-58bff8b94c to 1
+7s          7s           1         executor-svc-557b9676bc-jlg4z.153da6b152986976                         Pod                                                              Normal    Scheduled               default-scheduler                                   Successfully assigned executor-svc-557b9676bc-jlg4z to gke-cluster-1-pool-1-a289a9fe-wcvw
+6s          6s           1         executor-svc-557b9676bc-jlg4z.153da6b17302120d                         Pod                                                              Normal    SuccessfulMountVolume   kubelet, gke-cluster-1-pool-1-a289a9fe-wcvw         MountVolume.SetUp succeeded for volume "kasten-k10-1-serviceaccount-cab5-token-wf2c7" 
+5s          5s           1         executor-svc-557b9676bc-jlg4z.153da6b1ca85ab74                         Pod                     spec.containers{executor-svc}            Normal    Pulling                 kubelet, gke-cluster-1-pool-1-a289a9fe-wcvw         pulling image "gcr.io/kasten-images/executor:1.1.13"
+4s          4s           1         executor-svc-557b9676bc-jlg4z.153da6b1e5346f78                         Pod                     spec.containers{executor-svc}            Normal    Pulled                  kubelet, gke-cluster-1-pool-1-a289a9fe-wcvw         Successfully pulled image "gcr.io/kasten-images/executor:1.1.13"
+4s          4s           1         executor-svc-557b9676bc-jlg4z.153da6b1f2c4c262                         Pod                     spec.containers{executor-svc}            Normal    Created                 kubelet, gke-cluster-1-pool-1-a289a9fe-wcvw         Created container
+3s          3s           1         executor-svc-557b9676bc-jlg4z.153da6b22696ec58                         Pod                     spec.containers{executor-svc}            Normal    Started                 kubelet, gke-cluster-1-pool-1-a289a9fe-wcvw         Started container
+3s          3s           1         executor-svc-557b9676bc-jlg4z.153da6b226b93f6d                         Pod                     spec.containers{proxy}                   Normal    Pulling                 kubelet, gke-cluster-1-pool-1-a289a9fe-wcvw         pulling image "gcr.io/kasten-images/service-proxy:hash-bc17b40"
+3s          3s           1         executor-svc-557b9676bc-jlg4z.153da6b2451fae5a                         Pod                     spec.containers{proxy}                   Normal    Pulled                  kubelet, gke-cluster-1-pool-1-a289a9fe-wcvw         Successfully pulled image "gcr.io/kasten-images/service-proxy:hash-bc17b40"
+2s          2s           1         executor-svc-557b9676bc-jlg4z.153da6b24ca79e0a                         Pod                     spec.containers{proxy}                   Normal    Created                 kubelet, gke-cluster-1-pool-1-a289a9fe-wcvw         Created container
+2s          2s           1         executor-svc-557b9676bc-jlg4z.153da6b25d381e83                         Pod                     spec.containers{proxy}                   Normal    Started                 kubelet, gke-cluster-1-pool-1-a289a9fe-wcvw         Started container
+7s          7s           1         executor-svc-557b9676bc-lcbv8.153da6b153daa1b4                         Pod                                                              Normal    Scheduled               default-scheduler                                   Successfully assigned executor-svc-557b9676bc-lcbv8 to gke-cluster-1-pool-1-a289a9fe-v8jt
+5s          5s           1         executor-svc-557b9676bc-lcbv8.153da6b19d833992                         Pod                                                              Normal    SuccessfulMountVolume   kubelet, gke-cluster-1-pool-1-a289a9fe-v8jt         MountVolume.SetUp succeeded for volume "kasten-k10-1-serviceaccount-cab5-token-wf2c7" 
+4s          4s           1         executor-svc-557b9676bc-lcbv8.153da6b1e0a2e1f8                         Pod                     spec.containers{executor-svc}            Normal    Pulling                 kubelet, gke-cluster-1-pool-1-a289a9fe-v8jt         pulling image "gcr.io/kasten-images/executor:1.1.13"
+4s          4s           1         executor-svc-557b9676bc-lcbv8.153da6b1ee23e2bf                         Pod                     spec.containers{executor-svc}            Normal    Pulled                  kubelet, gke-cluster-1-pool-1-a289a9fe-v8jt         Successfully pulled image "gcr.io/kasten-images/executor:1.1.13"
+4s          4s           1         executor-svc-557b9676bc-lcbv8.153da6b1fdaec86f                         Pod                     spec.containers{executor-svc}            Normal    Created                 kubelet, gke-cluster-1-pool-1-a289a9fe-v8jt         Created container
+4s          4s           1         executor-svc-557b9676bc-lcbv8.153da6b2057c63cb                         Pod                     spec.containers{executor-svc}            Normal    Started                 kubelet, gke-cluster-1-pool-1-a289a9fe-v8jt         Started container
+4s          4s           1         executor-svc-557b9676bc-lcbv8.153da6b205abcc0f                         Pod                     spec.containers{proxy}                   Normal    Pulling                 kubelet, gke-cluster-1-pool-1-a289a9fe-v8jt         pulling image "gcr.io/kasten-images/service-proxy:hash-bc17b40"
+2s          2s           1         executor-svc-557b9676bc-lcbv8.153da6b268532456                         Pod                     spec.containers{proxy}                   Normal    Pulled                  kubelet, gke-cluster-1-pool-1-a289a9fe-v8jt         Successfully pulled image "gcr.io/kasten-images/service-proxy:hash-bc17b40"
+2s          2s           1         executor-svc-557b9676bc-lcbv8.153da6b26b640ec6                         Pod                     spec.containers{proxy}                   Normal    Created                 kubelet, gke-cluster-1-pool-1-a289a9fe-v8jt         Created container
+2s          2s           1         executor-svc-557b9676bc-lcbv8.153da6b273c73b32                         Pod                     spec.containers{proxy}                   Normal    Started                 kubelet, gke-cluster-1-pool-1-a289a9fe-v8jt         Started container
+7s          7s           1         executor-svc-557b9676bc-x866j.153da6b14d3a76eb                         Pod                                                              Normal    Scheduled               default-scheduler                                   Successfully assigned executor-svc-557b9676bc-x866j to gke-cluster-1-default-pool-c050e571-zx5c
+3s          3s           1         executor-svc-557b9676bc-x866j.153da6b23b81b519                         Pod                                                              Normal    SuccessfulMountVolume   kubelet, gke-cluster-1-default-pool-c050e571-zx5c   MountVolume.SetUp succeeded for volume "kasten-k10-1-serviceaccount-cab5-token-wf2c7" 
+1s          1s           1         executor-svc-557b9676bc-x866j.153da6b2a77a7309                         Pod                     spec.containers{executor-svc}            Normal    Pulling                 kubelet, gke-cluster-1-default-pool-c050e571-zx5c   pulling image "gcr.io/kasten-images/executor:1.1.13"
+0s          0s           1         executor-svc-557b9676bc-x866j.153da6b2de1109c2                         Pod                     spec.containers{executor-svc}            Normal    Pulled                  kubelet, gke-cluster-1-default-pool-c050e571-zx5c   Successfully pulled image "gcr.io/kasten-images/executor:1.1.13"
+0s          0s           1         executor-svc-557b9676bc-x866j.153da6b2e4575535                         Pod                     spec.containers{executor-svc}            Normal    Created                 kubelet, gke-cluster-1-default-pool-c050e571-zx5c   Created container
+7s          7s           1         executor-svc-557b9676bc.153da6b14ac7f635                               ReplicaSet                                                       Normal    SuccessfulCreate        replicaset-controller                               Created pod: executor-svc-557b9676bc-x866j
+7s          7s           1         executor-svc-557b9676bc.153da6b14d503fd2                               ReplicaSet                                                       Normal    SuccessfulCreate        replicaset-controller                               Created pod: executor-svc-557b9676bc-jlg4z
+7s          7s           1         executor-svc-557b9676bc.153da6b150c1eff3                               ReplicaSet                                                       Normal    SuccessfulCreate        replicaset-controller                               Created pod: executor-svc-557b9676bc-lcbv8
+7s          7s           1         executor-svc.153da6b1493ea376                                          Deployment                                                       Normal    ScalingReplicaSet       deployment-controller                               Scaled up replica set executor-svc-557b9676bc to 3
+9s          9s           1         fluentd-5679bfbf9-tlr57.153da6b0c265d0c1                               Pod                                                              Normal    Scheduled               default-scheduler                                   Successfully assigned fluentd-5679bfbf9-tlr57 to gke-cluster-1-pool-1-a289a9fe-v8jt
+9s          9s           1         fluentd-5679bfbf9-tlr57.153da6b0ccaa1ea8                               Pod                                                              Normal    SuccessfulMountVolume   kubelet, gke-cluster-1-pool-1-a289a9fe-v8jt         MountVolume.SetUp succeeded for volume "default-token-m8cw7" 
+9s          9s           1         fluentd-5679bfbf9-tlr57.153da6b0cce6a630                               Pod                                                              Normal    SuccessfulMountVolume   kubelet, gke-cluster-1-pool-1-a289a9fe-v8jt         MountVolume.SetUp succeeded for volume "config-volume-fluentd" 
+8s          8s           1         fluentd-5679bfbf9-tlr57.153da6b0e7899c2b                               Pod                     spec.containers{fluentd}                 Normal    Pulled                  kubelet, gke-cluster-1-pool-1-a289a9fe-v8jt         Container image "gcr.io/google-containers/fluentd-elasticsearch:v2.0.4" already present on machine
+8s          8s           1         fluentd-5679bfbf9-tlr57.153da6b0eabd96f2                               Pod                     spec.containers{fluentd}                 Normal    Created                 kubelet, gke-cluster-1-pool-1-a289a9fe-v8jt         Created container
+8s          8s           1         fluentd-5679bfbf9-tlr57.153da6b0f1ecc45d                               Pod                     spec.containers{fluentd}                 Normal    Started                 kubelet, gke-cluster-1-pool-1-a289a9fe-v8jt         Started container
+9s          9s           1         fluentd-5679bfbf9.153da6b0bee9f0c2                                     ReplicaSet                                                       Normal    SuccessfulCreate        replicaset-controller                               Created pod: fluentd-5679bfbf9-tlr57
+9s          9s           1         fluentd.153da6b0bdb7ad20                                               Deployment                                                       Normal    ScalingReplicaSet       deployment-controller                               Scaled up replica set fluentd-5679bfbf9 to 1
+5s          5s           1         frontend-svc-5ff44cf4f5-zflp2.153da6b1c0e42d2b                         Pod                                                              Normal    Scheduled               default-scheduler                                   Successfully assigned frontend-svc-5ff44cf4f5-zflp2 to gke-cluster-1-default-pool-c050e571-5gq9
+5s          5s           1         frontend-svc-5ff44cf4f5-zflp2.153da6b1ce8e7461                         Pod                                                              Normal    SuccessfulMountVolume   kubelet, gke-cluster-1-default-pool-c050e571-5gq9   MountVolume.SetUp succeeded for volume "kasten-k10-1-serviceaccount-cab5-token-wf2c7" 
+4s          4s           1         frontend-svc-5ff44cf4f5-zflp2.153da6b1ea2c0473                         Pod                     spec.containers{frontend-svc}            Normal    Pulling                 kubelet, gke-cluster-1-default-pool-c050e571-5gq9   pulling image "gcr.io/kasten-images/frontend:1.1.13"
+4s          4s           1         frontend-svc-5ff44cf4f5-zflp2.153da6b1f823c6f1                         Pod                     spec.containers{frontend-svc}            Normal    Pulled                  kubelet, gke-cluster-1-default-pool-c050e571-5gq9   Successfully pulled image "gcr.io/kasten-images/frontend:1.1.13"
+4s          4s           1         frontend-svc-5ff44cf4f5-zflp2.153da6b1fc3e50bc                         Pod                     spec.containers{frontend-svc}            Normal    Created                 kubelet, gke-cluster-1-default-pool-c050e571-5gq9   Created container
+4s          4s           1         frontend-svc-5ff44cf4f5-zflp2.153da6b204368de9                         Pod                     spec.containers{frontend-svc}            Normal    Started                 kubelet, gke-cluster-1-default-pool-c050e571-5gq9   Started container
+4s          4s           1         frontend-svc-5ff44cf4f5-zflp2.153da6b2047a43d1                         Pod                     spec.containers{proxy}                   Normal    Pulling                 kubelet, gke-cluster-1-default-pool-c050e571-5gq9   pulling image "gcr.io/kasten-images/service-proxy:hash-bc17b40"
+3s          3s           1         frontend-svc-5ff44cf4f5-zflp2.153da6b2124d9b3f                         Pod                     spec.containers{proxy}                   Normal    Pulled                  kubelet, gke-cluster-1-default-pool-c050e571-5gq9   Successfully pulled image "gcr.io/kasten-images/service-proxy:hash-bc17b40"
+3s          3s           1         frontend-svc-5ff44cf4f5-zflp2.153da6b216973150                         Pod                     spec.containers{proxy}                   Normal    Created                 kubelet, gke-cluster-1-default-pool-c050e571-5gq9   Created container
+3s          3s           1         frontend-svc-5ff44cf4f5-zflp2.153da6b22041e7d9                         Pod                     spec.containers{proxy}                   Normal    Started                 kubelet, gke-cluster-1-default-pool-c050e571-5gq9   Started container
+5s          5s           1         frontend-svc-5ff44cf4f5.153da6b1bf570bf9                               ReplicaSet                                                       Normal    SuccessfulCreate        replicaset-controller                               Created pod: frontend-svc-5ff44cf4f5-zflp2
+5s          5s           1         frontend-svc.153da6b1beea1b0a                                          Deployment                                                       Normal    ScalingReplicaSet       deployment-controller                               Scaled up replica set frontend-svc-5ff44cf4f5 to 1
+2s          2s           1         jobs-pv-claim.153da6b25af44999                                         PersistentVolumeClaim                                            Normal    ProvisioningSucceeded   persistentvolume-controller                         Successfully provisioned volume pvc-2129959d-7e35-11e8-a573-42010a8a01a6 using kubernetes.io/gce-pd
+3s          6s           4         jobs-svc-5d559fbfd-q7mt4.153da6b15bfa561d                              Pod                                                              Warning   FailedScheduling        default-scheduler                                   PersistentVolumeClaim is not bound: "jobs-pv-claim" (repeated 4 times)
+6s          6s           1         jobs-svc-5d559fbfd.153da6b15c5a54d7                                    ReplicaSet                                                       Normal    SuccessfulCreate        replicaset-controller                               Created pod: jobs-svc-5d559fbfd-q7mt4
+6s          6s           1         jobs-svc.153da6b15b8e3c89                                              Deployment                                                       Normal    ScalingReplicaSet       deployment-controller                               Scaled up replica set jobs-svc-5d559fbfd to 1
+2s          2s           1         jobsqueue-pv-claim.153da6b25fe7e547                                    PersistentVolumeClaim                                            Normal    ProvisioningSucceeded   persistentvolume-controller                         Successfully provisioned volume pvc-2142b55c-7e35-11e8-a573-42010a8a01a6 using kubernetes.io/gce-pd
+3s          6s           4         jobsqueue-svc-8798f7577-pk2qf.153da6b163f67109                         Pod                                                              Warning   FailedScheduling        default-scheduler                                   PersistentVolumeClaim is not bound: "jobsqueue-pv-claim" (repeated 4 times)
+6s          6s           1         jobsqueue-svc-8798f7577.153da6b1641fed32                               ReplicaSet                                                       Normal    SuccessfulCreate        replicaset-controller                               Created pod: jobsqueue-svc-8798f7577-pk2qf
+6s          6s           1         jobsqueue-svc.153da6b163724bdf                                         Deployment                                                       Normal    ScalingReplicaSet       deployment-controller                               Scaled up replica set jobsqueue-svc-8798f7577 to 1
+5s          5s           1         kanister-svc-554459f4b7-dh5gm.153da6b1cc83c0ca                         Pod                                                              Normal    Scheduled               default-scheduler                                   Successfully assigned kanister-svc-554459f4b7-dh5gm to gke-cluster-1-pool-1-a289a9fe-wcvw
+4s          4s           1         kanister-svc-554459f4b7-dh5gm.153da6b1e4d68d27                         Pod                                                              Normal    SuccessfulMountVolume   kubelet, gke-cluster-1-pool-1-a289a9fe-wcvw         MountVolume.SetUp succeeded for volume "kasten-k10-1-serviceaccount-cab5-token-wf2c7" 
+2s          2s           1         kanister-svc-554459f4b7-dh5gm.153da6b2549132e2                         Pod                     spec.containers{kanister-svc}            Normal    Pulling                 kubelet, gke-cluster-1-pool-1-a289a9fe-wcvw         pulling image "gcr.io/kasten-images/kanister:1.1.13"
+0s          0s           1         kanister-svc-554459f4b7-dh5gm.153da6b2d10f4761                         Pod                     spec.containers{kanister-svc}            Normal    Pulled                  kubelet, gke-cluster-1-pool-1-a289a9fe-wcvw         Successfully pulled image "gcr.io/kasten-images/kanister:1.1.13"
+0s          0s           1         kanister-svc-554459f4b7-dh5gm.153da6b2d3e8cd15                         Pod                     spec.containers{kanister-svc}            Normal    Created                 kubelet, gke-cluster-1-pool-1-a289a9fe-wcvw         Created container
+5s          5s           1         kanister-svc-554459f4b7.153da6b1cb82d1bc                               ReplicaSet                                                       Normal    SuccessfulCreate        replicaset-controller                               Created pod: kanister-svc-554459f4b7-dh5gm
+5s          5s           1         kanister-svc.153da6b1cb105170                                          Deployment                                                       Normal    ScalingReplicaSet       deployment-controller                               Scaled up replica set kanister-svc-554459f4b7 to 1
+17s         17s          1         kasten-k10-1-deployer-z4jd2.153da6af025a9ada                           Pod                                                              Normal    Scheduled               default-scheduler                                   Successfully assigned kasten-k10-1-deployer-z4jd2 to gke-cluster-1-pool-1-a289a9fe-wcvw
+16s         16s          1         kasten-k10-1-deployer-z4jd2.153da6af12ea4af4                           Pod                                                              Normal    SuccessfulMountVolume   kubelet, gke-cluster-1-pool-1-a289a9fe-wcvw         MountVolume.SetUp succeeded for volume "config-volume" 
+16s         16s          1         kasten-k10-1-deployer-z4jd2.153da6af14a1e2b3                           Pod                                                              Normal    SuccessfulMountVolume   kubelet, gke-cluster-1-pool-1-a289a9fe-wcvw         MountVolume.SetUp succeeded for volume "kasten-k10-1-deployer-sa-token-9ffgq" 
+16s         16s          1         kasten-k10-1-deployer-z4jd2.153da6af258fcdd0                           Pod                     spec.containers{deployer}                Normal    Pulling                 kubelet, gke-cluster-1-pool-1-a289a9fe-wcvw         pulling image "gcr.io/ruela-test/k10-deployer"
+16s         16s          1         kasten-k10-1-deployer-z4jd2.153da6af320e1693                           Pod                     spec.containers{deployer}                Normal    Pulled                  kubelet, gke-cluster-1-pool-1-a289a9fe-wcvw         Successfully pulled image "gcr.io/ruela-test/k10-deployer"
+16s         16s          1         kasten-k10-1-deployer-z4jd2.153da6af346b9ec0                           Pod                     spec.containers{deployer}                Normal    Created                 kubelet, gke-cluster-1-pool-1-a289a9fe-wcvw         Created container
+16s         16s          1         kasten-k10-1-deployer-z4jd2.153da6af39dd5155                           Pod                     spec.containers{deployer}                Normal    Started                 kubelet, gke-cluster-1-pool-1-a289a9fe-wcvw         Started container
+17s         17s          1         kasten-k10-1-deployer.153da6af0169d8b2                                 Job                                                              Normal    SuccessfulCreate        job-controller                                      Created pod: kasten-k10-1-deployer-z4jd2
+1s          1s           1         kasten-k10-1-deployer.153da6b2b3c68510                                 Job                                                              Warning   BackoffLimitExceeded    job-controller                                      Job has reach the specified backoff limit
+9s          9s           1         kasten-k10-1-nginx-controller-559c8b6c6f-ddvt4.153da6b0c6887862        Pod                                                              Normal    Scheduled               default-scheduler                                   Successfully assigned kasten-k10-1-nginx-controller-559c8b6c6f-ddvt4 to gke-cluster-1-default-pool-c050e571-zx5c
+3s          3s           1         kasten-k10-1-nginx-controller-559c8b6c6f-ddvt4.153da6b2307609ab        Pod                                                              Normal    SuccessfulMountVolume   kubelet, gke-cluster-1-default-pool-c050e571-zx5c   MountVolume.SetUp succeeded for volume "kasten-k10-1-nginx-token-ffr2j" 
+0s          0s           1         kasten-k10-1-nginx-controller-559c8b6c6f-ddvt4.153da6b2c39ba718        Pod                     spec.containers{nginx-controller}        Normal    Pulling                 kubelet, gke-cluster-1-default-pool-c050e571-zx5c   pulling image "quay.io/kubernetes-ingress-controller/nginx-ingress-controller:0.12.0"
+9s          9s           1         kasten-k10-1-nginx-controller-559c8b6c6f.153da6b0c35a49f0              ReplicaSet                                                       Normal    SuccessfulCreate        replicaset-controller                               Created pod: kasten-k10-1-nginx-controller-559c8b6c6f-ddvt4
+9s          9s           1         kasten-k10-1-nginx-controller.153da6b0c1a766db                         Deployment                                                       Normal    ScalingReplicaSet       deployment-controller                               Scaled up replica set kasten-k10-1-nginx-controller-559c8b6c6f to 1
+9s          9s           1         kasten-k10-1-nginx-default-backend-5b44fcd485-gwmqx.153da6b0c9fac07e   Pod                                                              Normal    Scheduled               default-scheduler                                   Successfully assigned kasten-k10-1-nginx-default-backend-5b44fcd485-gwmqx to gke-cluster-1-pool-1-a289a9fe-wcvw
+9s          9s           1         kasten-k10-1-nginx-default-backend-5b44fcd485-gwmqx.153da6b0e0188a51   Pod                                                              Normal    SuccessfulMountVolume   kubelet, gke-cluster-1-pool-1-a289a9fe-wcvw         MountVolume.SetUp succeeded for volume "default-token-m8cw7" 
+7s          7s           1         kasten-k10-1-nginx-default-backend-5b44fcd485-gwmqx.153da6b12a01ba58   Pod                     spec.containers{nginx-default-backend}   Normal    Pulled                  kubelet, gke-cluster-1-pool-1-a289a9fe-wcvw         Container image "k8s.gcr.io/defaultbackend:1.3" already present on machine
+7s          7s           1         kasten-k10-1-nginx-default-backend-5b44fcd485-gwmqx.153da6b131efb10f   Pod                     spec.containers{nginx-default-backend}   Normal    Created                 kubelet, gke-cluster-1-pool-1-a289a9fe-wcvw         Created container
+7s          7s           1         kasten-k10-1-nginx-default-backend-5b44fcd485-gwmqx.153da6b151753370   Pod                     spec.containers{nginx-default-backend}   Normal    Started                 kubelet, gke-cluster-1-pool-1-a289a9fe-wcvw         Started container
+9s          9s           1         kasten-k10-1-nginx-default-backend-5b44fcd485.153da6b0c80f93d2         ReplicaSet                                                       Normal    SuccessfulCreate        replicaset-controller                               Created pod: kasten-k10-1-nginx-default-backend-5b44fcd485-gwmqx
+9s          9s           1         kasten-k10-1-nginx-default-backend.153da6b0c738c362                    Deployment                                                       Normal    ScalingReplicaSet       deployment-controller                               Scaled up replica set kasten-k10-1-nginx-default-backend-5b44fcd485 to 1
+6s          9s           4         kasten-k10-1-prometheus-server-5dc986857f-zqj8c.153da6b0cc46e99b       Pod                                                              Warning   FailedScheduling        default-scheduler                                   PersistentVolumeClaim is not bound: "kasten-k10-1-prometheus-server" (repeated 4 times)
+2s          2s           1         kasten-k10-1-prometheus-server-5dc986857f-zqj8c.153da6b26fe22d40       Pod                                                              Normal    Scheduled               default-scheduler                                   Successfully assigned kasten-k10-1-prometheus-server-5dc986857f-zqj8c to gke-cluster-1-pool-1-a289a9fe-v8jt
+1s          1s           1         kasten-k10-1-prometheus-server-5dc986857f-zqj8c.153da6b2adc98672       Pod                                                              Normal    SuccessfulMountVolume   kubelet, gke-cluster-1-pool-1-a289a9fe-v8jt         MountVolume.SetUp succeeded for volume "config-volume" 
+0s          0s           1         kasten-k10-1-prometheus-server-5dc986857f-zqj8c.153da6b2dd78750f       Pod                                                              Normal    SuccessfulMountVolume   kubelet, gke-cluster-1-pool-1-a289a9fe-v8jt         MountVolume.SetUp succeeded for volume "kasten-k10-1-prometheus-server-token-w5gkv" 
+9s          9s           1         kasten-k10-1-prometheus-server-5dc986857f.153da6b0ccfdca93             ReplicaSet                                                       Normal    SuccessfulCreate        replicaset-controller                               Created pod: kasten-k10-1-prometheus-server-5dc986857f-zqj8c
+9s          9s           1         kasten-k10-1-prometheus-server.153da6b0caab2b15                        Deployment                                                       Normal    ScalingReplicaSet       deployment-controller                               Scaled up replica set kasten-k10-1-prometheus-server-5dc986857f to 1
+6s          6s           1         kasten-k10-1-prometheus-server.153da6b187331a95                        PersistentVolumeClaim                                            Normal    ProvisioningSucceeded   persistentvolume-controller                         Successfully provisioned volume pvc-1f1a4ba6-7e35-11e8-a573-42010a8a01a6 using kubernetes.io/gce-pd
+2s          2s           1         policies-pv-claim.153da6b262c5b70a                                     PersistentVolumeClaim                                            Normal    ProvisioningSucceeded   persistentvolume-controller                         Successfully provisioned volume pvc-214f8706-7e35-11e8-a573-42010a8a01a6 using kubernetes.io/gce-pd
+3s          6s           4         policies-svc-56fdcdc788-n4djt.153da6b16970880e                         Pod                                                              Warning   FailedScheduling        default-scheduler                                   PersistentVolumeClaim is not bound: "policies-pv-claim" (repeated 4 times)
+6s          6s           1         policies-svc-56fdcdc788.153da6b1698da832                               ReplicaSet                                                       Normal    SuccessfulCreate        replicaset-controller                               Created pod: policies-svc-56fdcdc788-n4djt
+6s          6s           1         policies-svc.153da6b1688bfa96                                          Deployment                                                       Normal    ScalingReplicaSet       deployment-controller                               Scaled up replica set policies-svc-56fdcdc788 to 1
+2s          2s           1         profiles-pv-claim.153da6b26b697843                                     PersistentVolumeClaim                                            Normal    ProvisioningSucceeded   persistentvolume-controller                         Successfully provisioned volume pvc-21610d83-7e35-11e8-a573-42010a8a01a6 using kubernetes.io/gce-pd
+3s          6s           4         profiles-svc-6f6db7476d-lmnch.153da6b17104a283                         Pod                                                              Warning   FailedScheduling        default-scheduler                                   PersistentVolumeClaim is not bound: "profiles-pv-claim" (repeated 4 times)
+6s          6s           1         profiles-svc-6f6db7476d.153da6b173f2122c                               ReplicaSet                                                       Normal    SuccessfulCreate        replicaset-controller                               Created pod: profiles-svc-6f6db7476d-lmnch
+6s          6s           1         profiles-svc.153da6b1727f144a                                          Deployment                                                       Normal    ScalingReplicaSet       deployment-controller                               Scaled up replica set profiles-svc-6f6db7476d to 1
+6s          6s           1         scheduler-svc-77fd99c789-6xbv7.153da6b178eebaf3                        Pod                                                              Normal    Scheduled               default-scheduler                                   Successfully assigned scheduler-svc-77fd99c789-6xbv7 to gke-cluster-1-pool-1-a289a9fe-v8jt
+5s          5s           1         scheduler-svc-77fd99c789-6xbv7.153da6b1c0b3ba28                        Pod                                                              Normal    SuccessfulMountVolume   kubelet, gke-cluster-1-pool-1-a289a9fe-v8jt         MountVolume.SetUp succeeded for volume "kasten-k10-1-serviceaccount-cab5-token-wf2c7" 
+4s          4s           1         scheduler-svc-77fd99c789-6xbv7.153da6b1f209f616                        Pod                     spec.containers{scheduler-svc}           Normal    Pulling                 kubelet, gke-cluster-1-pool-1-a289a9fe-v8jt         pulling image "gcr.io/kasten-images/scheduler:1.1.13"
+2s          2s           1         scheduler-svc-77fd99c789-6xbv7.153da6b25b752f84                        Pod                     spec.containers{scheduler-svc}           Normal    Pulled                  kubelet, gke-cluster-1-pool-1-a289a9fe-v8jt         Successfully pulled image "gcr.io/kasten-images/scheduler:1.1.13"
+2s          2s           1         scheduler-svc-77fd99c789-6xbv7.153da6b282202e09                        Pod                     spec.containers{scheduler-svc}           Normal    Created                 kubelet, gke-cluster-1-pool-1-a289a9fe-v8jt         Created container
+1s          1s           1         scheduler-svc-77fd99c789-6xbv7.153da6b29a9cb648                        Pod                     spec.containers{scheduler-svc}           Normal    Started                 kubelet, gke-cluster-1-pool-1-a289a9fe-v8jt         Started container
+1s          1s           1         scheduler-svc-77fd99c789-6xbv7.153da6b29b3dbc7b                        Pod                     spec.containers{proxy}                   Normal    Pulling                 kubelet, gke-cluster-1-pool-1-a289a9fe-v8jt         pulling image "gcr.io/kasten-images/service-proxy:hash-bc17b40"
+1s          1s           1         scheduler-svc-77fd99c789-6xbv7.153da6b2a88078e5                        Pod                     spec.containers{proxy}                   Normal    Pulled                  kubelet, gke-cluster-1-pool-1-a289a9fe-v8jt         Successfully pulled image "gcr.io/kasten-images/service-proxy:hash-bc17b40"
+1s          1s           1         scheduler-svc-77fd99c789-6xbv7.153da6b2ad7f933e                        Pod                     spec.containers{proxy}                   Normal    Created                 kubelet, gke-cluster-1-pool-1-a289a9fe-v8jt         Created container
+1s          1s           1         scheduler-svc-77fd99c789-6xbv7.153da6b2b5fa4b2c                        Pod                     spec.containers{proxy}                   Normal    Started                 kubelet, gke-cluster-1-pool-1-a289a9fe-v8jt         Started container
+6s          6s           1         scheduler-svc-77fd99c789.153da6b176c4db33                              ReplicaSet                                                       Normal    SuccessfulCreate        replicaset-controller                               Created pod: scheduler-svc-77fd99c789-6xbv7
+6s          6s           1         scheduler-svc.153da6b175b91c18                                         Deployment                                                       Normal    ScalingReplicaSet       deployment-controller                               Scaled up replica set scheduler-svc-77fd99c789 to 1
+2s          2s           1         schedules-pv-claim.153da6b279a4de85                                    PersistentVolumeClaim                                            Normal    ProvisioningSucceeded   persistentvolume-controller                         Successfully provisioned volume pvc-21811e86-7e35-11e8-a573-42010a8a01a6 using kubernetes.io/gce-pd
+2s          5s           4         schedules-svc-7c56d5578d-j4j79.153da6b1986a67fe                        Pod                                                              Warning   FailedScheduling        default-scheduler                                   PersistentVolumeClaim is not bound: "schedules-pv-claim" (repeated 4 times)
+5s          5s           1         schedules-svc-7c56d5578d.153da6b19822d2a7                              ReplicaSet                                                       Normal    SuccessfulCreate        replicaset-controller                               Created pod: schedules-svc-7c56d5578d-j4j79
+5s          5s           1         schedules-svc.153da6b196548128                                         Deployment                                                       Normal    ScalingReplicaSet       deployment-controller                               Scaled up replica set schedules-svc-7c56d5578d to 1
+1s          1s           1         state-pv-claim.153da6b2b147649f                                        PersistentVolumeClaim                                            Normal    ProvisioningSucceeded   persistentvolume-controller                         Successfully provisioned volume pvc-21e6183a-7e35-11e8-a573-42010a8a01a6 using kubernetes.io/gce-pd
+2s          5s           4         state-svc-86c7d6b647-w5hmn.153da6b1ac254e01                            Pod                                                              Warning   FailedScheduling        default-scheduler                                   PersistentVolumeClaim is not bound: "state-pv-claim" (repeated 4 times)
+5s          5s           1         state-svc-86c7d6b647.153da6b1ac58fc04                                  ReplicaSet                                                       Normal    SuccessfulCreate        replicaset-controller                               Created pod: state-svc-86c7d6b647-w5hmn
+5s          5s           1         state-svc.153da6b1ab974df4                                             Deployment                                                       Normal    ScalingReplicaSet       deployment-controller                               Scaled up replica set state-svc-86c7d6b647 to 1
+INFO Collecting logs for deployer
++ overlay_test_schema.py --orig /data-test/schema.yaml --dest /data/schema.yaml
+No test schema.yaml defined
++ rm -f /data-test/schema.yaml
++ /bin/expand_config.py
+++ /bin/print_config.py --param '{"x-google-marketplace": {"type": "NAME"}}'
++ export NAME=kasten-k10-1
++ NAME=kasten-k10-1
+++ /bin/print_config.py --param '{"x-google-marketplace": {"type": "NAMESPACE"}}'
+Deploying application "kasten-k10-1" in test mode
++ export NAMESPACE=apptest-8f0887bb
++ NAMESPACE=apptest-8f0887bb
++ echo 'Deploying application "kasten-k10-1" in test mode'
+++ kubectl get applications/kasten-k10-1 --namespace=apptest-8f0887bb '--output=jsonpath={.metadata.uid}'
++ app_uid=19c01fe7-7e35-11e8-a573-42010a8a01a6
+++ kubectl get applications/kasten-k10-1 --namespace=apptest-8f0887bb '--output=jsonpath={.apiVersion}'
++ app_api_version=app.k8s.io/v1alpha1
++ create_manifests.sh --mode=test
++ for i in "$@"
++ case $i in
++ mode=test
++ shift
++ [[ -z kasten-k10-1 ]]
++ [[ -z apptest-8f0887bb ]]
++ echo 'Creating the manifests for the kubernetes resources that build the application "kasten-k10-1"'
+Creating the manifests for the kubernetes resources that build the application "kasten-k10-1"
++ data_dir=/data
++ manifest_dir=/data/manifest-expanded
++ mkdir -p /data/manifest-expanded
++ [[ test = \t\e\s\t ]]
++ test_data_dir=/data-test
++ mkdir -p /data-test
++ extract_manifest /data
++ data=/data
++ extracted=/data/extracted
++ mkdir -p /data/extracted
++ for chart in "$data"/chart/*
++ [[ -e /data/chart/k10.tar.gz ]]
+++ basename /data/chart/k10.tar.gz
+++ sed 's/.tar.gz$//'
++ chart_manifest_file=k10
++ mkdir /data/extracted/k10
++ tar xfC /data/chart/k10.tar.gz /data/extracted/k10
++ [[ test = \t\e\s\t ]]
++ extract_manifest /data-test
++ data=/data-test
++ extracted=/data-test/extracted
++ mkdir -p /data-test/extracted
++ for chart in "$data"/chart/*
++ [[ -e /data-test/chart/* ]]
++ continue
++ overlay_test_files.py --manifest /data/extracted --test_manifest /data-test/extracted
++ for chart in "$data_dir/extracted"/*
+++ sed 's/.tar.gz$//'
+++ basename /data/extracted/k10
++ chart_manifest_file=k10.yaml
++ helm template /data/extracted/k10/chart --name=kasten-k10-1 --namespace=apptest-8f0887bb --values=/dev/fd/63
+++ /bin/print_config.py --output=yaml
++ [[ test != \t\e\s\t ]]
++ process_helm_hooks.py --deploy_tests --manifest /data/manifest-expanded/k10.yaml
+Reading /data/manifest-expanded/k10.yaml
++ ensure_k8s_apps_labels.py --manifest /data/manifest-expanded/k10.yaml --appname kasten-k10-1
+Reading /data/manifest-expanded/k10.yaml
++ /bin/set_ownership.py --app_name kasten-k10-1 --app_uid 19c01fe7-7e35-11e8-a573-42010a8a01a6 --app_api_version app.k8s.io/v1alpha1 --manifests /data/manifest-expanded --dest /data/resources.yaml
+Reading /data/manifest-expanded/k10.yaml
+Application 'kasten-k10-1' owns 'Secret/k10-api-key'
+Application 'kasten-k10-1' owns 'ConfigMap/fluentd'
+Application 'kasten-k10-1' owns 'ConfigMap/kasten-k10-1-nginx-controller'
+Application 'kasten-k10-1' owns 'ConfigMap/k10-config'
+Application 'kasten-k10-1' owns 'ConfigMap/kasten-k10-1-k10-prometheus-config'
+Application 'kasten-k10-1' owns 'ServiceAccount/kasten-k10-1-nginx'
+Application 'kasten-k10-1' owns 'ServiceAccount/kasten-k10-1-prometheus-server'
+Application 'kasten-k10-1' owns 'ClusterRole/kasten-k10-1-nginx'
+Application 'kasten-k10-1' owns 'ClusterRoleBinding/kasten-k10-1-nginx'
+Application 'kasten-k10-1' owns 'Role/kasten-k10-1-nginx'
+Application 'kasten-k10-1' owns 'RoleBinding/kasten-k10-1-nginx'
+Application 'kasten-k10-1' owns 'Service/fluentd'
+Application 'kasten-k10-1' owns 'Service/kasten-k10-1-nginx-controller'
+Application 'kasten-k10-1' owns 'Service/kasten-k10-1-nginx-default-backend'
+Application 'kasten-k10-1' owns 'Service/kasten-k10-1-prometheus-server'
+Application 'kasten-k10-1' owns 'Service/ambassador'
+Application 'kasten-k10-1' owns 'Deployment/ambassador'
+Application 'kasten-k10-1' owns 'Service/api-policies'
+Application 'kasten-k10-1' owns 'Service/api-profiles'
+Application 'kasten-k10-1' owns 'Service/kasten-k10-1-prometheus-server-exp'
+Application 'kasten-k10-1' owns 'Service/auth-svc'
+Application 'kasten-k10-1' owns 'Service/catalog-svc'
+Application 'kasten-k10-1' owns 'Service/compliance-svc'
+Application 'kasten-k10-1' owns 'Service/credentials-svc'
+Application 'kasten-k10-1' owns 'Service/executor-svc'
+Application 'kasten-k10-1' owns 'Service/jobs-svc'
+Application 'kasten-k10-1' owns 'Service/jobsqueue-svc'
+Application 'kasten-k10-1' owns 'Service/policies-svc'
+Application 'kasten-k10-1' owns 'Service/profiles-svc'
+Application 'kasten-k10-1' owns 'Service/scheduler-svc'
+Application 'kasten-k10-1' owns 'Service/schedules-svc'
+Application 'kasten-k10-1' owns 'Service/state-svc'
+Application 'kasten-k10-1' owns 'Service/dashboardbff-svc'
+Application 'kasten-k10-1' owns 'Service/frontend-svc'
+Application 'kasten-k10-1' owns 'Deployment/fluentd'
+Application 'kasten-k10-1' owns 'Deployment/kasten-k10-1-nginx-controller'
+Application 'kasten-k10-1' owns 'Deployment/kasten-k10-1-nginx-default-backend'
+Application 'kasten-k10-1' owns 'Deployment/kasten-k10-1-prometheus-server'
+Application 'kasten-k10-1' owns 'Deployment/api-policies-svc'
+Application 'kasten-k10-1' owns 'Deployment/api-profiles-svc'
+Application 'kasten-k10-1' owns 'Deployment/auth-svc'
+Application 'kasten-k10-1' owns 'Deployment/catalog-svc'
+Application 'kasten-k10-1' owns 'Deployment/compliance-svc'
+Application 'kasten-k10-1' owns 'Deployment/credentials-svc'
+Application 'kasten-k10-1' owns 'Deployment/executor-svc'
+Application 'kasten-k10-1' owns 'Deployment/jobs-svc'
+Application 'kasten-k10-1' owns 'Deployment/jobsqueue-svc'
+Application 'kasten-k10-1' owns 'Deployment/policies-svc'
+Application 'kasten-k10-1' owns 'Deployment/profiles-svc'
+Application 'kasten-k10-1' owns 'Deployment/scheduler-svc'
+Application 'kasten-k10-1' owns 'Deployment/schedules-svc'
+Application 'kasten-k10-1' owns 'Deployment/state-svc'
+Application 'kasten-k10-1' owns 'Deployment/dashboardbff-svc'
+Application 'kasten-k10-1' owns 'Deployment/frontend-svc'
+Application 'kasten-k10-1' owns 'Deployment/kanister-svc'
+Application 'kasten-k10-1' owns 'Ingress/kasten-k10-1-ingress'
++ separate_tester_resources.py --app_uid 19c01fe7-7e35-11e8-a573-42010a8a01a6 --app_name kasten-k10-1 --app_api_version app.k8s.io/v1alpha1 --manifests /data/resources.yaml --out_manifests /data/resources.yaml --out_test_manifests /data/tester.yaml
+Reading /data/resources.yaml
+INFO Prod resource: Secret/k10-api-key
+INFO Prod resource: ConfigMap/fluentd
+INFO Prod resource: ConfigMap/kasten-k10-1-nginx-controller
+INFO Prod resource: ConfigMap/k10-config
+INFO Prod resource: ConfigMap/kasten-k10-1-k10-prometheus-config
+INFO Prod resource: PersistentVolumeClaim/kasten-k10-1-prometheus-server
+INFO Prod resource: ServiceAccount/kasten-k10-1-nginx
+INFO Prod resource: ServiceAccount/kasten-k10-1-prometheus-server
+INFO Prod resource: ClusterRole/kasten-k10-1-nginx
+INFO Prod resource: ClusterRoleBinding/kasten-k10-1-nginx
+INFO Prod resource: Role/kasten-k10-1-nginx
+INFO Prod resource: RoleBinding/kasten-k10-1-nginx
+INFO Prod resource: Service/fluentd
+INFO Prod resource: Service/kasten-k10-1-nginx-controller
+INFO Prod resource: Service/kasten-k10-1-nginx-default-backend
+INFO Prod resource: Service/kasten-k10-1-prometheus-server
+INFO Prod resource: Service/ambassador
+INFO Prod resource: Deployment/ambassador
+INFO Prod resource: Service/api-policies
+INFO Prod resource: Service/api-profiles
+INFO Prod resource: Service/kasten-k10-1-prometheus-server-exp
+INFO Prod resource: Service/auth-svc
+INFO Prod resource: Service/catalog-svc
+INFO Prod resource: Service/compliance-svc
+INFO Prod resource: Service/credentials-svc
+INFO Prod resource: Service/executor-svc
+INFO Prod resource: Service/jobs-svc
+INFO Prod resource: Service/jobsqueue-svc
+INFO Prod resource: Service/policies-svc
+INFO Prod resource: Service/profiles-svc
+INFO Prod resource: Service/scheduler-svc
+INFO Prod resource: Service/schedules-svc
+INFO Prod resource: Service/state-svc
+INFO Prod resource: Service/dashboardbff-svc
+INFO Prod resource: Service/frontend-svc
+INFO Prod resource: Deployment/fluentd
+INFO Prod resource: Deployment/kasten-k10-1-nginx-controller
+INFO Prod resource: Deployment/kasten-k10-1-nginx-default-backend
+INFO Prod resource: Deployment/kasten-k10-1-prometheus-server
+INFO Prod resource: Deployment/api-policies-svc
+INFO Prod resource: Deployment/api-profiles-svc
+INFO Prod resource: Deployment/auth-svc
+INFO Prod resource: PersistentVolumeClaim/catalog-pv-claim
+INFO Prod resource: Deployment/catalog-svc
+INFO Prod resource: Deployment/compliance-svc
+INFO Prod resource: PersistentVolumeClaim/credentials-pv-claim
+INFO Prod resource: Deployment/credentials-svc
+INFO Prod resource: Deployment/executor-svc
+INFO Prod resource: PersistentVolumeClaim/jobs-pv-claim
+INFO Prod resource: Deployment/jobs-svc
+INFO Prod resource: PersistentVolumeClaim/jobsqueue-pv-claim
+INFO Prod resource: Deployment/jobsqueue-svc
+INFO Prod resource: PersistentVolumeClaim/policies-pv-claim
+INFO Prod resource: Deployment/policies-svc
+INFO Prod resource: PersistentVolumeClaim/profiles-pv-claim
+INFO Prod resource: Deployment/profiles-svc
+INFO Prod resource: Deployment/scheduler-svc
+INFO Prod resource: PersistentVolumeClaim/schedules-pv-claim
+INFO Prod resource: Deployment/schedules-svc
+INFO Prod resource: PersistentVolumeClaim/state-pv-claim
+INFO Prod resource: Deployment/state-svc
+INFO Prod resource: Deployment/dashboardbff-svc
+INFO Prod resource: Deployment/frontend-svc
+INFO Prod resource: Deployment/kanister-svc
+INFO Prod resource: Ingress/kasten-k10-1-ingress
+INFO Prod resource: Application/kasten-k10-1
+INFO Prod resource: NetworkPolicy/default-deny
+INFO Prod resource: NetworkPolicy/cross-services-allow
+INFO Prod resource: NetworkPolicy/allow-external
+INFO Prod resource: PodDisruptionBudget/kasten-k10-1-nginx-controller
+INFO Prod resource: PodDisruptionBudget/kasten-k10-1-nginx-default-backend
+apiVersion: v1
+data:
+  x-api-key: MGlXaFVpZ0IzaEFwOFhGbVUzT1hCcUtFZjhxZVVhQTY=
+kind: Secret
+metadata:
+  labels:
+    app: k10
+    app.kubernetes.io/name: kasten-k10-1
+    chart: k10-1.1.13
+    heritage: Tiller
+    release: kasten-k10-1
+  name: k10-api-key
+  namespace: apptest-8f0887bb
+  ownerReferences:
+  - apiVersion: app.k8s.io/v1alpha1
+    blockOwnerDeletion: true
+    kind: Application
+    name: kasten-k10-1
+    uid: 19c01fe7-7e35-11e8-a573-42010a8a01a6
+type: Opaque
+---
+apiVersion: v1
+data:
+  forward-input.conf: "<source>\n  @type forward\n  port 24224\n  bind 0.0.0.0\n</source>"
+  general.conf: "# Prevent fluentd from handling records containing its own logs.\
+    \ Otherwise\n# it can lead to an infinite loop, when error in sending one message\
+    \ generates\n# another message which also fails to be sent and so on.\n<match\
+    \ fluentd.**>\n  @type null\n</match>\n\n# Used for health checking\n<source>\n\
+    \  @type http\n  port 9880\n  bind 0.0.0.0\n</source>\n\n# Emits internal metrics\
+    \ to every minute, and also exposes them on port\n# 24220. Useful for determining\
+    \ if an output plugin is retryring/erroring,\n# or determining the buffer queue\
+    \ length.\n<source>\n  @type monitor_agent\n  bind 0.0.0.0\n  port 24220\n  tag\
+    \ fluentd.monitor.metrics\n</source>"
+  output.conf: "<match **>\n  @type file\n  path /tmp/k10.%Y%m%d\n  append true\n\
+    \  <buffer time>\n    @type file\n    timekey 86400\n    flush_mode interval\n\
+    \    flush_interval 10s\n  </buffer>\n</match>\n# <match **>\n#   @id elasticsearch\n\
+    #   @type elasticsearch\n#   @log_level info\n#   include_tag_key true\n#   #\
+    \ Replace with the host/port to your Elasticsearch cluster.\n#   host \"#{ENV['OUTPUT_HOST']}\"\
+    \n#   port \"#{ENV['OUTPUT_PORT']}\"\n#   logstash_format true\n#   <buffer>\n\
+    #     @type file\n#     path /var/log/fluentd-buffers/kubernetes.system.buffer\n\
+    #     flush_mode interval\n#     retry_type exponential_backoff\n#     flush_thread_count\
+    \ 2\n#     flush_interval 5s\n#     retry_forever\n#     retry_max_interval 30\n\
+    #     chunk_limit_size \"#{ENV['OUTPUT_BUFFER_CHUNK_LIMIT']}\"\n#     queue_limit_length\
+    \ \"#{ENV['OUTPUT_BUFFER_QUEUE_LIMIT']}\"\n#     overflow_action block\n#   </buffer>\n\
+    # </match>"
+  system.conf: "<system>\n  root_dir /tmp/fluentd-buffers/\n</system>"
+kind: ConfigMap
+metadata:
+  labels:
+    app: fluentd
+    app.kubernetes.io/name: kasten-k10-1
+    chart: fluentd-0.1.4
+    heritage: Tiller
+    release: kasten-k10-1
+  name: fluentd
+  ownerReferences:
+  - apiVersion: app.k8s.io/v1alpha1
+    blockOwnerDeletion: true
+    kind: Application
+    name: kasten-k10-1
+    uid: 19c01fe7-7e35-11e8-a573-42010a8a01a6
+---
+apiVersion: v1
+data:
+  enable-vts-status: 'false'
+kind: ConfigMap
+metadata:
+  labels:
+    app: nginx
+    app.kubernetes.io/name: kasten-k10-1
+    chart: nginx-0.14.0
+    component: controller
+    heritage: Tiller
+    release: kasten-k10-1
+  name: kasten-k10-1-nginx-controller
+  ownerReferences:
+  - apiVersion: app.k8s.io/v1alpha1
+    blockOwnerDeletion: true
+    kind: Application
+    name: kasten-k10-1
+    uid: 19c01fe7-7e35-11e8-a573-42010a8a01a6
+---
+apiVersion: v1
+data:
+  clustername: PEteo2SAnmUyT1x8
+  firehosedeliverystreamname: k10-testdev-logger
+  loglevel: info
+  modelstoredirname: //mnt/k10state/kasten-io/
+  version: 1.1.13
+kind: ConfigMap
+metadata:
+  labels:
+    app: k10
+    app.kubernetes.io/name: kasten-k10-1
+    chart: k10-1.1.13
+    heritage: Tiller
+    release: kasten-k10-1
+  name: k10-config
+  namespace: apptest-8f0887bb
+  ownerReferences:
+  - apiVersion: app.k8s.io/v1alpha1
+    blockOwnerDeletion: true
+    kind: Application
+    name: kasten-k10-1
+    uid: 19c01fe7-7e35-11e8-a573-42010a8a01a6
+---
+apiVersion: v1
+data:
+  prometheus.yml: "global:\n  scrape_interval: 1m\n  scrape_timeout: 10s\n  evaluation_interval:\
+    \ 1m\nscrape_configs:\n  - job_name: auth\n    metrics_path: /metrics\n    scheme:\
+    \ http\n    static_configs:\n      - targets:\n        - auth-svc.apptest-8f0887bb.svc.cluster.local:8000\n\
+    \  - job_name: catalog\n    metrics_path: /metrics\n    scheme: http\n    static_configs:\n\
+    \      - targets:\n        - catalog-svc.apptest-8f0887bb.svc.cluster.local:8000\n\
+    \  - job_name: compliance\n    metrics_path: /metrics\n    scheme: http\n    static_configs:\n\
+    \      - targets:\n        - compliance-svc.apptest-8f0887bb.svc.cluster.local:8000\n\
+    \  - job_name: credentials\n    metrics_path: /metrics\n    scheme: http\n   \
+    \ static_configs:\n      - targets:\n        - credentials-svc.apptest-8f0887bb.svc.cluster.local:8000\n\
+    \  - job_name: executor\n    metrics_path: /metrics\n    scheme: http\n    static_configs:\n\
+    \      - targets:\n        - executor-svc.apptest-8f0887bb.svc.cluster.local:8000\n\
+    \  - job_name: jobs\n    metrics_path: /metrics\n    scheme: http\n    static_configs:\n\
+    \      - targets:\n        - jobs-svc.apptest-8f0887bb.svc.cluster.local:8000\n\
+    \  - job_name: jobsqueue\n    metrics_path: /metrics\n    scheme: http\n    static_configs:\n\
+    \      - targets:\n        - jobsqueue-svc.apptest-8f0887bb.svc.cluster.local:8000\n\
+    \  - job_name: policies\n    metrics_path: /metrics\n    scheme: http\n    static_configs:\n\
+    \      - targets:\n        - policies-svc.apptest-8f0887bb.svc.cluster.local:8000\n\
+    \  - job_name: profiles\n    metrics_path: /metrics\n    scheme: http\n    static_configs:\n\
+    \      - targets:\n        - profiles-svc.apptest-8f0887bb.svc.cluster.local:8000\n\
+    \  - job_name: scheduler\n    metrics_path: /metrics\n    scheme: http\n    static_configs:\n\
+    \      - targets:\n        - scheduler-svc.apptest-8f0887bb.svc.cluster.local:8000\n\
+    \  - job_name: schedules\n    metrics_path: /metrics\n    scheme: http\n    static_configs:\n\
+    \      - targets:\n        - schedules-svc.apptest-8f0887bb.svc.cluster.local:8000\n\
+    \  - job_name: state\n    metrics_path: /metrics\n    scheme: http\n    static_configs:\n\
+    \      - targets:\n        - state-svc.apptest-8f0887bb.svc.cluster.local:8000\n\
+    \  - job_name: dashboardbff\n    metrics_path: /metrics\n    scheme: http\n  \
+    \  static_configs:\n      - targets:\n        - dashboardbff-svc.apptest-8f0887bb.svc.cluster.local:8000\n"
+kind: ConfigMap
+metadata:
+  labels:
+    app: k10
+    app.kubernetes.io/name: kasten-k10-1
+    chart: k10-1.1.13
+    heritage: Tiller
+    release: kasten-k10-1
+  name: kasten-k10-1-k10-prometheus-config
+  namespace: apptest-8f0887bb
+  ownerReferences:
+  - apiVersion: app.k8s.io/v1alpha1
+    blockOwnerDeletion: true
+    kind: Application
+    name: kasten-k10-1
+    uid: 19c01fe7-7e35-11e8-a573-42010a8a01a6
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    app: prometheus
+    app.kubernetes.io/name: kasten-k10-1
+    chart: prometheus-6.7.0
+    component: server
+    heritage: Tiller
+    release: kasten-k10-1
+  name: kasten-k10-1-prometheus-server
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 8Gi
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    app: nginx
+    app.kubernetes.io/name: kasten-k10-1
+    chart: nginx-0.14.0
+    heritage: Tiller
+    release: kasten-k10-1
+  name: kasten-k10-1-nginx
+  ownerReferences:
+  - apiVersion: app.k8s.io/v1alpha1
+    blockOwnerDeletion: true
+    kind: Application
+    name: kasten-k10-1
+    uid: 19c01fe7-7e35-11e8-a573-42010a8a01a6
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    app: prometheus
+    app.kubernetes.io/name: kasten-k10-1
+    chart: prometheus-6.7.0
+    component: server
+    heritage: Tiller
+    release: kasten-k10-1
+  name: kasten-k10-1-prometheus-server
+  ownerReferences:
+  - apiVersion: app.k8s.io/v1alpha1
+    blockOwnerDeletion: true
+    kind: Application
+    name: kasten-k10-1
+    uid: 19c01fe7-7e35-11e8-a573-42010a8a01a6
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  labels:
+    app: nginx
+    app.kubernetes.io/name: kasten-k10-1
+    chart: nginx-0.14.0
+    heritage: Tiller
+    release: kasten-k10-1
+  name: kasten-k10-1-nginx
+  ownerReferences:
+  - apiVersion: app.k8s.io/v1alpha1
+    blockOwnerDeletion: true
+    kind: Application
+    name: kasten-k10-1
+    uid: 19c01fe7-7e35-11e8-a573-42010a8a01a6
+rules:
+- apiGroups:
+  - ''
+  resources:
+  - configmaps
+  - endpoints
+  - nodes
+  - pods
+  - secrets
+  verbs:
+  - list
+  - watch
+- apiGroups:
+  - ''
+  resources:
+  - nodes
+  verbs:
+  - get
+- apiGroups:
+  - ''
+  resources:
+  - services
+  verbs:
+  - get
+  - list
+  - update
+  - watch
+- apiGroups:
+  - extensions
+  resources:
+  - ingresses
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ''
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+- apiGroups:
+  - extensions
+  resources:
+  - ingresses/status
+  verbs:
+  - update
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    app: nginx
+    app.kubernetes.io/name: kasten-k10-1
+    chart: nginx-0.14.0
+    heritage: Tiller
+    release: kasten-k10-1
+  name: kasten-k10-1-nginx
+  ownerReferences:
+  - apiVersion: app.k8s.io/v1alpha1
+    blockOwnerDeletion: true
+    kind: Application
+    name: kasten-k10-1
+    uid: 19c01fe7-7e35-11e8-a573-42010a8a01a6
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: kasten-k10-1-nginx
+subjects:
+- kind: ServiceAccount
+  name: kasten-k10-1-nginx
+  namespace: apptest-8f0887bb
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: Role
+metadata:
+  labels:
+    app: nginx
+    app.kubernetes.io/name: kasten-k10-1
+    chart: nginx-0.14.0
+    heritage: Tiller
+    release: kasten-k10-1
+  name: kasten-k10-1-nginx
+  ownerReferences:
+  - apiVersion: app.k8s.io/v1alpha1
+    blockOwnerDeletion: true
+    kind: Application
+    name: kasten-k10-1
+    uid: 19c01fe7-7e35-11e8-a573-42010a8a01a6
+rules:
+- apiGroups:
+  - ''
+  resources:
+  - configmaps
+  - namespaces
+  - pods
+  - secrets
+  verbs:
+  - get
+- apiGroups:
+  - ''
+  resourceNames:
+  - ingress-controller-leader-internal-k10-nginx-ingress
+  resources:
+  - configmaps
+  verbs:
+  - get
+  - update
+- apiGroups:
+  - ''
+  resources:
+  - configmaps
+  verbs:
+  - create
+- apiGroups:
+  - ''
+  resources:
+  - endpoints
+  verbs:
+  - create
+  - get
+  - update
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: RoleBinding
+metadata:
+  labels:
+    app: nginx
+    app.kubernetes.io/name: kasten-k10-1
+    chart: nginx-0.14.0
+    heritage: Tiller
+    release: kasten-k10-1
+  name: kasten-k10-1-nginx
+  ownerReferences:
+  - apiVersion: app.k8s.io/v1alpha1
+    blockOwnerDeletion: true
+    kind: Application
+    name: kasten-k10-1
+    uid: 19c01fe7-7e35-11e8-a573-42010a8a01a6
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: kasten-k10-1-nginx
+subjects:
+- kind: ServiceAccount
+  name: kasten-k10-1-nginx
+  namespace: apptest-8f0887bb
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: fluentd
+    app.kubernetes.io/name: kasten-k10-1
+    chart: fluentd-0.1.4
+    heritage: Tiller
+    release: kasten-k10-1
+  name: fluentd
+  ownerReferences:
+  - apiVersion: app.k8s.io/v1alpha1
+    blockOwnerDeletion: true
+    kind: Application
+    name: kasten-k10-1
+    uid: 19c01fe7-7e35-11e8-a573-42010a8a01a6
+spec:
+  ports:
+  - name: monitor-agent
+    port: 24220
+    protocol: TCP
+    targetPort: 24220
+  - name: input-port
+    port: 24224
+    protocol: TCP
+    targetPort: 24224
+  selector:
+    app: fluentd
+    release: kasten-k10-1
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: nginx
+    app.kubernetes.io/name: kasten-k10-1
+    chart: nginx-0.14.0
+    component: controller
+    heritage: Tiller
+    release: kasten-k10-1
+  name: kasten-k10-1-nginx-controller
+  ownerReferences:
+  - apiVersion: app.k8s.io/v1alpha1
+    blockOwnerDeletion: true
+    kind: Application
+    name: kasten-k10-1
+    uid: 19c01fe7-7e35-11e8-a573-42010a8a01a6
+spec:
+  clusterIP: ''
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: 80
+  - name: https
+    port: 443
+    protocol: TCP
+    targetPort: 443
+  selector:
+    app: nginx
+    component: controller
+    release: kasten-k10-1
+  type: NodePort
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: nginx
+    app.kubernetes.io/name: kasten-k10-1
+    chart: nginx-0.14.0
+    component: default-backend
+    heritage: Tiller
+    release: kasten-k10-1
+  name: kasten-k10-1-nginx-default-backend
+  ownerReferences:
+  - apiVersion: app.k8s.io/v1alpha1
+    blockOwnerDeletion: true
+    kind: Application
+    name: kasten-k10-1
+    uid: 19c01fe7-7e35-11e8-a573-42010a8a01a6
+spec:
+  clusterIP: ''
+  ports:
+  - port: 80
+    targetPort: 8080
+  selector:
+    app: nginx
+    component: default-backend
+    release: kasten-k10-1
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: prometheus
+    app.kubernetes.io/name: kasten-k10-1
+    chart: prometheus-6.7.0
+    component: server
+    heritage: Tiller
+    release: kasten-k10-1
+  name: kasten-k10-1-prometheus-server
+  ownerReferences:
+  - apiVersion: app.k8s.io/v1alpha1
+    blockOwnerDeletion: true
+    kind: Application
+    name: kasten-k10-1
+    uid: 19c01fe7-7e35-11e8-a573-42010a8a01a6
+spec:
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: 9090
+  selector:
+    app: prometheus
+    component: server
+    release: kasten-k10-1
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    getambassador.io/config: '---
+
+      apiVersion: ambassador/v0
+
+      kind:  AuthService
+
+      name:  authentication
+
+      auth_service: "auth-svc:8000"
+
+      path_prefix: "/v0/authz"
+
+      '
+  labels:
+    app: k10
+    app.kubernetes.io/name: kasten-k10-1
+    chart: k10-1.1.13
+    heritage: Tiller
+    release: kasten-k10-1
+    service: ambassador
+  name: ambassador
+  ownerReferences:
+  - apiVersion: app.k8s.io/v1alpha1
+    blockOwnerDeletion: true
+    kind: Application
+    name: kasten-k10-1
+    uid: 19c01fe7-7e35-11e8-a573-42010a8a01a6
+spec:
+  ports:
+  - name: http
+    port: 80
+    targetPort: 80
+  selector:
+    service: ambassador
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: k10
+    app.kubernetes.io/name: kasten-k10-1
+    chart: k10-1.1.13
+    heritage: Tiller
+    release: kasten-k10-1
+  name: ambassador
+  ownerReferences:
+  - apiVersion: app.k8s.io/v1alpha1
+    blockOwnerDeletion: true
+    kind: Application
+    name: kasten-k10-1
+    uid: 19c01fe7-7e35-11e8-a573-42010a8a01a6
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: k10
+        chart: k10-1.1.13
+        heritage: Tiller
+        release: kasten-k10-1
+        service: ambassador
+    spec:
+      containers:
+      - env:
+        - name: AMBASSADOR_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: AMBASSADOR_SINGLE_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        image: quay.io/datawire/ambassador:0.34.3
+        livenessProbe:
+          httpGet:
+            path: /ambassador/v0/check_alive
+            port: 8877
+          initialDelaySeconds: 30
+          periodSeconds: 3
+        name: ambassador
+        readinessProbe:
+          httpGet:
+            path: /ambassador/v0/check_ready
+            port: 8877
+          initialDelaySeconds: 30
+          periodSeconds: 3
+        resources:
+          limits:
+            cpu: 1
+            memory: 400Mi
+          requests:
+            cpu: 200m
+            memory: 100Mi
+      - image: quay.io/datawire/statsd:0.34.3
+        name: statsd
+      restartPolicy: Always
+      serviceAccountName: kasten-k10-1-serviceaccount-cab5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    getambassador.io/config: '---
+
+      apiVersion: ambassador/v0
+
+      kind:  Mapping
+
+      name:  api-policies-mapping
+
+      grpc: true
+
+      prefix: /policies.Policies/
+
+      rewrite: /policies.Policies/
+
+      service: api-policies:9000
+
+      timeout_ms: 15000
+
+      '
+  labels:
+    app: k10
+    app.kubernetes.io/name: kasten-k10-1
+    chart: k10-1.1.13
+    component: api-policies
+    heritage: Tiller
+    release: kasten-k10-1
+    run: api-policies-svc
+  name: api-policies
+  namespace: apptest-8f0887bb
+  ownerReferences:
+  - apiVersion: app.k8s.io/v1alpha1
+    blockOwnerDeletion: true
+    kind: Application
+    name: kasten-k10-1
+    uid: 19c01fe7-7e35-11e8-a573-42010a8a01a6
+spec:
+  ports:
+  - name: http
+    port: 9000
+    protocol: TCP
+    targetPort: 9000
+  selector:
+    run: api-policies-svc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    getambassador.io/config: '---
+
+      apiVersion: ambassador/v0
+
+      kind:  Mapping
+
+      name:  api-profiles-mapping
+
+      grpc: true
+
+      prefix: /profiles.Profiles/
+
+      rewrite: /profiles.Profiles/
+
+      service: api-profiles:9000
+
+      timeout_ms: 15000
+
+      '
+  labels:
+    app: k10
+    app.kubernetes.io/name: kasten-k10-1
+    chart: k10-1.1.13
+    component: api-profiles
+    heritage: Tiller
+    release: kasten-k10-1
+    run: api-profiles-svc
+  name: api-profiles
+  namespace: apptest-8f0887bb
+  ownerReferences:
+  - apiVersion: app.k8s.io/v1alpha1
+    blockOwnerDeletion: true
+    kind: Application
+    name: kasten-k10-1
+    uid: 19c01fe7-7e35-11e8-a573-42010a8a01a6
+spec:
+  ports:
+  - name: http
+    port: 9000
+    protocol: TCP
+    targetPort: 9000
+  selector:
+    run: api-profiles-svc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    getambassador.io/config: '---
+
+      apiVersion: ambassador/v0
+
+      kind:  Mapping
+
+      name:  kasten-k10-1-prometheus-server-mapping
+
+      prefix: /kasten-k10-1/prometheus/
+
+      service: kasten-k10-1-prometheus-server.apptest-8f0887bb:80
+
+      timeout_ms: 15000
+
+      '
+  labels:
+    app: k10
+    app.kubernetes.io/name: kasten-k10-1
+    chart: k10-1.1.13
+    component: kasten-k10-1-prometheus-server
+    heritage: Tiller
+    release: kasten-k10-1
+    run: kasten-k10-1-prometheus-server
+  name: kasten-k10-1-prometheus-server-exp
+  namespace: apptest-8f0887bb
+  ownerReferences:
+  - apiVersion: app.k8s.io/v1alpha1
+    blockOwnerDeletion: true
+    kind: Application
+    name: kasten-k10-1
+    uid: 19c01fe7-7e35-11e8-a573-42010a8a01a6
+spec:
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: 9090
+  selector:
+    run: kasten-k10-1-prometheus-server
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    getambassador.io/config: '---
+
+      apiVersion: ambassador/v0
+
+      kind:  Mapping
+
+      name:  auth-mapping
+
+      prefix: /kasten-k10-1/auth-svc/
+
+      rewrite: /
+
+      service: auth-svc.apptest-8f0887bb:8000
+
+      timeout_ms: 15000
+
+      '
+  labels:
+    app: k10
+    app.kubernetes.io/name: kasten-k10-1
+    chart: k10-1.1.13
+    component: auth
+    heritage: Tiller
+    release: kasten-k10-1
+    run: auth-svc
+  name: auth-svc
+  namespace: apptest-8f0887bb
+  ownerReferences:
+  - apiVersion: app.k8s.io/v1alpha1
+    blockOwnerDeletion: true
+    kind: Application
+    name: kasten-k10-1
+    uid: 19c01fe7-7e35-11e8-a573-42010a8a01a6
+spec:
+  ports:
+  - name: http
+    port: 8000
+    protocol: TCP
+    targetPort: 8000
+  selector:
+    run: auth-svc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    getambassador.io/config: '---
+
+      apiVersion: ambassador/v0
+
+      kind:  Mapping
+
+      name:  catalog-mapping
+
+      prefix: /kasten-k10-1/catalog-svc/
+
+      rewrite: /
+
+      service: catalog-svc.apptest-8f0887bb:8000
+
+      timeout_ms: 15000
+
+      '
+  labels:
+    app: k10
+    app.kubernetes.io/name: kasten-k10-1
+    chart: k10-1.1.13
+    component: catalog
+    heritage: Tiller
+    release: kasten-k10-1
+    run: catalog-svc
+  name: catalog-svc
+  namespace: apptest-8f0887bb
+  ownerReferences:
+  - apiVersion: app.k8s.io/v1alpha1
+    blockOwnerDeletion: true
+    kind: Application
+    name: kasten-k10-1
+    uid: 19c01fe7-7e35-11e8-a573-42010a8a01a6
+spec:
+  ports:
+  - name: http
+    port: 8000
+    protocol: TCP
+    targetPort: 8000
+  selector:
+    run: catalog-svc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    getambassador.io/config: '---
+
+      apiVersion: ambassador/v0
+
+      kind:  Mapping
+
+      name:  compliance-mapping
+
+      prefix: /kasten-k10-1/compliance-svc/
+
+      rewrite: /
+
+      service: compliance-svc.apptest-8f0887bb:8000
+
+      timeout_ms: 15000
+
+      '
+  labels:
+    app: k10
+    app.kubernetes.io/name: kasten-k10-1
+    chart: k10-1.1.13
+    component: compliance
+    heritage: Tiller
+    release: kasten-k10-1
+    run: compliance-svc
+  name: compliance-svc
+  namespace: apptest-8f0887bb
+  ownerReferences:
+  - apiVersion: app.k8s.io/v1alpha1
+    blockOwnerDeletion: true
+    kind: Application
+    name: kasten-k10-1
+    uid: 19c01fe7-7e35-11e8-a573-42010a8a01a6
+spec:
+  ports:
+  - name: http
+    port: 8000
+    protocol: TCP
+    targetPort: 8000
+  selector:
+    run: compliance-svc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    getambassador.io/config: '---
+
+      apiVersion: ambassador/v0
+
+      kind:  Mapping
+
+      name:  credentials-mapping
+
+      prefix: /kasten-k10-1/credentials-svc/
+
+      rewrite: /
+
+      service: credentials-svc.apptest-8f0887bb:8000
+
+      timeout_ms: 15000
+
+      '
+  labels:
+    app: k10
+    app.kubernetes.io/name: kasten-k10-1
+    chart: k10-1.1.13
+    component: credentials
+    heritage: Tiller
+    release: kasten-k10-1
+    run: credentials-svc
+  name: credentials-svc
+  namespace: apptest-8f0887bb
+  ownerReferences:
+  - apiVersion: app.k8s.io/v1alpha1
+    blockOwnerDeletion: true
+    kind: Application
+    name: kasten-k10-1
+    uid: 19c01fe7-7e35-11e8-a573-42010a8a01a6
+spec:
+  ports:
+  - name: http
+    port: 8000
+    protocol: TCP
+    targetPort: 8000
+  selector:
+    run: credentials-svc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    getambassador.io/config: '---
+
+      apiVersion: ambassador/v0
+
+      kind:  Mapping
+
+      name:  executor-mapping
+
+      prefix: /kasten-k10-1/executor-svc/
+
+      rewrite: /
+
+      service: executor-svc.apptest-8f0887bb:8000
+
+      timeout_ms: 15000
+
+      '
+  labels:
+    app: k10
+    app.kubernetes.io/name: kasten-k10-1
+    chart: k10-1.1.13
+    component: executor
+    heritage: Tiller
+    release: kasten-k10-1
+    run: executor-svc
+  name: executor-svc
+  namespace: apptest-8f0887bb
+  ownerReferences:
+  - apiVersion: app.k8s.io/v1alpha1
+    blockOwnerDeletion: true
+    kind: Application
+    name: kasten-k10-1
+    uid: 19c01fe7-7e35-11e8-a573-42010a8a01a6
+spec:
+  ports:
+  - name: http
+    port: 8000
+    protocol: TCP
+    targetPort: 8000
+  selector:
+    run: executor-svc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    getambassador.io/config: '---
+
+      apiVersion: ambassador/v0
+
+      kind:  Mapping
+
+      name:  jobs-mapping
+
+      prefix: /kasten-k10-1/jobs-svc/
+
+      rewrite: /
+
+      service: jobs-svc.apptest-8f0887bb:8000
+
+      timeout_ms: 15000
+
+      '
+  labels:
+    app: k10
+    app.kubernetes.io/name: kasten-k10-1
+    chart: k10-1.1.13
+    component: jobs
+    heritage: Tiller
+    release: kasten-k10-1
+    run: jobs-svc
+  name: jobs-svc
+  namespace: apptest-8f0887bb
+  ownerReferences:
+  - apiVersion: app.k8s.io/v1alpha1
+    blockOwnerDeletion: true
+    kind: Application
+    name: kasten-k10-1
+    uid: 19c01fe7-7e35-11e8-a573-42010a8a01a6
+spec:
+  ports:
+  - name: http
+    port: 8000
+    protocol: TCP
+    targetPort: 8000
+  selector:
+    run: jobs-svc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    getambassador.io/config: '---
+
+      apiVersion: ambassador/v0
+
+      kind:  Mapping
+
+      name:  jobsqueue-mapping
+
+      prefix: /kasten-k10-1/jobsqueue-svc/
+
+      rewrite: /
+
+      service: jobsqueue-svc.apptest-8f0887bb:8000
+
+      timeout_ms: 15000
+
+      '
+  labels:
+    app: k10
+    app.kubernetes.io/name: kasten-k10-1
+    chart: k10-1.1.13
+    component: jobsqueue
+    heritage: Tiller
+    release: kasten-k10-1
+    run: jobsqueue-svc
+  name: jobsqueue-svc
+  namespace: apptest-8f0887bb
+  ownerReferences:
+  - apiVersion: app.k8s.io/v1alpha1
+    blockOwnerDeletion: true
+    kind: Application
+    name: kasten-k10-1
+    uid: 19c01fe7-7e35-11e8-a573-42010a8a01a6
+spec:
+  ports:
+  - name: http
+    port: 8000
+    protocol: TCP
+    targetPort: 8000
+  selector:
+    run: jobsqueue-svc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    getambassador.io/config: '---
+
+      apiVersion: ambassador/v0
+
+      kind:  Mapping
+
+      name:  policies-mapping
+
+      prefix: /kasten-k10-1/policies-svc/
+
+      rewrite: /
+
+      service: policies-svc.apptest-8f0887bb:8000
+
+      timeout_ms: 15000
+
+      '
+  labels:
+    app: k10
+    app.kubernetes.io/name: kasten-k10-1
+    chart: k10-1.1.13
+    component: policies
+    heritage: Tiller
+    release: kasten-k10-1
+    run: policies-svc
+  name: policies-svc
+  namespace: apptest-8f0887bb
+  ownerReferences:
+  - apiVersion: app.k8s.io/v1alpha1
+    blockOwnerDeletion: true
+    kind: Application
+    name: kasten-k10-1
+    uid: 19c01fe7-7e35-11e8-a573-42010a8a01a6
+spec:
+  ports:
+  - name: http
+    port: 8000
+    protocol: TCP
+    targetPort: 8000
+  selector:
+    run: policies-svc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    getambassador.io/config: '---
+
+      apiVersion: ambassador/v0
+
+      kind:  Mapping
+
+      name:  profiles-mapping
+
+      prefix: /kasten-k10-1/profiles-svc/
+
+      rewrite: /
+
+      service: profiles-svc.apptest-8f0887bb:8000
+
+      timeout_ms: 60000
+
+      '
+  labels:
+    app: k10
+    app.kubernetes.io/name: kasten-k10-1
+    chart: k10-1.1.13
+    component: profiles
+    heritage: Tiller
+    release: kasten-k10-1
+    run: profiles-svc
+  name: profiles-svc
+  namespace: apptest-8f0887bb
+  ownerReferences:
+  - apiVersion: app.k8s.io/v1alpha1
+    blockOwnerDeletion: true
+    kind: Application
+    name: kasten-k10-1
+    uid: 19c01fe7-7e35-11e8-a573-42010a8a01a6
+spec:
+  ports:
+  - name: http
+    port: 8000
+    protocol: TCP
+    targetPort: 8000
+  selector:
+    run: profiles-svc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    getambassador.io/config: '---
+
+      apiVersion: ambassador/v0
+
+      kind:  Mapping
+
+      name:  scheduler-mapping
+
+      prefix: /kasten-k10-1/scheduler-svc/
+
+      rewrite: /
+
+      service: scheduler-svc.apptest-8f0887bb:8000
+
+      timeout_ms: 15000
+
+      '
+  labels:
+    app: k10
+    app.kubernetes.io/name: kasten-k10-1
+    chart: k10-1.1.13
+    component: scheduler
+    heritage: Tiller
+    release: kasten-k10-1
+    run: scheduler-svc
+  name: scheduler-svc
+  namespace: apptest-8f0887bb
+  ownerReferences:
+  - apiVersion: app.k8s.io/v1alpha1
+    blockOwnerDeletion: true
+    kind: Application
+    name: kasten-k10-1
+    uid: 19c01fe7-7e35-11e8-a573-42010a8a01a6
+spec:
+  ports:
+  - name: http
+    port: 8000
+    protocol: TCP
+    targetPort: 8000
+  selector:
+    run: scheduler-svc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    getambassador.io/config: '---
+
+      apiVersion: ambassador/v0
+
+      kind:  Mapping
+
+      name:  schedules-mapping
+
+      prefix: /kasten-k10-1/schedules-svc/
+
+      rewrite: /
+
+      service: schedules-svc.apptest-8f0887bb:8000
+
+      timeout_ms: 15000
+
+      '
+  labels:
+    app: k10
+    app.kubernetes.io/name: kasten-k10-1
+    chart: k10-1.1.13
+    component: schedules
+    heritage: Tiller
+    release: kasten-k10-1
+    run: schedules-svc
+  name: schedules-svc
+  namespace: apptest-8f0887bb
+  ownerReferences:
+  - apiVersion: app.k8s.io/v1alpha1
+    blockOwnerDeletion: true
+    kind: Application
+    name: kasten-k10-1
+    uid: 19c01fe7-7e35-11e8-a573-42010a8a01a6
+spec:
+  ports:
+  - name: http
+    port: 8000
+    protocol: TCP
+    targetPort: 8000
+  selector:
+    run: schedules-svc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    getambassador.io/config: '---
+
+      apiVersion: ambassador/v0
+
+      kind:  Mapping
+
+      name:  state-mapping
+
+      prefix: /kasten-k10-1/state-svc/
+
+      rewrite: /
+
+      service: state-svc.apptest-8f0887bb:8000
+
+      timeout_ms: 15000
+
+      '
+  labels:
+    app: k10
+    app.kubernetes.io/name: kasten-k10-1
+    chart: k10-1.1.13
+    component: state
+    heritage: Tiller
+    release: kasten-k10-1
+    run: state-svc
+  name: state-svc
+  namespace: apptest-8f0887bb
+  ownerReferences:
+  - apiVersion: app.k8s.io/v1alpha1
+    blockOwnerDeletion: true
+    kind: Application
+    name: kasten-k10-1
+    uid: 19c01fe7-7e35-11e8-a573-42010a8a01a6
+spec:
+  ports:
+  - name: http
+    port: 8000
+    protocol: TCP
+    targetPort: 8000
+  selector:
+    run: state-svc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    getambassador.io/config: '---
+
+      apiVersion: ambassador/v0
+
+      kind:  Mapping
+
+      name:  dashboardbff-mapping
+
+      prefix: /kasten-k10-1/dashboardbff-svc/
+
+      rewrite: /
+
+      service: dashboardbff-svc.apptest-8f0887bb:8000
+
+      timeout_ms: 15000
+
+      '
+  labels:
+    app: k10
+    app.kubernetes.io/name: kasten-k10-1
+    chart: k10-1.1.13
+    component: dashboardbff
+    heritage: Tiller
+    release: kasten-k10-1
+    run: dashboardbff-svc
+  name: dashboardbff-svc
+  namespace: apptest-8f0887bb
+  ownerReferences:
+  - apiVersion: app.k8s.io/v1alpha1
+    blockOwnerDeletion: true
+    kind: Application
+    name: kasten-k10-1
+    uid: 19c01fe7-7e35-11e8-a573-42010a8a01a6
+spec:
+  ports:
+  - name: http
+    port: 8000
+    protocol: TCP
+    targetPort: 8000
+  selector:
+    run: dashboardbff-svc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    getambassador.io/config: '---
+
+      apiVersion: ambassador/v0
+
+      kind:  Mapping
+
+      name:  frontend-mapping
+
+      prefix: /kasten-k10-1
+
+      rewrite: /
+
+      service: frontend-svc.apptest-8f0887bb:8000
+
+      timeout_ms: 15000
+
+      '
+  labels:
+    app: k10
+    app.kubernetes.io/name: kasten-k10-1
+    chart: k10-1.1.13
+    component: frontend
+    heritage: Tiller
+    release: kasten-k10-1
+    run: frontend-svc
+  name: frontend-svc
+  namespace: apptest-8f0887bb
+  ownerReferences:
+  - apiVersion: app.k8s.io/v1alpha1
+    blockOwnerDeletion: true
+    kind: Application
+    name: kasten-k10-1
+    uid: 19c01fe7-7e35-11e8-a573-42010a8a01a6
+spec:
+  ports:
+  - name: http
+    port: 8000
+    protocol: TCP
+    targetPort: 8000
+  selector:
+    run: frontend-svc
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: fluentd
+    app.kubernetes.io/name: kasten-k10-1
+    chart: fluentd-0.1.4
+    heritage: Tiller
+    release: kasten-k10-1
+  name: fluentd
+  ownerReferences:
+  - apiVersion: app.k8s.io/v1alpha1
+    blockOwnerDeletion: true
+    kind: Application
+    name: kasten-k10-1
+    uid: 19c01fe7-7e35-11e8-a573-42010a8a01a6
+spec:
+  replicas: null
+  selector:
+    matchLabels:
+      app: fluentd
+      release: kasten-k10-1
+  template:
+    metadata:
+      labels:
+        app: fluentd
+        release: kasten-k10-1
+    spec:
+      containers:
+      - env:
+        - name: OUTPUT_HOST
+          value: elasticsearch-client.default.svc.cluster.local
+        - name: OUTPUT_PORT
+          value: '9200'
+        - name: OUTPUT_BUFFER_CHUNK_LIMIT
+          value: 2M
+        - name: OUTPUT_BUFFER_QUEUE_LIMIT
+          value: '8'
+        image: gcr.io/google-containers/fluentd-elasticsearch:v2.0.4
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          httpGet:
+            path: /fluentd.pod.healthcheck?json=%7B%22log%22%3A+%22health+check%22%7D
+            port: 9880
+          initialDelaySeconds: 5
+          timeoutSeconds: 1
+        name: fluentd
+        ports:
+        - containerPort: 24220
+          name: monitor-agent
+          protocol: TCP
+        - containerPort: 24224
+          name: input-port
+          protocol: TCP
+        - containerPort: 9880
+          name: http-input
+          protocol: TCP
+        resources: {}
+        volumeMounts:
+        - mountPath: /etc/fluent/config.d
+          name: config-volume-fluentd
+      volumes:
+      - configMap:
+          name: fluentd
+        name: config-volume-fluentd
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: nginx
+    app.kubernetes.io/name: kasten-k10-1
+    chart: nginx-0.14.0
+    component: controller
+    heritage: Tiller
+    release: kasten-k10-1
+  name: kasten-k10-1-nginx-controller
+  ownerReferences:
+  - apiVersion: app.k8s.io/v1alpha1
+    blockOwnerDeletion: true
+    kind: Application
+    name: kasten-k10-1
+    uid: 19c01fe7-7e35-11e8-a573-42010a8a01a6
+spec:
+  minReadySeconds: 0
+  replicas: 1
+  revisionHistoryLimit: 10
+  strategy: {}
+  template:
+    metadata:
+      annotations:
+        checksum/config: e0acb651b3915fb48ab56cc4bdeaaf56b4caee271dfeedfb715425e8a9495495
+      labels:
+        app: nginx
+        component: controller
+        release: kasten-k10-1
+    spec:
+      containers:
+      - args:
+        - /nginx-ingress-controller
+        - --default-backend-service=apptest-8f0887bb/kasten-k10-1-nginx-default-backend
+        - --election-id=ingress-controller-leader
+        - --ingress-class=internal-k10-nginx-ingress
+        - --configmap=apptest-8f0887bb/kasten-k10-1-nginx-controller
+        - --watch-namespace=apptest-8f0887bb
+        env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        image: quay.io/kubernetes-ingress-controller/nginx-ingress-controller:0.12.0
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /healthz
+            port: 10254
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        name: nginx-controller
+        ports:
+        - containerPort: 80
+          name: http
+          protocol: TCP
+        - containerPort: 443
+          name: https
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /healthz
+            port: 10254
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        resources: {}
+      dnsPolicy: ClusterFirst
+      hostNetwork: false
+      serviceAccountName: kasten-k10-1-nginx
+      terminationGracePeriodSeconds: 60
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: nginx
+    app.kubernetes.io/name: kasten-k10-1
+    chart: nginx-0.14.0
+    component: default-backend
+    heritage: Tiller
+    release: kasten-k10-1
+  name: kasten-k10-1-nginx-default-backend
+  ownerReferences:
+  - apiVersion: app.k8s.io/v1alpha1
+    blockOwnerDeletion: true
+    kind: Application
+    name: kasten-k10-1
+    uid: 19c01fe7-7e35-11e8-a573-42010a8a01a6
+spec:
+  replicas: 1
+  revisionHistoryLimit: 10
+  template:
+    metadata:
+      labels:
+        app: nginx
+        component: default-backend
+        release: kasten-k10-1
+    spec:
+      containers:
+      - args: null
+        image: k8s.gcr.io/defaultbackend:1.3
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 30
+          timeoutSeconds: 5
+        name: nginx-default-backend
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+        resources: {}
+      terminationGracePeriodSeconds: 60
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: prometheus
+    app.kubernetes.io/name: kasten-k10-1
+    chart: prometheus-6.7.0
+    component: server
+    heritage: Tiller
+    release: kasten-k10-1
+  name: kasten-k10-1-prometheus-server
+  ownerReferences:
+  - apiVersion: app.k8s.io/v1alpha1
+    blockOwnerDeletion: true
+    kind: Application
+    name: kasten-k10-1
+    uid: 19c01fe7-7e35-11e8-a573-42010a8a01a6
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: prometheus
+        component: server
+        release: kasten-k10-1
+    spec:
+      containers:
+      - args:
+        - --volume-dir=/etc/config
+        - --webhook-url=http://localhost:9090/-/reload
+        image: jimmidyson/configmap-reload:v0.1
+        imagePullPolicy: IfNotPresent
+        name: prometheus-server-configmap-reload
+        resources: {}
+        volumeMounts:
+        - mountPath: /etc/config
+          name: config-volume
+          readOnly: true
+      - args:
+        - --config.file=/etc/config/prometheus.yml
+        - --storage.tsdb.path=/data
+        - --web.console.libraries=/etc/prometheus/console_libraries
+        - --web.console.templates=/etc/prometheus/consoles
+        - --web.enable-lifecycle
+        image: prom/prometheus:v2.2.1
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          httpGet:
+            path: /-/healthy
+            port: 9090
+          initialDelaySeconds: 30
+          timeoutSeconds: 30
+        name: prometheus-server
+        ports:
+        - containerPort: 9090
+        readinessProbe:
+          httpGet:
+            path: /-/ready
+            port: 9090
+          initialDelaySeconds: 30
+          timeoutSeconds: 30
+        resources: {}
+        volumeMounts:
+        - mountPath: /etc/config
+          name: config-volume
+        - mountPath: /data
+          name: storage-volume
+          subPath: ''
+      initContainers:
+      - command:
+        - chown
+        - -R
+        - 65534:65534
+        - /data
+        image: busybox:latest
+        imagePullPolicy: IfNotPresent
+        name: init-chown-data
+        resources: {}
+        volumeMounts:
+        - mountPath: /data
+          name: storage-volume
+          subPath: ''
+      serviceAccountName: kasten-k10-1-prometheus-server
+      terminationGracePeriodSeconds: 300
+      volumes:
+      - configMap:
+          name: kasten-k10-1-k10-prometheus-config
+        name: config-volume
+      - name: storage-volume
+        persistentVolumeClaim:
+          claimName: kasten-k10-1-prometheus-server
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: k10
+    app.kubernetes.io/name: kasten-k10-1
+    chart: k10-1.1.13
+    component: api-policies
+    heritage: Tiller
+    release: kasten-k10-1
+  name: api-policies-svc
+  namespace: apptest-8f0887bb
+  ownerReferences:
+  - apiVersion: app.k8s.io/v1alpha1
+    blockOwnerDeletion: true
+    kind: Application
+    name: kasten-k10-1
+    uid: 19c01fe7-7e35-11e8-a573-42010a8a01a6
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: k10
+        chart: k10-1.1.13
+        component: api-policies
+        heritage: Tiller
+        release: kasten-k10-1
+        run: api-policies-svc
+    spec:
+      containers:
+      - env:
+        - name: VERSION
+          valueFrom:
+            configMapKeyRef:
+              key: version
+              name: k10-config
+        - name: CLUSTER_NAME
+          valueFrom:
+            configMapKeyRef:
+              key: clustername
+              name: k10-config
+        - name: MODEL_STORE_DIR
+          valueFrom:
+            configMapKeyRef:
+              key: modelstoredirname
+              name: k10-config
+        - name: AWS_FIREHOSE_DELIVERY_STREAM_NAME
+          valueFrom:
+            configMapKeyRef:
+              key: firehosedeliverystreamname
+              name: k10-config
+        - name: LOG_LEVEL
+          valueFrom:
+            configMapKeyRef:
+              key: loglevel
+              name: k10-config
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        image: gcr.io/kasten-images/api-policies:1.1.13
+        imagePullPolicy: Always
+        livenessProbe:
+          httpGet:
+            path: /v0/healthz
+            port: 8000
+          initialDelaySeconds: 90
+          timeoutSeconds: 1
+        name: api-policies-svc
+        ports:
+        - containerPort: 8000
+      - args:
+        - tail
+        - -f
+        - /dev/null
+        image: gcr.io/kasten-images/service-proxy:hash-bc17b40
+        imagePullPolicy: Always
+        name: proxy
+      serviceAccountName: kasten-k10-1-serviceaccount-cab5
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: k10
+    app.kubernetes.io/name: kasten-k10-1
+    chart: k10-1.1.13
+    component: api-profiles
+    heritage: Tiller
+    release: kasten-k10-1
+  name: api-profiles-svc
+  namespace: apptest-8f0887bb
+  ownerReferences:
+  - apiVersion: app.k8s.io/v1alpha1
+    blockOwnerDeletion: true
+    kind: Application
+    name: kasten-k10-1
+    uid: 19c01fe7-7e35-11e8-a573-42010a8a01a6
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: k10
+        chart: k10-1.1.13
+        component: api-profiles
+        heritage: Tiller
+        release: kasten-k10-1
+        run: api-profiles-svc
+    spec:
+      containers:
+      - env:
+        - name: VERSION
+          valueFrom:
+            configMapKeyRef:
+              key: version
+              name: k10-config
+        - name: CLUSTER_NAME
+          valueFrom:
+            configMapKeyRef:
+              key: clustername
+              name: k10-config
+        - name: MODEL_STORE_DIR
+          valueFrom:
+            configMapKeyRef:
+              key: modelstoredirname
+              name: k10-config
+        - name: AWS_FIREHOSE_DELIVERY_STREAM_NAME
+          valueFrom:
++ cat /data/resources.yaml
+            configMapKeyRef:
+              key: firehosedeliverystreamname
+              name: k10-config
+        - name: LOG_LEVEL
+          valueFrom:
+            configMapKeyRef:
+              key: loglevel
+              name: k10-config
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        image: gcr.io/kasten-images/api-profiles:1.1.13
+        imagePullPolicy: Always
+        livenessProbe:
+          httpGet:
+            path: /v0/healthz
+            port: 8000
+          initialDelaySeconds: 90
+          timeoutSeconds: 1
+        name: api-profiles-svc
+        ports:
+        - containerPort: 8000
+      - args:
+        - tail
+        - -f
+        - /dev/null
+        image: gcr.io/kasten-images/service-proxy:hash-bc17b40
+        imagePullPolicy: Always
+        name: proxy
+      serviceAccountName: kasten-k10-1-serviceaccount-cab5
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: k10
+    app.kubernetes.io/name: kasten-k10-1
+    chart: k10-1.1.13
+    component: auth
+    heritage: Tiller
+    release: kasten-k10-1
+  name: auth-svc
+  namespace: apptest-8f0887bb
+  ownerReferences:
+  - apiVersion: app.k8s.io/v1alpha1
+    blockOwnerDeletion: true
+    kind: Application
+    name: kasten-k10-1
+    uid: 19c01fe7-7e35-11e8-a573-42010a8a01a6
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: k10
+        chart: k10-1.1.13
+        component: auth
+        heritage: Tiller
+        release: kasten-k10-1
+        run: auth-svc
+    spec:
+      containers:
+      - env:
+        - name: VERSION
+          valueFrom:
+            configMapKeyRef:
+              key: version
+              name: k10-config
+        - name: CLUSTER_NAME
+          valueFrom:
+            configMapKeyRef:
+              key: clustername
+              name: k10-config
+        - name: MODEL_STORE_DIR
+          valueFrom:
+            configMapKeyRef:
+              key: modelstoredirname
+              name: k10-config
++ kubectl apply --namespace=apptest-8f0887bb --filename=/data/resources.yaml
+        - name: AWS_FIREHOSE_DELIVERY_STREAM_NAME
+          valueFrom:
+            configMapKeyRef:
+              key: firehosedeliverystreamname
+              name: k10-config
+        - name: LOG_LEVEL
+          valueFrom:
+            configMapKeyRef:
+              key: loglevel
+              name: k10-config
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        image: gcr.io/kasten-images/auth:1.1.13
+        imagePullPolicy: Always
+        livenessProbe:
+          httpGet:
+            path: /v0/healthz
+            port: 8000
+          initialDelaySeconds: 90
+          timeoutSeconds: 1
+        name: auth-svc
+        ports:
+        - containerPort: 8000
+        volumeMounts:
+        - mountPath: /var/run/secret/kasten.io/k10-api-key
+          name: k10-api-key
+          readOnly: true
+      - args:
+        - tail
+        - -f
+        - /dev/null
+        image: gcr.io/kasten-images/service-proxy:hash-bc17b40
+        imagePullPolicy: Always
+        name: proxy
+      serviceAccountName: kasten-k10-1-serviceaccount-cab5
+      volumes:
+      - name: k10-api-key
+        secret:
+          secretName: k10-api-key
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    app: k10
+    app.kubernetes.io/name: kasten-k10-1
+    chart: k10-1.1.13
+    component: catalog
+    heritage: Tiller
+    release: kasten-k10-1
+  name: catalog-pv-claim
+  namespace: apptest-8f0887bb
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: k10
+    app.kubernetes.io/name: kasten-k10-1
+    chart: k10-1.1.13
+    component: catalog
+    heritage: Tiller
+    release: kasten-k10-1
+  name: catalog-svc
+  namespace: apptest-8f0887bb
+  ownerReferences:
+  - apiVersion: app.k8s.io/v1alpha1
+    blockOwnerDeletion: true
+    kind: Application
+    name: kasten-k10-1
+    uid: 19c01fe7-7e35-11e8-a573-42010a8a01a6
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: k10
+        chart: k10-1.1.13
+        component: catalog
+        heritage: Tiller
+        release: kasten-k10-1
+        run: catalog-svc
+    spec:
+      containers:
+      - env:
+        - name: VERSION
+          valueFrom:
+            configMapKeyRef:
+              key: version
+              name: k10-config
+        - name: CLUSTER_NAME
+          valueFrom:
+            configMapKeyRef:
+              key: clustername
+              name: k10-config
+        - name: MODEL_STORE_DIR
+          valueFrom:
+            configMapKeyRef:
+              key: modelstoredirname
+              name: k10-config
+        - name: AWS_FIREHOSE_DELIVERY_STREAM_NAME
+          valueFrom:
+            configMapKeyRef:
+              key: firehosedeliverystreamname
+              name: k10-config
+        - name: LOG_LEVEL
+          valueFrom:
+            configMapKeyRef:
+              key: loglevel
+              name: k10-config
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        image: gcr.io/kasten-images/catalog:1.1.13
+        imagePullPolicy: Always
+        livenessProbe:
+          httpGet:
+            path: /v0/healthz
+            port: 8000
+          initialDelaySeconds: 90
+          timeoutSeconds: 1
+        name: catalog-svc
+        ports:
+        - containerPort: 8000
+        volumeMounts:
+        - mountPath: /mnt/k10state
+          name: catalog-persistent-storage
+      - args:
+        - tail
+        - -f
+        - /dev/null
+        image: gcr.io/kasten-images/service-proxy:hash-bc17b40
+        imagePullPolicy: Always
+        name: proxy
+      serviceAccountName: kasten-k10-1-serviceaccount-cab5
+      volumes:
+      - name: catalog-persistent-storage
+        persistentVolumeClaim:
+          claimName: catalog-pv-claim
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: k10
+    app.kubernetes.io/name: kasten-k10-1
+    chart: k10-1.1.13
+    component: compliance
+    heritage: Tiller
+    release: kasten-k10-1
+  name: compliance-svc
+  namespace: apptest-8f0887bb
+  ownerReferences:
+  - apiVersion: app.k8s.io/v1alpha1
+    blockOwnerDeletion: true
+    kind: Application
+    name: kasten-k10-1
+    uid: 19c01fe7-7e35-11e8-a573-42010a8a01a6
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: k10
+        chart: k10-1.1.13
+        component: compliance
+        heritage: Tiller
+        release: kasten-k10-1
+        run: compliance-svc
+    spec:
+      containers:
+      - env:
+        - name: VERSION
+          valueFrom:
+            configMapKeyRef:
+              key: version
+              name: k10-config
+        - name: CLUSTER_NAME
+          valueFrom:
+            configMapKeyRef:
+              key: clustername
+              name: k10-config
+        - name: MODEL_STORE_DIR
+          valueFrom:
+            configMapKeyRef:
+              key: modelstoredirname
+              name: k10-config
+        - name: AWS_FIREHOSE_DELIVERY_STREAM_NAME
+          valueFrom:
+            configMapKeyRef:
+              key: firehosedeliverystreamname
+              name: k10-config
+        - name: LOG_LEVEL
+          valueFrom:
+            configMapKeyRef:
+              key: loglevel
+              name: k10-config
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        image: gcr.io/kasten-images/compliance:1.1.13
+        imagePullPolicy: Always
+        livenessProbe:
+          httpGet:
+            path: /v0/healthz
+            port: 8000
+          initialDelaySeconds: 90
+          timeoutSeconds: 1
+        name: compliance-svc
+        ports:
+        - containerPort: 8000
+      - args:
+        - tail
+        - -f
+        - /dev/null
+        image: gcr.io/kasten-images/service-proxy:hash-bc17b40
+        imagePullPolicy: Always
+        name: proxy
+      serviceAccountName: kasten-k10-1-serviceaccount-cab5
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    app: k10
+    app.kubernetes.io/name: kasten-k10-1
+    chart: k10-1.1.13
+    component: credentials
+    heritage: Tiller
+    release: kasten-k10-1
+  name: credentials-pv-claim
+  namespace: apptest-8f0887bb
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: k10
+    app.kubernetes.io/name: kasten-k10-1
+    chart: k10-1.1.13
+    component: credentials
+    heritage: Tiller
+    release: kasten-k10-1
+  name: credentials-svc
+  namespace: apptest-8f0887bb
+  ownerReferences:
+  - apiVersion: app.k8s.io/v1alpha1
+    blockOwnerDeletion: true
+    kind: Application
+    name: kasten-k10-1
+    uid: 19c01fe7-7e35-11e8-a573-42010a8a01a6
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: k10
+        chart: k10-1.1.13
+        component: credentials
+        heritage: Tiller
+        release: kasten-k10-1
+        run: credentials-svc
+    spec:
+      containers:
+      - env:
+        - name: VERSION
+          valueFrom:
+            configMapKeyRef:
+              key: version
+              name: k10-config
+        - name: CLUSTER_NAME
+          valueFrom:
+            configMapKeyRef:
+              key: clustername
+              name: k10-config
+        - name: MODEL_STORE_DIR
+          valueFrom:
+            configMapKeyRef:
+              key: modelstoredirname
+              name: k10-config
+        - name: AWS_FIREHOSE_DELIVERY_STREAM_NAME
+          valueFrom:
+            configMapKeyRef:
+              key: firehosedeliverystreamname
+              name: k10-config
+        - name: LOG_LEVEL
+          valueFrom:
+            configMapKeyRef:
+              key: loglevel
+              name: k10-config
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        image: gcr.io/kasten-images/credentials:1.1.13
+        imagePullPolicy: Always
+        livenessProbe:
+          httpGet:
+            path: /v0/healthz
+            port: 8000
+          initialDelaySeconds: 90
+          timeoutSeconds: 1
+        name: credentials-svc
+        ports:
+        - containerPort: 8000
+        volumeMounts:
+        - mountPath: /mnt/k10state
+          name: credentials-persistent-storage
+      - args:
+        - tail
+        - -f
+        - /dev/null
+        image: gcr.io/kasten-images/service-proxy:hash-bc17b40
+        imagePullPolicy: Always
+        name: proxy
+      serviceAccountName: kasten-k10-1-serviceaccount-cab5
+      volumes:
+      - name: credentials-persistent-storage
+        persistentVolumeClaim:
+          claimName: credentials-pv-claim
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: k10
+    app.kubernetes.io/name: kasten-k10-1
+    chart: k10-1.1.13
+    component: executor
+    heritage: Tiller
+    release: kasten-k10-1
+  name: executor-svc
+  namespace: apptest-8f0887bb
+  ownerReferences:
+  - apiVersion: app.k8s.io/v1alpha1
+    blockOwnerDeletion: true
+    kind: Application
+    name: kasten-k10-1
+    uid: 19c01fe7-7e35-11e8-a573-42010a8a01a6
+spec:
+  replicas: 3
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: k10
+        chart: k10-1.1.13
+        component: executor
+        heritage: Tiller
+        release: kasten-k10-1
+        run: executor-svc
+    spec:
+      containers:
+      - env:
+        - name: VERSION
+          valueFrom:
+            configMapKeyRef:
+              key: version
+              name: k10-config
+        - name: CLUSTER_NAME
+          valueFrom:
+            configMapKeyRef:
+              key: clustername
+              name: k10-config
+        - name: MODEL_STORE_DIR
+          valueFrom:
+            configMapKeyRef:
+              key: modelstoredirname
+              name: k10-config
+        - name: AWS_FIREHOSE_DELIVERY_STREAM_NAME
+          valueFrom:
+            configMapKeyRef:
+              key: firehosedeliverystreamname
+              name: k10-config
+        - name: LOG_LEVEL
+          valueFrom:
+            configMapKeyRef:
+              key: loglevel
+              name: k10-config
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        image: gcr.io/kasten-images/executor:1.1.13
+        imagePullPolicy: Always
+        livenessProbe:
+          httpGet:
+            path: /v0/healthz
+            port: 8000
+          initialDelaySeconds: 90
+          timeoutSeconds: 1
+        name: executor-svc
+        ports:
+        - containerPort: 8000
+      - args:
+        - tail
+        - -f
+        - /dev/null
+        image: gcr.io/kasten-images/service-proxy:hash-bc17b40
+        imagePullPolicy: Always
+        name: proxy
+      serviceAccountName: kasten-k10-1-serviceaccount-cab5
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    app: k10
+    app.kubernetes.io/name: kasten-k10-1
+    chart: k10-1.1.13
+    component: jobs
+    heritage: Tiller
+    release: kasten-k10-1
+  name: jobs-pv-claim
+  namespace: apptest-8f0887bb
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: k10
+    app.kubernetes.io/name: kasten-k10-1
+    chart: k10-1.1.13
+    component: jobs
+    heritage: Tiller
+    release: kasten-k10-1
+  name: jobs-svc
+  namespace: apptest-8f0887bb
+  ownerReferences:
+  - apiVersion: app.k8s.io/v1alpha1
+    blockOwnerDeletion: true
+    kind: Application
+    name: kasten-k10-1
+    uid: 19c01fe7-7e35-11e8-a573-42010a8a01a6
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: k10
+        chart: k10-1.1.13
+        component: jobs
+        heritage: Tiller
+        release: kasten-k10-1
+        run: jobs-svc
+    spec:
+      containers:
+      - env:
+        - name: VERSION
+          valueFrom:
+            configMapKeyRef:
+              key: version
+              name: k10-config
+        - name: CLUSTER_NAME
+          valueFrom:
+            configMapKeyRef:
+              key: clustername
+              name: k10-config
+        - name: MODEL_STORE_DIR
+          valueFrom:
+            configMapKeyRef:
+              key: modelstoredirname
+              name: k10-config
+        - name: AWS_FIREHOSE_DELIVERY_STREAM_NAME
+          valueFrom:
+            configMapKeyRef:
+              key: firehosedeliverystreamname
+              name: k10-config
+        - name: LOG_LEVEL
+          valueFrom:
+            configMapKeyRef:
+              key: loglevel
+              name: k10-config
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        image: gcr.io/kasten-images/jobs:1.1.13
+        imagePullPolicy: Always
+        livenessProbe:
+          httpGet:
+            path: /v0/healthz
+            port: 8000
+          initialDelaySeconds: 90
+          timeoutSeconds: 1
+        name: jobs-svc
+        ports:
+        - containerPort: 8000
+        volumeMounts:
+        - mountPath: /mnt/k10state
+          name: jobs-persistent-storage
+      - args:
+        - tail
+        - -f
+        - /dev/null
+        image: gcr.io/kasten-images/service-proxy:hash-bc17b40
+        imagePullPolicy: Always
+        name: proxy
+      serviceAccountName: kasten-k10-1-serviceaccount-cab5
+      volumes:
+      - name: jobs-persistent-storage
+        persistentVolumeClaim:
+          claimName: jobs-pv-claim
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    app: k10
+    app.kubernetes.io/name: kasten-k10-1
+    chart: k10-1.1.13
+    component: jobsqueue
+    heritage: Tiller
+    release: kasten-k10-1
+  name: jobsqueue-pv-claim
+  namespace: apptest-8f0887bb
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: k10
+    app.kubernetes.io/name: kasten-k10-1
+    chart: k10-1.1.13
+    component: jobsqueue
+    heritage: Tiller
+    release: kasten-k10-1
+  name: jobsqueue-svc
+  namespace: apptest-8f0887bb
+  ownerReferences:
+  - apiVersion: app.k8s.io/v1alpha1
+    blockOwnerDeletion: true
+    kind: Application
+    name: kasten-k10-1
+    uid: 19c01fe7-7e35-11e8-a573-42010a8a01a6
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: k10
+        chart: k10-1.1.13
+        component: jobsqueue
+        heritage: Tiller
+        release: kasten-k10-1
+        run: jobsqueue-svc
+    spec:
+      containers:
+      - env:
+        - name: VERSION
+          valueFrom:
+            configMapKeyRef:
+              key: version
+              name: k10-config
+        - name: CLUSTER_NAME
+          valueFrom:
+            configMapKeyRef:
+              key: clustername
+              name: k10-config
+        - name: MODEL_STORE_DIR
+          valueFrom:
+            configMapKeyRef:
+              key: modelstoredirname
+              name: k10-config
+        - name: AWS_FIREHOSE_DELIVERY_STREAM_NAME
+          valueFrom:
+            configMapKeyRef:
+              key: firehosedeliverystreamname
+              name: k10-config
+        - name: LOG_LEVEL
+          valueFrom:
+            configMapKeyRef:
+              key: loglevel
+              name: k10-config
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        image: gcr.io/kasten-images/jobsqueue:1.1.13
+        imagePullPolicy: Always
+        livenessProbe:
+          httpGet:
+            path: /v0/healthz
+            port: 8000
+          initialDelaySeconds: 90
+          timeoutSeconds: 1
+        name: jobsqueue-svc
+        ports:
+        - containerPort: 8000
+        volumeMounts:
+        - mountPath: /mnt/k10state
+          name: jobsqueue-persistent-storage
+      - args:
+        - tail
+        - -f
+        - /dev/null
+        image: gcr.io/kasten-images/service-proxy:hash-bc17b40
+        imagePullPolicy: Always
+        name: proxy
+      serviceAccountName: kasten-k10-1-serviceaccount-cab5
+      volumes:
+      - name: jobsqueue-persistent-storage
+        persistentVolumeClaim:
+          claimName: jobsqueue-pv-claim
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    app: k10
+    app.kubernetes.io/name: kasten-k10-1
+    chart: k10-1.1.13
+    component: policies
+    heritage: Tiller
+    release: kasten-k10-1
+  name: policies-pv-claim
+  namespace: apptest-8f0887bb
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: k10
+    app.kubernetes.io/name: kasten-k10-1
+    chart: k10-1.1.13
+    component: policies
+    heritage: Tiller
+    release: kasten-k10-1
+  name: policies-svc
+  namespace: apptest-8f0887bb
+  ownerReferences:
+  - apiVersion: app.k8s.io/v1alpha1
+    blockOwnerDeletion: true
+    kind: Application
+    name: kasten-k10-1
+    uid: 19c01fe7-7e35-11e8-a573-42010a8a01a6
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: k10
+        chart: k10-1.1.13
+        component: policies
+        heritage: Tiller
+        release: kasten-k10-1
+        run: policies-svc
+    spec:
+      containers:
+      - env:
+        - name: VERSION
+          valueFrom:
+            configMapKeyRef:
+              key: version
+              name: k10-config
+        - name: CLUSTER_NAME
+          valueFrom:
+            configMapKeyRef:
+              key: clustername
+              name: k10-config
+        - name: MODEL_STORE_DIR
+          valueFrom:
+            configMapKeyRef:
+              key: modelstoredirname
+              name: k10-config
+        - name: AWS_FIREHOSE_DELIVERY_STREAM_NAME
+          valueFrom:
+            configMapKeyRef:
+              key: firehosedeliverystreamname
+              name: k10-config
+        - name: LOG_LEVEL
+          valueFrom:
+            configMapKeyRef:
+              key: loglevel
+              name: k10-config
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        image: gcr.io/kasten-images/policies:1.1.13
+        imagePullPolicy: Always
+        livenessProbe:
+          httpGet:
+            path: /v0/healthz
+            port: 8000
+          initialDelaySeconds: 90
+          timeoutSeconds: 1
+        name: policies-svc
+        ports:
+        - containerPort: 8000
+        volumeMounts:
+        - mountPath: /mnt/k10state
+          name: policies-persistent-storage
+      - args:
+        - tail
+        - -f
+        - /dev/null
+        image: gcr.io/kasten-images/service-proxy:hash-bc17b40
+        imagePullPolicy: Always
+        name: proxy
+      serviceAccountName: kasten-k10-1-serviceaccount-cab5
+      volumes:
+      - name: policies-persistent-storage
+        persistentVolumeClaim:
+          claimName: policies-pv-claim
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    app: k10
+    app.kubernetes.io/name: kasten-k10-1
+    chart: k10-1.1.13
+    component: profiles
+    heritage: Tiller
+    release: kasten-k10-1
+  name: profiles-pv-claim
+  namespace: apptest-8f0887bb
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: k10
+    app.kubernetes.io/name: kasten-k10-1
+    chart: k10-1.1.13
+    component: profiles
+    heritage: Tiller
+    release: kasten-k10-1
+  name: profiles-svc
+  namespace: apptest-8f0887bb
+  ownerReferences:
+  - apiVersion: app.k8s.io/v1alpha1
+    blockOwnerDeletion: true
+    kind: Application
+    name: kasten-k10-1
+    uid: 19c01fe7-7e35-11e8-a573-42010a8a01a6
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: k10
+        chart: k10-1.1.13
+        component: profiles
+        heritage: Tiller
+        release: kasten-k10-1
+        run: profiles-svc
+    spec:
+      containers:
+      - env:
+        - name: VERSION
+          valueFrom:
+            configMapKeyRef:
+              key: version
+              name: k10-config
+        - name: CLUSTER_NAME
+          valueFrom:
+            configMapKeyRef:
+              key: clustername
+              name: k10-config
+        - name: MODEL_STORE_DIR
+          valueFrom:
+            configMapKeyRef:
+              key: modelstoredirname
+              name: k10-config
+        - name: AWS_FIREHOSE_DELIVERY_STREAM_NAME
+          valueFrom:
+            configMapKeyRef:
+              key: firehosedeliverystreamname
+              name: k10-config
+        - name: LOG_LEVEL
+          valueFrom:
+            configMapKeyRef:
+              key: loglevel
+              name: k10-config
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        image: gcr.io/kasten-images/profiles:1.1.13
+        imagePullPolicy: Always
+        livenessProbe:
+          httpGet:
+            path: /v0/healthz
+            port: 8000
+          initialDelaySeconds: 90
+          timeoutSeconds: 1
+        name: profiles-svc
+        ports:
+        - containerPort: 8000
+        volumeMounts:
+        - mountPath: /mnt/k10state
+          name: profiles-persistent-storage
+      - args:
+        - tail
+        - -f
+        - /dev/null
+        image: gcr.io/kasten-images/service-proxy:hash-bc17b40
+        imagePullPolicy: Always
+        name: proxy
+      serviceAccountName: kasten-k10-1-serviceaccount-cab5
+      volumes:
+      - name: profiles-persistent-storage
+        persistentVolumeClaim:
+          claimName: profiles-pv-claim
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: k10
+    app.kubernetes.io/name: kasten-k10-1
+    chart: k10-1.1.13
+    component: scheduler
+    heritage: Tiller
+    release: kasten-k10-1
+  name: scheduler-svc
+  namespace: apptest-8f0887bb
+  ownerReferences:
+  - apiVersion: app.k8s.io/v1alpha1
+    blockOwnerDeletion: true
+    kind: Application
+    name: kasten-k10-1
+    uid: 19c01fe7-7e35-11e8-a573-42010a8a01a6
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: k10
+        chart: k10-1.1.13
+        component: scheduler
+        heritage: Tiller
+        release: kasten-k10-1
+        run: scheduler-svc
+    spec:
+      containers:
+      - env:
+        - name: VERSION
+          valueFrom:
+            configMapKeyRef:
+              key: version
+              name: k10-config
+        - name: CLUSTER_NAME
+          valueFrom:
+            configMapKeyRef:
+              key: clustername
+              name: k10-config
+        - name: MODEL_STORE_DIR
+          valueFrom:
+            configMapKeyRef:
+              key: modelstoredirname
+              name: k10-config
+        - name: AWS_FIREHOSE_DELIVERY_STREAM_NAME
+          valueFrom:
+            configMapKeyRef:
+              key: firehosedeliverystreamname
+              name: k10-config
+        - name: LOG_LEVEL
+          valueFrom:
+            configMapKeyRef:
+              key: loglevel
+              name: k10-config
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        image: gcr.io/kasten-images/scheduler:1.1.13
+        imagePullPolicy: Always
+        livenessProbe:
+          httpGet:
+            path: /v0/healthz
+            port: 8000
+          initialDelaySeconds: 90
+          timeoutSeconds: 1
+        name: scheduler-svc
+        ports:
+        - containerPort: 8000
+      - args:
+        - tail
+        - -f
+        - /dev/null
+        image: gcr.io/kasten-images/service-proxy:hash-bc17b40
+        imagePullPolicy: Always
+        name: proxy
+      serviceAccountName: kasten-k10-1-serviceaccount-cab5
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    app: k10
+    app.kubernetes.io/name: kasten-k10-1
+    chart: k10-1.1.13
+    component: schedules
+    heritage: Tiller
+    release: kasten-k10-1
+  name: schedules-pv-claim
+  namespace: apptest-8f0887bb
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: k10
+    app.kubernetes.io/name: kasten-k10-1
+    chart: k10-1.1.13
+    component: schedules
+    heritage: Tiller
+    release: kasten-k10-1
+  name: schedules-svc
+  namespace: apptest-8f0887bb
+  ownerReferences:
+  - apiVersion: app.k8s.io/v1alpha1
+    blockOwnerDeletion: true
+    kind: Application
+    name: kasten-k10-1
+    uid: 19c01fe7-7e35-11e8-a573-42010a8a01a6
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: k10
+        chart: k10-1.1.13
+        component: schedules
+        heritage: Tiller
+        release: kasten-k10-1
+        run: schedules-svc
+    spec:
+      containers:
+      - env:
+        - name: VERSION
+          valueFrom:
+            configMapKeyRef:
+              key: version
+              name: k10-config
+        - name: CLUSTER_NAME
+          valueFrom:
+            configMapKeyRef:
+              key: clustername
+              name: k10-config
+        - name: MODEL_STORE_DIR
+          valueFrom:
+            configMapKeyRef:
+              key: modelstoredirname
+              name: k10-config
+        - name: AWS_FIREHOSE_DELIVERY_STREAM_NAME
+          valueFrom:
+            configMapKeyRef:
+              key: firehosedeliverystreamname
+              name: k10-config
+        - name: LOG_LEVEL
+          valueFrom:
+            configMapKeyRef:
+              key: loglevel
+              name: k10-config
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        image: gcr.io/kasten-images/schedules:1.1.13
+        imagePullPolicy: Always
+        livenessProbe:
+          httpGet:
+            path: /v0/healthz
+            port: 8000
+          initialDelaySeconds: 90
+          timeoutSeconds: 1
+        name: schedules-svc
+        ports:
+        - containerPort: 8000
+        volumeMounts:
+        - mountPath: /mnt/k10state
+          name: schedules-persistent-storage
+      - args:
+        - tail
+        - -f
+        - /dev/null
+        image: gcr.io/kasten-images/service-proxy:hash-bc17b40
+        imagePullPolicy: Always
+        name: proxy
+      serviceAccountName: kasten-k10-1-serviceaccount-cab5
+      volumes:
+      - name: schedules-persistent-storage
+        persistentVolumeClaim:
+          claimName: schedules-pv-claim
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    app: k10
+    app.kubernetes.io/name: kasten-k10-1
+    chart: k10-1.1.13
+    component: state
+    heritage: Tiller
+    release: kasten-k10-1
+  name: state-pv-claim
+  namespace: apptest-8f0887bb
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: k10
+    app.kubernetes.io/name: kasten-k10-1
+    chart: k10-1.1.13
+    component: state
+    heritage: Tiller
+    release: kasten-k10-1
+  name: state-svc
+  namespace: apptest-8f0887bb
+  ownerReferences:
+  - apiVersion: app.k8s.io/v1alpha1
+    blockOwnerDeletion: true
+    kind: Application
+    name: kasten-k10-1
+    uid: 19c01fe7-7e35-11e8-a573-42010a8a01a6
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: k10
+        chart: k10-1.1.13
+        component: state
+        heritage: Tiller
+        release: kasten-k10-1
+        run: state-svc
+    spec:
+      containers:
+      - env:
+        - name: VERSION
+          valueFrom:
+            configMapKeyRef:
+              key: version
+              name: k10-config
+        - name: CLUSTER_NAME
+          valueFrom:
+            configMapKeyRef:
+              key: clustername
+              name: k10-config
+        - name: MODEL_STORE_DIR
+          valueFrom:
+            configMapKeyRef:
+              key: modelstoredirname
+              name: k10-config
+        - name: AWS_FIREHOSE_DELIVERY_STREAM_NAME
+          valueFrom:
+            configMapKeyRef:
+              key: firehosedeliverystreamname
+              name: k10-config
+        - name: LOG_LEVEL
+          valueFrom:
+            configMapKeyRef:
+              key: loglevel
+              name: k10-config
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        image: gcr.io/kasten-images/state:1.1.13
+        imagePullPolicy: Always
+        livenessProbe:
+          httpGet:
+            path: /v0/healthz
+            port: 8000
+          initialDelaySeconds: 90
+          timeoutSeconds: 1
+        name: state-svc
+        ports:
+        - containerPort: 8000
+        volumeMounts:
+        - mountPath: /mnt/k10state
+          name: state-persistent-storage
+      - args:
+        - tail
+        - -f
+        - /dev/null
+        image: gcr.io/kasten-images/service-proxy:hash-bc17b40
+        imagePullPolicy: Always
+        name: proxy
+      serviceAccountName: kasten-k10-1-serviceaccount-cab5
+      volumes:
+      - name: state-persistent-storage
+        persistentVolumeClaim:
+          claimName: state-pv-claim
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: k10
+    app.kubernetes.io/name: kasten-k10-1
+    chart: k10-1.1.13
+    component: dashboardbff
+    heritage: Tiller
+    release: kasten-k10-1
+  name: dashboardbff-svc
+  namespace: apptest-8f0887bb
+  ownerReferences:
+  - apiVersion: app.k8s.io/v1alpha1
+    blockOwnerDeletion: true
+    kind: Application
+    name: kasten-k10-1
+    uid: 19c01fe7-7e35-11e8-a573-42010a8a01a6
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: k10
+        chart: k10-1.1.13
+        component: dashboardbff
+        heritage: Tiller
+        release: kasten-k10-1
+        run: dashboardbff-svc
+    spec:
+      containers:
+      - env:
+        - name: VERSION
+          valueFrom:
+            configMapKeyRef:
+              key: version
+              name: k10-config
+        - name: CLUSTER_NAME
+          valueFrom:
+            configMapKeyRef:
+              key: clustername
+              name: k10-config
+        - name: MODEL_STORE_DIR
+          valueFrom:
+            configMapKeyRef:
+              key: modelstoredirname
+              name: k10-config
+        - name: AWS_FIREHOSE_DELIVERY_STREAM_NAME
+          valueFrom:
+            configMapKeyRef:
+              key: firehosedeliverystreamname
+              name: k10-config
+        - name: LOG_LEVEL
+          valueFrom:
+            configMapKeyRef:
+              key: loglevel
+              name: k10-config
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        image: gcr.io/kasten-images/dashboardbff:1.1.13
+        imagePullPolicy: Always
+        livenessProbe:
+          httpGet:
+            path: /v0/healthz
+            port: 8000
+          initialDelaySeconds: 90
+          timeoutSeconds: 1
+        name: dashboardbff-svc
+        ports:
+        - containerPort: 8000
+      - args:
+        - tail
+        - -f
+        - /dev/null
+        image: gcr.io/kasten-images/service-proxy:hash-bc17b40
+        imagePullPolicy: Always
+        name: proxy
+      serviceAccountName: kasten-k10-1-serviceaccount-cab5
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: k10
+    app.kubernetes.io/name: kasten-k10-1
+    chart: k10-1.1.13
+    component: frontend
+    heritage: Tiller
+    release: kasten-k10-1
+  name: frontend-svc
+  namespace: apptest-8f0887bb
+  ownerReferences:
+  - apiVersion: app.k8s.io/v1alpha1
+    blockOwnerDeletion: true
+    kind: Application
+    name: kasten-k10-1
+    uid: 19c01fe7-7e35-11e8-a573-42010a8a01a6
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: k10
+        chart: k10-1.1.13
+        component: frontend
+        heritage: Tiller
+        release: kasten-k10-1
+        run: frontend-svc
+    spec:
+      containers:
+      - env:
+        - name: VERSION
+          valueFrom:
+            configMapKeyRef:
+              key: version
+              name: k10-config
+        - name: CLUSTER_NAME
+          valueFrom:
+            configMapKeyRef:
+              key: clustername
+              name: k10-config
+        - name: MODEL_STORE_DIR
+          valueFrom:
+            configMapKeyRef:
+              key: modelstoredirname
+              name: k10-config
+        - name: AWS_FIREHOSE_DELIVERY_STREAM_NAME
+          valueFrom:
+            configMapKeyRef:
+              key: firehosedeliverystreamname
+              name: k10-config
+        - name: LOG_LEVEL
+          valueFrom:
+            configMapKeyRef:
+              key: loglevel
+              name: k10-config
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        image: gcr.io/kasten-images/frontend:1.1.13
+        imagePullPolicy: Always
+        livenessProbe:
+          httpGet:
+            path: /v0/healthz
+            port: 8000
+          initialDelaySeconds: 90
+          timeoutSeconds: 1
+        name: frontend-svc
+        ports:
+        - containerPort: 8000
+      - args:
+        - tail
+        - -f
+        - /dev/null
+        image: gcr.io/kasten-images/service-proxy:hash-bc17b40
+        imagePullPolicy: Always
+        name: proxy
+      serviceAccountName: kasten-k10-1-serviceaccount-cab5
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: k10
+    app.kubernetes.io/name: kasten-k10-1
+    chart: k10-1.1.13
+    component: kanister
+    heritage: Tiller
+    release: kasten-k10-1
+  name: kanister-svc
+  namespace: apptest-8f0887bb
+  ownerReferences:
+  - apiVersion: app.k8s.io/v1alpha1
+    blockOwnerDeletion: true
+    kind: Application
+    name: kasten-k10-1
+    uid: 19c01fe7-7e35-11e8-a573-42010a8a01a6
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: k10
+        chart: k10-1.1.13
+        component: kanister
+        heritage: Tiller
+        release: kasten-k10-1
+        run: kanister-svc
+    spec:
+      containers:
+      - env:
+        - name: VERSION
+          valueFrom:
+            configMapKeyRef:
+              key: version
+              name: k10-config
+        - name: CLUSTER_NAME
+          valueFrom:
+            configMapKeyRef:
+              key: clustername
+              name: k10-config
+        - name: MODEL_STORE_DIR
+          valueFrom:
+            configMapKeyRef:
+              key: modelstoredirname
+              name: k10-config
+        - name: AWS_FIREHOSE_DELIVERY_STREAM_NAME
+          valueFrom:
+            configMapKeyRef:
+              key: firehosedeliverystreamname
+              name: k10-config
+        - name: LOG_LEVEL
+          valueFrom:
+            configMapKeyRef:
+              key: loglevel
+              name: k10-config
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        image: gcr.io/kasten-images/kanister:1.1.13
+        imagePullPolicy: Always
+        livenessProbe:
+          httpGet:
+            path: /v0/healthz
+            port: 8000
+          initialDelaySeconds: 90
+          timeoutSeconds: 1
+        name: kanister-svc
+        ports:
+        - containerPort: 8000
+      - args:
+        - tail
+        - -f
+        - /dev/null
+        image: gcr.io/kasten-images/service-proxy:hash-bc17b40
+        imagePullPolicy: Always
+        name: proxy
+      serviceAccountName: kasten-k10-1-serviceaccount-cab5
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: internal-k10-nginx-ingress
+    nginx.ingress.kubernetes.io/ssl-redirect: 'false'
+  labels:
+    app: k10
+    app.kubernetes.io/name: kasten-k10-1
+    chart: k10-1.1.13
+    heritage: Tiller
+    release: kasten-k10-1
+  name: kasten-k10-1-ingress
+  namespace: apptest-8f0887bb
+  ownerReferences:
+  - apiVersion: app.k8s.io/v1alpha1
+    blockOwnerDeletion: true
+    kind: Application
+    name: kasten-k10-1
+    uid: 19c01fe7-7e35-11e8-a573-42010a8a01a6
+spec:
+  rules:
+  - http:
+      paths:
+      - backend:
+          serviceName: ambassador
+          servicePort: http
+        path: /kasten-k10-1/
+---
+apiVersion: app.k8s.io/v1alpha1
+kind: Application
+metadata:
+  annotations:
+    kubernetes-engine.cloud.google.com/icon: data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAZgAAAGfCAMAAABV4DTfAAAAk1BMVEUAAABAcK9Ar79QcJ9AcKdAp8dQcKdAqsVFaqpKcKVAp8dEbKdMdKNAqcZDbKlNc6ZAp8dCbapNcqVAqMZCa6hNcqRAp8VEbKlOcqVAqMZDbKhMcaVAp8ZDbKlNc6ZAqMZDbapNcqVAp8ZCbKlNcqVAqMVDbKlNcqZAqMZDbKhNcqVAqMZDbKlNcqVAqMZDbKlNcqWT+MaEAAAALnRSTlMAEBAQICAgMDAwQEBAUFBQYGBgcHBwgICAkJCQoKCgsLCwwMDA0NDQ4ODg8PDwnsvd5AAAFIhJREFUeNrsnW1r6loQhbfBoCiKokQsikWxRCI7///fXbXc2nOaY5u6ZmbN1vXhvH1ICg9HH2fNjuGZZ5555plnhNNf/CLzTnhGNN1d/ascF+EZwXSO9W/zEoSTT1bbKpJlvykGQSG7+vcZBsHkyzLSZjMJwunWd+Q1iGWwjdypiixIZl7fkyCWItJHFs2CFExG/Dr2kVLwzYYQzPA4Pv06iR6yDFLhA3N6cT2cf99HD9lLvZzRgVmfr7s4v/1HFyl7QSRsYNbvH147pz9uootUMmTIwKw/fXbNo4+UIq9mXGCu8t49/W0ZfUTkfYYKzPB65d1ZmenGMYpuxgSmc/hr3DOLTjIK8DCBefl86bfzv3j4lCn0NkMEpv/ntad+lDnGIqBDBOY6574qM/so8yN5AIcHzPjzhf//lNmLTrIJ4NCAub7z/6HMq+gk6HkmDZiGH2TtSZnLgA0LmO6xqSH1Ucy8ZxagYQGzbrr8zksxc06FVWYSMMPm60/dFDPwz/8kYP6xEnIID6vMHGCmTRd3VszEuA3AUIBp3G1zV8xgR2YUYG78EGtHxQxUmRnA3Nxt63pSZuDIjAHM69cLOy1mgMpMAGb4zR6uJ2VeBVQIwLzdvsfBUzGDG5nZg/l2SXf+kMpsDqZJlT0XM6hjAOZgXr6/y8KVMoPe/63BNKmy72IGpMzWYHY/OofjSpkxIzNjMOOGi3ovZjAtszGYw8/us3s8ZbYFc+PuX4uZUXSSfQDEFMzPT0wfHk6ZTcE09MlJFDOIkZklmH6bxz08mjJbgvlOlb8WM16UGdAyG4KZtrtX35My3z8yswPTaVDlZIqZ+5XZDkzrO/s5ZI5omc3AdFs+XMjVIXPAYqYZmAZVTqqYqTKfYJr65LSKmaVPMG+t7uPwkHmMPY9g2qmyy0PmcesQzHVIlrIyj/yBaXdXr4fMS3dg2j1W0O0h81h4A9OweplkMVPlvsB8qHLyyrzyBabVkMz1IfM48ASmYfUy2WJm6whMkyqnW8xM/IC5sXqZ4C5TmXkB0291A/eHzGPhBcyuvjuuipmY+wAzru/PpZiZFdIBncnd+ABzqAFR+oIU0MvlwAOYRY3IUedLhUAThr0DMCdVhqQbVAKaMEz4waxrSJReylAThipjBzOsIVF6JcNNGJbsYACq/D5h1gqqlMu5wUxrSHZBL6BSbksNpgNRZeFvRqNRZkUwGFU+DTE1A9pjK4nBdDGqfFRSZbAyz3jBvNaQaKnyJbg9tipjBQNS5YOaKl+C22NbsYJ5qyEZB+2glLnHCcahKl+Caxi2lGBQQ7J+MAjo6MeIEYxLVUYrc8YHpltDojck+xTcY2wLPjCgIZm2Kl+CW8qpcjYwKFUOVgEt5azYwHgckol8JfeAC8y8hsRCle2UWQEMSpWVh2QiI7MJExhQn/wSLANS5irjAXP/6qWpKoNb5oIHDEiV9fpk2ZFZzgIGsXp5OeNnHZAyb1jAuFdlo5ZZGgxoSPYa7KO7mCkMBtQn26oyWJlnDGBAqmw1JDNczJQFgxqSGasyuGVe2oNJRJUtlFkUjOM+2XwxUxKMy9VLFmWWBANSZZs+WXRkVpqCQfXJFKoMVubCEozT1UuSxUw5MChVDlwBjcxWdmDcrl7qKHPPCkwCfbJpyywFBtUnm6xeqixmTmzA3P0oHz5VRitzZgEGpcokQzKDllkIDGhINg+MUVnMlAGTqCprKrMMmPSGZOqLmSJgQEMyPlUGK/NeGQxKlamGZCIjs4kumKT6ZKuWWQBMIquXxsosAAakyix9suzILNcDk8zqpYoyb9TAJNgnm7TMcDAgVWZYvVRZzCyVwIBWL7n6ZFFlnumAeQBV1mmZwWBQQzJqVVZZzASDeQhVVlFmLJjkVi/tFjOhYFBDMnpVBivzSBoMSJUZ+2TZllkYTNJ9svbjf5Bgkly9tFJmIBiUKgdPAY3MVpJgQEMyttVLHWUeyIFJdvVSpWXeioFBqTLh6qXKyGwiBQa0emn7KB9LZc5kwDygKsu2zCgwoCEZ5+qlxWImCAyoT/alymBl3kiAAamymyGZ/GImBgxoqszfJ4u2zFs8GNB/GAd9sqgyD9BgQP9hPA3JRBYzN2gwmHOwHlUZrMw5FgzoM4yPPll0ZDbDgsFMydhXLzWUeY8Fg/lw6VOVwS1zBgVTI+KnT5YcmQ2QYCDHLjysXiooc4EEAxnH+FXl/9g7A9VEliCK1gyKIZKHIYviYkhQDMrI7P//3QuEJYSXxy7Mqeq63VMfYIIHZ05X3e5Gp8wHEgyRjdGIXvoHM4/ZwCir8u/qt9NrkwyM2jw5oAAwgC3LzZP9CwAD7LzQf/XjBYABHmXKbbLP2h8nVzorU19eUktM1MqQVpl4Q4ZqyqBgkGisvpchm2XQlX/3iyj1lQzT+EfXMcxgWX3tT6z7x3GFggF8WV6ZkU7ZOKC6zHQxxfvLSG95PLBgjMmTq4aXwADTAwyGeZYpKzOhyuN4YVf+WBpDd+rPTPzHLQ2G+smoKjOjyuPQ42Cgn4xqywxKlW3hJib4k9HbtgTmMIfeAQy10U9SmRlVHjd02x/4HOmWGbQ99ozPY8C+jKIyu+yOAcEgPWbFPWWQKh/4CWbbuzB9dmCSYBpVZq9jfjgw1E5/rSkzMU9+r0vvCIZSZqksE3Rh2YNHSqbVgxdBVT66xJeqv/rSvUk2rpzBNKfMTqqMg2ntjD9mnjwOvTsYSplFWmZQk2zrFJHlPk5MmSlV9souN3lJCTdPHu8jwLSkzEj0chyPbmn/Rk/3p1R5GQSGUub0LTMmejnu/fbHtHmDjMs82RUMdOdS9ikzpMpPjjvK2I8UCWZC0cuz51a/1q7A9ldlLzBMyDx1MBNqkr24bo51U+a8U2ZnVXYDgxz7k3nK7BG9jABDKXPWYCbUJBv6cDDUlDmpMkOqvHE+gOF3NXNnid882R9MzcrsFL0MAkO1zCxfQap8cD9LxlWZ87XMqHnyshAYasqcTpm9opdRYKiWWbYpM6TKl4BjsZyVOVkw0y16GQamzilziCo7g6kxmEk1yVZFwVDKnOj9D82TDyFHL35W9cFMSpX7wmCgKXOeYCbUJHuKOazU7dPTKXOUKk//6uxr1R7MDGmShYCpS5l9o5exYKiWWYZgJqXKyxRgIGXO0DKD5sn7sJPKP8p5ylxemb2jl9FgqJZZcWWGVHkTd7a/619IE8x0j16iX5t9VuVT5ph5ciwYKJhZdsoMzZNfIq8piVLmksFM6CifcZkKTAXBTEiVt6EX+3xbHsf/lAtmUk2yPhkYeWUOVuUwMOrBzLB5cjgYSpnLTJmpJtl9QjBQy6yMMkOqfIi+1e+j6p0yB86TC4ARDmYGRS8LgaFaZvFTZkqV4y8ojVXm8GBmVPSyFBjVKXPoPLkIGCqYGTtlplR5lRgMpcyh738oerkvcQn2R9U5ZS6jytFgBIOZUJPsqci18VF/rIAyF1Ll6d+Vfa3qgpnR8+RSYChljjr+B2qSHS09GGrKHKPMlCovBcBAU+aYZ1n8PLkcGEaZYzJmwdHLwmCQltmCW/n518YkwBDKvONWfv51NhEw06fMt45b+fnXvQyYyS2zR27l518vJgPGTsAiBlr5udewFAKzmK7K0JDEv7YmBGZaMPMVXPm516WXAtPdZlVOCcZ+NKLKRxMDY29tqPJKDsy6CVU+mBwYe21BlXtBMItZlXOCsV39qmySYLpb7ar8oAnGHmdVzgnGTnWr8lIWzLpqVd6bLBh7nlU5J5jFrV5VfjLTBWO7WZWhLwcG011rVeV7m1wlwdg/laryi02vomDsNKtyTjB3Vary1oAqC8aeZ1XOCaa71afKGyOqMBj7UZ0qnw2p0mD+Kpi54KL3/gWocgow679QZS56718HY6o4GDtVpcoDoco5wCz+qMrcqcf+hahyDjD2syJVviCqnATMH5R5ze1S9a8HoyoBGHusRpWPhlUGMPZWiyqvDKsUYNazKucEY691qDL25k8DZjGrck4w//dvnKRU2chKAqa76qsy1CTLBeZ7ZX5uVJUzgfmuZXaTUmWqSZYNzFpclSdHL7OC+e+U+dqsKucCs7gpq/L06GVaMLYTVmVonpwTjF1nVc4JZi2rykT0MjEY+ymqyvibPxuY7k1TlfkHWTIw72amqMpMwi81GLu76akyOYVJC+adjJoq+3BJB8burlqqjA5hMoOx7iSkyoPL+2Xy0eFOZ+zvZFT5DLeUkaPDfI/YV1DlAW+QfX3bprzHLf8+2GHrsKxEyLy6Xhb2b3tn2COtCcRxWlMSn9DY2PqExJbElsTGxOS+/6cre6w78tzozK64y13n//YWxPkhDMPAfSt7LPv395OxBP30xz8P6K/T/yPFz7/9WagD8Pf3jJl9n1O/fPtemn49IwAjEolEIpFIJBKJRCKRSCQSiUQikUgkEolEIpFIJBKJRCLRo6rNRVqJylL/FlUrUVHyVzBWiYqSgClUAqZQCZhCJWAKlYApVAKmUAmYQiVgCpWAKVSfHExn3/UFQ32fG4x5ixrUl9PXAOPVl5OAKVQCplAJmEIlYAqVgClUAqZQCZhCJWAKlYApVJnAVKax1ns/v101emdNpe6Qbns/xsLTe+GngFk91Q/WqAMVufHa+L6t1GGRYCrnr2o2kFgXKsE1dpr5Wnb6WLg32x1h8EHBpFGzR1TTT+1CBamGRjHUXOp36x4ypNX49mwwFTS9Q5sYv5FtOc3A4jYKz73e+lRI4a+UGhPT1HGtdjN+7ZFq2lPBrLg4hSl5Ody45IvaveLenANGxzdH0TQ8q7n99nt9Hph6Sr4XbEOEYSGHDLkI+200J4BBjQkDWsWxmldxrN/sks1ZYGoYp9qtnPQ3hsYDXGLfywxGUw+dag4Ysv3tOWDa+cZ+exqOv6G+GS6XKc7bHyptsoIJHY4cgGvaarMK2kdszgDTslo5gIPcW9u8H+oIvnP0HVPD4sUBytpbNd2AGBnjef9A0iY/c62JtFo3J2RoqymlHAwLzgb90KdmnR+MhUfqPd8m+Kp9t6w6Eg94Xhl9y++Eh3zoXFUL87POuI5pt32n+EQgQ4Jplx9D2kHjklE4O5hVV6geXXX25Gh7cy563PD++teMC8x6ZfsWG77hvSmr1fr6a1ulDl+GaQYHE10N2kPhd84JNyw5H5jxYsAqH5hgS3gzYoFAWS32G5iBMZ9vygomad0RgTeNDgyOYdhufrMZQzL4ghkfKxrCam5zzGsPfzIImOhN5omhKb87Vk2U8xKDPhljZZZhMEf2dk96CT3MMvnAXLzJ4454Yjp8LVPdDPCs6LJO3ox04S0DTEd9mToXmHrOsnT9sYE7du2fBsbDCE3PQ9uTm6fdLgPkMoFZLV9yHGW+zTI7gRX7LDDw/TIb3ZJganKFNuQBs3KkcnCBwaMrAMzAXZFPC0AKjKM7wZwFTH98+bLxjvb1Q5kGc3L9/JoAkxLG12g6AxhwFX0mLsovFW7bdXwSGMs31bTbZzzit207ZuYwmMpnWr5g1vA7Pbh5DpiJ//Me+gy5CKDCTd0hMNFNhAdmE4DBQ9PRzXgGGE25yljgptoFYziPswfB1OPB5UsdospBIcRcYx1ncykXo03ng+kQY5PbGc0uGLWnTGBWy5f7uVQhRyTdGxu6SEcZeiETw+/N2WAcDE98B87uWW08LwPpVtjMjy9f2gHfERlCHs8uGJVuvIfEH3MimPGehYVNfrzl0JwPZnx8WdlMe7vnLYDB19iJYl5WSCo7A8xdQ0uXVo1brT8fzIPLF/DkaN21yzuHofAsMN4ydJv+Hje5zQlmwrkc2T5fxK8App2cYOKP2SoMTKjlEJcxJlPwweDpP5AHUAmYB5aW1ZrA1DcarNC6H6ceOiUSzxf8f4MZZpQMH+vw0Z+q+4TNnanLq1yQl4KpXwvG1gkZrlNEJZ6Z1TjFypbHc7yygNEPcZlf/MVY9QAZD64cI1WGQ7q1g8fI5ACjbrErc4f0y8HwyUA8idjow1f+dNdubEonPCAHmBmCipki5s8Bk5DheM0WQmtZwcRi/bz2SHKA8dkitE8GE8PLMDhxy07qBDBB7coj0BnA9NDeTwYmJZMpxEGAIV8NevnBnTaIcx++RevpYO4iU902JU4DA1u8Y4a6q2y7Tc8Hk5JhOsvVeWDgm8lR93DzJT4fmIRMFosfA1Ptl75vW73NnV/6TDAxdrWQyWDxY2DUuGt68At5EaTDx1ZeCEYpl6SW0RbXvMHomA10Dg/YHj628lIwkQy9awY5LqywzbG0tP3d4okbdM0zmL0KDJPMTMUJ4qI1yxwzE/kVdb5k/5LBJGQOODnJfg1mdtsc2eFVEBVyTM4TRQYC3nWJYJSlyUB3tax9NHQtHo910YbsqDzUmhsQ52Xh28uLlwiGk/SvYc+CczsDUgG5E+YoB6NneJB4AegT2AHDuM1eIhjV0gezB2CHXsRDbQUO1LUrjvSiND/uCm9MJNCZW+pQkWAY5whNyi7FcjtNvoSJkeJwsU61f90LNarAgXS4OAjd+YQVdNon8BuZygSTkCGvTxjqjUP+bnnG/n0uITkQ2fyklykmuYyqXrZDB5hEEDJpKk6l4Iqvy9+KB5OQoZMxxiVPz3ShVuCSgEFdA7hbwoS0Z3W5WWNIauZMGnB12UR4akCGuCjFlQqGPCZLp5X18Ax+5hKeg8gzM4sn77ltkV5ZFjJx6gEwyDx7gAvZhJ1w5kw/tsx1DJ/MRF37tTRQqUfQpPMLswl0zFkP1PV3Za78UTI9kQaDXABHgYFZnn+LHO2YUzHktEfgCaCvDskMEIikyWgykxJNADTU4d0KOceBZxFurwg/YkmMi/eImUiZpqzWnQdGx9x2bJgCz95GdfR1rHAwJhnRQ2EIPeFsmh56cFIJF02akuuRlRHWI5ZScBKA9YlSBom/ioYLLXmlKhOa4YfQECRHjn1W8HL+wV9e5pFKdCgeEgYvpe9tuAuHckKxw1kaIpFIJBKJRCKRSPSl9R+SRonOSJ+ajwAAAABJRU5ErkJggg==
+  labels:
+    app.kubernetes.io/name: kasten-k10-1
+  name: kasten-k10-1
+  namespace: apptest-8f0887bb
+spec:
+  componentKinds:
+  - group: apps/v1beta2
+    kind: Deployment
+  - group: v1
+    kind: ServiceAccount
+  - group: rbac.authorization.k8s.io/v1
+    kind: Role
+  - group: rbac.authorization.k8s.io/v1
+    kind: RoleBinding
+  - group: rbac.authorization.k8s.io/v1
+    kind: ClusterRole
+  - group: rbac.authorization.k8s.io/v1
+    kind: ClusterRoleBinding
+  - group: v1
+    kind: PersistentVolumeClaim
+  - group: v1
+    kind: Service
+  - group: v1
+    kind: Secret
+  - group: extensions/v1beta1
+    kind: Ingress
+  - group: v1
+    kind: ConfigMap
+  description: "Kasten\u2019s K10 data lifecycle management system"
+  links:
+  - description: Getting Started
+    url: https://docs.kasten.io/quickstart.html
+  maintainers:
+  - name: Google Click to Deploy
+    url: https://cloud.google.com/solutions/#click-to-deploy
+  - email: info@kasten.io
+    name: Kasten
+    url: https://kasten.io/
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: kasten-k10-1
+  versions: 1.1.13
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    app: k10
+    app.kubernetes.io/name: kasten-k10-1
+    chart: k10-1.1.13
+    heritage: Tiller
+    release: kasten-k10-1
+  name: default-deny
+  namespace: apptest-8f0887bb
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    app: k10
+    app.kubernetes.io/name: kasten-k10-1
+    chart: k10-1.1.13
+    heritage: Tiller
+    release: kasten-k10-1
+  name: cross-services-allow
+  namespace: apptest-8f0887bb
+spec:
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          release: kasten-k10-1
+    ports:
+    - port: 8000
+      protocol: TCP
+    - port: 9000
+      protocol: TCP
+    - port: 80
+      protocol: TCP
+  podSelector:
+    matchLabels:
+      release: kasten-k10-1
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    app: k10
+    app.kubernetes.io/name: kasten-k10-1
+    chart: k10-1.1.13
+    heritage: Tiller
+    release: kasten-k10-1
+  name: allow-external
+  namespace: apptest-8f0887bb
+spec:
+  ingress:
+  - from: []
+    ports:
+    - port: 80
+    - port: 443
+  podSelector:
+    matchLabels:
+      release: kasten-k10-1
+      service: ambassador
+---
+apiVersion: policy/v1beta1
+kind: PodDisruptionBudget
+metadata:
+  labels:
+    app: nginx
+    app.kubernetes.io/name: kasten-k10-1
+    chart: nginx-0.14.0
+    component: controller
+    heritage: Tiller
+    release: kasten-k10-1
+  name: kasten-k10-1-nginx-controller
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: nginx
+      component: controller
+      release: kasten-k10-1
+---
+apiVersion: policy/v1beta1
+kind: PodDisruptionBudget
+metadata:
+  labels:
+    app: nginx
+    app.kubernetes.io/name: kasten-k10-1
+    chart: nginx-0.14.0
+    component: default-backend
+    heritage: Tiller
+    release: kasten-k10-1
+  name: kasten-k10-1-nginx-default-backend
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: nginx
+      component: default-backend
+      release: kasten-k10-1
+secret "k10-api-key" created
+configmap "fluentd" created
+configmap "kasten-k10-1-nginx-controller" created
+configmap "k10-config" created
+configmap "kasten-k10-1-k10-prometheus-config" created
+persistentvolumeclaim "kasten-k10-1-prometheus-server" created
+serviceaccount "kasten-k10-1-nginx" created
+serviceaccount "kasten-k10-1-prometheus-server" created
+role "kasten-k10-1-nginx" created
+rolebinding "kasten-k10-1-nginx" created
+service "fluentd" created
+service "kasten-k10-1-nginx-controller" created
+service "kasten-k10-1-nginx-default-backend" created
+service "kasten-k10-1-prometheus-server" created
+service "ambassador" created
+deployment "ambassador" created
+service "api-policies" created
+service "api-profiles" created
+service "kasten-k10-1-prometheus-server-exp" created
+service "auth-svc" created
+service "catalog-svc" created
+service "compliance-svc" created
+service "credentials-svc" created
+service "executor-svc" created
+service "jobs-svc" created
+service "jobsqueue-svc" created
+service "policies-svc" created
+service "profiles-svc" created
+service "scheduler-svc" created
+service "schedules-svc" created
+service "state-svc" created
+service "dashboardbff-svc" created
+service "frontend-svc" created
+deployment "fluentd" created
+deployment "kasten-k10-1-nginx-controller" created
+deployment "kasten-k10-1-nginx-default-backend" created
+deployment "kasten-k10-1-prometheus-server" created
+deployment "api-policies-svc" created
+deployment "api-profiles-svc" created
+deployment "auth-svc" created
+persistentvolumeclaim "catalog-pv-claim" created
+deployment "catalog-svc" created
+deployment "compliance-svc" created
+persistentvolumeclaim "credentials-pv-claim" created
+deployment "credentials-svc" created
+deployment "executor-svc" created
+persistentvolumeclaim "jobs-pv-claim" created
+deployment "jobs-svc" created
+persistentvolumeclaim "jobsqueue-pv-claim" created
+deployment "jobsqueue-svc" created
+persistentvolumeclaim "policies-pv-claim" created
+deployment "policies-svc" created
+persistentvolumeclaim "profiles-pv-claim" created
+deployment "profiles-svc" created
+deployment "scheduler-svc" created
+persistentvolumeclaim "schedules-pv-claim" created
+deployment "schedules-svc" created
+persistentvolumeclaim "state-pv-claim" created
+deployment "state-svc" created
+deployment "dashboardbff-svc" created
+deployment "frontend-svc" created
+deployment "kanister-svc" created
+ingress "kasten-k10-1-ingress" created
+application "kasten-k10-1" configured
+networkpolicy "default-deny" created
+networkpolicy "cross-services-allow" created
+networkpolicy "allow-external" created
+poddisruptionbudget "kasten-k10-1-nginx-controller" created
+poddisruptionbudget "kasten-k10-1-nginx-default-backend" created
+Error from server (Forbidden): error when retrieving current configuration of:
+&{0xc4200de000 0xc4204416c0  kasten-k10-1-nginx /data/resources.yaml 0xc420af01b0  false}
+from server for: "/data/resources.yaml": clusterroles.rbac.authorization.k8s.io "kasten-k10-1-nginx" is forbidden: User "system:serviceaccount:apptest-8f0887bb:kasten-k10-1-deployer-sa" cannot get clusterroles.rbac.authorization.k8s.io at the cluster scope: Unknown user "system:serviceaccount:apptest-8f0887bb:kasten-k10-1-deployer-sa"
+Error from server (Forbidden): error when retrieving current configuration of:
+&{0xc4210f6000 0xc4200f1340  kasten-k10-1-nginx /data/resources.yaml 0xc42000c048  false}
+from server for: "/data/resources.yaml": clusterrolebindings.rbac.authorization.k8s.io "kasten-k10-1-nginx" is forbidden: User "system:serviceaccount:apptest-8f0887bb:kasten-k10-1-deployer-sa" cannot get clusterrolebindings.rbac.authorization.k8s.io at the cluster scope: Unknown user "system:serviceaccount:apptest-8f0887bb:kasten-k10-1-deployer-sa"
+INFO Deleting namespace "apptest-8f0887bb"
+namespace "apptest-8f0887bb" deleted

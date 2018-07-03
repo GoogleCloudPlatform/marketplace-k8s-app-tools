@@ -1,5 +1,6 @@
 {
   "deployer": "gcr.io/ruela-test/example/wordpress/deployer:latest",
+  "metadata": "/usr/local/google/home/ruela/workspace/marketplace-k8s-app-example/vendor/marketplace-tools/scripts/driver/version_metadata.json",
   "parameters": {
     "name": "wordpress-1",
     "imageWordpress": "gcr.io/ruela-test/example/wordpress:latest",

@@ -1,6 +1,7 @@
 {
-  "deployer": "gcr.io/kasten-cloudlauncher/kasten-k10",
+  "deployer": "gcr.io/ruela-test/k10-deployer",
   "parameters": {
-    "name": "kasten-k10-1"
+    "name": "kasten-k10-1",
+    "reportingSecret": "reportingSecret"
   }
 }
