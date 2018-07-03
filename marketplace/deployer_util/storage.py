@@ -42,12 +42,10 @@ def _gcs_client():
 
 def _parse_gs_path(path):
   """Returns (bucket, blob_name) for a provided gs:/ path."""
-  if not path.startswith('gs:/'):
+  if not path.startswith('gs://'):
     raise InvalidPath('Invalid path: {}'.format(path))
 
-  if path.startswith('gs://'):
-    path = path.replace('gs://', 'gs:/', 1)
-
-  _, bucket, blob_name = path.split('/', 2)
+  # Example:  gs://trironkk-testing/tmp/reporting-secret.yaml
+  _, _, bucket, blob_name = path.split('/', 3)
 
   return bucket, blob_name
