@@ -3,7 +3,7 @@
 This repository contains a set of tools supporting the development of Kubernetes
 manifests deployable via Google Cloud Marketplace. These tools will be updated
 as Google Cloud Marketplace's supports additional deployment mechanisms (e.g.
-Helm) and adopts ongoing community standard (e.g. SIG Apps defined Application).
+[Helm](https://helm.sh)) and adopts ongoing community standard (e.g. SIG Apps defined [Application](https://github.com/kubernetes-sigs/application)).
 
 For examples of how these tools are used, see
 [marketplace-k8s-app-example](https://github.com/GoogleCloudPlatform/marketplace-k8s-app-example).
@@ -12,17 +12,16 @@ For examples of how these tools are used, see
 
 ## Tool dependencies
 
-- [gcloud](https://cloud.google.com/sdk/)
 - [docker](https://docs.docker.com/install/)
-- [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/). You can install
-  this tool as part of `gcloud`.
+- [gcloud](https://cloud.google.com/sdk/)
+- [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/). You can install this tool as part of `gcloud`.
 - [jq](https://github.com/stedolan/jq/wiki/Installation)
 - [make](https://www.gnu.org/software/make/)
 
 ## Authorization
 
 This guide assumes you are using a local development environment. If you need
-run these instructions from a GCE VM or use a service account identity
+to run these instructions from a GCE VM or use a service account identity
 (e.g. for testing), see: [Advanced Authorization](#advanced-authorization)
 
 Log in as yourself by running:
@@ -62,10 +61,10 @@ https://console.cloud.google.com/apis/library/containerregistry.googleapis.com
 
 ## Updating git submodules
 
-This repo utilizies git submodules. This repo should typically be included in your
+This repo utilizes git submodules. This repo should typically be included in your
 application repo as a submodule as well. Run the following commands to make sure that
-all submodules are properly populated. `git clone` does not populate submodules by
-default.
+all submodules are properly populated (`git clone` does not populate submodules by
+default).
 
 ```shell
 git submodule sync --recursive
@@ -105,12 +104,12 @@ We follow [Google's coding style guides](https://google.github.io/styleguide/).
   namespace from local `gcloud` and `kubectl` configurations. Without this, user has
   to define these via environment variables.
 
-* `base_containers.Makefile`: Included as part of `app.Makefile`. Your application
+* `marketplace.Makefile`: Included as part of `app.Makefile`. Your application
   build target typically depends on one or more targets in this file. For example,
-  your application would need the base `kubectl` deployer container to build upon.
+  your application might need the base `helm` deployer container to build upon.
 
-* `ubbagent.Makefile`: Include this if your application needs to build usage base
-  metering agent. See https://github.com/GoogleCloudPlatform/ubbagent
+* `ubbagent.Makefile`: Include this if your application needs to build [usage base
+  metering agent](https://github.com/GoogleCloudPlatform/ubbagent).
 
 # Appendix
 
@@ -147,3 +146,174 @@ If this is not an option (e.g. integration testing), see the following:
 By default, the Compute service account that the VM authorizes as does not have
 k8s engine admin privilege. You need to grant that role to the service account
 via the IAM Admin console.
+
+## Defining app parameters with schema.yaml file
+
+The `schema.yaml` file is the way to declare information that end-user needs to provide
+in order to provisioning the application. For example, the name of the application, the kubernetes
+namespace, service accounts, etc.
+
+The information provided by the user for properties defined in `schema.yaml` is available at deployment time. 
+
+If the app has dependency resources, those can also be defined in the `schema.yaml`. In case a dependency resource
+does not exist, it will be provisioned on behalf of the user.
+
+Supported resources are:
+- Kubernetes service account
+- Storage class
+
+This is a simple example of a schema.yaml file:
+
+```yaml
+properties:
+  name:
+    type: string
+    x-google-marketplace:
+      type: NAME
+  namespace:
+    type: string
+    x-google-marketplace:
+      type: NAMESPACE
+required:
+- name
+- namespace
+```
+
+Each entry is defined inside properties, and ```required``` is a list of required parameters.
+We validate that all required fields are provided before starting the deployment.
+In general, these parameters are saved in a ConfigMap (secrets do not show in ConfigMaps) 
+and will have the same name as the keys in the schema.yaml. So in the example
+above, ConfigMap would look like the following:
+
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  ...
+data:
+  name: <value provided by user>
+  namespace: <value provided by user>
+```
+
+Schema.yaml specification
+---
+
+### Properties
+
+#### type
+
+Represents the type of the input in the form for that property.
+
+##### Supported values
+- `string`
+- `integer`
+- `boolean`
+
+#### title
+
+Displayed text in the ui.
+
+#### description
+
+Explanation of what the property is or what is used for. Be mindful of good explanation as a way to improve user experience.
+
+#### default
+
+If user does not provide a value, `default` will be used.
+
+#### minimum
+
+The value has to be greater or equal than `minimum`.
+
+#### maximum
+
+The value has to be less or equal than `maximum`.
+
+#### maxLength
+
+The value length has to be less or equal than `maxLength`.
+
+#### pattern
+
+A regex pattern. The value needs to match `pattern`.
+
+#### x-google-marketplace
+
+This server as an annotation to tell gcp to handle that property in a special way, depending on `type`. 
+It has several usages and more will be added based on demand.
+
+#### [Examples](https://github.com/GoogleCloudPlatform/marketplace-k8s-app-example/blob/master/wordpress/schema.yaml).
+
+---
+### x-google-marketplace
+
+#### type
+
+It defines how this object will be handled. Each type has a different set of properties.
+
+##### Supported values
+- `NAME`: To be used as the name of the app.
+- `NAMESPACE`: To be used as the kubernetes namespace where the app will installed.
+- `IMAGE`: Link to a docker image.
+- `REPORTING_SECRET`: The Secret resource name containing the usage reporting credentials
+- `GENERATED_PASSWORD`: A value to be generated at deployment time, following common password requirements.
+- `SERVICE_ACCOUNT`: A pre-provisioned kubernetes service account. If it does not exist, one is created.
+- `STORAGE_CLASS`: A pre-provisioned kubernetes storage class. If it does not exist, one is created.
+
+---
+
+### type: GENERATED_PASSWORD
+
+Example:
+
+```yaml
+dbPassword:
+    type: string
+    x-google-marketplace:
+      type: GENERATED_PASSWORD
+      generatedPassword:
+        length: 16
+```
+---
+
+### type: SERVICE_ACCOUNT
+
+Example:
+
+```yaml
+properties:
+  operatorServiceAccount:
+    type: string
+    x-google-marketplace:
+      type: SERVICE_ACCOUNT
+      serviceAccount:
+        roles:
+        - type: ClusterRole        # This is a cluster-wide ClusterRole
+          rulesType: PREDEFINED
+          rulesFromRoleName: edit  # Use predefined role named "edit"
+        - type: Role               # This is a namespaced Role
+          rulesType: CUSTOM        # We specify our own custom RBAC rules
+          rules:
+          - apiGroups: ['apps.kubernetes.io/v1alpha1']
+            resources: ['Application']
+            verbs: ['*']
+        - type: ClusterRole
+          rulesType: CUSTOM
+          rules:
+          - apiGroups: ['etcd.database.coreos.com/v1beta2']
+            resources: ['EtcdCluster']  
+            verbs: ['*']
+```
+
+---
+### type: STORAGE_CLASS
+
+```yaml
+properties:
+  ssdStorageClass:
+    type: string
+    x-google-marketplace:
+      type: STORAGE_CLASS
+      storageClass:
+        type: SSD
+```
