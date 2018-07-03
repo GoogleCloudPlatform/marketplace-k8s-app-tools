@@ -13,7 +13,10 @@
 # limitations under the License.
 
 
-def set_resource_ownership(appuid, appname, resource):
+def set_resource_ownership(app_uid,
+                           app_name,
+                           app_api_version,
+                           resource):
   """ Set the app as owner of the resource"""
 
   if 'metadata' not in resource:
@@ -23,7 +26,7 @@ def set_resource_ownership(appuid, appname, resource):
 
   owner_reference = None
   for existing_owner_reference in resource['metadata']['ownerReferences']:
-    if existing_owner_reference['uid'] == appuid:
+    if existing_owner_reference['uid'] == app_uid:
       owner_reference = existing_owner_reference
       break
 
@@ -31,9 +34,8 @@ def set_resource_ownership(appuid, appname, resource):
     owner_reference = {}
     resource['metadata']['ownerReferences'].append(owner_reference)
 
-  owner_reference['apiVersion'] = "app.k8s.io/v1alpha1"
+  owner_reference['apiVersion'] = app_api_version
   owner_reference['kind'] = "Application"
-  owner_reference['controller'] = True
   owner_reference['blockOwnerDeletion'] = True
-  owner_reference['name'] = appname
-  owner_reference['uid'] = appuid
+  owner_reference['name'] = app_name
+  owner_reference['uid'] = app_uid
