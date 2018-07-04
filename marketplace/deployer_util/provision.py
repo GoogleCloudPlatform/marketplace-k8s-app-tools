@@ -60,9 +60,8 @@ def process(schema, values, deployer_image, deployer_entrypoint):
       continue
     value, gs_manifests = provision_from_gs(
         key, value, app_name=app_name, namespace=namespace)
-    props[key] = value
-    manifests += gs_manifests
     values[key] = value
+    manifests += gs_manifests
 
   for prop in schema.properties.values():
     if prop.name in values:
