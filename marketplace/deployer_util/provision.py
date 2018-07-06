@@ -55,13 +55,11 @@ def process(schema, values, deployer_image, deployer_entrypoint):
   namespace = get_namespace(schema, values)
 
   for key, value in values.items():
-    if not value.startswith('gs://'):
-      # The value is not a google storage URI. Skip.
-      continue
-    value, gs_manifests = provision_from_gs(
-        key, value, app_name=app_name, namespace=namespace)
-    values[key] = value
-    manifests += gs_manifests
+    if value.startswith('gs://'):
+      value, gs_manifests = provision_from_gs(
+          key, value, app_name=app_name, namespace=namespace)
+      values[key] = value
+      manifests += gs_manifests
 
   for prop in schema.properties.values():
     if prop.name in values:
