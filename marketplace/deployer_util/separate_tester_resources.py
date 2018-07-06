@@ -71,8 +71,9 @@ def main():
       print("INFO Prod resource: {}".format(full_name))
       nontest_resources.append(resource)
 
-  with open(args.out_manifests, "w") as outfile:
-    yaml.safe_dump_all(nontest_resources, outfile, default_flow_style=False)
+  if nontest_resources:
+    with open(args.out_manifests, "w") as outfile:
+      yaml.safe_dump_all(nontest_resources, outfile, default_flow_style=False)
 
   if test_resources:
     with open(args.out_test_manifests, "a") as test_outfile:
