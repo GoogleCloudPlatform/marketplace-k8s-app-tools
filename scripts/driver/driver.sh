@@ -52,7 +52,7 @@ NAME="$(echo "$parameters" \
     --values_file=- --param '{"x-google-marketplace": {"type": "NAME"}}')"
 
 export NAMESPACE="apptest-$(cat /dev/urandom \
-    | tr -dc 'a-zA-Z0-9' \
+    | tr -dc 'a-z0-9' \
     | fold -w 8 \
     | head -n 1)"
 export NAME
