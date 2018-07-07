@@ -51,7 +51,10 @@ NAME="$(echo "$parameters" \
     | docker run -i --entrypoint=/bin/print_config.py --rm "$deployer" \
     --values_file=- --param '{"x-google-marketplace": {"type": "NAME"}}')"
 
-export NAMESPACE="apptest-$(cat /dev/urandom | xxd -l 4 -ps -c 4)"
+export NAMESPACE="apptest-$(cat /dev/urandom \
+    | tr -dc 'a-z0-9' \
+    | fold -w 8 \
+    | head -n 1)"
 export NAME
 
 kubectl version
