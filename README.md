@@ -97,6 +97,8 @@ We follow [Google's coding style guides](https://google.github.io/styleguide/).
       build application containers
     * `app.Makefile` defines 2 main targets to manage the lifecycle of the application
       on the cluster in a target namespace: `make app/install` and `make app/uninstall`.
+    * `app.Makefile` also defines an utility target to validate the overall funcionality
+      of the application, `make app/verify`.
 
 * `crd.Makefile`: Include this to expose `make crd/install` and `make crd/uninstall`.
 
@@ -149,18 +151,13 @@ via the IAM Admin console.
 
 ## Defining app parameters with schema.yaml file
 
-The `schema.yaml` file is the way to declare information that end-user needs to provide
-in order to provisioning the application. For example, the name of the application, the kubernetes
-namespace, service accounts, etc.
+The `schema.yaml` file is the way to declare parameter values that end-user needs to provide
+in order to provision the application. For example, the name of the application, the kubernetes
+namespace, service accounts, etc. It follows a more strict subset of JSON schema specifications.
+The UI uses `schema.yaml` to render the form that end-users will interact with to configure and
+deploy the application.
 
 The information provided by the user for properties defined in `schema.yaml` is available at deployment time. 
-
-If the app has dependency resources, those can also be defined in the `schema.yaml`. In case a dependency resource
-does not exist, it will be provisioned on behalf of the user.
-
-Supported resources are:
-- Kubernetes service account
-- Storage class
 
 This is a simple example of a schema.yaml file:
 
@@ -179,20 +176,85 @@ required:
 - namespace
 ```
 
-Each entry is defined inside properties, and ```required``` is a list of required parameters.
+Each entry is defined inside properties, and `required` is a list of required parameters.
 We validate that all required fields are provided before starting the deployment.
-In general, these parameters are saved in a ConfigMap (secrets do not show in ConfigMaps) 
-and will have the same name as the keys in the schema.yaml. So in the example
-above, ConfigMap would look like the following:
+
+### Referencing `schema.yaml` parameter values in kubernetes manifests
+
+All parameters defined in `schema.yaml` can be used in manifests.
+
+#### Helm based deployer
+
+They can be referenced in helm charts just like a regular value from `values.yaml`. 
+
+Example of `schema.yaml`
 
 ```yaml
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  ...
-data:
-  name: <value provided by user>
-  namespace: <value provided by user>
+properties:
+  port:
+    type: string
+  name:
+    type: string
+    x-google-marketplace:
+      type: NAME
+  namespace:
+    type: string
+    x-google-marketplace:
+      type: NAMESPACE
+required:
+- name
+- namespace
+- port
+```
+
+Usage example of the value of `port` in a helm chart:
+
+```yaml
+...
+      containers:
+        - name: "myContainer"
+          image: "myImage"
+          ports:
+            - name: http
+              containerPort: {{ .Values.port }}
+...
+```
+
+#### Envsubs based deployer
+
+They can be referenced in manifests by its name in `schema.yaml`, prefixed with $.
+
+Example of `schema.yaml`
+
+```yaml
+properties:
+  port:
+    type: string
+  name:
+    type: string
+    x-google-marketplace:
+      type: NAME
+  namespace:
+    type: string
+    x-google-marketplace:
+      type: NAMESPACE
+required:
+- name
+- namespace
+- port
+```
+
+Usage example of the value of `port` in a helm chart:
+
+```yaml
+...
+      containers:
+        - name: "myContainer"
+          image: "myImage"
+          ports:
+            - name: http
+              containerPort: $port
+...
 ```
 
 Schema.yaml specification
@@ -257,8 +319,8 @@ It defines how this object will be handled. Each type has a different set of pro
 - `IMAGE`: Link to a docker image.
 - `REPORTING_SECRET`: The Secret resource name containing the usage reporting credentials
 - `GENERATED_PASSWORD`: A value to be generated at deployment time, following common password requirements.
-- `SERVICE_ACCOUNT`: A pre-provisioned kubernetes service account. If it does not exist, one is created.
-- `STORAGE_CLASS`: A pre-provisioned kubernetes storage class. If it does not exist, one is created.
+- `SERVICE_ACCOUNT`: The name of a pre-provisioned k8s `ServiceAccount`. If it does not exist, one is created.
+- `STORAGE_CLASS`: The name of a pre-provisioned k8s `StorageClass`. If it does not exist, one is created.
 
 ---
 
@@ -277,6 +339,10 @@ dbPassword:
 ---
 
 ### type: SERVICE_ACCOUNT
+
+Defining a `ServiceAccount` as a resource to be deployed will cause deployer to fail with authentication errors,
+because the deployer doesn't run with privileges that allow creating them. 
+All service accounts need to be defined as parameters in `schema.yaml`.
 
 Example:
 
@@ -307,6 +373,10 @@ properties:
 
 ---
 ### type: STORAGE_CLASS
+
+Defining a `StorageClass` as a resource to be deployed will cause deployer to fail with authentication errors,
+because the deployer doesn't run with privileges that allow creating them. 
+All service accounts need to be defined as parameters in `schema.yaml`.
 
 ```yaml
 properties:
