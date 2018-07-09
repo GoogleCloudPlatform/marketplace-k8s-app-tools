@@ -51,7 +51,9 @@ NAME="$(echo "$parameters" \
     | docker run -i --entrypoint=/bin/print_config.py --rm "$deployer" \
     --values_file=- --param '{"x-google-marketplace": {"type": "NAME"}}')"
 
+# use base64 for BSD systems where tr won't handle illegal characters
 export NAMESPACE="apptest-$(cat /dev/urandom \
+    | base64 \
     | tr -dc 'a-z0-9' \
     | fold -w 8 \
     | head -n 1)"
