@@ -75,7 +75,7 @@ app_api_version=$(kubectl get "applications/$name" \
 # Provisions external resource dependencies and the deployer resources.
 # We set the application as the owner for all of these resources.
 echo "${parameters}" \
-  | docker run -i --entrypoint=/bin/provision.py --rm "${deployer}" \
+  | docker run -e "GOOGLE_APPLICATION_CREDENTIALS" -i --entrypoint=/bin/provision.py --rm "${deployer}" \
     --values_file=- --deployer_image="${deployer}" --deployer_entrypoint="${entrypoint}" \
   | docker run -i --entrypoint=/bin/set_app_labels.py --rm "${deployer}" \
     --manifests=- --dest=- --name="${name}" --namespace="${namespace}" \
