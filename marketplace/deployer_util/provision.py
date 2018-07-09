@@ -21,6 +21,7 @@ from argparse import ArgumentParser
 import yaml
 
 import schema_values_common
+import storage
 from config_helper import Schema
 
 _PROG_HELP = """
@@ -53,6 +54,13 @@ def process(schema, values, deployer_image, deployer_entrypoint):
   app_name = get_name(schema, values)
   namespace = get_namespace(schema, values)
 
+  for key, value in values.items():
+    if value.startswith('gs://'):
+      value, gs_manifests = provision_from_gs(
+          key, value, app_name=app_name, namespace=namespace)
+      values[key] = value
+      manifests += gs_manifests
+
   for prop in schema.properties.values():
     if prop.name in values:
       # The value has been explicitly specified. Skip.
@@ -61,12 +69,12 @@ def process(schema, values, deployer_image, deployer_entrypoint):
       value, sa_manifests = provision_service_account(
           schema, prop, app_name=app_name, namespace=namespace)
       props[prop.name] = value
-      manifests += add_preprovisioned_labels(sa_manifests, prop.name)
+      manifests += sa_manifests
     elif prop.storage_class:
       value, sc_manifests = provision_storage_class(
           schema, prop, app_name=app_name, namespace=namespace)
       props[prop.name] = value
-      manifests += add_preprovisioned_labels(sc_manifests, prop.name)
+      manifests += sc_manifests
 
   # Merge input and provisioned properties.
   app_params = dict(list(values.iteritems()) + list(props.iteritems()))
@@ -78,6 +86,20 @@ def process(schema, values, deployer_image, deployer_entrypoint):
                                   deployer_entrypoint=deployer_entrypoint,
                                   app_params=app_params)
   return manifests
+
+
+def provision_from_gs(key, value, app_name, namespace):
+  """Provisions a resource for a property specified via gs://."""
+  raw_manifest = storage.load(value)
+
+  manifest = yaml.safe_load(raw_manifest)
+  if 'metadata' not in manifest:
+    manifest['metadata'] = {}
+  resource_name = dns1123_name("{}-{}".format(app_name, key))
+  manifest['metadata']['name'] = resource_name
+  manifest['metadata']['namespace'] = namespace
+
+  return resource_name, add_preprovisioned_labels([manifest], key)
 
 
 def provision_deployer(schema,
@@ -277,7 +299,7 @@ def provision_service_account(schema, prop, app_name, namespace):
         },
         'subjects': subjects,
     })
-  return sa_name, manifests
+  return sa_name, add_preprovisioned_labels(manifests, sa_name)
 
 
 def provision_storage_class(schema, prop, app_name, namespace):
@@ -296,7 +318,7 @@ def provision_storage_class(schema, prop, app_name, namespace):
             'type': 'pd-ssd',
         }
     }]
-    return sc_name, manifests
+    return sc_name, add_preprovisioned_labels(manifests, sc_name)
   else:
     raise Exception(
         'Do not know how to provision for property {}'.format(prop.name))
