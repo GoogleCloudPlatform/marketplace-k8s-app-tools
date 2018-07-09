@@ -1,5 +1,5 @@
 {
-  "deployer": "gcr.io/ruela-test/k10-deployer",
+  "deployer": "gcr.io/ruela-test/k10/deployer:latest",
   "parameters": {
     "name": "kasten-k10-1",
     "reportingSecret": "reportingSecret"

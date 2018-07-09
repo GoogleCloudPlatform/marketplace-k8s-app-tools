@@ -6,23 +6,25 @@ deployer="$(cat "$1" | jq -r .deployer)"
 parameters="$(cat "$1" | jq -r .parameters)"
 metadata="$(cat "$1" | jq -r .metadata)"
 
+rm -rf data
 mkdir -p data/values
 
-printf myapp > data/values/name
-printf mynamespace > data/values/namespace
-printf reportingSecret > data/values/reportingSecret
+printf "name: myapp\n" >> data/values.yaml
+printf "namespace: mynamespace\n" >> data/values.yaml
+printf "reportingSecret: reportingSecret\n" >> data/values.yaml
+printf "serviceAccount.name: kasten-sa\n" >> data/values.yaml
 
-docker run -i --entrypoint=/bin/validate.py \
--v /var/run/docker.sock:/var/run/docker.sock \
--v $(realpath "../../marketplace/deployer_util/validate.py"):/bin/validate.py \
--v $(realpath "../../marketplace/deployer_util/bash_util.py"):/bin/bash_util.py \
--v $(realpath data/values/name):/data/values/name \
--v $(realpath data/values/namespace):/data/values/namespace \
--v $(realpath data/values/reportingSecret):/data/values/reportingSecret \
--v "$metadata":/metadata \
---rm "$deployer" \
---metadata=/metadata
+cat data/values.yaml
 
-# ./driver.sh \
-#  --deployer="$deployer" \
-#  --parameters="$parameters"
+# docker run -i --rm --entrypoint=/bin/validate.py \
+#   -v /var/run/docker.sock:/var/run/docker.sock \
+#   -v "$(realpath "../../marketplace/deployer_util/validate.py")":/bin/validate.py \
+#   -v "$(realpath "../../marketplace/deployer_util/bash_util.py")":/bin/bash_util.py \
+#   -v "$(realpath data/values.yaml)":/data/values.yaml \
+#   -v "$metadata":/metadata \
+#   "$deployer" \
+#   --metadata=/metadata
+
+./driver.sh \
+ --deployer="$deployer" \
+ --parameters="$parameters"
