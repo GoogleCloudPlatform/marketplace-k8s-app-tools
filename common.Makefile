@@ -29,7 +29,7 @@ MARKETPLACE_TOOLS_PATH ?= $(patsubst %/,%,$(dir $(realpath $(lastword $(MAKEFILE
 
 
 .PHONY: clean
-clean:
+clean::
 	rm -Rf .build
 
 
