@@ -47,9 +47,6 @@ DIR="$(dirname $0)"
 echo $DIR
 
 namespace_key="$(docker run --entrypoint=/bin/extract_schema_key.py --rm "$deployer" --type NAMESPACE)"
-NAME="$(echo "$parameters" \
-    | docker run -i --entrypoint=/bin/print_config.py --rm "$deployer" \
-    --values_file=- --param '{"x-google-marketplace": {"type": "NAME"}}')"
 
 # use base64 for BSD systems where tr won't handle illegal characters
 export NAMESPACE="apptest-$(cat /dev/urandom \
@@ -57,9 +54,13 @@ export NAMESPACE="apptest-$(cat /dev/urandom \
     | tr -dc 'a-z0-9' \
     | fold -w 8 \
     | head -n 1)"
-export NAME
+export NAME="$(echo "$parameters" \
+    | docker run -i --entrypoint=/bin/print_config.py --rm "$deployer" \
+    --values_file=- --param '{"x-google-marketplace": {"type": "NAME"}}')"
 
 kubectl version
+
+printenv
 
 echo "INFO Creates namespace \"$NAMESPACE\""
 kubectl create namespace "$NAMESPACE"
