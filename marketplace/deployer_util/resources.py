@@ -26,7 +26,7 @@ def set_resource_ownership(app_uid,
 
   owner_reference = None
   for existing_owner_reference in resource['metadata']['ownerReferences']:
-    if existing_owner_reference['uid'] == appuid:
+    if existing_owner_reference['uid'] == app_uid:
       owner_reference = existing_owner_reference
       break
 
