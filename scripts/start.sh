@@ -74,12 +74,33 @@ app_api_version=$(kubectl get "applications/$name" \
 
 # Provisions external resource dependencies and the deployer resources.
 # We set the application as the owner for all of these resources.
+# Note: We mount /workspace:ro to share credentials.
 echo "${parameters}" \
-  | docker run -e "GOOGLE_APPLICATION_CREDENTIALS" -i --entrypoint=/bin/provision.py --rm "${deployer}" \
-    --values_file=- --deployer_image="${deployer}" --deployer_entrypoint="${entrypoint}" \
-  | docker run -i --entrypoint=/bin/set_app_labels.py --rm "${deployer}" \
-    --manifests=- --dest=- --name="${name}" --namespace="${namespace}" \
-  | docker run -i --entrypoint=/bin/set_ownership.py --rm "${deployer}" \
-    --manifests=- --dest=- --noapp \
-    --app_name="${name}" --app_uid="${app_uid}" --app_api_version="${app_api_version}" \
+  | docker run \
+    -e "GOOGLE_APPLICATION_CREDENTIALS" \
+    -i \
+    --volume=/workspace:/workspace:ro \
+    --entrypoint=/bin/provision.py \
+    --rm "${deployer}" \
+    --values_file=- \
+    --deployer_image="${deployer}" \
+    --deployer_entrypoint="${entrypoint}" \
+  | docker run \
+    -i \
+    --entrypoint=/bin/set_app_labels.py\
+    --rm "${deployer}" \
+    --manifests=-\
+    --dest=-\
+    --name="${name}"\
+    --namespace="${namespace}" \
+  | docker run \
+    -i \
+    --entrypoint=/bin/set_ownership.py\
+    --rm "${deployer}" \
+    --manifests=-\
+    --dest=-\
+    --noapp \
+    --app_name="${name}"\
+    --app_uid="${app_uid}"\
+    --app_api_version="${app_api_version}" \
   | kubectl apply --namespace="$namespace" --filename=-
