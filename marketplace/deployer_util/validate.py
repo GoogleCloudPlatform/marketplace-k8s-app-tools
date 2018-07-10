@@ -94,6 +94,7 @@ def validate_images(schema, resources):
 
 
 def expand_and_load_resources():
+  """ Expands the templates and charts so we have the final manifests manifests """
   print(Command("/bin/expand_config.py").output)
   assure_env_set('NAME', 'myapp')
   assure_env_set('NAMESPACE', 'mynamespace')
@@ -104,9 +105,6 @@ def expand_and_load_resources():
   manifest_dir = "/data/manifest-expanded"
   for filename in os.listdir(manifest_dir):
     filename = os.path.join(manifest_dir, filename)
-    # print_file(filename)
-
-    Command("cat " + filename)
     resources = load_resources_yaml(filename)
     all_resources.extend(resources)
     for resource in resources:
@@ -122,6 +120,8 @@ def expand_and_load_resources():
 
 
 def validate_metadata(metadata, application):
+  """ Makes sure that deployer is consistent with the metadata """
+
   # Validate partner id and solution id
   expected_partner_id = deep_get(metadata, "version", "partnerId")
   if not expected_partner_id:

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -xeo pipefail
+set -eo pipefail
 
 DIR="$(dirname $0)"
 
