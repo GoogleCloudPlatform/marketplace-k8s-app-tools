@@ -33,12 +33,12 @@ Validates and test the deployer image.
 
 def main():
   parser = ArgumentParser(description=_PROG_HELP)
-  # parser.add_argument('--parameters', required=True)
   parser.add_argument('--metadata')
   args = parser.parse_args()
 
   all_resources, application = expand_and_load_resources()
 
+  metadata = None
   if args.metadata:
     with open(args.metadata, "r") as metadatafile:
       metadata = json.loads(metadatafile.read())
@@ -46,25 +46,21 @@ def main():
   if metadata:  
     validate_metadata(metadata, application)
 
-  # images = deep_get(metadata, "version", "k8sConfig", "deployer_config_schema", "images")
-
-  # deployer_image = None
-  # for image in images:
-  #   if deep_get(image, "imageType") == "DEPLOYMENT_IMAGE":
-  #     deployer_image = deep_get(image, "imageDigest")
-
   schema = load_yaml("/data/schema.yaml")
   validate_images(schema, all_resources)
 
 
 def validate_images(schema, resources):
-  declared_images = [ key for key, param in schema["properties"].iteritems() 
-    if deep_get(param, GOOGLE_MARKETPLACE, "type") == "IMAGE" ]
+  declared_images = set([ deep_get(param, "default") for key, param in schema["properties"].iteritems() 
+    if deep_get(param, GOOGLE_MARKETPLACE, "type") == "IMAGE" ])
+
+  print(declared_images)
 
   used_images = []
   for resource in resources:
     used_images.extend(deep_find(resource, "image"))
-  
+  used_images = set(used_images)
+
   undeclared_images = [ image for image in used_images 
     if image not in declared_images ]
 
@@ -90,6 +86,9 @@ def validate_images(schema, resources):
     raise Exception(error_message)  
 
   print("All {} declared images are used.".format(len(declared_images)))
+
+  for image in used_images:
+    print(image)
 
   print("Images validation succeeded")
 

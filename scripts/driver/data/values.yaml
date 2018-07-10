@@ -1,4 +1,0 @@
-name: myapp
-namespace: mynamespace
-reportingSecret: reportingSecret
-serviceAccount.name: kasten-sa

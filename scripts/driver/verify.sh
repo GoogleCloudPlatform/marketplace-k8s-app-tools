@@ -2,29 +2,37 @@
 
 set -xeo pipefail
 
+DIR="$(dirname $0)"
+
 deployer="$(cat "$1" | jq -r .deployer)"
-parameters="$(cat "$1" | jq -r .parameters)"
 metadata="$(cat "$1" | jq -r .metadata)"
 
-rm -rf data
-mkdir -p data/values
+filename=$(basename -- "$1")
+filename="${filename%.*}"
 
-printf "name: myapp\n" >> data/values.yaml
-printf "namespace: mynamespace\n" >> data/values.yaml
-printf "reportingSecret: reportingSecret\n" >> data/values.yaml
-printf "serviceAccount.name: kasten-sa\n" >> data/values.yaml
+mkdir -p data
 
-cat data/values.yaml
+values="$(realpath data)"/${filename}.yaml
 
-# docker run -i --rm --entrypoint=/bin/validate.py \
-#   -v /var/run/docker.sock:/var/run/docker.sock \
-#   -v "$(realpath "../../marketplace/deployer_util/validate.py")":/bin/validate.py \
-#   -v "$(realpath "../../marketplace/deployer_util/bash_util.py")":/bin/bash_util.py \
-#   -v "$(realpath data/values.yaml)":/data/values.yaml \
-#   -v "$metadata":/metadata \
-#   "$deployer" \
-#   --metadata=/metadata
+cat $1 | jq -r '.parameters | to_entries[] | "\(.key): \(.value)"' > "$values"
 
-./driver.sh \
+cat "$values"
+
+[[ -z "$metadata" ]] || [[ "$metadata" == "null" ]] || metadata_path="/metadata"
+
+docker run -i --rm \
+  --entrypoint=/bin/validate.py \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  -v "$values":/data/values.yaml \
+  -v "$metadata":/metadata \
+  "$deployer" \
+  --metadata="$metadata_path"
+
+testParameters=$(echo "$(cat $1 | jq -r '.parameters')" "$(cat $1 | jq -r '.testParameters')" \
+    | jq -s '.[0] * .[1]')
+
+echo "$testParameters"
+
+"$DIR/driver.sh" \
  --deployer="$deployer" \
- --parameters="$parameters"
+ --parameters="$testParameters"

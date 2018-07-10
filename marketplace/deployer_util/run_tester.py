@@ -24,6 +24,7 @@ from dict_util import deep_get
 from yaml_util import load_resources_yaml
 
 _PROG_HELP = "Deploy and run tester pods and wait for them to finish execution"
+INVALID_IMAGE_NAME_ERROR = "InvalidImageName"
 
 def main():
   parser = ArgumentParser(description=_PROG_HELP)
@@ -74,9 +75,18 @@ def main():
         log("INFO Tester '{}' succeeded".format(full_name))
         break
 
+      pendingReason = None
+      if result == "Pending": 
+        containerStatuses = deep_get(resource, "status", "containerStatuses")
+        for status in containerStatuses:
+          pendingReason = deep_get(status, "state", "waiting", "reason")
+          if pendingReason == INVALID_IMAGE_NAME_ERROR:
+            print_logs(full_name, args.namespace)
+            raise Exception("ERROR Tester '{}' failed: {}".format(full_name, pendingReason))
+
       if time.time() - start_time > tester_timeout:
         print_logs(full_name, args.namespace)
-        raise Exception("ERROR Tester '{}' timeout".format(full_name))
+        raise Exception("ERROR Tester '{}' timeout: {}".format(full_name, pendingReason))
 
       time.sleep(poll_interval)
 
