@@ -353,8 +353,9 @@ def dns1123_name(name):
   """
   # Attempt to fix the input name.
   fixed = name.lower()
-  fixed = re.sub(r'[^a-z0-9.-]', '', fixed)
-  fixed = fixed.strip('.-')
+  fixed = re.sub(r'[.]', '-', fixed)
+  fixed = re.sub(r'[^a-z0-9-]', '', fixed)
+  fixed = fixed.strip('-')
   if len(fixed) > 64:
     fixed = fixed[:59]
 
