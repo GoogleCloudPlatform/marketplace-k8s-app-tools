@@ -353,8 +353,8 @@ def dns1123_name(name):
   """
   # Attempt to fix the input name.
   fixed = name.lower()
-  fixed = re.sub(r'[^a-z0-9.-]', '', fixed)
-  fixed = fixed.strip('.-')
+  fixed = re.sub(r'[^a-z0-9-]', '', fixed)
+  fixed = fixed.strip('-')
   if len(fixed) > 64:
     fixed = fixed[:59]
 
@@ -366,7 +366,6 @@ def dns1123_name(name):
     h4sh = m.hexdigest()[:4]
     fixed = '{}-{}'.format(fixed, h4sh)
   return fixed
-
 
 def add_preprovisioned_labels(manifests, prop_name):
   for r in manifests:
