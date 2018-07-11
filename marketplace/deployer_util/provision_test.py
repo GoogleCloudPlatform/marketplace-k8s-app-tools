@@ -21,20 +21,24 @@ from provision import dns1123_name
 class ProvisionTest(unittest.TestCase):
 
   def test_dns1123_name(self):
-    self.assertEqual(dns1123_name('valid.name'),
-                     'valid.name')
+    self.assertEqual(dns1123_name('valid-name'),
+                     'valid-name')
     self.assertModifiedName(dns1123_name('aA'),
                             'aa')
     self.assertModifiedName(dns1123_name('*sp3cial-@chars.(rem0ved^'),
-                            'sp3cial-chars.rem0ved')
+                            'sp3cial-chars-rem0ved')
     self.assertModifiedName(dns1123_name('-abc.def.'),
-                            'abc.def')
+                            'abc-def')
     self.assertModifiedName(dns1123_name('-123.456.'),
-                            '123.456')
+                            '123-456')
     self.assertModifiedName(
         dns1123_name('very-long-Name-that-gets-chopped-at-a-dash-'
                      '-------------------------------------------'),
         'very-long-name-that-gets-chopped-at-a-dash')
+    self.assertModifiedName(
+        dns1123_name('very-long-Name-that-gets-chopped-at-a-dot-'
+                     '...........................................'),
+        'very-long-name-that-gets-chopped-at-a-dot')
 
   def assertModifiedName(self, text, expected):
     self.assertEqual(text[:-5], expected)
