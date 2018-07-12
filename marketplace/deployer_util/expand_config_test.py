@@ -45,6 +45,27 @@ class ExpandConfigTest(unittest.TestCase):
         expand_config.InvalidProperty,
         lambda: expand_config.expand({'p1': 3}, schema))
 
+  def test_generate_properties_for_image_split_by_colon(self):
+    schema = config_helper.Schema.load_yaml(
+        """
+        properties:
+          i1:
+            type: string
+            x-google-marketplace:
+              type: IMAGE
+              image:
+                generatingProperties:
+                  splitByColon:
+                    before: i1.before
+                    after: i1.after
+        """)
+    result = expand_config.expand({'i1': 'gcr.io/foo:bar'}, schema)
+    self.assertEqual({
+        'i1': 'gcr.io/foo:bar',
+        'i1.before': 'gcr.io/foo',
+        'i1.after': 'bar',
+    }, result)
+
   def test_generate_password(self):
     schema = config_helper.Schema.load_yaml(
         """
