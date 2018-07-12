@@ -21,6 +21,7 @@ RUN wget -q -O /bin/kubectl \
 
 COPY marketplace/deployer_envsubst_base/* /bin/
 COPY marketplace/deployer_util/* /bin/
+COPY tag /tag
 
 RUN mkdir -p /data/manifest
 

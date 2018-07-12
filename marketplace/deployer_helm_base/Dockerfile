@@ -28,6 +28,7 @@ RUN mkdir -p /bin/helm-downloaded \
 
 COPY marketplace/deployer_helm_base/* /bin/
 COPY marketplace/deployer_util/* /bin/
+COPY tag /tag
 
 RUN mkdir -p /data/chart
 RUN mkdir -p /data-test/chart
