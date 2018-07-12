@@ -37,7 +37,7 @@ diff="$(git diff $branch origin/$branch)"
 
 if [[ ! -z "$diff" ]]; then
   echo "Make sure all changes are pushed to $branch"
-  # exit 1
+  exit 1
 fi
 
 rm -f .build/marketplace/deployer/envsubst
