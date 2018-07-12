@@ -111,13 +111,14 @@ def validate_value_types(values, schema):
           .format(k, prop.type, v))
 
 
-def generate_properties_for_image(prop, v, result):
+def generate_properties_for_image(prop, value, result):
   if prop.image.split_by_colon:
     before_name, after_name = prop.image.split_by_colon
-    parts = v.split(':', 1)
+    parts = value.split(':', 1)
     if len(parts) != 2:
       raise InvalidProperty(
-          'Property {} has a value that does not contain a colon'.format(k, v))
+          'Property {} has a value that does not contain a colon'.format(
+              prop.name, value))
     before_value, after_value = parts
     result[before_name] = before_value
     result[after_name] = after_value

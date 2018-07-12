@@ -54,7 +54,7 @@ class ExpandConfigTest(unittest.TestCase):
             x-google-marketplace:
               type: IMAGE
               image:
-                generatingProperties:
+                generatedProperties:
                   splitByColon:
                     before: i1.before
                     after: i1.after

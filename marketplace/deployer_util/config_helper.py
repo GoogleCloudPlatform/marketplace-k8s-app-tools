@@ -273,11 +273,11 @@ class SchemaXImage:
   """Wrapper class providing convenient access to IMAGE property."""
 
   def __init__(self, dictionary):
-    self._generating = dictionary.get('generatingProperties', {})
+    self._generatedProperties = dictionary.get('generatedProperties', {})
     self._split_by_colon = None
 
-    if 'splitByColon' in self._generating:
-      s = self._generating['splitByColon']
+    if 'splitByColon' in self._generatedProperties:
+      s = self._generatedProperties['splitByColon']
       if 'before' not in s:
         raise InvalidSchema(
             '"before" attribute is required within splitByColon')

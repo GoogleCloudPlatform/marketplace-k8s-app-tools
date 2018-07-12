@@ -225,7 +225,7 @@ class ConfigHelperTest(unittest.TestCase):
             x-google-marketplace:
               type: IMAGE
               image:
-                generatingProperties:
+                generatedProperties:
                   splitByColon:
                     before: image.before
                     after: image.after
