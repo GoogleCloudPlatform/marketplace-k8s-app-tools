@@ -128,6 +128,7 @@ class SchemaProperty:
     self._required = required
     self._default = dictionary.get('default', None)
     self._x = dictionary.get(XGOOGLE, None)
+    self._image = None
     self._password = None
     self._service_account = None
     self._storage_class = None
@@ -157,8 +158,11 @@ class SchemaProperty:
         raise InvalidSchema(
             'Property {} has {} without a type'.format(name, XGOOGLE))
       xt = self._x['type']
-      if xt in (XTYPE_IMAGE, XTYPE_NAME, XTYPE_NAMESPACE):
+      if xt in (XTYPE_NAME, XTYPE_NAMESPACE):
         pass
+      elif xt == XTYPE_IMAGE:
+        d = self._x.get('image', {})
+        self._image = SchemaXImage(d)
       elif xt == XTYPE_PASSWORD:
         d = self._x.get('generatedPassword', {})
         spec = {
@@ -202,6 +206,10 @@ class SchemaProperty:
     if self._x:
       return self._x['type']
     return None
+
+  @property
+  def image(self):
+    return self._image
 
   @property
   def password(self):
@@ -259,6 +267,28 @@ class SchemaProperty:
     if not isinstance(other, SchemaProperty):
       return False
     return other._name == self._name and other._d == self._d
+
+
+class SchemaXImage:
+  """Wrapper class providing convenient access to IMAGE property."""
+
+  def __init__(self, dictionary):
+    self._generatedProperties = dictionary.get('generatedProperties', {})
+    self._split_by_colon = None
+
+    if 'splitByColon' in self._generatedProperties:
+      s = self._generatedProperties['splitByColon']
+      if 'before' not in s:
+        raise InvalidSchema(
+            '"before" attribute is required within splitByColon')
+      if 'after' not in s:
+        raise InvalidSchema('"after" attribute is required within splitByColon')
+      self._split_by_colon = (s['before'], s['after'])
+
+  @property
+  def split_by_colon(self):
+    """Return 2-tuple of before- and after-colon names, or None"""
+    return self._split_by_colon
 
 
 SchemaXPassword = collections.namedtuple('SchemaXPassword',

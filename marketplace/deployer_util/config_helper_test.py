@@ -44,6 +44,11 @@ properties:
   propertyBooleanWithDefault:
     type: boolean
     default: false
+  propertyImage:
+    type: string
+    default: gcr.io/google/busybox
+    x-google-marketplace:
+      type: IMAGE
   propertyPassword:
     type: string
     x-google-marketplace:
@@ -100,6 +105,7 @@ class ConfigHelperTest(unittest.TestCase):
          'propertyNumberWithDefault',
          'propertyBoolean',
          'propertyBooleanWithDefault',
+         'propertyImage',
          'propertyPassword'},
         set(schema.properties))
     self.assertEqual(str,
@@ -135,6 +141,10 @@ class ConfigHelperTest(unittest.TestCase):
                      schema.properties['propertyBooleanWithDefault'].type)
     self.assertEqual(False,
                      schema.properties['propertyBooleanWithDefault'].default)
+    self.assertEqual(str, schema.properties['propertyImage'].type)
+    self.assertEqual('gcr.io/google/busybox',
+                     schema.properties['propertyImage'].default)
+    self.assertEqual('IMAGE', schema.properties['propertyImage'].xtype)
     self.assertEqual(str, schema.properties['propertyPassword'].type)
     self.assertIsNone(schema.properties['propertyPassword'].default)
     self.assertEqual('GENERATED_PASSWORD',
@@ -203,7 +213,26 @@ class ConfigHelperTest(unittest.TestCase):
             x-google-marketplace:
               type: IMAGE
         """)
-    self.assertIsNotNone(schema.properties['i'])
+    self.assertIsNotNone(schema.properties['i'].image)
+    self.assertIsNone(schema.properties['i'].image.split_by_colon)
+
+  def test_image_type_splitbycolon(self):
+    schema = config_helper.Schema.load_yaml(
+        """
+        properties:
+          i:
+            type: string
+            x-google-marketplace:
+              type: IMAGE
+              image:
+                generatedProperties:
+                  splitByColon:
+                    before: image.before
+                    after: image.after
+        """)
+    self.assertIsNotNone(schema.properties['i'].image)
+    self.assertEqual(('image.before', 'image.after'),
+                     schema.properties['i'].image.split_by_colon)
 
   def test_password(self):
     schema = config_helper.Schema.load_yaml(
