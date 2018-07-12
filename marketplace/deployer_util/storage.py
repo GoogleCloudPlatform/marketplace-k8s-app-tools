@@ -30,7 +30,17 @@ class InvalidPath(Exception):
 
 def load(path):
   """Returns the contents of a path as a string."""
-  bucket_name, blob_name = _parse_gs_path(path)
+  if path.startswith('gs://'):
+    return _gcs_load(path)
+  if path.startswith('file://'):
+    return _file_load(path)
+  raise ValueError('Unknown URI: {}'.format(path))
+  
+
+def _gcs_load(path):
+  """Returns a gcs object's contents as a string."""
+  _, _, bucket, blob_name = path.split('/', 3)
+
   client = _gcs_client()
   bucket = client.get_bucket(bucket_name)
   blob = bucket.blob(blob_name)
@@ -42,12 +52,8 @@ def _gcs_client():
   return google.cloud.storage.client.Client()
 
 
-def _parse_gs_path(path):
-  """Returns (bucket, blob_name) for a provided gs:/ path."""
-  if not path.startswith('gs://'):
-    raise InvalidPath('Invalid path: {}'.format(path))
-
-  # Example: gs://trironkk-testing/tmp/reporting-secret.yaml
-  _, _, bucket, blob_name = path.split('/', 3)
-
-  return bucket, blob_name
+def _file_load(path):
+  """Returns a file's contents as a string."""
+  _, _, file_path = path.split('/', 2)
+  with open(file_path, 'r') as file_handle:
+      return file_handle.read().replace('\n', '')
