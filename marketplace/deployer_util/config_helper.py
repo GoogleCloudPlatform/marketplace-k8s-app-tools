@@ -29,9 +29,10 @@ XTYPE_NAME = 'NAME'
 XTYPE_NAMESPACE = 'NAMESPACE'
 XTYPE_IMAGE = 'IMAGE'
 XTYPE_PASSWORD = 'GENERATED_PASSWORD'
+XTYPE_REPORTING_SECRET = 'REPORTING_SECRET'
 XTYPE_SERVICE_ACCOUNT = 'SERVICE_ACCOUNT'
 XTYPE_STORAGE_CLASS = 'STORAGE_CLASS'
-XTYPE_REPORTING_SECRET = 'REPORTING_SECRET'
+XTYPE_STRING = 'STRING'
 
 
 class InvalidName(Exception):
@@ -130,9 +131,10 @@ class SchemaProperty:
     self._x = dictionary.get(XGOOGLE, None)
     self._image = None
     self._password = None
+    self._reporting_secret = None
     self._service_account = None
     self._storage_class = None
-    self._reporting_secret = None
+    self._string = None
 
     if not NAME_RE.match(name):
       raise InvalidSchema('Invalid property name: {}'.format(name))
@@ -177,11 +179,15 @@ class SchemaProperty:
       elif xt == XTYPE_STORAGE_CLASS:
         d = self._x.get('storageClass', {})
         self._storage_class = SchemaXStorageClass(d)
+      elif xt == XTYPE_STRING:
+        d = self._x.get('string', {})
+        self._string = SchemaXString(d)
       elif xt == XTYPE_REPORTING_SECRET:
         d = self._x.get('reportingSecret', {})
         self._reporting_secret = SchemaXReportingSecret(d)
       else:
-        raise InvalidSchema('Property {} has an unknown type: {}'.format(name, xt))
+        raise InvalidSchema(
+            'Property {} has an unknown type: {}'.format(name, xt))
 
 
   @property
@@ -216,6 +222,10 @@ class SchemaProperty:
     return self._password
 
   @property
+  def reporting_secret(self):
+    return self._reporting_secret
+
+  @property
   def service_account(self):
     return self._service_account
 
@@ -224,8 +234,8 @@ class SchemaProperty:
     return self._storage_class
 
   @property
-  def reporting_secret(self):
-    return self._reporting_secret
+  def string(self):
+    return self._string
 
   def str_to_type(self, str_val):
     if self._type == bool:
@@ -273,11 +283,11 @@ class SchemaXImage:
   """Wrapper class providing convenient access to IMAGE property."""
 
   def __init__(self, dictionary):
-    self._generatedProperties = dictionary.get('generatedProperties', {})
     self._split_by_colon = None
 
-    if 'splitByColon' in self._generatedProperties:
-      s = self._generatedProperties['splitByColon']
+    generated_properties = dictionary.get('generatedProperties', {})
+    if 'splitByColon' in generated_properties:
+      s = generated_properties['splitByColon']
       if 'before' not in s:
         raise InvalidSchema(
             '"before" attribute is required within splitByColon')
@@ -333,7 +343,7 @@ class SchemaXServiceAccount:
 
 
 class SchemaXStorageClass:
-  """Wrapper class providing convenient access to STORAGE_CLASS property"""
+  """Wrapper class providing convenient access to STORAGE_CLASS property."""
 
   def __init__(self, dictionary):
     self._type = dictionary['type']
@@ -343,8 +353,21 @@ class SchemaXStorageClass:
     return self._type == 'SSD'
 
 
+class SchemaXString:
+  """Wrapper class providing convenient access to STRING property."""
+
+  def __init__(self, dictionary):
+    generated_properties = dictionary.get('generatedProperties', {})
+
+    self._base64_encoded = generated_properties.get('base64Encoded', None)
+
+  @property
+  def base64_encoded(self):
+    return self._base64_encoded
+
+
 class SchemaXReportingSecret:
-  """Wrapper class providing convenient access to REPORTING_SECRET property"""
+  """Wrapper class providing convenient access to REPORTING_SECRET property."""
 
   def __init__(self, dictionary):
     pass

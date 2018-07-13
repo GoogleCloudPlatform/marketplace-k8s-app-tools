@@ -436,6 +436,22 @@ class ConfigHelperTest(unittest.TestCase):
     sc = schema.properties['sc'].storage_class
     self.assertTrue(sc.ssd)
 
+  def test_xstring_base64(self):
+    schema = config_helper.Schema.load_yaml(
+        """
+        properties:
+          s:
+            type: string
+            x-google-marketplace:
+              type: STRING
+              string:
+                generatedProperties:
+                  base64Encoded: s.encoded
+        """)
+    xstring = schema.properties['s'].string
+    self.assertIsNotNone(xstring)
+    self.assertEqual('s.encoded', xstring.base64_encoded)
+
   def test_reporting_secret(self):
     schema = config_helper.Schema.load_yaml(
         """
