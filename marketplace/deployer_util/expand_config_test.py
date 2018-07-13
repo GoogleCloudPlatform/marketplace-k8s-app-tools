@@ -60,11 +60,33 @@ class ExpandConfigTest(unittest.TestCase):
                     after: i1.after
         """)
     result = expand_config.expand({'i1': 'gcr.io/foo:bar'}, schema)
-    self.assertEqual({
-        'i1': 'gcr.io/foo:bar',
-        'i1.before': 'gcr.io/foo',
-        'i1.after': 'bar',
-    }, result)
+    self.assertEqual(
+        {
+            'i1': 'gcr.io/foo:bar',
+            'i1.before': 'gcr.io/foo',
+            'i1.after': 'bar',
+        },
+        result)
+
+  def test_generate_properties_for_string_base64_encoded(self):
+    schema = config_helper.Schema.load_yaml(
+        """
+        properties:
+          s1:
+            type: string
+            x-google-marketplace:
+              type: STRING
+              string:
+                generatedProperties:
+                  base64Encoded: s1.encoded
+        """)
+    result = expand_config.expand({'s1': 'test'}, schema)
+    self.assertEqual(
+        {
+            's1': 'test',
+            's1.encoded': 'dGVzdA==',
+        },
+        result)
 
   def test_generate_password(self):
     schema = config_helper.Schema.load_yaml(
