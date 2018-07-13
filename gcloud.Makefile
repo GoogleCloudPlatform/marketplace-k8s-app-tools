@@ -2,12 +2,8 @@ ifndef __GCLOUD_MAKEFILE__
 
 __GCLOUD_MAKEFILE__ := included
 
-# Include this Makefile to automatically derive registry
-# and target namespace from the current gcloud and kubectl
-# configurations.
-# This is for convenience over having to specifying the
-# environment variables manually.
-
+# Include this Makefile to set environment context variables to sane
+# defaults based on the current working context.
 
 ifndef REGISTRY
   # We replace ':' with '/' characters to support a now-deprecated
@@ -22,7 +18,22 @@ ifndef NAMESPACE
   endif
 endif
 
+ifndef PROJECT
+  PROJECT := $(shell kubectl config current-context | sed 's/gke_//' | sed 's/_.*//')
+endif
+
+ifndef CLUSTER
+  CLUSTER := $(shell kubectl config current-context | sed 's/gke_//' | sed 's/.*_//')
+endif
+
+ifndef ZONE
+  ZONE := $(shell kubectl config current-context | sed 's/gke_//' | sed 's/[^_]*_//' | sed 's/_.*//')
+endif
+
 $(info ---- REGISTRY = $(REGISTRY))
 $(info ---- NAMESPACE = $(NAMESPACE))
+$(info ---- PROJECT = $(PROJECT))
+$(info ---- CLUSTER = $(CLUSTER))
+$(info ---- ZONE = $(ZONE))
 
 endif

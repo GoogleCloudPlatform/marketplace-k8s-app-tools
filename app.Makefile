@@ -4,6 +4,7 @@ __APP_MAKEFILE__ := included
 
 
 makefile_dir := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
+include $(makefile_dir)/marketplace.Makefile
 include $(makefile_dir)/common.Makefile
 include $(makefile_dir)/var.Makefile
 
@@ -49,10 +50,23 @@ app/build:: ;
 app/install:: app/build \
               .build/var/MARKETPLACE_TOOLS_PATH \
               .build/var/APP_DEPLOYER_IMAGE \
-              .build/var/APP_PARAMETERS
-	$(MARKETPLACE_TOOLS_PATH)/scripts/start.sh \
-	    --deployer='$(APP_DEPLOYER_IMAGE)' \
-	    --parameters='$(APP_PARAMETERS)'
+              .build/var/APP_PARAMETERS \
+              .build/marketplace/dev
+	docker run \
+	    -i \
+	    -e CLOUDSDK_API_ENDPOINT_OVERRIDES_CONTAINER \
+	    -v /var/run/docker.sock:/var/run/docker.sock \
+	    --rm \
+	    --entrypoint /bin/bash \
+	    "gcr.io/cloud-marketplace-tools/k8s/dev" \
+	    -- \
+	    /scripts/start.sh \
+	        --project='$(PROJECT)' \
+	        --cluster='$(CLUSTER)' \
+	        --zone='$(ZONE)' \
+	        --deployer='$(APP_DEPLOYER_IMAGE)' \
+	        --parameters='$(PARAMETERS)' \
+	        --entrypoint='/bin/deploy_with_tests.sh'
 
 
 # Installs the application into target namespace on the cluster.
@@ -61,11 +75,23 @@ app/install-test:: app/build \
                    .build/var/MARKETPLACE_TOOLS_PATH \
                    .build/var/APP_DEPLOYER_IMAGE \
                    .build/var/APP_PARAMETERS \
-                   .build/var/APP_TEST_PARAMETERS
-	$(MARKETPLACE_TOOLS_PATH)/scripts/start.sh \
-	    --deployer='$(APP_DEPLOYER_IMAGE)' \
-	    --parameters='$(call combined_parameters)' \
-	    --entrypoint='/bin/deploy_with_tests.sh'
+                   .build/var/APP_TEST_PARAMETERS \
+                   .build/marketplace/dev
+	docker run \
+	    -i \
+	    -e CLOUDSDK_API_ENDPOINT_OVERRIDES_CONTAINER \
+	    -v /var/run/docker.sock:/var/run/docker.sock \
+	    --rm \
+	    --entrypoint /bin/bash \
+	    "gcr.io/cloud-marketplace-tools/k8s/dev" \
+	    -- \
+	    /scripts/start.sh \
+	        --project='$(PROJECT)' \
+	        --cluster='$(CLUSTER)' \
+	        --zone='$(ZONE)' \
+	        --deployer='$(APP_DEPLOYER_IMAGE)' \
+	        --parameters='$(call combined_parameters)' \
+	        --entrypoint='/bin/deploy_with_tests.sh'
 
 
 # Uninstalls the application from the target namespace on the cluster.
@@ -84,10 +110,22 @@ app/verify: app/build \
             .build/var/MARKETPLACE_TOOLS_PATH \
             .build/var/APP_DEPLOYER_IMAGE \
             .build/var/APP_PARAMETERS \
-            .build/var/APP_TEST_PARAMETERS
-	$(MARKETPLACE_TOOLS_PATH)/scripts/driver/driver.sh \
-	    --deployer='$(APP_DEPLOYER_IMAGE)' \
-	    --parameters='$(call combined_parameters)'
+            .build/var/APP_TEST_PARAMETERS \
+            .build/marketplace/dev
+	docker run \
+	    -i \
+	    -e CLOUDSDK_API_ENDPOINT_OVERRIDES_CONTAINER \
+	    -v /var/run/docker.sock:/var/run/docker.sock \
+	    --rm \
+	    --entrypoint /bin/bash \
+	    "gcr.io/cloud-marketplace-tools/k8s/dev" \
+	    -- \
+	    /scripts/driver/driver.sh \
+	        --project='$(PROJECT)' \
+	        --cluster='$(CLUSTER)' \
+	        --zone='$(ZONE)' \
+	        --deployer='$(APP_DEPLOYER_IMAGE)' \
+	        --parameters='$(call combined_parameters)'
 
 
 # Monitors resources in the target namespace on the cluster.

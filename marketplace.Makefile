@@ -11,6 +11,19 @@ include $(makefile_dir)/common.Makefile
 	mkdir -p "$@"
 
 
+.build/marketplace/dev: $(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_util/* \
+                        $(MARKETPLACE_TOOLS_PATH)/marketplace/dev/* \
+                        $(MARKETPLACE_TOOLS_PATH)/scripts/* \
+                        | .build/marketplace
+	$(call print_target)
+	cd $(MARKETPLACE_TOOLS_PATH) \
+	&& docker build \
+	    --tag "gcr.io/cloud-marketplace-tools/k8s/dev" \
+	    -f marketplace/dev/Dockerfile \
+	    .
+	@touch "$@"
+
+
 .build/marketplace/deployer: | .build/marketplace
 	mkdir -p "$@"
 

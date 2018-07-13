@@ -19,6 +19,18 @@ set -eo pipefail
 for i in "$@"
 do
 case $i in
+  --project=*)
+    project="${i#*=}"
+    shift
+    ;;
+  --cluster=*)
+    cluster="${i#*=}"
+    shift
+    ;;
+  --zone=*)
+    zone="${i#*=}"
+    shift
+    ;;
   --deployer=*)
     deployer="${i#*=}"
     shift
@@ -38,23 +50,41 @@ case $i in
 esac
 done
 
+[[ -z "$project" ]] && >&2 echo "--project required" && exit 1
+[[ -z "$cluster" ]] && >&2 echo "--cluster required" && exit 1
+[[ -z "$zone" ]] && >&2 echo "--zone required" && exit 1
 [[ -z "$deployer" ]] && >&2 echo "--deployer required" && exit 1
 [[ -z "$parameters" ]] && >&2 echo "--parameters required" && exit 1
 [[ -z "$entrypoint" ]] && entrypoint="/bin/deploy.sh"
 
-name="$( \
-  echo "${parameters}" \
-  | docker run -i --entrypoint=/bin/print_config.py --rm "${deployer}" \
-    --values_file=- --param '{"x-google-marketplace": {"type": "NAME"}}')"
-namespace="$( \
-  echo "${parameters}" \
-  | docker run -i --entrypoint=/bin/print_config.py --rm "${deployer}" \
-    --values_file=- --param '{"x-google-marketplace": {"type": "NAMESPACE"}}')"
-app_version="$( \
-  docker run -i --entrypoint=/bin/bash --rm "${deployer}" \
-    -c 'cat /data/schema.yaml | yaml2json' \
-  | docker run -i --entrypoint=jq --rm "${deployer}" \
-    -r 'if .application_api_version then .application_api_version else "v1alpha1" end')"
+gcloud container clusters get-credentials "$cluster" \
+    --zone "$zone" \
+    --project "$project" 
+
+docker run \
+    -i \
+    --entrypoint=/bin/bash \
+    --rm "${deployer}" \
+    -c 'cat /data/schema.yaml' \
+> /tmp/schema.yaml
+
+echo "$parameters" > /tmp/values.json
+
+name="$(print_config.py \
+    --schema_file=/tmp/schema.yaml \
+    --values_file=/tmp/values.json \
+    --param '{"x-google-marketplace": {"type": "NAME"}}')"
+namespace="$(print_config.py \
+    --schema_file=/tmp/schema.yaml \
+    --values_file=/tmp/values.json \
+    --param '{"x-google-marketplace": {"type": "NAMESPACE"}}')"
+
+app_version="$(cat /tmp/schema.yaml \
+  | yaml2json \
+  | jq -r 'if .application_api_version
+           then .application_api_version
+           else "v1alpha1"
+           end')"
 
 # Create Application instance.
 kubectl apply --namespace="$namespace" --filename=- <<EOF
@@ -74,17 +104,27 @@ app_uid=$(kubectl get "applications/$name" \
   --namespace="$namespace" \
   --output=jsonpath='{.metadata.uid}')
 app_api_version=$(kubectl get "applications/$name" \
-  --namespace="$NAMESPACE" \
+  --namespace="$namespace" \
   --output=jsonpath='{.apiVersion}')
 
 # Provisions external resource dependencies and the deployer resources.
 # We set the application as the owner for all of these resources.
 echo "${parameters}" \
-  | docker run -i --entrypoint=/bin/provision.py --rm "${deployer}" \
-    --values_file=- --deployer_image="${deployer}" --deployer_entrypoint="${entrypoint}" \
-  | docker run -i --entrypoint=/bin/set_app_labels.py --rm "${deployer}" \
-    --manifests=- --dest=- --name="${name}" --namespace="${namespace}" \
-  | docker run -i --entrypoint=/bin/set_ownership.py --rm "${deployer}" \
-    --manifests=- --dest=- --noapp \
-    --app_name="${name}" --app_uid="${app_uid}" --app_api_version="${app_api_version}" \
+  | provision.py \
+    --schema_file=/tmp/schema.yaml \
+    --values_file=/tmp/values.json \
+    --deployer_image="${deployer}" \
+    --deployer_entrypoint="${entrypoint}" \
+  | set_app_labels.py \
+    --manifests=- \
+    --dest=- \
+    --name="${name}" \
+    --namespace="${namespace}" \
+  | set_ownership.py \
+    --manifests=- \
+    --dest=- \
+    --noapp \
+    --app_name="${name}" \
+    --app_uid="${app_uid}" \
+    --app_api_version="${app_api_version}" \
   | kubectl apply --namespace="$namespace" --filename=-

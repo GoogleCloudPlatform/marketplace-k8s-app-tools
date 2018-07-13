@@ -19,6 +19,18 @@ set -eo pipefail
 for i in "$@"
 do
 case $i in
+  --project=*)
+    project="${i#*=}"
+    shift
+    ;;
+  --cluster=*)
+    cluster="${i#*=}"
+    shift
+    ;;
+  --zone=*)
+    zone="${i#*=}"
+    shift
+    ;;
   --deployer=*)
     deployer="${i#*=}"
     shift
@@ -38,6 +50,9 @@ case $i in
 esac
 done
 
+[[ -z "$project" ]] && >&2 echo "--project required" && exit 1
+[[ -z "$cluster" ]] && >&2 echo "--cluster required" && exit 1
+[[ -z "$zone" ]] && >&2 echo "--zone required" && exit 1
 [[ -z "$deployer" ]] && deployer="$APP_DEPLOYER_IMAGE"
 [[ -z "$parameters" ]] && parameters="{}"
 [[ -z "$wait_timeout" ]] && wait_timeout=600
@@ -46,10 +61,11 @@ done
 DIR="$(dirname $0)"
 echo $DIR
 
-namespace_key="$(docker run --entrypoint=/bin/extract_schema_key.py --rm "$deployer" --type NAMESPACE)"
-NAME="$(echo "$parameters" \
-    | docker run -i --entrypoint=/bin/print_config.py --rm "$deployer" \
-    --values_file=- --param '{"x-google-marketplace": {"type": "NAME"}}')"
+namespace_key="$(extract_schema_key.py --rm "$deployer" --type NAMESPACE)"
+NAME="$(print_config.py \
+    --schema_file=/tmp/schema.yaml \
+    --values_file=/tmp/values.json \
+    --param '{"x-google-marketplace": {"type": "NAME"}}')"
 
 # use base64 for BSD systems where tr won't handle illegal characters
 export NAMESPACE="apptest-$(cat /dev/urandom \
@@ -94,10 +110,14 @@ parameters=$(echo "$parameters" \
 echo "INFO Parameters: $parameters"
 
 echo "INFO Initializes the deployer container which will deploy all the application components"
-$DIR/../start.sh \
-  --deployer="$deployer" \
-  --parameters="$parameters" \
-  --entrypoint='/bin/deploy_with_tests.sh' \
+echo "$CLOUDSDK_API_ENDPOINT_OVERRIDES_CONTAINER"
+/scripts/start.sh \
+    --project="$(kubectl config current-context | sed 's/gke_//' | sed 's/_.*//')" \
+    --cluster="$(kubectl config current-context | sed 's/gke_//' | sed 's/.*_//')" \
+    --zone="$(kubectl config current-context | sed 's/gke_//' | sed 's/[^_]*_//' | sed 's/_.*//')" \
+    --deployer="$deployer" \
+    --parameters="$parameters" \
+    --entrypoint='/bin/deploy_with_tests.sh' \
   || clean_and_exit "ERROR Failed to start deployer"
 
 echo "INFO wait for the deployer to succeed"

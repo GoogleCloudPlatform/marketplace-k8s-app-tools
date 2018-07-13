@@ -39,7 +39,7 @@ def load(path):
 
 def _gcs_load(path):
   """Returns a gcs object's contents as a string."""
-  _, _, bucket, blob_name = path.split('/', 3)
+  _, _, bucket_name, blob_name = path.split('/', 3)
 
   client = _gcs_client()
   bucket = client.get_bucket(bucket_name)
