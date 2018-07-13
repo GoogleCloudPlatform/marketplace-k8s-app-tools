@@ -74,7 +74,7 @@ app_uid=$(kubectl get "applications/$name" \
   --namespace="$namespace" \
   --output=jsonpath='{.metadata.uid}')
 app_api_version=$(kubectl get "applications/$name" \
-  --namespace="$NAMESPACE" \
+  --namespace="$namespace" \
   --output=jsonpath='{.apiVersion}')
 
 # Provisions external resource dependencies and the deployer resources.
