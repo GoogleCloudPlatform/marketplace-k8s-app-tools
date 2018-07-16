@@ -21,6 +21,7 @@ __VAR_MAKEFILE__ := included
 # update the file.
 .build/var/%: .build/var/%-required .build/var/%-phony ;
 
+.build/var/%-optional: .build/var/%-phony ;
 
 .build/var:
 	mkdir -p .build/var

@@ -19,18 +19,6 @@ set -eo pipefail
 for i in "$@"
 do
 case $i in
-  --project=*)
-    project="${i#*=}"
-    shift
-    ;;
-  --cluster=*)
-    cluster="${i#*=}"
-    shift
-    ;;
-  --zone=*)
-    zone="${i#*=}"
-    shift
-    ;;
   --deployer=*)
     deployer="${i#*=}"
     shift
@@ -50,16 +38,9 @@ case $i in
 esac
 done
 
-[[ -z "$project" ]] && >&2 echo "--project required" && exit 1
-[[ -z "$cluster" ]] && >&2 echo "--cluster required" && exit 1
-[[ -z "$zone" ]] && >&2 echo "--zone required" && exit 1
 [[ -z "$deployer" ]] && >&2 echo "--deployer required" && exit 1
 [[ -z "$parameters" ]] && >&2 echo "--parameters required" && exit 1
 [[ -z "$entrypoint" ]] && entrypoint="/bin/deploy.sh"
-
-gcloud container clusters get-credentials "$cluster" \
-    --zone "$zone" \
-    --project "$project" 
 
 docker run \
     -i \

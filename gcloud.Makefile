@@ -18,22 +18,7 @@ ifndef NAMESPACE
   endif
 endif
 
-ifndef PROJECT
-  PROJECT := $(shell kubectl config current-context | sed 's/gke_//' | sed 's/_.*//')
-endif
-
-ifndef CLUSTER
-  CLUSTER := $(shell kubectl config current-context | sed 's/gke_//' | sed 's/.*_//')
-endif
-
-ifndef ZONE
-  ZONE := $(shell kubectl config current-context | sed 's/gke_//' | sed 's/[^_]*_//' | sed 's/_.*//')
-endif
-
 $(info ---- REGISTRY = $(REGISTRY))
 $(info ---- NAMESPACE = $(NAMESPACE))
-$(info ---- PROJECT = $(PROJECT))
-$(info ---- CLUSTER = $(CLUSTER))
-$(info ---- ZONE = $(ZONE))
 
 endif
