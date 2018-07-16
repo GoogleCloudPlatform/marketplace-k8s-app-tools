@@ -80,6 +80,12 @@ def expand(values_dict, schema):
             'Invalid value for IMAGE property {}: {}'.format(k, v))
       generate_properties_for_image(prop, v, generated)
 
+    if v is not None and prop.string:
+      if not isinstance(v, str):
+        raise InvalidProperty(
+            'Invalid value for STRING property {}: {}'.format(k, v))
+      generate_properties_for_string(prop, v, generated)
+
     if v is not None:
       result[k] = v
 
@@ -122,6 +128,11 @@ def generate_properties_for_image(prop, value, result):
     before_value, after_value = parts
     result[before_name] = before_value
     result[after_name] = after_value
+
+
+def generate_properties_for_string(prop, value, result):
+  if prop.string.base64_encoded:
+    result[prop.string.base64_encoded] = base64.b64encode(value)
 
 
 def generate_password(config):
