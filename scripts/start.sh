@@ -47,13 +47,18 @@ name="$( \
   | docker run -i --entrypoint=/bin/print_config.py --rm "${deployer}" \
     --values_file=- --param '{"x-google-marketplace": {"type": "NAME"}}')"
 namespace="$( \
-  echo "${parameters}"\
+  echo "${parameters}" \
   | docker run -i --entrypoint=/bin/print_config.py --rm "${deployer}" \
     --values_file=- --param '{"x-google-marketplace": {"type": "NAMESPACE"}}')"
+app_version="$( \
+  docker run -i --entrypoint=/bin/bash --rm "${deployer}" \
+    -c 'cat /data/schema.yaml | yaml2json' \
+  | docker run -i --entrypoint=jq --rm "${deployer}" \
+    -r 'if .application_api_version then .application_api_version else "v1alpha1" end')"
 
 # Create Application instance.
 kubectl apply --namespace="$namespace" --filename=- <<EOF
-apiVersion: app.k8s.io/v1alpha1
+apiVersion: "app.k8s.io/${app_version}"
 kind: Application
 metadata:
   name: "${name}"
@@ -69,7 +74,7 @@ app_uid=$(kubectl get "applications/$name" \
   --namespace="$namespace" \
   --output=jsonpath='{.metadata.uid}')
 app_api_version=$(kubectl get "applications/$name" \
-  --namespace="$NAMESPACE" \
+  --namespace="$namespace" \
   --output=jsonpath='{.apiVersion}')
 
 # Provisions external resource dependencies and the deployer resources.

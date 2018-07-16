@@ -60,6 +60,7 @@ def expand(values_dict, schema):
       raise InvalidProperty('No such property defined in schema: {}'.format(k))
 
   result = {}
+  generated = {}
   for k, prop in schema.properties.iteritems():
     v = values_dict.get(k, None)
 
@@ -73,14 +74,30 @@ def expand(values_dict, schema):
     if v is None and prop.default is not None:
       v = prop.default
 
-    if v is not None:
-      if not isinstance(v, prop.type):
+    if v is not None and prop.image:
+      if not isinstance(v, str):
         raise InvalidProperty(
-            'Property {} is expected to be of type {}, but has value: {}'
-            .format(k, prop.type, v))
+            'Invalid value for IMAGE property {}: {}'.format(k, v))
+      generate_properties_for_image(prop, v, generated)
+
+    if v is not None and prop.string:
+      if not isinstance(v, str):
+        raise InvalidProperty(
+            'Invalid value for STRING property {}: {}'.format(k, v))
+      generate_properties_for_string(prop, v, generated)
+
+    if v is not None:
       result[k] = v
 
+  validate_value_types(result, schema)
   validate_required_props(result, schema)
+
+  for k, v in generated.iteritems():
+    if k in result:
+      raise InvalidProperty(
+        'The property is to be generated, but already has a value: {}'
+        .format(k))
+    result[k] = v
   return result
 
 
@@ -89,6 +106,33 @@ def validate_required_props(values, schema):
     if k not in values:
       raise MissingRequiredProperty(
           'No value for required property: {}'.format(k))
+
+
+def validate_value_types(values, schema):
+  for k, v in values.iteritems():
+    prop = schema.properties[k]
+    if not isinstance(v, prop.type):
+      raise InvalidProperty(
+          'Property {} is expected to be of type {}, but has value: {}'
+          .format(k, prop.type, v))
+
+
+def generate_properties_for_image(prop, value, result):
+  if prop.image.split_by_colon:
+    before_name, after_name = prop.image.split_by_colon
+    parts = value.split(':', 1)
+    if len(parts) != 2:
+      raise InvalidProperty(
+          'Property {} has a value that does not contain a colon'.format(
+              prop.name, value))
+    before_value, after_value = parts
+    result[before_name] = before_value
+    result[after_name] = after_value
+
+
+def generate_properties_for_string(prop, value, result):
+  if prop.string.base64_encoded:
+    result[prop.string.base64_encoded] = base64.b64encode(value)
 
 
 def generate_password(config):
