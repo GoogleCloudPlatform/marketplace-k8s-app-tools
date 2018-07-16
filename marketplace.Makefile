@@ -10,17 +10,36 @@ include $(makefile_dir)/common.Makefile
 .build/marketplace: | .build
 	mkdir -p "$@"
 
-
 .build/marketplace/dev: $(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_util/* \
                         $(MARKETPLACE_TOOLS_PATH)/marketplace/dev/* \
                         $(MARKETPLACE_TOOLS_PATH)/scripts/* \
+                        $(MARKETPLACE_TOOLS_PATH)/marketplace.Makefile \
+                        .build/var/SERVICE_ACCOUNT_JSON_FILE-optional \
                         | .build/marketplace
 	$(call print_target)
-	cd $(MARKETPLACE_TOOLS_PATH) \
-	&& docker build \
+
+	# Note: This approach is ugly and doesn't quite work - docker
+	# build seems to be ignoring .build/ files. Probably better
+	# to have an init that checks for files mounted in predictable
+	# places.
+	set -x ; \
+	if [[ ! -z "$(SERVICE_ACCOUNT_JSON_FILE)" ]]; then \
+	    mkdir -p "$(MARKETPLACE_TOOLS_PATH)/.build/marketplace" ; \
+	    cp "$(realpath $(SERVICE_ACCOUNT_JSON_FILE))" "$(MARKETPLACE_TOOLS_PATH)/.build/marketplace/service_account.json" ; \
+	    export SERVICE_ACCOUNT_JSON_FILE="$(MARKETPLACE_TOOLS_PATH)/.build/marketplace/service_account.json" ; \
+	fi ; \
+	cd "$(MARKETPLACE_TOOLS_PATH)" ; \
+	if [[ -z "$(SERVICE_ACCOUNT_JSON_FILE)" ]]; then \
+	    export SERVICE_ACCOUNT_JSON_FILE=.build/blank ; \
+	    touch "$$SERVICE_ACCOUNT_JSON_FILE" ; \
+	fi ; \
+	find . | grep .build ; \
+	docker build \
+	    --build-arg SERVICE_ACCOUNT_JSON_FILE="$$SERVICE_ACCOUNT_JSON_FILE" \
 	    --tag "gcr.io/cloud-marketplace-tools/k8s/dev" \
 	    -f marketplace/dev/Dockerfile \
-	    .
+	    . ; \
+	rm "$$SERVICE_ACCOUNT_JSON_FILE"
 	@touch "$@"
 
 

@@ -31,4 +31,11 @@ COPY scripts/* /scripts/
 
 COPY marketplace/dev/bash_profile /root/.bashrc
 
+ARG SERVICE_ACCOUNT_JSON_FILE
+COPY ${SERVICE_ACCOUNT_JSON_FILE} /root/service_account.json
+RUN [ -s /root/service_account.json ] \
+    && gcloud auth activate-service-account --key-file=/root/service_account.json \
+    || >&2 echo 'Skipping service account activation.'
+
+
 ENTRYPOINT /bin/bash
