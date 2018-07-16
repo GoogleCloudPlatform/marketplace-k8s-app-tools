@@ -376,7 +376,7 @@ properties:
 
 Defining a `StorageClass` as a resource to be deployed will cause deployer to fail with authentication errors,
 because the deployer doesn't run with privileges that allow creating them. 
-All service accounts need to be defined as parameters in `schema.yaml`.
+All storage classes need to be defined as parameters in `schema.yaml`.
 
 ```yaml
 properties:
