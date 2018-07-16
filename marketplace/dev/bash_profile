@@ -1,0 +1,5 @@
+echo "TRIGGERED!"
+
+export FOO=bar
+
+touch /tmp/i_was_here

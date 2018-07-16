@@ -3,7 +3,7 @@ FROM gcr.io/cloud-builders/docker
 RUN apt-get update && apt-get install -y --no-install-recommends \
     bash \
     ca-certificates \
-		curl \
+    curl \
     gettext \
     jq \
     python \
@@ -28,5 +28,7 @@ RUN wget -q -O /usr/bin/google-cloud-sdk-199.0.0-linux-x86_64.tar.gz \
 
 COPY marketplace/deployer_util/* /bin/
 COPY scripts/* /scripts/
+
+COPY marketplace/dev/bash_profile /root/.bashrc
 
 ENTRYPOINT /bin/bash
