@@ -42,49 +42,16 @@ done
 [[ -z "$parameters" ]] && >&2 echo "--parameters required" && exit 1
 [[ -z "$entrypoint" ]] && entrypoint="/bin/deploy.sh"
 
-name="$( \
-  echo "${parameters}" \
-  | docker run -i --entrypoint=/bin/print_config.py --rm "${deployer}" \
-    --values_file=- --param '{"x-google-marketplace": {"type": "NAME"}}')"
-namespace="$( \
-  echo "${parameters}" \
-  | docker run -i --entrypoint=/bin/print_config.py --rm "${deployer}" \
-    --values_file=- --param '{"x-google-marketplace": {"type": "NAMESPACE"}}')"
-app_version="$( \
-  docker run -i --entrypoint=/bin/bash --rm "${deployer}" \
-    -c 'cat /data/schema.yaml | yaml2json' \
-  | docker run -i --entrypoint=jq --rm "${deployer}" \
-    -r 'if .application_api_version then .application_api_version else "v1alpha1" end')"
-
-# Create Application instance.
-kubectl apply --namespace="$namespace" --filename=- <<EOF
-apiVersion: "app.k8s.io/${app_version}"
-kind: Application
-metadata:
-  name: "${name}"
-  namespace: "${namespace}"
-spec:
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: "${name}"
-  assemblyPhase: "Pending"
-EOF
-
-app_uid=$(kubectl get "applications/$name" \
-  --namespace="$namespace" \
-  --output=jsonpath='{.metadata.uid}')
-app_api_version=$(kubectl get "applications/$name" \
-  --namespace="$namespace" \
-  --output=jsonpath='{.apiVersion}')
-
-# Provisions external resource dependencies and the deployer resources.
-# We set the application as the owner for all of these resources.
-echo "${parameters}" \
-  | docker run -i --entrypoint=/bin/provision.py --rm "${deployer}" \
-    --values_file=- --deployer_image="${deployer}" --deployer_entrypoint="${entrypoint}" \
-  | docker run -i --entrypoint=/bin/set_app_labels.py --rm "${deployer}" \
-    --manifests=- --dest=- --name="${name}" --namespace="${namespace}" \
-  | docker run -i --entrypoint=/bin/set_ownership.py --rm "${deployer}" \
-    --manifests=- --dest=- --noapp \
-    --app_name="${name}" --app_uid="${app_uid}" --app_api_version="${app_api_version}" \
-  | kubectl apply --namespace="$namespace" --filename=-
+docker run \
+    --interactive \
+    --tty \
+    --volume "/var/run/docker.sock:/var/run/docker.sock:ro" \
+    --volume "${KUBECONFIG:-$HOME/.kube}:/root/mount/.kube:ro" \
+    --volume "$HOME/.config/gcloud:/root/.config/gcloud:ro" \
+    --rm \
+    "gcr.io/cloud-marketplace-tools/k8s/dev" \
+    -- \
+    /scripts/start_internal.sh \
+          --deployer="$deployer" \
+          --parameters="$parameters" \
+          --entrypoint="$entrypoint"

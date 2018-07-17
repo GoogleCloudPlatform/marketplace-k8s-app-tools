@@ -4,6 +4,7 @@ __APP_MAKEFILE__ := included
 
 
 makefile_dir := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
+include $(makefile_dir)/marketplace.Makefile
 include $(makefile_dir)/common.Makefile
 include $(makefile_dir)/var.Makefile
 
@@ -49,10 +50,13 @@ app/build:: ;
 app/install:: app/build \
               .build/var/MARKETPLACE_TOOLS_PATH \
               .build/var/APP_DEPLOYER_IMAGE \
-              .build/var/APP_PARAMETERS
-	$(MARKETPLACE_TOOLS_PATH)/scripts/start.sh \
+              .build/var/APP_PARAMETERS \
+              .build/marketplace/dev
+	$(call print_target)
+	"$(MARKETPLACE_TOOLS_PATH)/scripts/start.sh" \
 	    --deployer='$(APP_DEPLOYER_IMAGE)' \
-	    --parameters='$(APP_PARAMETERS)'
+	    --parameters='$(APP_PARAMETERS)' \
+	    --entrypoint='/bin/deploy.sh'
 
 
 # Installs the application into target namespace on the cluster.
@@ -61,8 +65,10 @@ app/install-test:: app/build \
                    .build/var/MARKETPLACE_TOOLS_PATH \
                    .build/var/APP_DEPLOYER_IMAGE \
                    .build/var/APP_PARAMETERS \
-                   .build/var/APP_TEST_PARAMETERS
-	$(MARKETPLACE_TOOLS_PATH)/scripts/start.sh \
+                   .build/var/APP_TEST_PARAMETERS \
+                   .build/marketplace/dev
+	$(call print_target)
+	"$(MARKETPLACE_TOOLS_PATH)/scripts/start.sh" \
 	    --deployer='$(APP_DEPLOYER_IMAGE)' \
 	    --parameters='$(call combined_parameters)' \
 	    --entrypoint='/bin/deploy_with_tests.sh'
@@ -72,7 +78,9 @@ app/install-test:: app/build \
 .PHONY: app/uninstall
 app/uninstall: .build/var/MARKETPLACE_TOOLS_PATH \
                .build/var/APP_DEPLOYER_IMAGE \
-               .build/var/APP_PARAMETERS
+               .build/var/APP_PARAMETERS \
+               .build/marketplace/dev
+	$(call print_target)
 	$(MARKETPLACE_TOOLS_PATH)/scripts/stop.sh \
 	    --namespace='$(call namespace_parameter)' \
 	    --name='$(call name_parameter)'
@@ -84,8 +92,10 @@ app/verify: app/build \
             .build/var/MARKETPLACE_TOOLS_PATH \
             .build/var/APP_DEPLOYER_IMAGE \
             .build/var/APP_PARAMETERS \
-            .build/var/APP_TEST_PARAMETERS
-	$(MARKETPLACE_TOOLS_PATH)/scripts/driver/driver.sh \
+            .build/var/APP_TEST_PARAMETERS \
+            .build/marketplace/dev
+	$(call print_target)
+	"$(MARKETPLACE_TOOLS_PATH)/scripts/driver/driver.sh" \
 	    --deployer='$(APP_DEPLOYER_IMAGE)' \
 	    --parameters='$(call combined_parameters)'
 
@@ -96,6 +106,7 @@ app/verify: app/build \
 app/watch: .build/var/MARKETPLACE_TOOLS_PATH \
            .build/var/APP_DEPLOYER_IMAGE \
            .build/var/APP_PARAMETERS
+	$(call print_target)
 	$(MARKETPLACE_TOOLS_PATH)/scripts/watch.sh \
 	    --namespace='$(call namespace_parameter)'
 

@@ -1,0 +1,114 @@
+#!/bin/bash
+#
+# Copyright 2018 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+set -eo pipefail
+
+for i in "$@"
+do
+case $i in
+  --deployer=*)
+    deployer="${i#*=}"
+    shift
+    ;;
+  --parameters=*)
+    parameters="${i#*=}"
+    shift
+    ;;
+  --entrypoint=*)
+    entrypoint="${i#*=}"
+    shift
+    ;;
+  *)
+    >&2 echo "Unrecognized flag: $i"
+    exit 1
+    ;;
+esac
+done
+
+[[ -z "$deployer" ]] && >&2 echo "--deployer required" && exit 1
+[[ -z "$parameters" ]] && >&2 echo "--parameters required" && exit 1
+[[ -z "$entrypoint" ]] && entrypoint="/bin/deploy.sh"
+
+# Mount kubectl configuration.
+mount_kubeconfig.sh
+
+# Extract schema and values files.
+docker run \
+    -i \
+    --entrypoint=/bin/bash \
+    --rm "${deployer}" \
+    -c 'cat /data/schema.yaml' \
+> /data/schema.yaml
+echo "$parameters" \
+  | json2yaml \
+> /data/values.yaml
+
+# Extract name, namespace, and api version.
+name="$(print_config.py \
+    --schema_file=/data/schema.yaml \
+    --values_file=/data/values.yaml \
+    --param='{"x-google-marketplace": {"type": "NAME"}}')"
+namespace="$(print_config.py \
+    --schema_file=/data/schema.yaml \
+    --values_file=/data/values.yaml \
+    --param='{"x-google-marketplace": {"type": "NAMESPACE"}}')"
+app_version="$(cat /data/schema.yaml \
+  | yaml2json \
+  | jq -r 'if .application_api_version
+           then .application_api_version
+           else "v1alpha1"
+           end')"
+
+# Create Application instance.
+kubectl apply --namespace="$namespace" --filename=- <<EOF
+apiVersion: "app.k8s.io/${app_version}"
+kind: Application
+metadata:
+  name: "${name}"
+  namespace: "${namespace}"
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: "${name}"
+  assemblyPhase: "Pending"
+EOF
+
+app_uid=$(kubectl get "applications/$name" \
+  --namespace="$namespace" \
+  --output=jsonpath='{.metadata.uid}')
+
+# Provisions external resource dependencies and the deployer resources.
+# We set the application as the owner for all of these resources.
+echo "${parameters}" \
+  | provision.py \
+    --values_file=- \
+    --deployer_image="${deployer}" \
+    --deployer_entrypoint="${entrypoint}" \
+  | set_app_labels.py \
+    --manifests=- \
+    --dest=- \
+    --name="${name}" \
+    --namespace="${namespace}" \
+  | set_ownership.py \
+    --manifests=- \
+    --dest=- \
+    --noapp \
+    --app_name="${name}" \
+    --app_uid="${app_uid}" \
+    --app_api_version="${app_version}" \
+  | kubectl apply \
+    --namespace="$namespace" \
+    --filename=-
