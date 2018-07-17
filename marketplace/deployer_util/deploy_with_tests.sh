@@ -14,20 +14,90 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+INGRESS_IP=127.0.0.1
+
 set -eox pipefail
 
-# This is the entry point for the test deployment
+get_domain_name() {
+  echo "$NAME.$INGRESS_IP.xip.io"
+}
 
-overlay_test_schema.py \
-  --orig "/data-test/schema.yaml" \
-  --dest "/data/schema.yaml"
-rm -f /data-test/schema.yaml
+# Installs CloudBees Jenkins Enterprise
+install_cje() {
+    local source=${1:?}
+    local install_file; install_file=$(mktemp)
+    cp $source $install_file
+    
+    # Set domain
+    sed -i -e "s#cje.example.com#$(get_domain_name)#" "$install_file"
+    kubectl apply -f "$install_file"
+}
+
+# Installs ingress controller
+install_ingress_controller() {
+    if [[ -z $(kubectl get svc | grep $NAME-ingress-nginx ) ]]; then
+      local source=${1:?}
+      local install_file; install_file=$(mktemp)
+      cp $source $install_file
+      kubectl apply -f "$install_file"
+      echo "Installed ingress controller."
+    else
+      echo "Ingress controller already exists."
+    fi
+    
+    
+    while [[ "$(kubectl get svc $NAME-ingress-nginx -o jsonpath='{.status.loadBalancer.ingress[0].ip}')" = '' ]]; do sleep 3; done
+    INGRESS_IP=$(kubectl get svc $NAME-ingress-nginx  -o jsonpath='{.status.loadBalancer.ingress[0].ip}' | sed 's/"//g')
+    echo "NGINX INGRESS: $INGRESS_IP"
+}
+
+#create self-signed cert
+create_cert(){
+  local source=/data/server.config
+  local config_file; config_file=$(mktemp)
+  cp $source $config_file
+
+  sed -i -e "s#cje.example.com#$(get_domain_name)#" "$config_file"
+
+  openssl req -config "$config_file" -new -newkey rsa:2048 -nodes -keyout server.key -out server.csr
+
+  echo "Created server.key"
+  echo "Created server.csr"
+
+  openssl x509 -req -days 365 -in server.csr -signkey server.key -out server.crt
+  echo "Created server.crt (self-signed)"
+
+  kubectl create secret tls $NAME-tls --cert=server.crt --key=server.key
+}
+
+# This is the entry point for the production deployment
+
+# If any command returns with non-zero exit code, set -e will cause the script
+# to exit. Prior to exit, set App assembly status to "Failed".
+handle_failure() {
+  code=$?
+  if [[ -z "$NAME" ]] || [[ -z "$NAMESPACE" ]]; then
+    # /bin/expand_config.py might have failed.
+    # We fall back to the unexpanded params to get the name and namespace.
+    NAME="$(/bin/print_config.py --param '{"x-google-marketplace": {"type": "NAME"}}' \
+            --values_file /data/values.yaml --values_dir /data/values)"
+    NAMESPACE="$(/bin/print_config.py --param '{"x-google-marketplace": {"type": "NAMESPACE"}}' \
+                 --values_file /data/values.yaml --values_dir /data/values)"
+    export NAME
+    export NAMESPACE
+  fi
+  patch_assembly_phase.sh --status="Failed"
+  exit $code
+}
+trap "handle_failure" EXIT
 
 /bin/expand_config.py
-export NAME="$(/bin/print_config.py --param '{"x-google-marketplace": {"type": "NAME"}}')"
-export NAMESPACE="$(/bin/print_config.py --param '{"x-google-marketplace": {"type": "NAMESPACE"}}')"
+NAME="$(/bin/print_config.py --param '{"x-google-marketplace": {"type": "NAME"}}')"
+NAMESPACE="$(/bin/print_config.py --param '{"x-google-marketplace": {"type": "NAMESPACE"}}')"
+export NAME
+export NAMESPACE
 
-echo "Deploying application \"$NAME\" in test mode"
+echo "Deploying application \"$NAME\""
 
 app_uid=$(kubectl get "applications/$NAME" \
   --namespace="$NAMESPACE" \
@@ -36,41 +106,45 @@ app_api_version=$(kubectl get "applications/$NAME" \
   --namespace="$NAMESPACE" \
   --output=jsonpath='{.apiVersion}')
 
-create_manifests.sh --mode="test"
+create_manifests.sh
 
+install_ingress_controller "/data/manifest-ingress-expanded/nginx.yaml"
+
+###cje###
 # Assign owner references for the resources.
 /bin/set_ownership.py \
   --app_name "$NAME" \
   --app_uid "$app_uid" \
   --app_api_version "$app_api_version" \
   --manifests "/data/manifest-expanded" \
-  --dest "/data/resources.yaml"
+  --dest "/data/cje.yaml"
 
-separate_tester_resources.py \
-  --app_uid "$app_uid" \
-  --app_name "$NAME" \
-  --app_api_version "$app_api_version" \
-  --manifests "/data/resources.yaml" \
-  --out_manifests "/data/resources.yaml" \
-  --out_test_manifests "/data/tester.yaml"
+# Ensure assembly phase is "Pending", until successful kubectl apply.
+/bin/setassemblyphase.py \
+  --manifest "/data/cje.yaml" \
+  --status "Pending"
 
-# Apply the manifest.
-kubectl apply --namespace="$NAMESPACE" --filename="/data/resources.yaml"
+#generate a self-signed cert
+create_cert
+
+install_cje "/data/cje.yaml"
+
+sleep 20
+
+kubectl create secret generic initialAdminPassword --from-literal=password=$(kubectl exec $NAME-cjoc-0 -n $NAMESPACE -- cat /var/jenkins_home/secrets/initialAdminPassword)
 
 patch_assembly_phase.sh --status="Success"
 
-wait_for_ready.py \
-  --name $NAME \
-  --namespace $NAMESPACE \
-  --timeout 300
+clean_iam_resources.sh
 
-tester_manifest="/data/tester.yaml"
-if [[ -e "$tester_manifest" ]]; then
-  cat $tester_manifest
+echo "CloudBees Jenkins Enterprise is installed and running at http://$(get_domain_name)/cjoc."
 
-  run_tester.py \
-    --namespace $NAMESPACE \
-    --manifest $tester_manifest
+# Test #1 console validation
+if curl -skSLf "http://$(get_domain_name)/cjoc/login" | grep "Unlock Jenkins"; then
+  echo "CloudBees Core setup wizard is available. Test passed."
+else
+  echo "CloudBees Core setup wizard is NOT available. Test failed."
+  exit 1
 fi
 
-clean_iam_resources.sh
+trap - EXIT

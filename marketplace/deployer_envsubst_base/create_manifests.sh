@@ -40,6 +40,8 @@ echo "Creating the manifests for the kubernetes resources that build the applica
 data_dir="/data"
 manifest_dir="$data_dir/manifest-expanded"
 mkdir "$manifest_dir"
+manifest_ingress_dir="$data_dir/manifest-ingress-expanded"
+mkdir "$manifest_ingress_dir"
 
 # Overwrite the templates using the test templates
 if [[ "$mode" = "test" ]]; then
@@ -54,4 +56,12 @@ for manifest_template_file in "$data_dir"/manifest/*; do
   cat "$manifest_template_file" \
     | /bin/config_env.py envsubst "${env_vars}" \
     > "$manifest_dir/$manifest_file"
+done
+
+# Replace the environment variables placeholders from the manifest templates
+for manifest_template_file in "$data_dir"/manifest-ingress/*; do
+  manifest_file=$(basename "$manifest_template_file" | sed 's/.template$//')
+  cat "$manifest_template_file" \
+    | /bin/config_env.py envsubst "${env_vars}" \
+    > "$manifest_ingress_dir/$manifest_file"
 done
