@@ -31,6 +31,14 @@ case $i in
     wait_timeout="${i#*=}"
     shift
     ;;
+  --kubeconfig=*)
+    kubeconfig="${i#*=}"
+    shift
+    ;;
+  --gcloudconfig=*)
+    gcloudconfig="${i#*=}"
+    shift
+    ;;
   *)
     echo "Unrecognized flag: $i"
     exit 1
@@ -41,13 +49,15 @@ done
 [[ -z "$deployer" ]] && deployer="$APP_DEPLOYER_IMAGE"
 [[ -z "$parameters" ]] && parameters="{}"
 [[ -z "$wait_timeout" ]] && wait_timeout=600
+[[ -z "$kubeconfig" ]] && kubeconfig="${KUBECONFIG:-$HOME/.kube}"
+[[ -z "$gcloudconfig" ]] && gcloudconfig="$HOME/.config/gcloud"
 
 docker run \
     --interactive \
     --tty \
     --volume "/var/run/docker.sock:/var/run/docker.sock:ro" \
-    --volume "${KUBECONFIG:-$HOME/.kube}:/root/mount/.kube:ro" \
-    --volume "$HOME/.config/gcloud:/root/.config/gcloud:ro" \
+    --volume "$kubeconfig:/root/mount/.kube:ro" \
+    --volume "$gcloudconfig:/root/.config/gcloud:ro" \
     --rm \
     "gcr.io/cloud-marketplace-tools/k8s/dev" \
     -- \

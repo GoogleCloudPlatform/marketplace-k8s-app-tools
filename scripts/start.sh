@@ -31,6 +31,14 @@ case $i in
     entrypoint="${i#*=}"
     shift
     ;;
+  --kubeconfig=*)
+    kubeconfig="${i#*=}"
+    shift
+    ;;
+  --gcloudconfig=*)
+    gcloudconfig="${i#*=}"
+    shift
+    ;;
   *)
     >&2 echo "Unrecognized flag: $i"
     exit 1
@@ -41,13 +49,15 @@ done
 [[ -z "$deployer" ]] && >&2 echo "--deployer required" && exit 1
 [[ -z "$parameters" ]] && >&2 echo "--parameters required" && exit 1
 [[ -z "$entrypoint" ]] && entrypoint="/bin/deploy.sh"
+[[ -z "$kubeconfig" ]] && kubeconfig="${KUBECONFIG:-$HOME/.kube}"
+[[ -z "$gcloudconfig" ]] && gcloudconfig="$HOME/.config/gcloud"
 
 docker run \
     --interactive \
     --tty \
     --volume "/var/run/docker.sock:/var/run/docker.sock:ro" \
-    --volume "${KUBECONFIG:-$HOME/.kube}:/root/mount/.kube:ro" \
-    --volume "$HOME/.config/gcloud:/root/.config/gcloud:ro" \
+    --volume "$kubeconfig:/root/mount/.kube:ro" \
+    --volume "$gcloudconfig:/root/.config/gcloud:ro" \
     --rm \
     "gcr.io/cloud-marketplace-tools/k8s/dev" \
     -- \
