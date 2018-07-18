@@ -4,7 +4,6 @@
 # (we have not yet initialized), copy system kubectl configuration to
 # them to the default $KUBECONFIG location after adjusting system-specific
 # fields.
-
 if [[ -e "/root/mount/.kube/config" && ! -e "/root/.kube/config" ]]; then
   mkdir ~/.kube
 
@@ -12,7 +11,12 @@ if [[ -e "/root/mount/.kube/config" && ! -e "/root/.kube/config" ]]; then
     | yaml2json \
     | jq \
           --arg gcloud "$(readlink -f "$(which gcloud)")" \
-          '.users[].user["auth-provider"]["config"]["cmd-path"] = $gcloud' \
+          '.users = [ .users[] |
+                      if .user["auth-provider"]["name"] == "gcp"
+                        then .user["auth-provider"]["config"]["cmd-path"] = $gcloud
+                        else .
+                      end
+                    ]' \
   > /root/.kube/config
 
   kubectl config view
