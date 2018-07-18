@@ -31,4 +31,4 @@ COPY scripts/driver/* /scripts/driver/
 COPY marketplace/dev/mount_kubeconfig.sh /bin/mount_kubeconfig.sh
 RUN mkdir -p /data/
 
-ENTRYPOINT ["/bin/bash", "-x"]
+ENTRYPOINT ["/bin/bash"]

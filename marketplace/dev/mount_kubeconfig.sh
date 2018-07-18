@@ -18,7 +18,4 @@ if [[ -e "/root/mount/.kube/config" && ! -e "/root/.kube/config" ]]; then
                       end
                     ]' \
   > /root/.kube/config
-
-  kubectl config view
-  kubectl cluster-info
 fi
