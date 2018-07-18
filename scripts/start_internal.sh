@@ -42,8 +42,8 @@ done
 [[ -z "$parameters" ]] && >&2 echo "--parameters required" && exit 1
 [[ -z "$entrypoint" ]] && entrypoint="/bin/deploy.sh"
 
-# Mount kubectl configuration.
-mount_kubeconfig.sh
+# Set up kubectl configuration.
+setup_kubeconfig.sh
 
 # Extract schema and values files.
 docker run \

@@ -48,15 +48,14 @@ app/build:: ;
 # Installs the application into target namespace on the cluster.
 .PHONY: app/install
 app/install:: app/build \
-              .build/var/MARKETPLACE_TOOLS_PATH \
+              .build/marketplace/dev \
               .build/var/APP_DEPLOYER_IMAGE \
               .build/var/APP_PARAMETERS \
-              .build/marketplace/dev
+              .build/var/MARKETPLACE_TOOLS_PATH
 	$(call print_target)
 	"$(MARKETPLACE_TOOLS_PATH)/scripts/start.sh" \
 	    --deployer='$(APP_DEPLOYER_IMAGE)' \
-	    --parameters='$(APP_PARAMETERS)' \
-	    --entrypoint='/bin/deploy.sh'
+	    --parameters='$(APP_PARAMETERS)'
 
 
 # Installs the application into target namespace on the cluster.

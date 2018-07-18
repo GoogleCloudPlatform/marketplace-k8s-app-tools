@@ -42,8 +42,8 @@ done
 [[ -z "$parameters" ]] && parameters="{}"
 [[ -z "$wait_timeout" ]] && wait_timeout=600
 
-# Mount kubectl configuration.
-mount_kubeconfig.sh
+# Set up kubectl configuration.
+setup_kubeconfig.sh
 
 # Extract schema and values files.
 docker run \

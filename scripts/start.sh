@@ -53,8 +53,6 @@ done
 [[ -z "$gcloudconfig" ]] && gcloudconfig="$HOME/.config/gcloud"
 
 docker run \
-    --interactive \
-    --tty \
     --volume "/var/run/docker.sock:/var/run/docker.sock:ro" \
     --volume "$kubeconfig:/root/mount/.kube:ro" \
     --volume "$gcloudconfig:/root/.config/gcloud:ro" \
