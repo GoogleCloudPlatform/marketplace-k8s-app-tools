@@ -4,7 +4,6 @@ __APP_MAKEFILE__ := included
 
 
 makefile_dir := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
-include $(makefile_dir)/marketplace.Makefile
 include $(makefile_dir)/common.Makefile
 include $(makefile_dir)/var.Makefile
 
@@ -48,7 +47,6 @@ app/build:: ;
 # Installs the application into target namespace on the cluster.
 .PHONY: app/install
 app/install:: app/build \
-              .build/marketplace/dev \
               .build/var/APP_DEPLOYER_IMAGE \
               .build/var/APP_PARAMETERS \
               .build/var/MARKETPLACE_TOOLS_PATH
@@ -64,8 +62,7 @@ app/install-test:: app/build \
                    .build/var/MARKETPLACE_TOOLS_PATH \
                    .build/var/APP_DEPLOYER_IMAGE \
                    .build/var/APP_PARAMETERS \
-                   .build/var/APP_TEST_PARAMETERS \
-                   .build/marketplace/dev
+                   .build/var/APP_TEST_PARAMETERS
 	$(call print_target)
 	"$(MARKETPLACE_TOOLS_PATH)/scripts/start.sh" \
 	    --deployer='$(APP_DEPLOYER_IMAGE)' \
@@ -77,8 +74,7 @@ app/install-test:: app/build \
 .PHONY: app/uninstall
 app/uninstall: .build/var/MARKETPLACE_TOOLS_PATH \
                .build/var/APP_DEPLOYER_IMAGE \
-               .build/var/APP_PARAMETERS \
-               .build/marketplace/dev
+               .build/var/APP_PARAMETERS
 	$(call print_target)
 	$(MARKETPLACE_TOOLS_PATH)/scripts/stop.sh \
 	    --namespace='$(call namespace_parameter)' \
@@ -91,8 +87,7 @@ app/verify: app/build \
             .build/var/MARKETPLACE_TOOLS_PATH \
             .build/var/APP_DEPLOYER_IMAGE \
             .build/var/APP_PARAMETERS \
-            .build/var/APP_TEST_PARAMETERS \
-            .build/marketplace/dev
+            .build/var/APP_TEST_PARAMETERS
 	$(call print_target)
 	"$(MARKETPLACE_TOOLS_PATH)/scripts/driver/driver.sh" \
 	    --deployer='$(APP_DEPLOYER_IMAGE)' \

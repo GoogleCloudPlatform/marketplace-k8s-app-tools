@@ -5,7 +5,7 @@
 # them to the default $KUBECONFIG location after adjusting system-specific
 # fields.
 if [[ -e "/root/mount/.kube/config" && ! -e "/root/.kube/config" ]]; then
-  mkdir ~/.kube
+  mkdir -p /root/.kube
 
   cat /root/mount/.kube/config \
     | yaml2json \

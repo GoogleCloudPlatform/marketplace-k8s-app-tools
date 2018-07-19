@@ -151,21 +151,21 @@ echo "INFO Stop the application"
 
 deletion_timeout=180
 echo "INFO Wait for the applications to be deleted"
-/scripts/driver/wait_for_deletion.sh \
+/scripts/wait_for_deletion.sh \
   --namespace="$NAMESPACE" \
   --kind=applications \
   --timeout="$deletion_timeout" \
   || clean_and_exit "ERROR Some applications where not deleted"
 
 echo "INFO Wait for standard resources were deleted."
-/scripts/driver/wait_for_deletion.sh \
+/scripts/wait_for_deletion.sh \
   --namespace="$NAMESPACE" \
   --kind=all \
   --timeout="$deletion_timeout" \
   || clean_and_exit "ERROR Some resources where not deleted"
 
 echo "INFO Wait for service accounts to be deleted."
-/scripts/driver/wait_for_deletion.sh \
+/scripts/wait_for_deletion.sh \
   --namespace="$NAMESPACE" \
   --kind=serviceaccounts,roles,rolebindings \
   --timeout="$deletion_timeout" \

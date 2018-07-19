@@ -40,7 +40,6 @@ RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add - && \
 
 COPY marketplace/deployer_util/* /bin/
 COPY scripts/* /scripts/
-COPY scripts/driver/* /scripts/driver/
 COPY marketplace/dev/setup_kubeconfig.sh /bin/setup_kubeconfig.sh
 RUN mkdir -p /data/
 
