@@ -47,7 +47,6 @@ setup_kubeconfig.sh
 
 # Extract schema and values files.
 docker run \
-    -i \
     --entrypoint=/bin/bash \
     --rm "${deployer}" \
     -c 'cat /data/schema.yaml' \
@@ -56,22 +55,32 @@ echo "$parameters" \
   | json2yaml \
 > /data/values.yaml
 
-# Extract name, namespace, and api version.
-name="$(print_config.py \
+# Compose test id.
+test_id="$(cat /dev/urandom \
+    | tr -dc 'a-z0-9' \
+    | head -c 8)"
+
+# Extract keys for name and namespace.
+name_key="$(extract_schema_key.py \
     --schema_file=/data/schema.yaml \
-    --values_file=/data/values.yaml \
-    --param='{"x-google-marketplace": {"type": "NAME"}}')"
+    --type NAME)"
 namespace_key="$(extract_schema_key.py \
     --schema_file=/data/schema.yaml \
     --type NAMESPACE)"
 
-# use base64 for BSD systems where tr won't handle illegal characters
-export NAMESPACE="apptest-$(cat /dev/urandom \
-    | base64 \
-    | tr -dc 'a-z0-9' \
-    | fold -w 8 \
-    | head -n 1)"
-export NAME="$name"
+export NAME="name-$test_id"
+export NAMESPACE="namespace-$test_id"
+
+# Stitch in name and namespace parameters.
+parameters=$(echo "$parameters" \
+  | jq \
+    --arg name_key "$name_key" \
+    --arg name "$NAME" \
+    --arg namespace_key "$namespace_key" \
+    --arg namespace "$NAMESPACE" \
+    '.[$name_key] = $name | .[$namespace_key] = $namespace')
+
+echo "INFO Parameters: $parameters"
 
 echo "INFO Creates namespace \"$NAMESPACE\""
 kubectl create namespace "$NAMESPACE"
@@ -96,14 +105,6 @@ function clean_and_exit() {
   delete_namespace
   exit 1
 }
-
-parameters=$(echo "$parameters" \
-  | jq \
-    --arg namespace_key "$namespace_key" \
-    --arg namespace "$NAMESPACE" \
-    '.[$namespace_key] = $namespace')
-
-echo "INFO Parameters: $parameters"
 
 echo "INFO Initializes the deployer container which will deploy all the application components"
 /scripts/start_internal.sh \
