@@ -72,9 +72,9 @@ app/install-test:: app/build \
 
 # Uninstalls the application from the target namespace on the cluster.
 .PHONY: app/uninstall
-app/uninstall: .build/var/MARKETPLACE_TOOLS_PATH \
-               .build/var/APP_DEPLOYER_IMAGE \
-               .build/var/APP_PARAMETERS
+app/uninstall: .build/var/APP_DEPLOYER_IMAGE \
+               .build/var/APP_PARAMETERS \
+               .build/var/MARKETPLACE_TOOLS_PATH
 	$(call print_target)
 	$(MARKETPLACE_TOOLS_PATH)/scripts/stop.sh \
 	    --namespace='$(call namespace_parameter)' \
