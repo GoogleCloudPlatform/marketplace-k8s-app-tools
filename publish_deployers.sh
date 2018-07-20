@@ -16,31 +16,54 @@
 
 set -xeo pipefail
 
-branch="$1"
+for i in "$@"
+do
+case $i in
+  --tag=*)
+    tag="${i#*=}"
+    shift
+    ;;
+  --latest)
+    latest=1
+    shift
+    ;;
+  *)
+    echo "Unrecognized flag: $i"
+    exit 1
+    ;;
+esac
+done
 
-[[ -z "$1" ]] && branch="master"
+git fetch --tags
 
-selected_branch="$(git branch | grep "*" | sed s/"* "/""/g)"
+if [[ -z "$tag" ]]; then 
+  echo "Specify --tag"
+  git tag | grep -E '^v[0-9]+(\.[0-9]+)*$'
+  exit 1
+else
+  # Makes sure that the select tag exists
+  git tag | grep -w "$tag"
+fi
 
-[[ "$selected_branch" != "$branch" ]] && echo "Checkout to $branch branch" && exit 1
+git checkout "$tag"
 
 changes="$(git status --porcelain)"
-
 if [[ ! -z "$changes" ]]; then
   echo "Make sure there are no pending changes"
   exit 1
 fi
 
-git pull
+make -B .build/marketplace/deployer/envsubst
+make -B .build/marketplace/deployer/helm
 
-diff="$(git diff $branch origin/$branch)"
+commit="$(git rev-parse HEAD | fold -w 12 | head -n 1)"
+image_tag="$tag-$commit"
 
-if [[ ! -z "$diff" ]]; then
-  echo "Make sure all changes are pushed to $branch"
-  exit 1
-fi
+for name in deployer_envsubst deployer_helm; do \
+  docker tag \
+      "gcr.io/cloud-marketplace-tools/k8s/$name:latest" \
+      "gcr.io/cloud-marketplace-tools/k8s/$name:$image_tag"
+  docker push "gcr.io/cloud-marketplace-tools/k8s/$name:$image_tag"; \
 
-rm -f .build/marketplace/deployer/envsubst
-rm -f .build/marketplace/deployer/helm
-
-make images/deployer
+  [[ "$latest" ]] && push "gcr.io/cloud-marketplace-tools/k8s/$name:latest"
+done
