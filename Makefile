@@ -48,6 +48,18 @@ images/deployer: .build/marketplace/deployer/envsubst \
 	done
 
 
+.PHONY: images/dev
+images/dev: .build/marketplace/dev
+	$(call print_target)
+	@$(call print_notice,Pushing with tag "$(TAG)" in addition to "latest")
+
+	@ \
+	docker tag \
+	    "gcr.io/cloud-marketplace-tools/k8s/dev:latest" \
+	    "gcr.io/cloud-marketplace-tools/k8s/dev:$(TAG)" \
+	&& docker push "gcr.io/cloud-marketplace-tools/k8s/dev:latest" \
+	&& docker push "gcr.io/cloud-marketplace-tools/k8s/dev:$(TAG)"; \
+
 ### Testing ###
 
 
