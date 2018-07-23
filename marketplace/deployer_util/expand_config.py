@@ -55,6 +55,8 @@ def main():
 
 def expand(values_dict, schema):
   """Returns the expanded values according to schema."""
+  schema.validate()
+
   for k in values_dict:
     if k not in schema.properties:
       raise InvalidProperty('No such property defined in schema: {}'.format(k))
