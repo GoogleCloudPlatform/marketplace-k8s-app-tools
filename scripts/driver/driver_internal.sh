@@ -68,8 +68,8 @@ namespace_key="$(extract_schema_key.py \
     --schema_file=/data/schema.yaml \
     --type NAMESPACE)"
 
-export NAME="name-$test_id"
-export NAMESPACE="namespace-$test_id"
+export NAME="$test_id"
+export NAMESPACE="apptest-$test_id"
 
 # Stitch in name and namespace parameters.
 parameters=$(echo "$parameters" \
