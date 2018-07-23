@@ -19,10 +19,6 @@ set -eo pipefail
 for i in "$@"
 do
 case $i in
-  --tag=*)
-    tag="${i#*=}"
-    shift
-    ;;
   --latest)
     latest=1
     shift
@@ -42,28 +38,15 @@ if [[ "$h" ]]; then
   cat <<EOF
 Builds the base deployer images and push them to gcr.io. 
 
-Usage:
-publish_deployers.sh --tag=v0.5 --latest
+Usages:
+publish_deployers.sh
+publish_deployers.sh --latest
 
 Arguments:
-  --tag    The git tag to be published. Make sure that the tag is already created.
   --latest If present, the images will be pushed to the latest tag as well.
 EOF
 exit 0
 fi
-
-git fetch --tags
-
-if [[ -z "$tag" ]]; then 
-  echo "Specify --tag"
-  git tag | grep -E '^v[0-9]+(\.[0-9]+)*$'
-  exit 1
-else
-  # Makes sure that the select tag exists
-  git tag | grep -w "$tag"
-fi
-
-git checkout "$tag"
 
 changes="$(git status --porcelain)"
 if [[ ! -z "$changes" ]]; then
@@ -74,8 +57,13 @@ fi
 make -B .build/marketplace/deployer/envsubst
 make -B .build/marketplace/deployer/helm
 
-commit="$(git rev-parse HEAD | fold -w 12 | head -n 1)"
-image_tag="$tag-$commit"
+# Set the image tag as the git tag
+image_tag="$(git tag --points-at HEAD | grep -E '^v[0-9]+(\.[0-9]+)*$' | head -n 1 || echo "")"
+
+# If commit is not tagged, set image tag to commit hash
+[[ -z "$image_tag" ]] && image_tag="$(git rev-parse HEAD | fold -w 12 | head -n 1)"
+
+echo "Image tag: $image_tag"
 
 for name in deployer_envsubst deployer_helm; do \
   docker tag \
