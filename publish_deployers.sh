@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set -xeo pipefail
+set -eo pipefail
 
 for i in "$@"
 do
@@ -27,12 +27,30 @@ case $i in
     latest=1
     shift
     ;;
+  -h)
+    h=1
+    shift
+    ;;
   *)
     echo "Unrecognized flag: $i"
     exit 1
     ;;
 esac
 done
+
+if [[ "$h" ]]; then
+  cat <<EOF
+Builds the base deployer images and push them to gcr.io. 
+
+Usage:
+publish_deployers.sh --tag=v0.5 --latest
+
+Arguments:
+  --tag    The git tag to be published. Make sure that the tag is already created.
+  --latest If present, the images will be pushed to the latest tag as well.
+EOF
+exit 0
+fi
 
 git fetch --tags
 
