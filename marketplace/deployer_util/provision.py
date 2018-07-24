@@ -30,6 +30,7 @@ that need provisioning outside of the deployer to stdout.
 The manifests include the deployer-related resources.
 """
 
+
 def main():
   parser = ArgumentParser(description=_PROG_HELP)
   schema_values_common.add_to_argument_parser(parser)
@@ -138,11 +139,11 @@ def provision_deployer(schema,
   if deployer_entrypoint:
     pod_spec['containers'][0]['command'] = [deployer_entrypoint]
   labels = {
-      'application.k8s.io/component': 'deployer.marketplace.cloud.google.com',
+      'app.kubernetes.io/component': 'deployer.marketplace.cloud.google.com',
       'marketplace.cloud.google.com/deployer': 'Dependent',
   }
   job_labels = {
-      'application.k8s.io/component': 'deployer.marketplace.cloud.google.com',
+      'app.kubernetes.io/component': 'deployer.marketplace.cloud.google.com',
       'marketplace.cloud.google.com/deployer': 'Main',
   }
 
@@ -353,8 +354,9 @@ def dns1123_name(name):
   """
   # Attempt to fix the input name.
   fixed = name.lower()
-  fixed = re.sub(r'[^a-z0-9.-]', '', fixed)
-  fixed = fixed.strip('.-')
+  fixed = re.sub(r'[.]', '-', fixed)
+  fixed = re.sub(r'[^a-z0-9-]', '', fixed)
+  fixed = fixed.strip('-')
   if len(fixed) > 64:
     fixed = fixed[:59]
 
@@ -371,7 +373,7 @@ def dns1123_name(name):
 def add_preprovisioned_labels(manifests, prop_name):
   for r in manifests:
     labels = r['metadata'].get('labels', {})
-    labels['application.k8s.io/component'] = (
+    labels['app.kubernetes.io/component'] = (
       'auto-provisioned.marketplace.cloud.google.com')
     labels['marketplace.cloud.google.com/auto-provisioned-for-property'] = (
         prop_name)

@@ -11,7 +11,8 @@ include $(makefile_dir)/common.Makefile
 	mkdir -p "$@"
 
 
-.build/ubbagent/ubbagent: | .build/ubbagent
+.build/ubbagent/ubbagent: $(shell find "$(MARKETPLACE_TOOLS_PATH)/vendor/ubbagent" -type f ) \
+                          | .build/ubbagent
 	cd $(MARKETPLACE_TOOLS_PATH)/vendor/ubbagent \
 	&& docker build \
 	      --tag "gcr.io/cloud-marketplace-tools/ubbagent" \

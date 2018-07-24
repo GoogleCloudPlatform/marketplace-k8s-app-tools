@@ -31,6 +31,14 @@ case $i in
     entrypoint="${i#*=}"
     shift
     ;;
+  --kubeconfig=*)
+    kubeconfig="${i#*=}"
+    shift
+    ;;
+  --gcloudconfig=*)
+    gcloudconfig="${i#*=}"
+    shift
+    ;;
   *)
     >&2 echo "Unrecognized flag: $i"
     exit 1
@@ -41,45 +49,17 @@ done
 [[ -z "$deployer" ]] && >&2 echo "--deployer required" && exit 1
 [[ -z "$parameters" ]] && >&2 echo "--parameters required" && exit 1
 [[ -z "$entrypoint" ]] && entrypoint="/bin/deploy.sh"
+[[ -z "$kubeconfig" ]] && kubeconfig="${KUBECONFIG:-$HOME/.kube}"
+[[ -z "$gcloudconfig" ]] && gcloudconfig="$HOME/.config/gcloud"
 
-name="$( \
-  echo "${parameters}" \
-  | docker run -i --entrypoint=/bin/print_config.py --rm "${deployer}" \
-    --values_file=- --param '{"x-google-marketplace": {"type": "NAME"}}')"
-namespace="$( \
-  echo "${parameters}"\
-  | docker run -i --entrypoint=/bin/print_config.py --rm "${deployer}" \
-    --values_file=- --param '{"x-google-marketplace": {"type": "NAMESPACE"}}')"
-
-# Create Application instance.
-kubectl apply --namespace="$namespace" --filename=- <<EOF
-apiVersion: app.k8s.io/v1alpha1
-kind: Application
-metadata:
-  name: "${name}"
-  namespace: "${namespace}"
-spec:
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: "${name}"
-  assemblyPhase: "Pending"
-EOF
-
-app_uid=$(kubectl get "applications/$name" \
-  --namespace="$namespace" \
-  --output=jsonpath='{.metadata.uid}')
-app_api_version=$(kubectl get "applications/$name" \
-  --namespace="$NAMESPACE" \
-  --output=jsonpath='{.apiVersion}')
-
-# Provisions external resource dependencies and the deployer resources.
-# We set the application as the owner for all of these resources.
-echo "${parameters}" \
-  | docker run -i --entrypoint=/bin/provision.py --rm "${deployer}" \
-    --values_file=- --deployer_image="${deployer}" --deployer_entrypoint="${entrypoint}" \
-  | docker run -i --entrypoint=/bin/set_app_labels.py --rm "${deployer}" \
-    --manifests=- --dest=- --name="${name}" --namespace="${namespace}" \
-  | docker run -i --entrypoint=/bin/set_ownership.py --rm "${deployer}" \
-    --manifests=- --dest=- --noapp \
-    --app_name="${name}" --app_uid="${app_uid}" --app_api_version="${app_api_version}" \
-  | kubectl apply --namespace="$namespace" --filename=-
+docker run \
+    --volume "/var/run/docker.sock:/var/run/docker.sock:ro" \
+    --volume "$kubeconfig:/root/mount/.kube:ro" \
+    --volume "$gcloudconfig:/root/.config/gcloud:ro" \
+    --rm \
+    "gcr.io/cloud-marketplace-tools/k8s/dev" \
+    -- \
+    /scripts/start_internal.sh \
+          --deployer="$deployer" \
+          --parameters="$parameters" \
+          --entrypoint="$entrypoint"
