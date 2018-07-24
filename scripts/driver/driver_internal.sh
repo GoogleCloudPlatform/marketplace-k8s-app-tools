@@ -58,7 +58,8 @@ echo "$parameters" \
 # Compose test id.
 test_id="$(cat /dev/urandom \
     | tr -dc 'a-z0-9' \
-    | head -c 8)"
+    | head -c 8 \
+|| true)"
 
 # Extract keys for name and namespace.
 name_key="$(extract_schema_key.py \
@@ -68,7 +69,7 @@ namespace_key="$(extract_schema_key.py \
     --schema_file=/data/schema.yaml \
     --type NAMESPACE)"
 
-export NAME="$test_id"
+export NAME="apptest-$test_id"
 export NAMESPACE="apptest-$test_id"
 
 # Stitch in name and namespace parameters.
