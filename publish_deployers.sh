@@ -56,6 +56,7 @@ fi
 
 make -B .build/marketplace/deployer/envsubst
 make -B .build/marketplace/deployer/helm
+make -B .build/marketplace/dev
 
 # Set the image tag as the git tag
 image_tag="$(git tag --points-at HEAD | grep -E '^v[0-9]+(\.[0-9]+)*$' | head -n 1 || echo "")"
@@ -65,11 +66,13 @@ image_tag="$(git tag --points-at HEAD | grep -E '^v[0-9]+(\.[0-9]+)*$' | head -n
 
 echo "Image tag: $image_tag"
 
-for name in deployer_envsubst deployer_helm; do \
+for name in deployer_envsubst \
+            deployer_helm \
+            dev; do \
   docker tag \
       "gcr.io/cloud-marketplace-tools/k8s/$name:latest" \
       "gcr.io/cloud-marketplace-tools/k8s/$name:$image_tag"
-  docker push "gcr.io/cloud-marketplace-tools/k8s/$name:$image_tag"; \
+  docker push "gcr.io/cloud-marketplace-tools/k8s/$name:$image_tag"
 
   [[ "$latest" ]] && push "gcr.io/cloud-marketplace-tools/k8s/$name:latest"
 done
