@@ -75,11 +75,13 @@ def main():
         log("INFO Tester '{}' succeeded".format(full_name))
         break
 
-      pendingReason = None
+      pendingReason = "Reason undefined"
       if result == "Pending": 
         containerStatuses = deep_get(resource, "status", "containerStatuses")
         for status in containerStatuses:
           pendingReason = deep_get(status, "state", "waiting", "reason")
+          if not pendingReason:
+            pendingReason = "Reason undefined"
           if pendingReason == INVALID_IMAGE_NAME_ERROR:
             print_logs(full_name, args.namespace)
             raise Exception("ERROR Tester '{}' failed: {}".format(full_name, pendingReason))
