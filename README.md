@@ -162,6 +162,7 @@ The information provided by the user for properties defined in `schema.yaml` is 
 This is a simple example of a schema.yaml file:
 
 ```yaml
+application_api_version: v1beta
 properties:
   name:
     type: string
@@ -190,6 +191,7 @@ They can be referenced in helm charts just like a regular value from `values.yam
 Example of `schema.yaml`
 
 ```yaml
+application_api_version: v1beta
 properties:
   port:
     type: string
@@ -220,6 +222,34 @@ Usage example of the value of `port` in a helm chart:
 ...
 ```
 
+Notice that:
+- Values defined in `schema.yaml` will overlay values defined in `values.yaml`. For example, if 
+`values.yaml` looks like the following:
+
+```yaml
+port: 80
+```
+
+but the value of `port` is set to 21 by the user, the value 21 will be used.
+
+- Dots can be used for referencing nested values. For example, if the app makes use of 
+`values.yaml` like below:
+
+```yaml
+mysql:
+  image: <path to image>
+```
+
+the property can ve referenced in the schema file as `mysql.image`
+
+```yaml
+application_api_version: v1beta
+properties:
+  mysql.image:
+    type: string
+...
+```
+
 #### Envsubs based deployer
 
 They can be referenced in manifests by its name in `schema.yaml`, prefixed with $.
@@ -227,6 +257,7 @@ They can be referenced in manifests by its name in `schema.yaml`, prefixed with 
 Example of `schema.yaml`
 
 ```yaml
+application_api_version: v1beta
 properties:
   port:
     type: string
@@ -260,13 +291,19 @@ Usage example of the value of `port` in a helm chart:
 Schema.yaml specification
 ---
 
+### application_api_version
+
+Specifies the version of the application CRD. 
+
+Supports versions starting from `v1beta1`.
+
 ### Properties
 
 #### type
 
 Represents the type of the input in the form for that property.
 
-##### Supported values
+##### Supported types
 - `string`
 - `integer`
 - `boolean`
@@ -301,7 +338,7 @@ A regex pattern. The value needs to match `pattern`.
 
 #### x-google-marketplace
 
-This server as an annotation to tell gcp to handle that property in a special way, depending on `type`. 
+This serves as an annotation to tell gcp to handle that property in a special way, depending on `type`. 
 It has several usages and more will be added based on demand.
 
 #### [Examples](https://github.com/GoogleCloudPlatform/marketplace-k8s-app-example/blob/master/wordpress/schema.yaml).
@@ -313,18 +350,19 @@ It has several usages and more will be added based on demand.
 
 It defines how this object will be handled. Each type has a different set of properties.
 
-##### Supported values
+##### Supported types
 - `NAME`: To be used as the name of the app.
 - `NAMESPACE`: To be used as the kubernetes namespace where the app will installed.
 - `IMAGE`: Link to a docker image.
-- `REPORTING_SECRET`: The Secret resource name containing the usage reporting credentials
 - `GENERATED_PASSWORD`: A value to be generated at deployment time, following common password requirements.
+- `REPORTING_SECRET`: The Secret resource name containing the usage reporting credentials
 - `SERVICE_ACCOUNT`: The name of a pre-provisioned k8s `ServiceAccount`. If it does not exist, one is created.
 - `STORAGE_CLASS`: The name of a pre-provisioned k8s `StorageClass`. If it does not exist, one is created.
+- `STRING`: A string to be used as password.
 
 ---
 
-### type: GENERATED_PASSWORD
+#### type: GENERATED_PASSWORD
 
 Example:
 
@@ -338,7 +376,7 @@ dbPassword:
 ```
 ---
 
-### type: SERVICE_ACCOUNT
+#### type: SERVICE_ACCOUNT
 
 Defining a `ServiceAccount` as a resource to be deployed will cause deployer to fail with authentication errors,
 because the deployer doesn't run with privileges that allow creating them. 
@@ -370,9 +408,9 @@ properties:
             resources: ['EtcdCluster']  
             verbs: ['*']
 ```
-
 ---
-### type: STORAGE_CLASS
+
+#### type: STORAGE_CLASS
 
 Defining a `StorageClass` as a resource to be deployed will cause deployer to fail with authentication errors,
 because the deployer doesn't run with privileges that allow creating them. 
@@ -387,3 +425,22 @@ properties:
       storageClass:
         type: SSD
 ```
+
+#### type: STRING
+
+To be used when a password needs to be taken as input.
+
+Example:
+
+```yaml
+properties:
+  explicitPassword:
+    type: string
+    x-google-marketplace:
+      type: STRING
+      string:
+        generatedProperties:
+          base64Encoded: explicitPasswordEncoded
+```
+
+In the example above, manifests can reference to the password as `explicitPassword`, as well as to its base64Encoded value as `explicitPasswordEncoded`.
