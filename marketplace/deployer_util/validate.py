@@ -31,9 +31,12 @@ _PROG_HELP="""
 Validates and test the deployer image.
 """
 
+class ValidationException(Exception):
+  pass
+
 def main():
   parser = ArgumentParser(description=_PROG_HELP)
-  parser.add_argument('--metadata')
+  parser.add_argument('--metadata', help='Path to metadata file for validation. If it is not present, the validation on the metadata file will be skipped.',)
   args = parser.parse_args()
 
   all_resources, application = expand_and_load_resources()
@@ -51,18 +54,16 @@ def main():
 
 
 def validate_images(schema, resources):
-  declared_images = set([ deep_get(param, "default") for key, param in schema["properties"].iteritems() 
-    if deep_get(param, GOOGLE_MARKETPLACE, "type") == "IMAGE" ])
-
-  print(declared_images)
+  declared_images = set([deep_get(param, "default") for key, param in schema["properties"].iteritems() 
+    if deep_get(param, GOOGLE_MARKETPLACE, "type") == "IMAGE"])
 
   used_images = []
   for resource in resources:
     used_images.extend(deep_find(resource, "image"))
   used_images = set(used_images)
 
-  undeclared_images = [ image for image in used_images 
-    if image not in declared_images ]
+  undeclared_images = [image for image in used_images 
+    if image not in declared_images]
 
   if undeclared_images:
     error_message = "ERROR Images should be declared in schema file."
@@ -70,12 +71,12 @@ def validate_images(schema, resources):
     for image in undeclared_images:
       print("  " + str(image))
 
-    raise Exception(error_message)
+    raise ValidationException(error_message)
 
   print("All {} used images are declared.".format(len(used_images)))
 
-  unused_images = [ image for image in declared_images 
-    if image not in used_images ]
+  unused_images = [image for image in declared_images 
+    if image not in used_images]
 
   if unused_images:
     error_message = "ERROR Images were declared but not used."
@@ -83,7 +84,7 @@ def validate_images(schema, resources):
     for image in unused_images:
       print("  " + str(image))
 
-    raise Exception(error_message)  
+    raise ValidationException(error_message)  
 
   print("All {} declared images are used.".format(len(declared_images)))
 
@@ -94,7 +95,7 @@ def validate_images(schema, resources):
 
 
 def expand_and_load_resources():
-  """ Expands the templates and charts so we have the final manifests manifests """
+  """Expands the templates and charts so we have the final manifests manifests"""
   print(Command("/bin/expand_config.py").output)
   assure_env_set('NAME', 'myapp')
   assure_env_set('NAMESPACE', 'mynamespace')
@@ -110,30 +111,30 @@ def expand_and_load_resources():
     for resource in resources:
       if deep_get(resource, "kind") == "Application":
         if application is not None:
-          raise Exception("More than one application defined in '/data'")
+          raise ValidationException("More than one application defined in '/data'")
         application = resource
 
   if application is None:
-    raise Exception("Application not found in '/data'")
+    raise ValidationException("Application not found in '/data'")
 
   return all_resources, application
 
 
 def validate_metadata(metadata, application):
-  """ Makes sure that deployer is consistent with the metadata """
+  """Makes sure that deployer is consistent with the metadata"""
 
   # Validate partner id and solution id
   expected_partner_id = deep_get(metadata, "version", "partnerId")
   if not expected_partner_id:
-    raise Exception("Metadata is missing 'version.partnerId'")
+    raise ValidationException("Metadata is missing 'version.partnerId'")
 
   expected_solution_id = deep_get(metadata, "version", "solutionId")
   if not expected_solution_id:
-    raise Exception("Metadata is missing 'version.solutionId'")
+    raise ValidationException("Metadata is missing 'version.solutionId'")
 
   deploy_info_string = deep_get(application, "metadata", "annotations", DEPLOY_INFO_ANNOTATION)
   if not deploy_info_string:
-    raise Exception("Application is missing annotation '{}'".format(DEPLOY_INFO_ANNOTATION))
+    raise ValidationException("Application is missing annotation '{}'".format(DEPLOY_INFO_ANNOTATION))
 
   deploy_info = json.loads(deploy_info_string)
 
@@ -172,7 +173,7 @@ def deep_find(o, key, found=[]):
 
 
 def match_error(message, expected, actual):
-  raise Exception("{}. Expected: '{}'. Actual '{}'".format(message, expected, actual))
+  raise ValidationException("{}. Expected: '{}'. Actual '{}'".format(message, expected, actual))
 
 
 def assure_env_set(env_name, fallback_value):

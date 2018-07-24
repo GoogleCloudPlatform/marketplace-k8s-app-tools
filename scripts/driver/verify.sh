@@ -2,6 +2,39 @@
 
 set -eo pipefail
 
+for i in "$@"
+do
+case $i in
+  -h=*)
+    h=1
+    shift
+    ;;
+  *)
+    echo "Unrecognized flag: $i"
+    exit 1
+    ;;
+esac
+done
+
+if [[ "$h" ]]; then
+  cat <<EOF
+Run the verification on app deployer. The only parameter is a config file in json format, example:
+
+{
+  "deployer": <link to the deployer image gcr>, // Required
+  "metadata": <path to the metadata file>, // Optional. When not specified, the validation the metadata will be skipped
+  "parameters": { // Optional. The parameters to be passed to the deployer. They are app specific
+    <key>: <value>,
+    ...
+  },
+  "testParameters": { // Optional. The parameters to be passed to the deployer in test mode. They are app specific.
+    <key>: <value>,
+    ...
+  }
+}
+EOF
+fi
+
 DIR="$(dirname $0)"
 
 deployer="$(cat "$1" | jq -r .deployer)"
