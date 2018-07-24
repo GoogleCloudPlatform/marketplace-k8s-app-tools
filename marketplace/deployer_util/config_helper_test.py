@@ -154,11 +154,11 @@ class ConfigHelperTest(unittest.TestCase):
     self.assertRaises(
         config_helper.InvalidSchema,
         lambda: config_helper.Schema.load_yaml(
-        """
-        properties:
-          bad/name:
-            type: string
-        """))
+            """
+            properties:
+              bad/name:
+                type: string
+            """))
 
   def test_required(self):
     schema = config_helper.Schema.load_yaml(SCHEMA)
@@ -467,13 +467,36 @@ class ConfigHelperTest(unittest.TestCase):
     self.assertRaises(
         config_helper.InvalidSchema,
         lambda: config_helper.Schema.load_yaml(
+            """
+            properties:
+              unk:
+                type: string
+                x-google-marketplace:
+                  type: UNKNOWN
+            """))
+
+  def test_validate_good(self):
+    schema = config_helper.Schema.load_yaml(
         """
+        application_api_version: v1beta1
         properties:
-          unk:
+          simple:
             type: string
-            x-google-marketplace:
-              type: UNKNOWN
-        """))
+        """
+        )
+    schema.validate()
+
+  def test_validate_missing_app_api_version(self):
+    self.assertRaisesRegexp(
+        config_helper.InvalidSchema,
+        'application_api_version',
+        lambda: config_helper.Schema.load_yaml(
+            """
+            properties:
+              simple:
+                type: string
+            """
+        ).validate())
 
 
 if __name__ == 'main':
