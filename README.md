@@ -358,7 +358,7 @@ It defines how this object will be handled. Each type has a different set of pro
 - `REPORTING_SECRET`: The Secret resource name containing the usage reporting credentials
 - `SERVICE_ACCOUNT`: The name of a pre-provisioned k8s `ServiceAccount`. If it does not exist, one is created.
 - `STORAGE_CLASS`: The name of a pre-provisioned k8s `StorageClass`. If it does not exist, one is created.
-- `STRING`: A string to be used as password.
+- `STRING`: A string that needs special handling.
 
 ---
 
@@ -428,7 +428,7 @@ properties:
 
 #### type: STRING
 
-To be used when a password needs to be taken as input.
+This is used to represent a string that needs special handling, for example base64 representation.
 
 Example:
 
