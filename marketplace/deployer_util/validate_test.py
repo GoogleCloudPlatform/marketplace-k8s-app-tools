@@ -98,14 +98,3 @@ class ValidateTest(unittest.TestCase):
       return
 
     raise Exception("Validation didn't catch missing image in schema")
-
-  def test_validate_images_unusedimage(self):
-    newimage = copy.deepcopy(schema['properties']['imageMysql'])
-    newimage['default'] = 'newImageValue'
-    schema['properties']['extraImage'] = newimage
-    try:
-      validate_images(schema, resources)
-    except ValidationException:
-      return
-
-    raise Exception("Validation didn't catch missing image in schema")

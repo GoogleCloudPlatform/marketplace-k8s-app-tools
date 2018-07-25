@@ -54,8 +54,10 @@ def main():
 
 
 def validate_images(schema, resources):
-  declared_images = set([deep_get(param, "default") for key, param in schema["properties"].iteritems() 
-    if deep_get(param, GOOGLE_MARKETPLACE, "type") == "IMAGE"])
+  declared_images = set([
+      deep_get(param, "default") 
+      for key, param in schema["properties"].iteritems() 
+      if deep_get(param, GOOGLE_MARKETPLACE, "type") == "IMAGE"])
 
   used_images = []
   for resource in resources:
@@ -63,7 +65,7 @@ def validate_images(schema, resources):
   used_images = set(used_images)
 
   undeclared_images = [image for image in used_images 
-    if image not in declared_images]
+      if image not in declared_images]
 
   if undeclared_images:
     error_message = "ERROR Images should be declared in schema file."
@@ -73,23 +75,12 @@ def validate_images(schema, resources):
 
     raise ValidationException(error_message)
 
-  print("All {} used images are declared.".format(len(used_images)))
+  if len(used_images) > 0:
+    print("All {} used images are declared.".format(len(used_images)))
 
-  unused_images = [image for image in declared_images 
-    if image not in used_images]
-
-  if unused_images:
-    error_message = "ERROR Images were declared but not used."
-    print(error_message)
-    for image in unused_images:
-      print("  " + str(image))
-
-    raise ValidationException(error_message)  
-
-  print("All {} declared images are used.".format(len(declared_images)))
-
-  for image in used_images:
-    print(image)
+    print("Declared images:")
+    for image in used_images:
+      print("  " + image)
 
   print("Images validation succeeded")
 
@@ -152,6 +143,7 @@ def validate_metadata(metadata, application):
 
   print("Metadata validation succeeded")
 
+
 def print_file(filename):
   with open(filename, "r") as stream:
     print(filename)
@@ -159,7 +151,7 @@ def print_file(filename):
 
 
 def deep_find(o, key, found=[]):
-  """ Finds all values with the specified key in any level of the object """
+  """Finds all values with the specified key in any level of the object"""
   if type(o) is dict:
     for k, value in o.iteritems():
       if k == key:

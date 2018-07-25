@@ -54,8 +54,9 @@ separate_tester_resources.py \
   --out_manifests "/data/resources.yaml" \
   --out_test_manifests "/data/tester.yaml"
 
+echo "=== /data/resources.yaml ==="
 cat "/data/resources.yaml"
-echo \\n\\n
+echo "============================"
 
 # Apply the manifest.
 kubectl apply --namespace="$NAMESPACE" --filename="/data/resources.yaml"
