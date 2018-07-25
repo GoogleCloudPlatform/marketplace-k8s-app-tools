@@ -4,8 +4,8 @@
 # (we have not yet initialized), copy system kubectl configuration to
 # them to the default $KUBECONFIG location after adjusting system-specific
 # fields.
-if [[ -e "/root/mount/.kube/config" && ! -e "/root/.kube/config" ]]; then
-  mkdir -p /root/.kube
+if [[ -e "/root/mount/.kube/config" && ! -e "$HOME/.kube/config" ]]; then
+  mkdir -p "$HOME/.kube"
 
   # Copy mounted kubectl configuration to default location, adjusting
   # cmd-path for gcp auth-providers to this docker image's gcloud
@@ -20,5 +20,5 @@ if [[ -e "/root/mount/.kube/config" && ! -e "/root/.kube/config" ]]; then
                         else .
                       end
                     ]' \
-  > /root/.kube/config
+  > "$HOME/.kube/config"
 fi
