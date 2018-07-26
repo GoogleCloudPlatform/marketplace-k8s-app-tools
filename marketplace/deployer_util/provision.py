@@ -55,7 +55,13 @@ def process(schema, values, deployer_image, deployer_entrypoint):
   app_name = get_name(schema, values)
   namespace = get_namespace(schema, values)
 
+  # Handle provisioning of reporting secrets from storage if a URI
+  # is provided.
   for key, value in values.items():
+    if key not in schema.properties:
+      continue
+    if not schema.properties[key].reporting_secret:
+      continue
     if '://' in value:
       value, storage_manifests = provision_from_storage(
           key, value, app_name=app_name, namespace=namespace)
