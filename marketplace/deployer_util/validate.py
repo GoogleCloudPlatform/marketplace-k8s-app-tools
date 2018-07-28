@@ -21,8 +21,10 @@ import yaml
 from argparse import ArgumentParser
 from bash_util import Command
 from dict_util import deep_get
+from shutil import copyfile
 from yaml_util import load_resources_yaml
 from yaml_util import load_yaml
+from yaml_util import write_yaml
 
 DEPLOY_INFO_ANNOTATION = "marketplace.cloud.google.com/deploy-info"
 GOOGLE_MARKETPLACE = "x-google-marketplace"
@@ -39,6 +41,9 @@ def main():
   parser.add_argument('--metadata', help='Path to metadata file for validation. If it is not present, the validation on the metadata file will be skipped.',)
   args = parser.parse_args()
 
+  schema = load_yaml("/data/schema.yaml")
+  create_values(schema)
+
   all_resources, application = expand_and_load_resources()
 
   metadata = None
@@ -49,8 +54,28 @@ def main():
   if metadata:  
     validate_metadata(metadata, application)
 
-  schema = load_yaml("/data/schema.yaml")
   validate_images(schema, all_resources)
+
+
+def create_values(schema):
+  """Test values are included in the deployer for validation, in /data-test/values.yaml"""
+
+  test_values_path = "/data-test/values.yaml"
+  test_schema_path = "/data-test/schema.yaml"
+  if(os.path.isfile(test_values_path)):
+    values = load_yaml(test_values_path)
+    test_schema = None
+    if (os.path.isfile(test_schema_path)):
+      test_schema = load_yaml(test_schema_path)
+    for k in values:
+      if test_schema and k in test_schema['properties'] and not k in schema['properties']:
+        # Static validation should check only values that are provided for a real deployment,
+        # so we have to exclude values required only in test mode.
+        del(k)
+        continue
+
+    write_yaml("/data/values.yaml", values)
+    print_file("/data/values.yaml")
 
 
 def validate_images(schema, resources):
@@ -146,8 +171,9 @@ def validate_metadata(metadata, application):
 
 def print_file(filename):
   with open(filename, "r") as stream:
-    print(filename)
+    print(">>> " + filename)
     print(stream.read())
+    print("<<<")
 
 
 def deep_find(o, key, found=[]):

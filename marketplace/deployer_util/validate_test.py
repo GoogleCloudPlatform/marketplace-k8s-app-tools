@@ -89,6 +89,12 @@ class ValidateTest(unittest.TestCase):
   def test_validate_images_success(self):
     validate_images(schema, resources)
 
+  def test_validate_images_unusedimage(self):
+    newimage = copy.deepcopy(schema['properties']['imageMysql'])
+    newimage['default'] = 'newImageValue'
+    schema['properties']['extraImage'] = newimage
+    validate_images(schema, resources)
+
   def test_validate_images_missingschema(self):
     newschema = copy.deepcopy(schema)
     del newschema['properties']['imageMysql']

@@ -27,6 +27,12 @@ def load_yaml(filename):
     return yaml.safe_load(content)
 
 
+def write_yaml(filename, value):
+  """Helper function for writing yaml"""
+  with open(filename, "w") as stream:
+    yaml.dump(value, stream, default_flow_style=False)
+
+
 def add_or_replace(orig, dest):
   for key in orig:
     if (type(orig[key]) is dict and
