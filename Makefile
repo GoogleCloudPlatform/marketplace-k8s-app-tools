@@ -23,43 +23,6 @@ submodule/init-force:
 
 include marketplace.Makefile
 
-
-# Get the tag associated with the current commit of the repo.
-# If there is no tag, use the abbreviated commit hash.
-TAG ?= $(shell \
-    tag="$(shell git tag --points-at HEAD | head -n 1)"; \
-    commit="$(shell git rev-parse HEAD | fold -w 12 | head -n 1)"; \
-    echo "$${tag:-$$commit}")
-
-
-.PHONY: images/deployer
-images/deployer: .build/marketplace/deployer/envsubst \
-                 .build/marketplace/deployer/helm
-	$(call print_target)
-	@$(call print_notice,Pushing with tag "$(TAG)" in addition to "latest")
-
-	@ \
-	for name in deployer_envsubst deployer_helm; do \
-	  docker tag \
-	      "gcr.io/cloud-marketplace-tools/k8s/$${name}:latest" \
-	      "gcr.io/cloud-marketplace-tools/k8s/$${name}:$(TAG)" \
-	  && docker push "gcr.io/cloud-marketplace-tools/k8s/$${name}:latest" \
-	  && docker push "gcr.io/cloud-marketplace-tools/k8s/$${name}:$(TAG)"; \
-	done
-
-
-.PHONY: images/dev
-images/dev: .build/marketplace/dev
-	$(call print_target)
-	@$(call print_notice,Pushing with tag "$(TAG)" in addition to "latest")
-
-	@ \
-	docker tag \
-	    "gcr.io/cloud-marketplace-tools/k8s/dev:latest" \
-	    "gcr.io/cloud-marketplace-tools/k8s/dev:$(TAG)" \
-	&& docker push "gcr.io/cloud-marketplace-tools/k8s/dev:latest" \
-	&& docker push "gcr.io/cloud-marketplace-tools/k8s/dev:$(TAG)"; \
-
 ### Testing ###
 
 
