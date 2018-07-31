@@ -2,6 +2,7 @@ ifndef __MARKETPLACE_MAKEFILE__
 
 __MARKETPLACE_MAKEFILE__ := included
 
+COMMIT ?= $(shell git rev-parse HEAD | fold -w 12 | head -n 1)
 
 makefile_dir := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
 include $(makefile_dir)/common.Makefile
@@ -50,6 +51,7 @@ include $(makefile_dir)/common.Makefile
 	$(call print_target)
 	cd $(MARKETPLACE_TOOLS_PATH) \
 	&& docker build \
+	    --build-arg VERSION="$(COMMIT)" \
 	    --tag "gcr.io/cloud-marketplace-tools/k8s/deployer_helm" \
 	    -f marketplace/deployer_helm_base/Dockerfile \
 	    .
