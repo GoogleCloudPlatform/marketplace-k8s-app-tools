@@ -96,6 +96,7 @@ function delete_namespace() {
   fi
 
   echo "INFO Deleting namespace \"$NAMESPACE\""
+  kubectl get all --namespace "$NAMESPACE" --output=yaml
   kubectl delete namespace "$NAMESPACE"
 }
 
