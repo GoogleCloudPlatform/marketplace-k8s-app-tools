@@ -22,6 +22,7 @@ include $(makefile_dir)/common.Makefile
 	$(call print_target)
 	cd $(MARKETPLACE_TOOLS_PATH) \
 	&& docker build \
+	    --cache-from "gcr.io/cloud-marketplace-tools/k8s/deployer_envsubst" \
 	    --tag "gcr.io/cloud-marketplace-tools/k8s/deployer_envsubst" \
 	    -f marketplace/deployer_envsubst_base/Dockerfile \
 	    .
