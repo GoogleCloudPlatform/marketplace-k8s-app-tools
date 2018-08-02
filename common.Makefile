@@ -28,6 +28,10 @@ MARKETPLACE_TOOLS_PATH ?= $(patsubst %/,%,$(dir $(realpath $(lastword $(MAKEFILE
 	mkdir -p .build
 
 
+.build/tmp: | .build
+	mkdir -p .build/tmp
+
+
 .PHONY: clean
 clean::
 	rm -Rf .build
