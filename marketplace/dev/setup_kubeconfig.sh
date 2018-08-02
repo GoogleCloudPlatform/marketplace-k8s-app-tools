@@ -1,14 +1,11 @@
 #!/bin/bash
 
-# If ~/mount/.kube/ exists ($KUBECONFIG is mounted) and ~/.kube does not
-# (we have not yet initialized), copy system kubectl configuration to
-# them to the default $KUBECONFIG location after adjusting system-specific
-# fields.
-if [[ -e "/root/mount/.kube/config" && ! -e "$HOME/.kube/config" ]]; then
+# If host kubernetes configuration is mounted, copy it to the container's
+# default $KUBECONFIG location after adjusting system-specific fields.
+if [[ -e "/root/mount/.kube/config" ]]; then
   mkdir -p "$HOME/.kube"
 
-  # Copy mounted kubectl configuration to default location, adjusting
-  # cmd-path for gcp auth-providers to this docker image's gcloud
+  # Adjusting cmd-path for gcp auth-providers to this container's gcloud
   # installation location.
   cat /root/mount/.kube/config \
     | yaml2json \
@@ -21,4 +18,13 @@ if [[ -e "/root/mount/.kube/config" && ! -e "$HOME/.kube/config" ]]; then
                       end
                     ]' \
   > "$HOME/.kube/config"
+fi
+
+# If host gcloud configuration is mounted, replace container gcloud
+# configuration with it.
+# Note: We do this to ensure the directory is writable without providing
+# write access to host gcloud configuration directory.
+if [[ -e "/root/mount/.config/gcloud" ]]; then
+  rm -rf "$HOME/.config/gcloud"
+  cp -r "/root/mount/.config/gcloud" "$HOME/.config"
 fi
