@@ -4,7 +4,9 @@ matrix:
     env: NAME=pylint
 
 install:
-- [[ "$NAME" == "pylint" ]] && pip install pylint
+- |-
+  [[ "$NAME" == "pylint" ]] && pip install pylint
 
 script:
-- [[ "$NAME" == "pylint" ]] && pylint
+- |-
+  [[ "$NAME" == "pylint" ]] && pylint
