@@ -88,7 +88,7 @@ kubectl create namespace "$NAMESPACE"
 
 function delete_namespace() {
   echo "INFO Collecting events for namespace \"$NAMESPACE\""
-  kubectl get events --namespace=$NAMESPACE || echo "ERROR Failed to get events for namespace $NAMESPACE"
+  kubectl get events --namespace="$NAMESPACE" || echo "ERROR Failed to get events for namespace \"$NAMESPACE\""
 
   if [[ ! -z $deployer_name ]]; then
     echo "INFO Collecting logs for deployer"
@@ -96,7 +96,8 @@ function delete_namespace() {
   fi
 
   echo "INFO Deleting namespace \"$NAMESPACE\""
-  kubectl delete namespace $NAMESPACE
+  kubectl get all --namespace "$NAMESPACE" --output=yaml
+  kubectl delete namespace "$NAMESPACE"
 }
 
 function clean_and_exit() {
