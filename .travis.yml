@@ -2,13 +2,21 @@ matrix:
   include:
   - language: python
     env: NAME=pylint
+  include:
+  - language: python
+    env: NAME=test/py
+    services:
+    - docker
 
 install:
-- |-
+- |
   [[ "$NAME" == "pylint" ]] && pip install pylint
 
 script:
-- |-
-  [[ "$NAME" == "pylint" ]] \
-  && pylint --rcfile google-pylint.rc \
-      marketplace/deployer_util/*
+# - |
+#   [[ "$NAME" == "pylint" ]] \
+#   && pylint --rcfile google-pylint.rc \
+#       marketplace/deployer_util/*
+- |
+  [[ "$NAME" == "test/py"]] \
+  && make test/py
