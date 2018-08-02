@@ -37,7 +37,7 @@ def main():
 
   application = Command('''
     kubectl get "applications/{}"
-      --namespace="{}" 
+      --namespace="{}"
       --output=json
     '''.format(args.name, args.namespace), print_call=True).json()
 
@@ -106,7 +106,7 @@ def is_healthy(resource):
 def is_deployment_ready(resource):
   if total_replicas(resource) == ready_replicas(resource):
     return True
-  
+
   log("INFO Deployment '{}' replicas are not ready: {}/{}".format(
     name(resource),
     ready_replicas(resource),
@@ -117,9 +117,9 @@ def is_deployment_ready(resource):
 def is_pvc_ready(resource):
   if resource['status']['phase'] == "Bound":
     return True
-  
+
   log("INFO pvc/{} phase is '{}'. Expected: 'Bound'".format(
-    name(resource), 
+    name(resource),
     phase(resource)))
   return False
 
@@ -130,7 +130,7 @@ def is_service_ready(resource):
 
   if service_ip(resource):
     return True
-  
+
   log("INFO service/{} service ip is not ready.".format(name(resource)))
   return False
 

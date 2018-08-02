@@ -55,7 +55,7 @@ done
 docker run \
     --volume "/var/run/docker.sock:/var/run/docker.sock:ro" \
     --volume "$kubeconfig:/root/mount/.kube:ro" \
-    --volume "$gcloudconfig:/root/.config/gcloud:ro" \
+    --volume "$gcloudconfig:/root/mount/.config/gcloud:ro" \
     --rm \
     "gcr.io/cloud-marketplace-tools/k8s/dev" \
     -- \
