@@ -21,6 +21,6 @@ script:
 #   && pylint --rcfile google-pylint.rc \
 #       marketplace/deployer_util/*
 - |
-  [[ "$NAME" == "test/py"]] \
+  [[ "$NAME" == "test/py" ]] \
   && make test/py \
   || :
