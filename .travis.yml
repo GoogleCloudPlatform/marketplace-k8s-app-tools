@@ -10,7 +10,10 @@ matrix:
 
 install:
 - |
-  [[ "$NAME" == "pylint" ]] && pip install pylint
+  [[ "$NAME" == "pylint" ]] \
+  && pip install pylint \
+  || :
+
 
 script:
 # - |
@@ -19,4 +22,5 @@ script:
 #       marketplace/deployer_util/*
 - |
   [[ "$NAME" == "test/py"]] \
-  && make test/py
+  && make test/py \
+  || :
