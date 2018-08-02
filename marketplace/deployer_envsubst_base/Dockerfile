@@ -21,6 +21,8 @@ RUN wget -q -O /bin/kubectl \
 
 COPY marketplace/deployer_envsubst_base/* /bin/
 COPY marketplace/deployer_util/* /bin/
+ARG VERSION
+RUN echo "$VERSION" > /version
 
 RUN mkdir -p /data/manifest
 

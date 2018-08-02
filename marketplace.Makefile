@@ -2,6 +2,7 @@ ifndef __MARKETPLACE_MAKEFILE__
 
 __MARKETPLACE_MAKEFILE__ := included
 
+COMMIT ?= $(shell git rev-parse HEAD | fold -w 12 | head -n 1)
 
 makefile_dir := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
 include $(makefile_dir)/common.Makefile
@@ -9,6 +10,21 @@ include $(makefile_dir)/common.Makefile
 
 .build/marketplace: | .build
 	mkdir -p "$@"
+
+
+.build/marketplace/dev: $(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_util/* \
+                        $(MARKETPLACE_TOOLS_PATH)/marketplace/dev/* \
+                        $(MARKETPLACE_TOOLS_PATH)/scripts/* \
+                        $(MARKETPLACE_TOOLS_PATH)/scripts/driver/* \
+                        $(MARKETPLACE_TOOLS_PATH)/marketplace.Makefile \
+                        | .build/marketplace
+	$(call print_target)
+	cd "$(MARKETPLACE_TOOLS_PATH)" ; \
+	docker build \
+	    --tag "gcr.io/cloud-marketplace-tools/k8s/dev" \
+	    -f marketplace/dev/Dockerfile \
+	    .
+	@touch "$@"
 
 
 .build/marketplace/deployer: | .build/marketplace
@@ -20,9 +36,8 @@ include $(makefile_dir)/common.Makefile
                                       .build/marketplace/delete_deprecated \
                                       | .build/marketplace/deployer
 	$(call print_target)
-	cd $(MARKETPLACE_TOOLS_PATH) \
-	&& docker build \
-	    --cache-from "gcr.io/cloud-marketplace-tools/k8s/deployer_envsubst" \
+	cd "$(MARKETPLACE_TOOLS_PATH)"; \
+	docker build \
 	    --tag "gcr.io/cloud-marketplace-tools/k8s/deployer_envsubst" \
 	    -f marketplace/deployer_envsubst_base/Dockerfile \
 	    .
@@ -36,6 +51,7 @@ include $(makefile_dir)/common.Makefile
 	$(call print_target)
 	cd $(MARKETPLACE_TOOLS_PATH) \
 	&& docker build \
+	    --build-arg VERSION="$(COMMIT)" \
 	    --tag "gcr.io/cloud-marketplace-tools/k8s/deployer_helm" \
 	    -f marketplace/deployer_helm_base/Dockerfile \
 	    .
