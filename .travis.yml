@@ -9,4 +9,6 @@ install:
 
 script:
 - |-
-  [[ "$NAME" == "pylint" ]] && pylint
+  [[ "$NAME" == "pylint" ]] \
+  && pylint --indent-string="  " \
+      marketplace/deployer_util/*
