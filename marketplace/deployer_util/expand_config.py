@@ -20,7 +20,6 @@ from argparse import ArgumentParser
 
 import yaml
 
-import config_helper
 import schema_values_common
 from password import GeneratePassword
 
@@ -42,9 +41,10 @@ def main():
   parser = ArgumentParser(description=_PROG_HELP)
   schema_values_common.add_to_argument_parser(
       parser, values_file='/data/values.yaml', values_dir='/data/values')
-  parser.add_argument('--final_values_file',
-                      help='Where the final value file should be written to',
-                      default='/data/final_values.yaml')
+  parser.add_argument(
+      '--final_values_file',
+      help='Where the final value file should be written to',
+      default='/data/final_values.yaml')
   args = parser.parse_args()
 
   schema = schema_values_common.load_schema(args)
@@ -78,14 +78,14 @@ def expand(values_dict, schema):
 
     if v is not None and prop.image:
       if not isinstance(v, str):
-        raise InvalidProperty(
-            'Invalid value for IMAGE property {}: {}'.format(k, v))
+        raise InvalidProperty('Invalid value for IMAGE property {}: {}'.format(
+            k, v))
       generate_properties_for_image(prop, v, generated)
 
     if v is not None and prop.string:
       if not isinstance(v, str):
-        raise InvalidProperty(
-            'Invalid value for STRING property {}: {}'.format(k, v))
+        raise InvalidProperty('Invalid value for STRING property {}: {}'.format(
+            k, v))
       generate_properties_for_string(prop, v, generated)
 
     if v is not None:
@@ -97,8 +97,8 @@ def expand(values_dict, schema):
   for k, v in generated.iteritems():
     if k in result:
       raise InvalidProperty(
-        'The property is to be generated, but already has a value: {}'
-        .format(k))
+          'The property is to be generated, but already has a value: {}'
+          .format(k))
     result[k] = v
   return result
 
@@ -115,8 +115,8 @@ def validate_value_types(values, schema):
     prop = schema.properties[k]
     if not isinstance(v, prop.type):
       raise InvalidProperty(
-          'Property {} is expected to be of type {}, but has value: {}'
-          .format(k, prop.type, v))
+          'Property {} is expected to be of type {}, but has value: {}'.format(
+              k, prop.type, v))
 
 
 def generate_properties_for_image(prop, value, result):
@@ -148,9 +148,7 @@ def write_values(values, values_file):
   if not os.path.exists(os.path.dirname(values_file)):
     os.makedirs(os.path.dirname(values_file))
   with open(values_file, 'w') as f:
-    data = yaml.safe_dump(values,
-                          default_flow_style=False,
-                          indent=2)
+    data = yaml.safe_dump(values, default_flow_style=False, indent=2)
     f.write(data)
 
 

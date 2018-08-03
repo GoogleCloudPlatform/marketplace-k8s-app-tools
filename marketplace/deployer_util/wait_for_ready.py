@@ -22,6 +22,7 @@ from bash_util import Command
 
 _PROG_HELP = "Wait for the application to get ready into a ready state"
 
+
 def main():
   parser = ArgumentParser(description=_PROG_HELP)
   parser.add_argument('--name')
@@ -29,21 +30,24 @@ def main():
   parser.add_argument('--timeout')
   args = parser.parse_args()
 
-  log("INFO Wait {} seconds for the application '{}' to get into ready state".format(args.timeout, args.name))
-  previous_healthy=False
+  log("INFO Wait {} seconds for the application '{}' to get into ready state".
+      format(args.timeout, args.name))
+  previous_healthy = False
 
-  min_time_before_healthy=30
-  poll_interval=4
+  min_time_before_healthy = 30
+  poll_interval = 4
 
-  application = Command('''
+  application = Command(
+      '''
     kubectl get "applications/{}"
       --namespace="{}"
       --output=json
-    '''.format(args.name, args.namespace), print_call=True).json()
+    '''.format(args.name, args.namespace),
+      print_call=True).json()
 
-  application_uid = application['metadata']['uid']
-
-  top_level_kinds = [ kind['kind'] for kind in application['spec']['componentKinds'] ]
+  top_level_kinds = [
+      kind['kind'] for kind in application['spec']['componentKinds']
+  ]
 
   poll_start_time = time.time()
 
@@ -69,10 +73,12 @@ def main():
         break
 
     if previous_healthy != healthy:
-      log("INFO Initialization: Found applications/{} ready status to be {}.".format(args.name, healthy))
+      log("INFO Initialization: Found applications/{} ready status to be {}.".
+          format(args.name, healthy))
       previous_healthy = healthy
       if healthy:
-        log("INFO Wait {} seconds to make sure app stays in healthy state.".format(min_time_before_healthy))
+        log("INFO Wait {} seconds to make sure app stays in healthy state.".
+            format(min_time_before_healthy))
         healthy_start_time = time.time()
 
     if healthy:
@@ -81,7 +87,9 @@ def main():
         break
 
     if time.time() - poll_start_time > args.timeout:
-      raise Exception("ERROR Application did not get ready before timeout of {} seconds".format(args.timeout))
+      raise Exception(
+          "ERROR Application did not get ready before timeout of {} seconds".
+          format(args.timeout))
 
     time.sleep(poll_interval)
 
@@ -108,9 +116,7 @@ def is_deployment_ready(resource):
     return True
 
   log("INFO Deployment '{}' replicas are not ready: {}/{}".format(
-    name(resource),
-    ready_replicas(resource),
-    total_replicas(resource)))
+      name(resource), ready_replicas(resource), total_replicas(resource)))
   return False
 
 
@@ -119,8 +125,7 @@ def is_pvc_ready(resource):
     return True
 
   log("INFO pvc/{} phase is '{}'. Expected: 'Bound'".format(
-    name(resource),
-    phase(resource)))
+      name(resource), phase(resource)))
   return False
 
 
@@ -156,8 +161,10 @@ def service_ip(resource):
 
   return resource['status']['loadBalancer']['ingress']
 
+
 def phase(resource):
   return resource['status']['phase']
+
 
 if __name__ == "__main__":
   main()

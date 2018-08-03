@@ -22,31 +22,31 @@ from constants import GOOGLE_CLOUD_TEST
 from dict_util import deep_get
 from resources import set_resource_ownership
 from yaml_util import load_resources_yaml
-from yaml_util import load_yaml
 
 _PROG_HELP = "Separate the tester job from resources manifest into a different manifest"
+
 
 def main():
 
   parser = ArgumentParser(description=_PROG_HELP)
-  parser.add_argument("--app_name",
-                      required=True,
-                      help="the name of the applictation instance")
-  parser.add_argument("--app_uid",
-                      required=True,
-                      help="the uid of the applictation instance")
-  parser.add_argument("--app_api_version",
-                      required=True,
-                      help="apiVersion of the Application CRD")
-  parser.add_argument("--manifests",
-                      required=True,
-                      help="the configuration for tests")
-  parser.add_argument("--out_manifests",
-                      required=True,
-                      help="the file to write non-test resources to")
-  parser.add_argument("--out_test_manifests",
-                      required=True,
-                      help="the file to write test resources to")
+  parser.add_argument(
+      "--app_name", required=True, help="the name of the applictation instance")
+  parser.add_argument(
+      "--app_uid", required=True, help="the uid of the applictation instance")
+  parser.add_argument(
+      "--app_api_version",
+      required=True,
+      help="apiVersion of the Application CRD")
+  parser.add_argument(
+      "--manifests", required=True, help="the configuration for tests")
+  parser.add_argument(
+      "--out_manifests",
+      required=True,
+      help="the file to write non-test resources to")
+  parser.add_argument(
+      "--out_test_manifests",
+      required=True,
+      help="the file to write test resources to")
   args = parser.parse_args()
 
   if os.path.isfile(args.manifests):
@@ -59,13 +59,16 @@ def main():
   test_resources = []
   nontest_resources = []
   for resource in resources:
-    full_name = "{}/{}".format(resource['kind'], deep_get(resource, 'metadata', 'name'))
-    if deep_get(resource, 'metadata', 'annotations', GOOGLE_CLOUD_TEST) == 'test':
+    full_name = "{}/{}".format(resource['kind'],
+                               deep_get(resource, 'metadata', 'name'))
+    if deep_get(resource, 'metadata', 'annotations',
+                GOOGLE_CLOUD_TEST) == 'test':
       print("INFO Tester resource: {}".format(full_name))
-      set_resource_ownership(app_uid=args.app_uid,
-                             app_name=args.app_name,
-                             app_api_version=args.app_api_version,
-                             resource=resource)
+      set_resource_ownership(
+          app_uid=args.app_uid,
+          app_name=args.app_name,
+          app_api_version=args.app_api_version,
+          resource=resource)
       test_resources.append(resource)
     else:
       print("INFO Prod resource: {}".format(full_name))
