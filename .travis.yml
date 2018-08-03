@@ -1,9 +1,11 @@
 matrix:
   include:
-  - env: NAME=lint/py
+  - language: generic
+    env: NAME=lint/py
     services:
     - docker
-  - env: NAME=test/py
+  - language: generic
+    env: NAME=test/py
     services:
     - docker
 
