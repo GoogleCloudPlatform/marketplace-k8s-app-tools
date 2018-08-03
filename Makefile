@@ -86,5 +86,5 @@ $(PYTHON_TEST_TARGETS): %.__pytest__: .build/testing/py
 
 .build/testing/py: testing/py/Dockerfile | .build/testing
 	$(call print_target)
-	docker build -t testing/py -f testing/py/Dockerfile .
+	docker build -t testing/py testing/py
 	@touch "$@"
