@@ -16,6 +16,9 @@
 
 set -eo pipefail
 
+export SCRIPT_DIR=$(readlink -f "$(dirname "${BASH_SOURCE[0]}")")
+. "${SCRIPT_DIR}/../../common.sh"
+
 for i in "$@"
 do
 case $i in
@@ -52,12 +55,14 @@ done
 [[ -z "$kubeconfig" ]] && kubeconfig="${KUBECONFIG:-$HOME/.kube}"
 [[ -z "$gcloudconfig" ]] && gcloudconfig="$HOME/.config/gcloud"
 
+image_tag=$( get_image_tag )
+
 docker run \
     --volume "/var/run/docker.sock:/var/run/docker.sock:ro" \
     --volume "$kubeconfig:/root/mount/.kube:ro" \
     --volume "$gcloudconfig:/root/mount/.config/gcloud:ro" \
     --rm \
-    "gcr.io/cloud-marketplace-tools/k8s/dev" \
+    "gcr.io/cloud-marketplace-tools/k8s/dev:$image_tag" \
     -- \
     /scripts/driver_internal.sh \
           --deployer="$deployer" \

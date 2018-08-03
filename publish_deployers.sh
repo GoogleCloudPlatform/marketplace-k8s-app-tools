@@ -16,6 +16,9 @@
 
 set -eo pipefail
 
+export SCRIPT_DIR=$(readlink -f "$(dirname "${BASH_SOURCE[0]}")")
+. "${SCRIPT_DIR}/common.sh"
+
 for i in "$@"
 do
 case $i in
@@ -36,7 +39,7 @@ done
 
 if [[ "$h" ]]; then
   cat <<EOF
-Builds the base deployer images and push them to gcr.io. 
+Builds the base deployer images and push them to gcr.io.
 
 Usages:
 publish_deployers.sh
@@ -54,15 +57,11 @@ if [[ ! -z "$changes" ]]; then
   exit 1
 fi
 
+image_tag=$( get_image_tag )
+
 make -B .build/marketplace/deployer/envsubst
 make -B .build/marketplace/deployer/helm
 make -B .build/marketplace/dev
-
-# Set the image tag as the git tag
-image_tag="$(git tag --points-at HEAD | grep -E '^v[0-9]+(\.[0-9]+)*$' | head -n 1 || echo "")"
-
-# If commit is not tagged, set image tag to commit hash
-[[ -z "$image_tag" ]] && image_tag="$(git rev-parse HEAD | fold -w 12 | head -n 1)"
 
 echo "Image tag: $image_tag"
 
