@@ -24,6 +24,6 @@ function get_image_tag() {
   # If commit is not tagged, set image tag to commit hash
   [[ -z "$image_tag" ]] && image_tag="$(git rev-parse HEAD | fold -w 12 | head -n 1)"
   # Return to previous location
-  cd -
+  cd - > /dev/null
   echo $image_tag
 }
