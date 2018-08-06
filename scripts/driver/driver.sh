@@ -56,7 +56,7 @@ docker run \
     --volume "/var/run/docker.sock:/var/run/docker.sock:ro" \
     --volume "$kubeconfig:/root/mount/.kube:ro" \
     --volume "$gcloudconfig:/root/mount/.config/gcloud:ro" \
-    --rm \
+    --rm -it \
     "gcr.io/cloud-marketplace-tools/k8s/dev" \
     -- \
     /scripts/driver_internal.sh \
