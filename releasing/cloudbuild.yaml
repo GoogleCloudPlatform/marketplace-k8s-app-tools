@@ -14,11 +14,9 @@ steps:
   args:
   - build
   - --tag
-  - gcr.io/$PROJECT_ID/$BRANCH_NAME/dev
+  - gcr.io/$PROJECT_ID/$BRANCH_NAME/dev:sha_$COMMIT_SHA
   - --tag
-  - gcr.io/$PROJECT_ID/$BRANCH_NAME/dev:$COMMIT_SHA
-  - --tag
-  - gcr.io/$PROJECT_ID/$BRANCH_NAME/dev:$SHORT_SHA
+  - gcr.io/$PROJECT_ID/$BRANCH_NAME/dev:sha_$SHORT_SHA
   - --file
   - marketplace/dev/Dockerfile
   - .
@@ -30,11 +28,9 @@ steps:
   args:
   - build
   - --tag
-  - gcr.io/$PROJECT_ID/$BRANCH_NAME/deployer_envsubst
+  - gcr.io/$PROJECT_ID/$BRANCH_NAME/deployer_envsubst:sha_$COMMIT_SHA
   - --tag
-  - gcr.io/$PROJECT_ID/$BRANCH_NAME/deployer_envsubst:$COMMIT_SHA
-  - --tag
-  - gcr.io/$PROJECT_ID/$BRANCH_NAME/deployer_envsubst:$SHORT_SHA
+  - gcr.io/$PROJECT_ID/$BRANCH_NAME/deployer_envsubst:sha_$SHORT_SHA
   - --file
   - marketplace/deployer_envsubst_base/Dockerfile
   - .
@@ -46,22 +42,17 @@ steps:
   args:
   - build
   - --tag
-  - gcr.io/$PROJECT_ID/$BRANCH_NAME/deployer_helm
+  - gcr.io/$PROJECT_ID/$BRANCH_NAME/deployer_helm:sha_$COMMIT_SHA
   - --tag
-  - gcr.io/$PROJECT_ID/$BRANCH_NAME/deployer_helm:$COMMIT_SHA
-  - --tag
-  - gcr.io/$PROJECT_ID/$BRANCH_NAME/deployer_helm:$SHORT_SHA
+  - gcr.io/$PROJECT_ID/$BRANCH_NAME/deployer_helm:sha_$SHORT_SHA
   - --file
   - marketplace/deployer_helm_base/Dockerfile
   - .
 
 images:
-  - gcr.io/$PROJECT_ID/$BRANCH_NAME/dev
-  - gcr.io/$PROJECT_ID/$BRANCH_NAME/dev:$COMMIT_SHA
-  - gcr.io/$PROJECT_ID/$BRANCH_NAME/dev:$SHORT_SHA
-  - gcr.io/$PROJECT_ID/$BRANCH_NAME/deployer_envsubst
-  - gcr.io/$PROJECT_ID/$BRANCH_NAME/deployer_envsubst:$COMMIT_SHA
-  - gcr.io/$PROJECT_ID/$BRANCH_NAME/deployer_envsubst:$SHORT_SHA
-  - gcr.io/$PROJECT_ID/$BRANCH_NAME/deployer_helm
-  - gcr.io/$PROJECT_ID/$BRANCH_NAME/deployer_helm:$COMMIT_SHA
-  - gcr.io/$PROJECT_ID/$BRANCH_NAME/deployer_helm:$SHORT_SHA
+  - gcr.io/$PROJECT_ID/$BRANCH_NAME/dev:sha_$COMMIT_SHA
+  - gcr.io/$PROJECT_ID/$BRANCH_NAME/dev:sha_$SHORT_SHA
+  - gcr.io/$PROJECT_ID/$BRANCH_NAME/deployer_envsubst:sha_$COMMIT_SHA
+  - gcr.io/$PROJECT_ID/$BRANCH_NAME/deployer_envsubst:sha_$SHORT_SHA
+  - gcr.io/$PROJECT_ID/$BRANCH_NAME/deployer_helm:sha_$COMMIT_SHA
+  - gcr.io/$PROJECT_ID/$BRANCH_NAME/deployer_helm:sha_$SHORT_SHA
