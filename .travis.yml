@@ -1,20 +1,13 @@
 matrix:
   include:
   - language: generic
-    env: NAME=lint/py
+    env: TARGET=lint/py
     services:
     - docker
   - language: generic
-    env: NAME=test/py
+    env: TARGET=test/py
     services:
     - docker
 
 script:
-- |
-  [[ "$NAME" == "lint/py" ]] \
-  && make lint/py \
-  || :
-- |
-  [[ "$NAME" == "test/py" ]] \
-  && make test/py \
-  || :
+- make "${TARGET}"
