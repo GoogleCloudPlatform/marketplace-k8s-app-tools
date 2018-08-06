@@ -15,7 +15,6 @@
 # limitations under the License.
 
 import json
-import os
 import re
 import sys
 
@@ -51,13 +50,17 @@ class InvalidParameter(Exception):
 def main():
   parser = ArgumentParser(description=_PROG_HELP)
   schema_values_common.add_to_argument_parser(parser)
-  parser.add_argument('--output', '-o', help=_OUTPUT_HELP,
-                      choices=[OUTPUT_SHELL_VARS, OUTPUT_YAML],
-                      default=OUTPUT_YAML)
-  parser.add_argument('--param',
-                      help='If specified, outputs the value of a single '
-                      'parameter unescaped. The value here is a JSON '
-                      'which should partially match the parameter schema.')
+  parser.add_argument(
+      '--output',
+      '-o',
+      help=_OUTPUT_HELP,
+      choices=[OUTPUT_SHELL_VARS, OUTPUT_YAML],
+      default=OUTPUT_YAML)
+  parser.add_argument(
+      '--param',
+      help='If specified, outputs the value of a single '
+      'parameter unescaped. The value here is a JSON '
+      'which should partially match the parameter schema.')
   args = parser.parse_args()
 
   schema = schema_values_common.load_schema(args)
@@ -81,8 +84,8 @@ def output_param(values, schema, definition):
   candidates = schema.properties_matching(definition)
   if len(candidates) != 1:
     raise InvalidParameter(
-        'There must be exactly one parameter matching but found {}: {}'
-        .format(len(candidates), definition))
+        'There must be exactly one parameter matching but found {}: {}'.format(
+            len(candidates), definition))
   key = candidates[0].name
   if key not in values:
     raise InvalidParameter('Parameter {} has no value'.format(key))
@@ -94,7 +97,8 @@ def output_shell_vars(values):
   sorted_keys.sort()
   invalid_keys = [key for key in sorted_keys if not ENV_KEY_RE.match(key)]
   if invalid_keys:
-    raise InvalidName('Invalid config parameter names: {}'.format(invalid_keys))
+    raise config_helper.InvalidName(
+        'Invalid config parameter names: {}'.format(invalid_keys))
   return ' '.join(['${}'.format(k) for k in sorted_keys])
 
 
@@ -109,9 +113,7 @@ def output_yaml(values):
       current_new_values = current_new_values[key_prefix]
     current_new_values[key] = value
 
-  return yaml.safe_dump(new_values,
-                        default_flow_style=False,
-                        indent=2)
+  return yaml.safe_dump(new_values, default_flow_style=False, indent=2)
 
 
 if __name__ == "__main__":

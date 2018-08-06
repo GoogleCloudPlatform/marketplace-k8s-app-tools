@@ -15,20 +15,21 @@
 # limitations under the License.
 
 import os
-import yaml
 
 from yaml_util import overlay_yaml_file
 from argparse import ArgumentParser
-
 ''' Copy all the files from the test manifest into final manifest.
     The values.yaml file is merged instead of overwriten '''
 
 parser = ArgumentParser()
 
-parser.add_argument("-tc", "--manifest", dest="manifest",
-                    help="the configuration for tests")
-parser.add_argument("-td", "--test_manifest", dest="test_manifest",
-                    help="the output for test resources")
+parser.add_argument(
+    "-tc", "--manifest", dest="manifest", help="the configuration for tests")
+parser.add_argument(
+    "-td",
+    "--test_manifest",
+    dest="test_manifest",
+    help="the output for test resources")
 
 args = parser.parse_args()
 

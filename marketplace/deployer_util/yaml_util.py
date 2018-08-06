@@ -29,9 +29,7 @@ def load_yaml(filename):
 
 def add_or_replace(orig, dest):
   for key in orig:
-    if (type(orig[key]) is dict and
-       key in dest and
-       type(dest[key]) is dict):
+    if (type(orig[key]) is dict and key in dest and type(dest[key]) is dict):
       add_or_replace(orig[key], dest[key])
     else:
       dest[key] = copy.deepcopy(orig[key])
