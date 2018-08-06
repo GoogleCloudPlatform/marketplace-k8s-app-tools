@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import random
-import yaml
 
 PROPERTY_LENGTH = 'length'
 PROPERTY_INCLUDE_SYMBOLS = 'includeSymbols'
@@ -45,17 +44,19 @@ def GeneratePassword(length=8, include_symbols=False):
   if length < MIN_LENGTH:
     raise InputError('Password length must be at least %d' % MIN_LENGTH)
 
-  candidates = (CANDIDATES_WITH_SYMBOLS if include_symbols
-                else CANDIDATES_WITHOUT_SYMBOLS)
-  categories = (CATEGORIES_WITH_SYMBOLS if include_symbols
-                else CATEGORIES_WITHOUT_SYMBOLS)
+  candidates = (
+      CANDIDATES_WITH_SYMBOLS
+      if include_symbols else CANDIDATES_WITHOUT_SYMBOLS)
+  categories = (
+      CATEGORIES_WITH_SYMBOLS
+      if include_symbols else CATEGORIES_WITHOUT_SYMBOLS)
 
   # Generates up to the specified length minus the number of categories.
   # Then inserts one character for each category, ensuring that the character
   # satisfy the category if the generated string hasn't already.
-  generated = ([random.choice(ALPHABET)] +
-               [random.choice(candidates)
-                for _ in range(length - 1 - len(categories))])
+  generated = (
+      [random.choice(ALPHABET)] +
+      [random.choice(candidates) for _ in range(length - 1 - len(categories))])
   for category in categories:
     _InsertAndEnsureSatisfaction(generated, category, candidates)
   return ''.join(generated)
@@ -86,5 +87,6 @@ def _InsertAndEnsureSatisfaction(generated, required, all_candidates):
 def _InsertInto(generated, candidates):
   """Inserts a random candidate into a random non-zero index of generated."""
   # Avoids inserting at index 0, since the first character follows its own rule.
-  generated.insert(random.randint(1, len(generated) - 1),
-                   random.choice(candidates))
+  generated.insert(
+      random.randint(1,
+                     len(generated) - 1), random.choice(candidates))

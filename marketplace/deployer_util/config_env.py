@@ -18,7 +18,6 @@ import subprocess
 import sys
 from argparse import ArgumentParser
 
-import config_helper
 import schema_values_common
 
 _PROG_HELP = """
@@ -39,20 +38,18 @@ def main():
   values = {k: str(v) for k, v in values.iteritems()}
 
   # Default env vars should NOT be passed on to the new environment.
-  default_vars = [v.split('=')[0]
-                  for v in subprocess.check_output(['env -0'],
-                                                   env={},
-                                                   shell=True).split('\0')
-                  if v]
-  command = (['/usr/bin/env'] +
-             ['--unset={}'.format(v) for v in default_vars] +
-             [args.command] +
-             args.arguments)
-  p = subprocess.Popen(command,
-                       env=values,
-                       stdin=subprocess.PIPE,
-                       stdout=subprocess.PIPE,
-                       stderr=subprocess.PIPE)
+  default_vars = [
+      v.split('=')[0] for v in subprocess.check_output(
+          ['env -0'], env={}, shell=True).split('\0') if v
+  ]
+  command = (['/usr/bin/env'] + ['--unset={}'.format(v) for v in default_vars] +
+             [args.command] + args.arguments)
+  p = subprocess.Popen(
+      command,
+      env=values,
+      stdin=subprocess.PIPE,
+      stdout=subprocess.PIPE,
+      stderr=subprocess.PIPE)
   stdoutdata, stderrdata = p.communicate(input=sys.stdin.read())
   if stdoutdata:
     sys.stdout.write(stdoutdata)
