@@ -33,28 +33,30 @@ the ones defined in its list of components kinds.
 
 def main():
   parser = ArgumentParser(description=_PROG_HELP)
-  parser.add_argument("--app_name",
-                      help="The name of the applictation instance",
-                      required=True)
-  parser.add_argument("--app_uid",
-                      help="The uid of the applictation instance",
-                      required=True)
-  parser.add_argument("--app_api_version",
-                      help="The apiVersion of the Application CRD",
-                      required=True)
-  parser.add_argument("--manifests",
-                      help="The folder containing the manifest templates, "
-                      "or - to read from stdin",
-                      required=True)
-  parser.add_argument("--dest",
-                      help="The output file for the resulting manifest, "
-                      "or - to write to stdout",
-                      required=True)
-  parser.add_argument("--noapp",
-                      action="store_true",
-                      help="Do not look for Application resource to determine "
-                      "what kinds to include. I.e. set owner references for "
-                      "all of the resources in the manifests")
+  parser.add_argument(
+      "--app_name", help="The name of the applictation instance", required=True)
+  parser.add_argument(
+      "--app_uid", help="The uid of the applictation instance", required=True)
+  parser.add_argument(
+      "--app_api_version",
+      help="The apiVersion of the Application CRD",
+      required=True)
+  parser.add_argument(
+      "--manifests",
+      help="The folder containing the manifest templates, "
+      "or - to read from stdin",
+      required=True)
+  parser.add_argument(
+      "--dest",
+      help="The output file for the resulting manifest, "
+      "or - to write to stdout",
+      required=True)
+  parser.add_argument(
+      "--noapp",
+      action="store_true",
+      help="Do not look for Application resource to determine "
+      "what kinds to include. I.e. set owner references for "
+      "all of the resources in the manifests")
   args = parser.parse_args()
 
   resources = []
@@ -66,7 +68,6 @@ def main():
     resources = []
     for filename in os.listdir(args.manifests):
       resources += load_resources_yaml(os.path.join(args.manifests, filename))
-
 
   if not args.noapp:
     apps = [r for r in resources if r["kind"] == "Application"]
@@ -86,35 +87,38 @@ def main():
     included_kinds = None
 
   if args.dest == "-":
-    dump(sys.stdout,
-         resources,
-         included_kinds,
-         app_name=args.app_name,
-         app_uid=args.app_uid,
-         app_api_version=args.app_api_version)
+    dump(
+        sys.stdout,
+        resources,
+        included_kinds,
+        app_name=args.app_name,
+        app_uid=args.app_uid,
+        app_api_version=args.app_api_version)
     sys.stdout.flush()
   else:
     with open(args.dest, "w") as outfile:
-      dump(outfile,
-           resources,
-           included_kinds,
-           app_name=args.app_name,
-           app_uid=args.app_uid,
-           app_api_version=args.app_api_version)
+      dump(
+          outfile,
+          resources,
+          included_kinds,
+          app_name=args.app_name,
+          app_uid=args.app_uid,
+          app_api_version=args.app_api_version)
 
 
-def dump(outfile, resources, included_kinds,
-         app_name, app_uid, app_api_version):
+def dump(outfile, resources, included_kinds, app_name, app_uid,
+         app_api_version):
   to_be_dumped = []
   for resource in resources:
     if included_kinds is None or resource["kind"] in included_kinds:
       log("Application '{:s}' owns '{:s}/{:s}'".format(
           app_name, resource["kind"], resource["metadata"]["name"]))
       resource = copy.deepcopy(resource)
-      set_resource_ownership(app_uid=app_uid,
-                             app_name=app_name,
-                             app_api_version=app_api_version,
-                             resource=resource)
+      set_resource_ownership(
+          app_uid=app_uid,
+          app_name=app_name,
+          app_api_version=app_api_version,
+          resource=resource)
     to_be_dumped.append(resource)
   yaml.safe_dump_all(to_be_dumped, outfile, default_flow_style=False, indent=2)
 

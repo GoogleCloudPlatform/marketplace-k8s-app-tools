@@ -30,20 +30,22 @@ Sets the app.kubernetes.io labels on resources.
 
 def main():
   parser = ArgumentParser(description=_PROG_HELP)
-  parser.add_argument("--manifests",
-                      help="The folder containing the manifest templates, "
-                      "or - to read from stdin",
-                      required=True)
-  parser.add_argument("--dest",
-                      help="The output file for the resulting manifest, "
-                      "or - to write to stdout",
-                      required=True)
-  parser.add_argument("--name",
-                      help="The name of the applictation instance",
-                      required=True)
-  parser.add_argument("--namespace",
-                      help="The namespace where the applictation is installed",
-                      required=True)
+  parser.add_argument(
+      "--manifests",
+      help="The folder containing the manifest templates, "
+      "or - to read from stdin",
+      required=True)
+  parser.add_argument(
+      "--dest",
+      help="The output file for the resulting manifest, "
+      "or - to write to stdout",
+      required=True)
+  parser.add_argument(
+      "--name", help="The name of the applictation instance", required=True)
+  parser.add_argument(
+      "--namespace",
+      help="The namespace where the applictation is installed",
+      required=True)
   args = parser.parse_args()
 
   resources = []

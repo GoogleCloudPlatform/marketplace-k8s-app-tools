@@ -29,10 +29,8 @@ class Command:
       print cmd
 
     parsedCmd = shlex.split(cmd)
-    self._process = subprocess.Popen(parsedCmd,
-      stdin=None,
-      stdout=subprocess.PIPE, 
-      stderr=subprocess.PIPE)
+    self._process = subprocess.Popen(
+        parsedCmd, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     self._exitcode = None
     self._output = None
     self._error = None
@@ -48,10 +46,11 @@ class Command:
       print "| " + cmd
 
     parsedCmd = shlex.split(cmd)
-    p2 = subprocess.Popen(parsedCmd, 
-      stdin=self._process.stdout, 
-      stdout=subprocess.PIPE, 
-      stderr=subprocess.PIPE)
+    p2 = subprocess.Popen(
+        parsedCmd,
+        stdin=self._process.stdout,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE)
 
     self._process = p2
     self._run()

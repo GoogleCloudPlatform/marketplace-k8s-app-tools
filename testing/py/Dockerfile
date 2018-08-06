@@ -7,4 +7,7 @@ RUN apt-get update \
         python-yaml \
     && rm -rf /var/lib/apt/lists/*
 
-RUN /usr/bin/env python2 -m pip install google-cloud-storage
+RUN pip2 install google-cloud-storage
+
+# Install lint tools.
+RUN pip2 install futures pyflakes yapf
