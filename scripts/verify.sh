@@ -59,7 +59,7 @@ docker run \
     --rm \
     "gcr.io/cloud-marketplace-tools/k8s/dev" \
     -- \
-    /scripts/driver_internal.sh \
+    /scripts/verify \
           --deployer="$deployer" \
           --parameters="$parameters" \
           --wait_timeout="$wait_timeout"

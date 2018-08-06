@@ -59,7 +59,7 @@ docker run \
     --rm \
     "gcr.io/cloud-marketplace-tools/k8s/dev" \
     -- \
-    /scripts/start_internal.sh \
+    /scripts/install \
           --deployer="$deployer" \
           --parameters="$parameters" \
           --entrypoint="$entrypoint"

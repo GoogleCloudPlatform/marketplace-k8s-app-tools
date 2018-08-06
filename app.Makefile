@@ -51,7 +51,7 @@ app/install:: app/build \
               .build/var/APP_PARAMETERS \
               .build/var/MARKETPLACE_TOOLS_PATH
 	$(call print_target)
-	"$(MARKETPLACE_TOOLS_PATH)/scripts/start.sh" \
+	"$(MARKETPLACE_TOOLS_PATH)/scripts/install.sh" \
 	    --deployer='$(APP_DEPLOYER_IMAGE)' \
 	    --parameters='$(APP_PARAMETERS)'
 
@@ -64,7 +64,7 @@ app/install-test:: app/build \
                    .build/var/APP_PARAMETERS \
                    .build/var/APP_TEST_PARAMETERS
 	$(call print_target)
-	"$(MARKETPLACE_TOOLS_PATH)/scripts/start.sh" \
+	"$(MARKETPLACE_TOOLS_PATH)/scripts/install.sh" \
 	    --deployer='$(APP_DEPLOYER_IMAGE)' \
 	    --parameters='$(call combined_parameters)' \
 	    --entrypoint='/bin/deploy_with_tests.sh'
@@ -76,7 +76,7 @@ app/uninstall: .build/var/APP_DEPLOYER_IMAGE \
                .build/var/APP_PARAMETERS \
                .build/var/MARKETPLACE_TOOLS_PATH
 	$(call print_target)
-	$(MARKETPLACE_TOOLS_PATH)/scripts/stop.sh \
+	$(MARKETPLACE_TOOLS_PATH)/scripts/uninstall.sh \
 	    --namespace='$(call namespace_parameter)' \
 	    --name='$(call name_parameter)'
 
@@ -89,42 +89,8 @@ app/verify: app/build \
             .build/var/APP_PARAMETERS \
             .build/var/APP_TEST_PARAMETERS
 	$(call print_target)
-	"$(MARKETPLACE_TOOLS_PATH)/scripts/driver/driver.sh" \
+	"$(MARKETPLACE_TOOLS_PATH)/scripts/verify.sh" \
 	    --deployer='$(APP_DEPLOYER_IMAGE)' \
 	    --parameters='$(call combined_parameters)'
-
-
-# Monitors resources in the target namespace on the cluster.
-# A convenient way to look at relevant k8s resources on the CLI.
-.PHONY: app/watch
-app/watch: .build/var/MARKETPLACE_TOOLS_PATH \
-           .build/var/APP_DEPLOYER_IMAGE \
-           .build/var/APP_PARAMETERS
-	$(call print_target)
-	$(MARKETPLACE_TOOLS_PATH)/scripts/watch.sh \
-	    --namespace='$(call namespace_parameter)'
-
-
-###################################################
-# Placeholder targets that provide user guidance. #
-###################################################
-
-# Note: Ideally all of these targets would be marked as PHONY, but it's
-# not clear how to achieve that with pattern targets.
-
-%registry_prefix: app/phony
-	@$(call print_notice,The $@ target has been replaced by .build/var/REGISTRY. Please replace */registry_prefix target with .build/var/REGISTRY.)
-	@exit 1
-
-
-%tag_prefix: app/phony
-	@$(call print_notice,The $@ target has been replaced by .build/var/TAG. Please replace */tag_prefix target with .build/var/TAG.)
-	@exit 1
-
-
-app/setup: app/phony
-	@$(call print_notice,The $@ target is deprecated. Please removed.)
-	@exit 1
-
 
 endif
