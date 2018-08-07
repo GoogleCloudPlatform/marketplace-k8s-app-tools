@@ -20,7 +20,6 @@ import copy
 from argparse import ArgumentParser
 from yaml_util import load_resources_yaml
 
-
 _K8S_APP_LABEL_KEY = 'app.kubernetes.io/name'
 
 
@@ -37,21 +36,25 @@ def ensure_resource_has_app_label(resource, app_name):
 
 def main():
   parser = ArgumentParser()
-  parser.add_argument("-m", "--manifest", dest="manifest",
-                      help="the manifest file to be parsed and updated")
-  parser.add_argument("-a", "--appname", dest="application_name",
-                      help="the application instance name")
+  parser.add_argument(
+      "-m",
+      "--manifest",
+      dest="manifest",
+      help="the manifest file to be parsed and updated")
+  parser.add_argument(
+      "-a",
+      "--appname",
+      dest="application_name",
+      help="the application instance name")
   args = parser.parse_args()
   manifest = args.manifest
   app_name = args.application_name
   resources = load_resources_yaml(manifest)
-  resources = map(
-      lambda r: ensure_resource_has_app_label(r, app_name) , resources)
+  resources = map(lambda r: ensure_resource_has_app_label(r, app_name),
+                  resources)
   with open(manifest, "w") as out:
-    yaml.dump_all(resources, out,
-                  default_flow_style=False, explicit_start=True)
+    yaml.dump_all(resources, out, default_flow_style=False, explicit_start=True)
 
 
 if __name__ == "__main__":
   main()
-

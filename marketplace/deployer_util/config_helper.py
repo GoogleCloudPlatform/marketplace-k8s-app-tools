@@ -47,24 +47,21 @@ class InvalidSchema(Exception):
   pass
 
 
-def load_values(values_file,
-                values_dir,
-                values_dir_encoding,
-                schema):
+def load_values(values_file, values_dir, values_dir_encoding, schema):
   if values_file == '-':
     return yaml.safe_load(sys.stdin.read())
   if values_file and os.path.isfile(values_file):
     with open(values_file, 'r') as f:
       return yaml.safe_load(f.read())
-  return _read_values_to_dict(values_dir,
-                              values_dir_encoding,
-                              schema)
+  return _read_values_to_dict(values_dir, values_dir_encoding, schema)
 
 
 def _read_values_to_dict(values_dir, codec, schema):
   """Returns a dict constructed from files in values_dir."""
-  files = [f for f in os.listdir(values_dir)
-           if os.path.isfile(os.path.join(values_dir, f))]
+  files = [
+      f for f in os.listdir(values_dir)
+      if os.path.isfile(os.path.join(values_dir, f))
+  ]
   result = {}
   for filename in files:
     if not NAME_RE.match(filename):
@@ -75,9 +72,10 @@ def _read_values_to_dict(values_dir, codec, schema):
       result[filename] = data
 
   # Data read in as strings. Convert them to proper types defined in schema.
-  result = {k: schema.properties[k].str_to_type(v) if k in schema.properties
-            else v
-            for k, v in result.iteritems()}
+  result = {
+      k: schema.properties[k].str_to_type(v) if k in schema.properties else v
+      for k, v in result.iteritems()
+  }
   return result
 
 
@@ -101,8 +99,9 @@ class Schema:
         for k, v in dictionary.get('properties', {}).iteritems()
     }
 
-    bad_required_names = [x for x in self._required
-                          if x not in self._properties]
+    bad_required_names = [
+        x for x in self._required if x not in self._properties
+    ]
     if bad_required_names:
       raise InvalidSchema('Undefined property names found in required: {}'
                           .format(', '.join(bad_required_names)))
@@ -127,8 +126,10 @@ class Schema:
     return self._properties
 
   def properties_matching(self, definition):
-    return [v for k, v in self._properties.iteritems()
-            if v.matches_definition(definition)]
+    return [
+        v for k, v in self._properties.iteritems()
+        if v.matches_definition(definition)
+    ]
 
 
 class SchemaProperty:
@@ -151,25 +152,26 @@ class SchemaProperty:
       raise InvalidSchema('Invalid property name: {}'.format(name))
     if 'type' not in dictionary:
       raise InvalidSchema('Property {} has no type'.format(name))
-    self._type = {'int': int,
-                  'integer': int,
-                  'string': str,
-                  'number': float,
-                  'boolean': bool,
-                  }.get(dictionary['type'], None)
+    self._type = {
+        'int': int,
+        'integer': int,
+        'string': str,
+        'number': float,
+        'boolean': bool,
+    }.get(dictionary['type'], None)
     if not self._type:
       raise InvalidSchema('Property {} has unsupported type: {}'.format(
-        name, dictionary['type']))
+          name, dictionary['type']))
 
     if self._default:
       if not isinstance(self._default, self._type):
-        raise InvalidSchema('Property {} has a default value of invalid type'.
-                            format(name))
+        raise InvalidSchema(
+            'Property {} has a default value of invalid type'.format(name))
 
     if self._x:
       if 'type' not in self._x:
-        raise InvalidSchema(
-            'Property {} has {} without a type'.format(name, XGOOGLE))
+        raise InvalidSchema('Property {} has {} without a type'.format(
+            name, XGOOGLE))
       xt = self._x['type']
       if xt in (XTYPE_NAME, XTYPE_NAMESPACE):
         pass
@@ -197,9 +199,8 @@ class SchemaProperty:
         d = self._x.get('reportingSecret', {})
         self._reporting_secret = SchemaXReportingSecret(d)
       else:
-        raise InvalidSchema(
-            'Property {} has an unknown type: {}'.format(name, xt))
-
+        raise InvalidSchema('Property {} has an unknown type: {}'.format(
+            name, xt))
 
   @property
   def name(self):
@@ -269,6 +270,7 @@ class SchemaProperty:
     There is a special `name` field in the dictionary that captures the
     property name, which does not originally exist in the schema.
     """
+
     def _matches(dictionary, subdict):
       for k, sv in subdict.iteritems():
         v = dictionary.get(k, None)
@@ -281,8 +283,7 @@ class SchemaProperty:
       return True
 
     return _matches(
-        dict(list(self._d.iteritems()) + [('name', self._name)]),
-        definition)
+        dict(list(self._d.iteritems()) + [('name', self._name)]), definition)
 
   def __eq__(self, other):
     if not isinstance(other, SchemaProperty):
@@ -312,10 +313,8 @@ class SchemaXImage:
     return self._split_by_colon
 
 
-SchemaXPassword = collections.namedtuple('SchemaXPassword',
-                                         ['length',
-                                          'include_symbols',
-                                          'base64'])
+SchemaXPassword = collections.namedtuple(
+    'SchemaXPassword', ['length', 'include_symbols', 'base64'])
 
 
 class SchemaXServiceAccount:
@@ -326,31 +325,35 @@ class SchemaXServiceAccount:
 
   def custom_role_rules(self):
     """Returns a list of rules for custom Roles."""
-    return [role.get('rules', [])
-            for role in self._roles
-            if role['type'] == 'Role'
-            and role['rulesType'] == 'CUSTOM']
+    return [
+        role.get('rules', [])
+        for role in self._roles
+        if role['type'] == 'Role' and role['rulesType'] == 'CUSTOM'
+    ]
 
   def custom_cluster_role_rules(self):
     """Returns a list of rules for custom ClusterRoles."""
-    return [role.get('rules', [])
-            for role in self._roles
-            if role['type'] == 'ClusterRole'
-            and role['rulesType'] == 'CUSTOM']
+    return [
+        role.get('rules', [])
+        for role in self._roles
+        if role['type'] == 'ClusterRole' and role['rulesType'] == 'CUSTOM'
+    ]
 
   def predefined_roles(self):
     """Returns a list of predefined Roles."""
-    return [role.get('rulesFromRoleName')
-            for role in self._roles
-            if role['type'] == 'Role'
-            and role['rulesType'] == 'PREDEFINED']
+    return [
+        role.get('rulesFromRoleName')
+        for role in self._roles
+        if role['type'] == 'Role' and role['rulesType'] == 'PREDEFINED'
+    ]
 
   def predefined_cluster_roles(self):
     """Returns a list of predefined ClusterRoles."""
-    return [role.get('rulesFromRoleName')
-            for role in self._roles
-            if role['type'] == 'ClusterRole'
-            and role['rulesType'] == 'PREDEFINED']
+    return [
+        role.get('rulesFromRoleName')
+        for role in self._roles
+        if role['type'] == 'ClusterRole' and role['rulesType'] == 'PREDEFINED'
+    ]
 
 
 class SchemaXStorageClass:

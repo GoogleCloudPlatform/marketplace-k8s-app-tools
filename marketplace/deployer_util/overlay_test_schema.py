@@ -18,16 +18,13 @@ import yaml
 import os.path
 
 from argparse import ArgumentParser
-from yaml_util import overlay_yaml_file
 from yaml_util import load_yaml
-from yaml_util import add_or_replace
+
 
 def main():
   parser = ArgumentParser()
-  parser.add_argument('--orig',
-                      help='Original schema file')
-  parser.add_argument('--dest',
-                      help='Destination schema file')
+  parser.add_argument('--orig', help='Original schema file')
+  parser.add_argument('--dest', help='Destination schema file')
   args = parser.parse_args()
 
   if not os.path.isfile(args.orig):
@@ -37,7 +34,8 @@ def main():
   orig = load_yaml(args.orig)
 
   if 'properties' not in orig:
-    print("No properties found in {}. Ignoring test schema merge.".format(args.orig))
+    print("No properties found in {}. Ignoring test schema merge.".format(
+        args.orig))
     return
 
   dest = load_yaml(args.dest)
@@ -46,9 +44,10 @@ def main():
       dest['properties'][prop] = orig['properties'][prop]
   else:
     dest['properties'] = orig['properties']
-  
+
   with open(args.dest, 'w') as f:
     yaml.dump(dest, f)
+
 
 if __name__ == "__main__":
   main()

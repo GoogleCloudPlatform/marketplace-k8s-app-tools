@@ -22,7 +22,6 @@ import yaml
 
 import schema_values_common
 import storage
-from config_helper import Schema
 
 _PROG_HELP = """
 Reads the schemas and writes k8s manifests for objects
@@ -40,13 +39,12 @@ def main():
 
   schema = schema_values_common.load_schema(args)
   values = schema_values_common.load_values(args)
-  manifests = process(schema,
-                      values,
-                      deployer_image=args.deployer_image,
-                      deployer_entrypoint=args.deployer_entrypoint)
-  print yaml.safe_dump_all(manifests,
-                           default_flow_style=False,
-                           indent=2)
+  manifests = process(
+      schema,
+      values,
+      deployer_image=args.deployer_image,
+      deployer_entrypoint=args.deployer_entrypoint)
+  print yaml.safe_dump_all(manifests, default_flow_style=False, indent=2)
 
 
 def process(schema, values, deployer_image, deployer_entrypoint):
@@ -86,12 +84,13 @@ def process(schema, values, deployer_image, deployer_entrypoint):
   # Merge input and provisioned properties.
   app_params = dict(list(values.iteritems()) + list(props.iteritems()))
   app_params = {k: str(v) for k, v in app_params.iteritems()}
-  manifests += provision_deployer(schema,
-                                  app_name=app_name,
-                                  namespace=namespace,
-                                  deployer_image=deployer_image,
-                                  deployer_entrypoint=deployer_entrypoint,
-                                  app_params=app_params)
+  manifests += provision_deployer(
+      schema,
+      app_name=app_name,
+      namespace=namespace,
+      deployer_image=deployer_image,
+      deployer_entrypoint=deployer_entrypoint,
+      app_params=app_params)
   return manifests
 
 
@@ -109,38 +108,33 @@ def provision_from_storage(key, value, app_name, namespace):
   return resource_name, add_preprovisioned_labels([manifest], key)
 
 
-def provision_deployer(schema,
-                       app_name,
-                       namespace,
-                       deployer_image,
-                       deployer_entrypoint,
-                       app_params):
+def provision_deployer(schema, app_name, namespace, deployer_image,
+                       deployer_entrypoint, app_params):
   """Provisions resources to run the deployer."""
   sa_name = dns1123_name('{}-deployer-sa'.format(app_name))
   pod_spec = {
-      'serviceAccountName': sa_name,
-      'containers': [
-          {
-              'name': 'deployer',
-              'image': deployer_image,
-              'imagePullPolicy': 'Always',
-              'volumeMounts': [
-                  {
-                      'name': 'config-volume',
-                      'mountPath': '/data/values',
-                  },
-              ],
-          },
-      ],
-      'restartPolicy': 'Never',
-      'volumes': [
-          {
+      'serviceAccountName':
+          sa_name,
+      'containers': [{
+          'name':
+              'deployer',
+          'image':
+              deployer_image,
+          'imagePullPolicy':
+              'Always',
+          'volumeMounts': [{
               'name': 'config-volume',
-              'configMap': {
-                  'name': "{}-deployer-config".format(app_name),
-              },
+              'mountPath': '/data/values',
+          },],
+      },],
+      'restartPolicy':
+          'Never',
+      'volumes': [{
+          'name': 'config-volume',
+          'configMap': {
+              'name': "{}-deployer-config".format(app_name),
           },
-      ],
+      },],
   }
   if deployer_entrypoint:
     pod_spec['containers'][0]['command'] = [deployer_entrypoint]
@@ -176,12 +170,10 @@ def provision_deployer(schema,
               'kind': 'ClusterRole',
               'name': 'cluster-admin',
           },
-          'subjects': [
-              {
-                  'kind': 'ServiceAccount',
-                  'name': sa_name,
-              },
-          ]
+          'subjects': [{
+              'kind': 'ServiceAccount',
+              'name': sa_name,
+          },]
       },
       {
           'apiVersion': 'v1',
@@ -297,7 +289,8 @@ def provision_service_account(schema, prop, app_name, namespace):
         'metadata': {
             'name':
                 '{}:{}:{}:{}-rb'.format(namespace, app_name, prop.name, role),
-            'namespace': namespace,
+            'namespace':
+                namespace,
         },
         'roleRef': {
             'apiGroup': 'rbac.authorization.k8s.io',
@@ -327,8 +320,8 @@ def provision_storage_class(schema, prop, app_name, namespace):
     }]
     return sc_name, add_preprovisioned_labels(manifests, sc_name)
   else:
-    raise Exception(
-        'Do not know how to provision for property {}'.format(prop.name))
+    raise Exception('Do not know how to provision for property {}'.format(
+        prop.name))
 
 
 def get_name(schema, values):
@@ -340,12 +333,11 @@ def get_namespace(schema, values):
 
 
 def get_property_value(schema, values, xtype):
-  candidates = schema.properties_matching(
-      {
-          'x-google-marketplace': {
-              'type': xtype,
-          },
-      })
+  candidates = schema.properties_matching({
+      'x-google-marketplace': {
+          'type': xtype,
+      },
+  })
   if len(candidates) != 1:
     raise Exception('Unable to find exactly one property with '
                     'x-google-marketplace.type={}'.format(xtype))
@@ -380,7 +372,7 @@ def add_preprovisioned_labels(manifests, prop_name):
   for r in manifests:
     labels = r['metadata'].get('labels', {})
     labels['app.kubernetes.io/component'] = (
-      'auto-provisioned.marketplace.cloud.google.com')
+        'auto-provisioned.marketplace.cloud.google.com')
     labels['marketplace.cloud.google.com/auto-provisioned-for-property'] = (
         prop_name)
     r['metadata']['labels'] = labels

@@ -25,22 +25,26 @@ from yaml_util import load_resources_yaml
 
 _PROG_HELP = "Deploy and run tester pods and wait for them to finish execution"
 
+
 def main():
   parser = ArgumentParser(description=_PROG_HELP)
   parser.add_argument('--namespace')
   parser.add_argument('--manifest')
   args = parser.parse_args()
 
-  kubectl_apply = Command('''
-    kubectl apply
-    --namespace="{}"
-    --filename="{}"
-    '''.format(args.namespace, args.manifest), print_call=True)
+  Command(
+      '''
+      kubectl apply
+      --namespace="{}"
+      --filename="{}"
+      '''.format(args.namespace, args.manifest),
+      print_call=True)
 
   resources = load_resources_yaml(args.manifest)
 
   for resource_def in resources:
-    full_name = "{}/{}".format(resource_def['kind'], deep_get(resource_def, 'metadata', 'name'))
+    full_name = "{}/{}".format(resource_def['kind'],
+                               deep_get(resource_def, 'metadata', 'name'))
 
     if resource_def['kind'] != 'Pod':
       log("INFO Skip '{}'".format(full_name))
@@ -51,12 +55,14 @@ def main():
     tester_timeout = 300
 
     while True:
-      try: 
-        resource = Command('''
+      try:
+        resource = Command(
+            '''
           kubectl get "{}"
           --namespace="{}"
           -o=json
-          '''.format(full_name, args.namespace), print_call=True).json()
+          '''.format(full_name, args.namespace),
+            print_call=True).json()
       except CommandException as ex:
         log(str(ex))
         log("INFO retrying")
@@ -82,7 +88,9 @@ def main():
 
 
 def print_logs(full_name, namespace):
-  log(Command('''kubectl logs {} --namespace="{}"'''.format(full_name, namespace)).output)
+  log(
+      Command('''kubectl logs {} --namespace="{}"'''.format(
+          full_name, namespace)).output)
 
 
 def log(msg):
