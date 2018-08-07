@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import tempfile
 import unittest
 
 from provision import dns1123_name
@@ -21,16 +20,12 @@ from provision import dns1123_name
 class ProvisionTest(unittest.TestCase):
 
   def test_dns1123_name(self):
-    self.assertEqual(dns1123_name('valid-name'),
-                     'valid-name')
-    self.assertModifiedName(dns1123_name('aA'),
-                            'aa')
-    self.assertModifiedName(dns1123_name('*sp3cial-@chars.(rem0ved^'),
-                            'sp3cial-chars-rem0ved')
-    self.assertModifiedName(dns1123_name('-abc.def.'),
-                            'abc-def')
-    self.assertModifiedName(dns1123_name('-123.456.'),
-                            '123-456')
+    self.assertEqual(dns1123_name('valid-name'), 'valid-name')
+    self.assertModifiedName(dns1123_name('aA'), 'aa')
+    self.assertModifiedName(
+        dns1123_name('*sp3cial-@chars.(rem0ved^'), 'sp3cial-chars-rem0ved')
+    self.assertModifiedName(dns1123_name('-abc.def.'), 'abc-def')
+    self.assertModifiedName(dns1123_name('-123.456.'), '123-456')
     self.assertModifiedName(
         dns1123_name('very-long-Name-that-gets-chopped-at-a-dash-'
                      '-------------------------------------------'),
@@ -42,5 +37,4 @@ class ProvisionTest(unittest.TestCase):
 
   def assertModifiedName(self, text, expected):
     self.assertEqual(text[:-5], expected)
-    self.assertRegexpMatches(text[-5:],
-                             r'-[a-f0-9]{4}')
+    self.assertRegexpMatches(text[-5:], r'-[a-f0-9]{4}')

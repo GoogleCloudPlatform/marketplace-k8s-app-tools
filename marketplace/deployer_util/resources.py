@@ -13,10 +13,7 @@
 # limitations under the License.
 
 
-def set_resource_ownership(app_uid,
-                           app_name,
-                           app_api_version,
-                           resource):
+def set_resource_ownership(app_uid, app_name, app_api_version, resource):
   """ Set the app as owner of the resource"""
 
   if 'metadata' not in resource:

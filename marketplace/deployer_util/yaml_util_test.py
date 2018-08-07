@@ -13,7 +13,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Test for yaml_util"""
 
 import unittest
@@ -104,8 +103,7 @@ spec:
 
     self.assertEqual(docs[0]['apiVersion'], "v1")
     self.assertEqual(docs[0]['kind'], "PersistentVolumeClaim")
-    self.assertEqual(docs[0]['spec']['resources']['requests']['storage'],
-                     "5Gi")
+    self.assertEqual(docs[0]['spec']['resources']['requests']['storage'], "5Gi")
 
     self.assertEqual(docs[1]['apiVersion'], "v1")
     self.assertEqual(docs[1]['kind'], "Service")

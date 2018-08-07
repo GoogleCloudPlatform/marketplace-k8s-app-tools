@@ -20,7 +20,6 @@ from argparse import ArgumentParser
 
 import config_helper
 
-
 _PROG_HELP = """
 Parses the provided schema file and prints all x-google-marketplace
 properties that match the provided type.
@@ -29,19 +28,21 @@ properties that match the provided type.
 
 def main():
   parser = ArgumentParser(description=_PROG_HELP)
-  parser.add_argument('--schema_file',
-                      help='Path to the schema file',
-                      default='/data/schema.yaml')
-  parser.add_argument('--type',
-                      help='The x-google-marketplace type for which '
-                           'configuration keys will be printed.\n'
-                           'Example: NAME',
-                      required=True)
+  parser.add_argument(
+      '--schema_file',
+      help='Path to the schema file',
+      default='/data/schema.yaml')
+  parser.add_argument(
+      '--type',
+      help='The x-google-marketplace type for which '
+      'configuration keys will be printed.\n'
+      'Example: NAME',
+      required=True)
   args = parser.parse_args()
 
   schema = config_helper.Schema.load_yaml_file(args.schema_file)
-  sys.stdout.write('\n'.join([k for k, v in schema.properties.items()
-                              if v.xtype == args.type]))
+  sys.stdout.write('\n'.join(
+      [k for k, v in schema.properties.items() if v.xtype == args.type]))
 
 
 if __name__ == "__main__":
