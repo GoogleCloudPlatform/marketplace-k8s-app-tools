@@ -2,8 +2,13 @@
 # merged into the master branch, and ensures that each commit on the
 # master branch has build artifacts associated with it.
 #
-# Associated build trigger:
-# http://console.cloud.google.com/cloud-build/triggers/0762301f-81af-4c60-8d12-a4cbdf8d6ea1
+# Associated build triggers:
+#
+# marketplace-k8s-app-tools push to any branch
+#   https://console.cloud.google.com/cloud-build/triggers/0762301f-81af-4c60-8d12-a4cbdf8d6ea1
+#
+# cloud-marketplace-tools push to master branch
+#   https://console.cloud.google.com/cloud-build/triggers/0257675b-9860-40a0-90c3-640a196e6a56
 
 steps:
 
