@@ -1,7 +1,7 @@
 # This cloudbuild.yaml config file is triggered in two contexts:
 #
 #
-# Trigger #1:
+# Trigger #1: Before master merge
 #
 # marketplace-k8s-app-tools push to any branch
 # https://console.cloud.google.com/cloud-build/triggers/0762301f-81af-4c60-8d12-a4cbdf8d6ea1?project=marketplace-k8s-app-tools
@@ -11,7 +11,7 @@
 # request. gcr.io/marketplace-k8s-app-tools read access restricted.
 #
 #
-# Trigger #2:
+# Trigger #2: After master merge
 #
 # cloud-marketplace-tools push to master branch
 # https://console.cloud.google.com/cloud-build/triggers/0257675b-9860-40a0-90c3-640a196e6a56?project=cloud-marketplace-tools
