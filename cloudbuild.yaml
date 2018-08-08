@@ -42,9 +42,9 @@ steps:
   args:
   - build
   - --tag
-  - gcr.io/$PROJECT_ID/$BRANCH_NAME/dev:sha_$COMMIT_SHA
+  - gcr.io/$PROJECT_ID/k8s/dev:sha_$COMMIT_SHA
   - --tag
-  - gcr.io/$PROJECT_ID/$BRANCH_NAME/dev:sha_$SHORT_SHA
+  - gcr.io/$PROJECT_ID/k8s/dev:sha_$SHORT_SHA
   - --file
   - marketplace/dev/Dockerfile
   - .
@@ -56,9 +56,9 @@ steps:
   args:
   - build
   - --tag
-  - gcr.io/$PROJECT_ID/$BRANCH_NAME/deployer_envsubst:sha_$COMMIT_SHA
+  - gcr.io/$PROJECT_ID/k8s/deployer_envsubst:sha_$COMMIT_SHA
   - --tag
-  - gcr.io/$PROJECT_ID/$BRANCH_NAME/deployer_envsubst:sha_$SHORT_SHA
+  - gcr.io/$PROJECT_ID/k8s/deployer_envsubst:sha_$SHORT_SHA
   - --file
   - marketplace/deployer_envsubst_base/Dockerfile
   - .
@@ -70,17 +70,17 @@ steps:
   args:
   - build
   - --tag
-  - gcr.io/$PROJECT_ID/$BRANCH_NAME/deployer_helm:sha_$COMMIT_SHA
+  - gcr.io/$PROJECT_ID/k8s/deployer_helm:sha_$COMMIT_SHA
   - --tag
-  - gcr.io/$PROJECT_ID/$BRANCH_NAME/deployer_helm:sha_$SHORT_SHA
+  - gcr.io/$PROJECT_ID/k8s/deployer_helm:sha_$SHORT_SHA
   - --file
   - marketplace/deployer_helm_base/Dockerfile
   - .
 
 images:
-  - gcr.io/$PROJECT_ID/$BRANCH_NAME/dev:sha_$COMMIT_SHA
-  - gcr.io/$PROJECT_ID/$BRANCH_NAME/dev:sha_$SHORT_SHA
-  - gcr.io/$PROJECT_ID/$BRANCH_NAME/deployer_envsubst:sha_$COMMIT_SHA
-  - gcr.io/$PROJECT_ID/$BRANCH_NAME/deployer_envsubst:sha_$SHORT_SHA
-  - gcr.io/$PROJECT_ID/$BRANCH_NAME/deployer_helm:sha_$COMMIT_SHA
-  - gcr.io/$PROJECT_ID/$BRANCH_NAME/deployer_helm:sha_$SHORT_SHA
+  - gcr.io/$PROJECT_ID/k8s/dev:sha_$COMMIT_SHA
+  - gcr.io/$PROJECT_ID/k8s/dev:sha_$SHORT_SHA
+  - gcr.io/$PROJECT_ID/k8s/deployer_envsubst:sha_$COMMIT_SHA
+  - gcr.io/$PROJECT_ID/k8s/deployer_envsubst:sha_$SHORT_SHA
+  - gcr.io/$PROJECT_ID/k8s/deployer_helm:sha_$COMMIT_SHA
+  - gcr.io/$PROJECT_ID/k8s/deployer_helm:sha_$SHORT_SHA
