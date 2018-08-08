@@ -19,6 +19,20 @@
 # This build trigger asserts the invariant that each commit on the master
 # branch of GoogleCloudPlatform/marketplace-k8s-app-tools will be built
 # and tagged in gcr.io/cloud-marketplace-tools/master.
+
+# The following variables will be provided by Cloud Build.
+# 
+# $PROJECT_ID: build.ProjectId
+# $BUILD_ID: build.BuildId
+# $COMMIT_SHA: build.SourceProvenance.ResolvedRepoSource.Revision.CommitSha
+# $SHORT_SHA : The first seven characters of COMMIT_SHA
+# $REPO_NAME: build.Source.RepoSource.RepoName (only available for triggered builds)
+# $BRANCH_NAME: build.Source.RepoSource.Revision.BranchName (only available for triggered builds)
+# $TAG_NAME: build.Source.RepoSource.Revision.TagName (only available for triggered builds)
+# $REVISION_ID: build.SourceProvenance.ResolvedRepoSource.Revision.CommitSha (only available for triggered builds)
+#
+# Source: https://cloud.google.com/cloud-build/docs/configuring-builds/substitute-variable-values
+
 steps:
 
 - id: Build dev
