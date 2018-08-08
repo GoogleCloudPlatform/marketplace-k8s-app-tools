@@ -3,8 +3,8 @@
 #
 # Trigger #1: Before master merge
 #
-# marketplace-k8s-app-tools push to any branch
-# https://console.cloud.google.com/cloud-build/triggers/0762301f-81af-4c60-8d12-a4cbdf8d6ea1?project=marketplace-k8s-app-tools
+# GoogleCloudPlatform/marketplace-k8s-app-tools push to any branch
+# https://console.cloud.google.com/cloud-build/triggers?project=marketplace-k8s-app-tools
 #
 # This build trigger asserts the invariant that the source code can
 # be built and pushed into a repository. Its success blocks pull
@@ -13,12 +13,12 @@
 #
 # Trigger #2: After master merge
 #
-# cloud-marketplace-tools push to master branch
-# https://console.cloud.google.com/cloud-build/triggers/0257675b-9860-40a0-90c3-640a196e6a56?project=cloud-marketplace-tools
+# GoogleCloudPlatform/marketplace-k8s-app-tools push to master branch
+# https://console.cloud.google.com/cloud-build/triggers?project=cloud-marketplace-tools
 #
 # This build trigger asserts the invariant that each commit on the master
 # branch of GoogleCloudPlatform/marketplace-k8s-app-tools will be built
-# and tagged in gcr.io/cloud-marketplace-tools/master.
+# and tagged in gcr.io/cloud-marketplace-tools/k8s.
 
 # The following variables will be provided by Cloud Build.
 # 
