@@ -25,7 +25,11 @@ MARKETPLACE_TOOLS_PATH ?= $(patsubst %/,%,$(dir $(realpath $(lastword $(MAKEFILE
 
 
 .build: | tools_path_exists
-	mkdir -p .build
+	mkdir -p "$@"
+
+
+.build/tmp: | .build
+	mkdir -p "$@"
 
 
 .PHONY: clean
