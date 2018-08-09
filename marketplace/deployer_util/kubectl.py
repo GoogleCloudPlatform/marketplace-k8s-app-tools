@@ -17,8 +17,7 @@
 import logging
 import subprocess
 
-
-DEFAULT_BINARY=['kubectl']
+DEFAULT_BINARY = ['kubectl']
 
 
 def create(resource_type, resource_name, binary=DEFAULT_BINARY):
@@ -32,6 +31,7 @@ def create(resource_type, resource_name, binary=DEFAULT_BINARY):
 
   return _run_command(command)
 
+
 def get(resource, binary=DEFAULT_BINARY):
   '''kubectl get <resource> --output=json...'''
   if not resource:
@@ -40,6 +40,7 @@ def get(resource, binary=DEFAULT_BINARY):
   command = binary + ['get', resource, '--output=json']
 
   return _run_command(command)
+
 
 def delete(resource_type, resource_name, binary=DEFAULT_BINARY):
   '''kubectl delete <resource_type> <resource_name>...'''
@@ -52,6 +53,7 @@ def delete(resource_type, resource_name, binary=DEFAULT_BINARY):
 
   return _run_command(command)
 
+
 def apply(definition, binary=DEFAULT_BINARY):
   '''kubectl apply --filename=<definition>...'''
   if not definition:
@@ -60,6 +62,7 @@ def apply(definition, binary=DEFAULT_BINARY):
   command = binary + ['apply', '--filename=' + definition]
 
   return _run_command(command)
+
 
 def _run_command(command):
   '''Internal wrapper for subprocess module.'''

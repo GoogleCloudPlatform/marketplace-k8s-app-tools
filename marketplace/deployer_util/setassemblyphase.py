@@ -19,16 +19,18 @@ import yaml
 
 from yaml_util import load_resources_yaml
 from argparse import ArgumentParser
-
 '''Scans a manifest for an Application resource and sets the assembly phase.'''
 
 parser = ArgumentParser()
 
-parser.add_argument("-m", "--manifest", dest="manifest",
-                    help="the manifest file")
-parser.add_argument("-s", "--status", dest="status",
-                    choices=['Failure', 'Pending', 'Success'],
-                    help="the assembly status to set")
+parser.add_argument(
+    "-m", "--manifest", dest="manifest", help="the manifest file")
+parser.add_argument(
+    "-s",
+    "--status",
+    dest="status",
+    choices=['Failure', 'Pending', 'Success'],
+    help="the assembly status to set")
 
 args = parser.parse_args()
 
@@ -38,7 +40,7 @@ assert os.path.exists(args.manifest)
 resources = []
 for r in load_resources_yaml(args.manifest):
   resources.append(r)
-apps = [ r for r in resources if r['kind'] == "Application" ]
+apps = [r for r in resources if r['kind'] == "Application"]
 
 if len(apps) == 0:
   raise Exception("Set of resources in {:s} does not include one of "

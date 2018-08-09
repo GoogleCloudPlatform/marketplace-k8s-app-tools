@@ -1,0 +1,86 @@
+# This cloudbuild.yaml config file is triggered in two contexts:
+#
+#
+# Trigger #1: Before master merge
+#
+# GoogleCloudPlatform/marketplace-k8s-app-tools push to any branch
+# https://console.cloud.google.com/cloud-build/triggers?project=marketplace-k8s-app-tools
+#
+# This build trigger asserts the invariant that the source code can
+# be built and pushed into a repository. Its success blocks pull
+# request. gcr.io/marketplace-k8s-app-tools read access restricted.
+#
+#
+# Trigger #2: After master merge
+#
+# GoogleCloudPlatform/marketplace-k8s-app-tools push to master branch
+# https://console.cloud.google.com/cloud-build/triggers?project=cloud-marketplace-tools
+#
+# This build trigger asserts the invariant that each commit on the master
+# branch of GoogleCloudPlatform/marketplace-k8s-app-tools will be built
+# and tagged in gcr.io/cloud-marketplace-tools/k8s.
+
+# The following variables will be provided by Cloud Build.
+# 
+# $PROJECT_ID: build.ProjectId
+# $BUILD_ID: build.BuildId
+# $COMMIT_SHA: build.SourceProvenance.ResolvedRepoSource.Revision.CommitSha
+# $SHORT_SHA : The first seven characters of COMMIT_SHA
+# $REPO_NAME: build.Source.RepoSource.RepoName (only available for triggered builds)
+# $BRANCH_NAME: build.Source.RepoSource.Revision.BranchName (only available for triggered builds)
+# $TAG_NAME: build.Source.RepoSource.Revision.TagName (only available for triggered builds)
+# $REVISION_ID: build.SourceProvenance.ResolvedRepoSource.Revision.CommitSha (only available for triggered builds)
+#
+# Source: https://cloud.google.com/cloud-build/docs/configuring-builds/substitute-variable-values
+
+steps:
+
+- id: Build dev
+  name: gcr.io/cloud-builders/docker
+  waitFor:
+  - '-'
+  args:
+  - build
+  - --tag
+  - gcr.io/$PROJECT_ID/k8s/dev:sha_$COMMIT_SHA
+  - --tag
+  - gcr.io/$PROJECT_ID/k8s/dev:sha_$SHORT_SHA
+  - --file
+  - marketplace/dev/Dockerfile
+  - .
+
+- id: Build deployer_envsubst
+  name: gcr.io/cloud-builders/docker
+  waitFor:
+  - '-'
+  args:
+  - build
+  - --tag
+  - gcr.io/$PROJECT_ID/k8s/deployer_envsubst:sha_$COMMIT_SHA
+  - --tag
+  - gcr.io/$PROJECT_ID/k8s/deployer_envsubst:sha_$SHORT_SHA
+  - --file
+  - marketplace/deployer_envsubst_base/Dockerfile
+  - .
+
+- id: Build deployer_helm
+  name: gcr.io/cloud-builders/docker
+  waitFor:
+  - '-'
+  args:
+  - build
+  - --tag
+  - gcr.io/$PROJECT_ID/k8s/deployer_helm:sha_$COMMIT_SHA
+  - --tag
+  - gcr.io/$PROJECT_ID/k8s/deployer_helm:sha_$SHORT_SHA
+  - --file
+  - marketplace/deployer_helm_base/Dockerfile
+  - .
+
+images:
+  - gcr.io/$PROJECT_ID/k8s/dev:sha_$COMMIT_SHA
+  - gcr.io/$PROJECT_ID/k8s/dev:sha_$SHORT_SHA
+  - gcr.io/$PROJECT_ID/k8s/deployer_envsubst:sha_$COMMIT_SHA
+  - gcr.io/$PROJECT_ID/k8s/deployer_envsubst:sha_$SHORT_SHA
+  - gcr.io/$PROJECT_ID/k8s/deployer_helm:sha_$COMMIT_SHA
+  - gcr.io/$PROJECT_ID/k8s/deployer_helm:sha_$SHORT_SHA

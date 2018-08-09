@@ -20,11 +20,8 @@ from argparse import ArgumentParser
 from constants import GOOGLE_CLOUD_TEST
 from dict_util import deep_get
 from yaml_util import load_resources_yaml
-
-
 ''' Remove all resources considered to be Kuberenetes Helm tests from
     a given manifest file. '''
-
 
 _HELM_HOOK_KEY = 'helm.sh/hook'
 _HOOK_SUCCESS = 'test-success'
@@ -33,8 +30,12 @@ _HOOK_FAILURE = 'test-failure'
 
 def main():
   parser = ArgumentParser()
-  parser.add_argument("--manifest", help="the manifest file location to be cleared of tests")
-  parser.add_argument("--deploy_tests", action="store_true", help="indicates whether tests should be deployed")
+  parser.add_argument(
+      "--manifest", help="the manifest file location to be cleared of tests")
+  parser.add_argument(
+      "--deploy_tests",
+      action="store_true",
+      help="indicates whether tests should be deployed")
   args = parser.parse_args()
 
   manifest = args.manifest
@@ -57,10 +58,9 @@ def main():
       raise Exception("Helm hook {} is not supported".format(helm_hook))
 
   with open(manifest, "w") as out:
-    yaml.dump_all(filtered_resources, out,
-                  default_flow_style=False, explicit_start=True)
+    yaml.dump_all(
+        filtered_resources, out, default_flow_style=False, explicit_start=True)
 
 
 if __name__ == "__main__":
   main()
-

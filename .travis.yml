@@ -1,0 +1,13 @@
+matrix:
+  include:
+  - language: generic
+    env: TARGET=lint/py
+    services:
+    - docker
+  - language: generic
+    env: TARGET=test/py
+    services:
+    - docker
+
+script:
+- make "${TARGET}"
