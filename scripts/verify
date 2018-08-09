@@ -109,7 +109,7 @@ function clean_and_exit() {
 }
 
 echo "INFO Initializes the deployer container which will deploy all the application components"
-/scripts/start_internal.sh \
+/scripts/install \
   --deployer="$deployer" \
   --parameters="$parameters" \
   --entrypoint='/bin/deploy_with_tests.sh' \
