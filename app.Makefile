@@ -55,7 +55,7 @@ app/install:: app/build \
 	docker run \
 	    --volume "/var/run/docker.sock:/var/run/docker.sock:ro" \
 	    --volume "$(HOME)/.kube:/root/mount/.kube:ro" \
-	    --volume "$(HOME).config/gcloud:/root/mount/.config/gcloud:ro" \
+	    --volume "$(HOME)/.config/gcloud:/root/mount/.config/gcloud:ro" \
 	    --rm -it \
 	    "gcr.io/cloud-marketplace-tools/k8s/dev:$(MARKETPLACE_TOOLS_TAG)" \
 	    -- \
@@ -77,7 +77,7 @@ app/install-test:: app/build \
 	docker run \
 	    --volume "/var/run/docker.sock:/var/run/docker.sock:ro" \
 	    --volume "$(HOME)/.kube:/root/mount/.kube:ro" \
-	    --volume "$(HOME).config/gcloud:/root/mount/.config/gcloud:ro" \
+	    --volume "$(HOME)/.config/gcloud:/root/mount/.config/gcloud:ro" \
 	    --rm -it \
 	    "gcr.io/cloud-marketplace-tools/k8s/dev:$(MARKETPLACE_TOOLS_TAG)" \
 	    -- \
@@ -109,7 +109,7 @@ app/verify: app/build \
 	docker run \
 	    --volume "/var/run/docker.sock:/var/run/docker.sock:ro" \
 	    --volume "$(HOME)/.kube:/root/mount/.kube:ro" \
-	    --volume "$(HOME).config/gcloud:/root/mount/.config/gcloud:ro" \
+	    --volume "$(HOME)/.config/gcloud:/root/mount/.config/gcloud:ro" \
 	    --rm -it \
 	    "gcr.io/cloud-marketplace-tools/k8s/dev:$(MARKETPLACE_TOOLS_TAG)" \
 	    -- \
