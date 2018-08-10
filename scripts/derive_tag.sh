@@ -27,13 +27,14 @@ esac
 done
 
 if [[ ! -z "$(git status --porcelain)" ]]; then
-  >&2 echo "    -----------------------------------------------------------"
-  >&2 echo "   /                                                         /"
-  >&2 echo "  /  The marketplace-k8s-app-tools submodule is not clean.  /"
+  >&2 echo "     -----------------------------------------------------------"
+  >&2 echo "    /                                                         /"
+  >&2 echo "   /  The marketplace-k8s-app-tools submodule is not clean.  /"
+  >&2 echo "  /  Please clean the marketplace-k8s-app-tools submodule.  /"
   >&2 echo " /                                                         /"
   >&2 echo "-----------------------------------------------------------"
   echo -n ''
   exit 1
 fi
 
-git rev-parse HEAD
+echo -n "sha_$(git rev-parse HEAD)"
