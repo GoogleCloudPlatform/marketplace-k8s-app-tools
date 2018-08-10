@@ -24,6 +24,11 @@ include $(makefile_dir)/var.Makefile
 MARKETPLACE_TOOLS_PATH ?= $(patsubst %/,%,$(dir $(realpath $(lastword $(MAKEFILE_LIST)))))
 
 
+# MARKETPLACE_TOOLS_TAG
+# TODO(trironkk): Document.
+MARKETPLACE_TOOLS_TAG ?= $(shell $(MARKETPLACE_TOOLS_PATH)/scripts/derive_tag.sh)
+
+
 .build: | tools_path_exists
 	mkdir -p .build
 

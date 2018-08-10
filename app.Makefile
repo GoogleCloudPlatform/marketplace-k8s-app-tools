@@ -50,14 +50,14 @@ app/install:: app/build \
               .build/var/APP_DEPLOYER_IMAGE \
               .build/var/APP_PARAMETERS \
               .build/var/HOME \
-              .build/var/MARKETPLACE_TOOLS_PATH
+              .build/var/MARKETPLACE_TOOLS_TAG
 	$(call print_target)
 	docker run \
 	    --volume "/var/run/docker.sock:/var/run/docker.sock:ro" \
 	    --volume "$(HOME)/.kube:/root/mount/.kube:ro" \
 	    --volume "$(HOME).config/gcloud:/root/mount/.config/gcloud:ro" \
-	    --rm \
-	    "gcr.io/cloud-marketplace-tools/k8s/dev" \
+	    --rm -it \
+	    "gcr.io/cloud-marketplace-tools/k8s/dev:$(MARKETPLACE_TOOLS_TAG)" \
 	    -- \
 	    /scripts/install \
 	          --deployer="$(APP_DEPLOYER_IMAGE)" \
@@ -68,18 +68,18 @@ app/install:: app/build \
 # Installs the application into target namespace on the cluster.
 .PHONY: app/install-test
 app/install-test:: app/build \
-                   .build/var/MARKETPLACE_TOOLS_PATH \
                    .build/var/APP_DEPLOYER_IMAGE \
                    .build/var/APP_PARAMETERS \
                    .build/var/APP_TEST_PARAMETERS \
                    .build/var/HOME \
+                   .build/var/MARKETPLACE_TOOLS_TAG
 	$(call print_target)
 	docker run \
 	    --volume "/var/run/docker.sock:/var/run/docker.sock:ro" \
 	    --volume "$(HOME)/.kube:/root/mount/.kube:ro" \
 	    --volume "$(HOME).config/gcloud:/root/mount/.config/gcloud:ro" \
-	    --rm \
-	    "gcr.io/cloud-marketplace-tools/k8s/dev" \
+	    --rm -it \
+	    "gcr.io/cloud-marketplace-tools/k8s/dev:$(MARKETPLACE_TOOLS_TAG)" \
 	    -- \
 	    /scripts/install \
 	          --deployer="$(APP_DEPLOYER_IMAGE)" \
@@ -90,8 +90,7 @@ app/install-test:: app/build \
 # Uninstalls the application from the target namespace on the cluster.
 .PHONY: app/uninstall
 app/uninstall: .build/var/APP_DEPLOYER_IMAGE \
-               .build/var/APP_PARAMETERS \
-               .build/var/MARKETPLACE_TOOLS_PATH
+               .build/var/APP_PARAMETERS
 	$(call print_target)
 	kubectl delete 'application/$(call name_parameter)' \
 	    --namespace='$(call namespace_parameter)' \
@@ -101,21 +100,22 @@ app/uninstall: .build/var/APP_DEPLOYER_IMAGE \
 # Runs the verification pipeline.
 .PHONY: app/verify
 app/verify: app/build \
-            .build/var/MARKETPLACE_TOOLS_PATH \
-            .build/var/HOME \
             .build/var/APP_DEPLOYER_IMAGE \
             .build/var/APP_PARAMETERS \
-            .build/var/APP_TEST_PARAMETERS
+            .build/var/APP_TEST_PARAMETERS \
+            .build/var/HOME \
+            .build/var/MARKETPLACE_TOOLS_TAG
 	$(call print_target)
 	docker run \
 	    --volume "/var/run/docker.sock:/var/run/docker.sock:ro" \
 	    --volume "$(HOME)/.kube:/root/mount/.kube:ro" \
 	    --volume "$(HOME).config/gcloud:/root/mount/.config/gcloud:ro" \
 	    --rm -it \
-	    "gcr.io/cloud-marketplace-tools/k8s/dev" \
+	    "gcr.io/cloud-marketplace-tools/k8s/dev:$(MARKETPLACE_TOOLS_TAG)" \
 	    -- \
 	    /scripts/verify \
 	          --deployer='$(APP_DEPLOYER_IMAGE)' \
 	          --parameters='$(call combined_parameters)'
+
 
 endif
