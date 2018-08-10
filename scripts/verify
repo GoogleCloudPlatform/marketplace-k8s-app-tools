@@ -147,9 +147,8 @@ kubectl logs "jobs/$deployer_name" --namespace="$NAMESPACE" || echo "ERROR Faile
 deployer_name=""
 
 echo "INFO Stop the application"
-/scripts/stop.sh \
-  --name="$NAME" \
-  --namespace="$NAMESPACE" \
+kubectl delete "application/$NAME" \
+    --namespace="$NAMESPACE" \
   || clean_and_exit "ERROR Failed to stop application"
 
 deletion_timeout=180
