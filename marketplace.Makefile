@@ -21,7 +21,7 @@ include $(makefile_dir)/common.Makefile
 	$(call print_target)
 	cd "$(MARKETPLACE_TOOLS_PATH)" ; \
 	docker build \
-	    --tag "gcr.io/cloud-marketplace-tools/k8s/dev" \
+	    --tag "gcr.io/cloud-marketplace-tools/k8s/dev:$(MARKETPLACE_TOOLS_TAG)" \
 	    -f marketplace/dev/Dockerfile \
 	    .
 	@touch "$@"
@@ -38,7 +38,7 @@ include $(makefile_dir)/common.Makefile
 	$(call print_target)
 	cd "$(MARKETPLACE_TOOLS_PATH)"; \
 	docker build \
-	    --tag "gcr.io/cloud-marketplace-tools/k8s/deployer_envsubst" \
+	    --tag "gcr.io/cloud-marketplace-tools/k8s/deployer_envsubst:$(MARKETPLACE_TOOLS_TAG)" \
 	    -f marketplace/deployer_envsubst_base/Dockerfile \
 	    .
 	@touch "$@"
@@ -52,7 +52,7 @@ include $(makefile_dir)/common.Makefile
 	cd $(MARKETPLACE_TOOLS_PATH) \
 	&& docker build \
 	    --build-arg VERSION="$(COMMIT)" \
-	    --tag "gcr.io/cloud-marketplace-tools/k8s/deployer_helm" \
+	    --tag "gcr.io/cloud-marketplace-tools/k8s/deployer_helm:$(MARKETPLACE_TOOLS_TAG)" \
 	    -f marketplace/deployer_helm_base/Dockerfile \
 	    .
 	@touch "$@"
