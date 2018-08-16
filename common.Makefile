@@ -33,7 +33,11 @@ MARKETPLACE_TOOLS_TAG ?= $(shell cd $(MARKETPLACE_TOOLS_PATH) && $(MARKETPLACE_T
 $(info ---- MARKETPLACE_TOOLS_TAG = $(MARKETPLACE_TOOLS_TAG))
 
 .build: | tools_path_exists
-	mkdir -p .build
+	mkdir -p "$@"
+
+
+.build/tmp: | .build
+	mkdir -p "$@"
 
 
 .PHONY: clean
