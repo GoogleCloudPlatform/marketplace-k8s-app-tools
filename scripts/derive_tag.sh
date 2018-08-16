@@ -14,17 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set -e
-
-for i in "$@"
-do
-case $i in
-  *)
-    >&2 echo "Unrecognized flag: $i"
-    exit 1
-    ;;
-esac
-done
+set -eo pipefail
 
 if [[ ! -z "$(git status --porcelain)" ]]; then
   >&2 echo "     -----------------------------------------------------------"
