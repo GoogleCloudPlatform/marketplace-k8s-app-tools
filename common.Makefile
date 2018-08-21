@@ -18,11 +18,19 @@ makefile_dir := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
 include $(makefile_dir)/var.Makefile
 
 
-# MARKETPLACE_TOOLS_PATH contains the path to the root of this tools repo.
-# It is derived here by taking the full path of the directory containing
-# this common.Makefile. patsubst operation removes the trailing slash.
+# MARKETPLACE_TOOLS_PATH is the path to the root of the
+# marketplace-k8s-app-tools submodule. We derive it here by taking the
+# full path of the directory containing this common.Makefile. patsubst
+# operation removes the trailing slash.
 MARKETPLACE_TOOLS_PATH ?= $(patsubst %/,%,$(dir $(realpath $(lastword $(MAKEFILE_LIST)))))
 
+$(info ---- MARKETPLACE_TOOLS_PATH = $(MARKETPLACE_TOOLS_PATH))
+
+# MARKETPLACE_TOOLS_TAG is the tag of the container images published
+# by marketplace-k8s-app-tools.
+MARKETPLACE_TOOLS_TAG ?= $(shell cd $(MARKETPLACE_TOOLS_PATH) && $(MARKETPLACE_TOOLS_PATH)/scripts/derive_tag.sh)
+
+$(info ---- MARKETPLACE_TOOLS_TAG = $(MARKETPLACE_TOOLS_TAG))
 
 .build: | tools_path_exists
 	mkdir -p "$@"
