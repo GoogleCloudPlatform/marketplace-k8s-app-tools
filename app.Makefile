@@ -49,82 +49,73 @@ app/build:: ;
 app/install:: app/build \
               .build/var/APP_DEPLOYER_IMAGE \
               .build/var/APP_PARAMETERS \
-              .build/var/MARKETPLACE_TOOLS_PATH
+              .build/var/HOME \
+              .build/var/MARKETPLACE_TOOLS_TAG
 	$(call print_target)
-	"$(MARKETPLACE_TOOLS_PATH)/scripts/start.sh" \
-	    --deployer='$(APP_DEPLOYER_IMAGE)' \
-	    --parameters='$(APP_PARAMETERS)'
+	docker run \
+	    --volume "/var/run/docker.sock:/var/run/docker.sock:ro" \
+	    --volume "$(HOME)/.kube:/root/mount/.kube:ro" \
+	    --volume "$(HOME)/.config/gcloud:/root/mount/.config/gcloud:ro" \
+	    --rm \
+	    "gcr.io/cloud-marketplace-tools/k8s/dev:$(MARKETPLACE_TOOLS_TAG)" \
+	    -- \
+	    /scripts/install \
+	          --deployer="$(APP_DEPLOYER_IMAGE)" \
+	          --parameters="$(APP_PARAMETERS)" \
+	          --entrypoint="/bin/deploy.sh"
 
 
 # Installs the application into target namespace on the cluster.
 .PHONY: app/install-test
 app/install-test:: app/build \
-                   .build/var/MARKETPLACE_TOOLS_PATH \
                    .build/var/APP_DEPLOYER_IMAGE \
                    .build/var/APP_PARAMETERS \
-                   .build/var/APP_TEST_PARAMETERS
+                   .build/var/APP_TEST_PARAMETERS \
+                   .build/var/HOME \
+                   .build/var/MARKETPLACE_TOOLS_TAG
 	$(call print_target)
-	"$(MARKETPLACE_TOOLS_PATH)/scripts/start.sh" \
-	    --deployer='$(APP_DEPLOYER_IMAGE)' \
-	    --parameters='$(call combined_parameters)' \
-	    --entrypoint='/bin/deploy_with_tests.sh'
+	docker run \
+	    --volume "/var/run/docker.sock:/var/run/docker.sock:ro" \
+	    --volume "$(HOME)/.kube:/root/mount/.kube:ro" \
+	    --volume "$(HOME)/.config/gcloud:/root/mount/.config/gcloud:ro" \
+	    --rm \
+	    "gcr.io/cloud-marketplace-tools/k8s/dev:$(MARKETPLACE_TOOLS_TAG)" \
+	    -- \
+	    /scripts/install \
+	          --deployer="$(APP_DEPLOYER_IMAGE)" \
+	          --parameters="$(call combined_parameters)" \
+	          --entrypoint="/bin/deploy_with_tests.sh"
 
 
 # Uninstalls the application from the target namespace on the cluster.
 .PHONY: app/uninstall
 app/uninstall: .build/var/APP_DEPLOYER_IMAGE \
-               .build/var/APP_PARAMETERS \
-               .build/var/MARKETPLACE_TOOLS_PATH
+               .build/var/APP_PARAMETERS
 	$(call print_target)
-	$(MARKETPLACE_TOOLS_PATH)/scripts/stop.sh \
+	kubectl delete 'application/$(call name_parameter)' \
 	    --namespace='$(call namespace_parameter)' \
-	    --name='$(call name_parameter)'
+	    --ignore-not-found
 
 
 # Runs the verification pipeline.
 .PHONY: app/verify
 app/verify: app/build \
-            .build/var/MARKETPLACE_TOOLS_PATH \
             .build/var/APP_DEPLOYER_IMAGE \
             .build/var/APP_PARAMETERS \
-            .build/var/APP_TEST_PARAMETERS
+            .build/var/APP_TEST_PARAMETERS \
+            .build/var/HOME \
+            .build/var/MARKETPLACE_TOOLS_TAG
 	$(call print_target)
-	"$(MARKETPLACE_TOOLS_PATH)/scripts/driver/driver.sh" \
-	    --deployer='$(APP_DEPLOYER_IMAGE)' \
-	    --parameters='$(call combined_parameters)'
-
-
-# Monitors resources in the target namespace on the cluster.
-# A convenient way to look at relevant k8s resources on the CLI.
-.PHONY: app/watch
-app/watch: .build/var/MARKETPLACE_TOOLS_PATH \
-           .build/var/APP_DEPLOYER_IMAGE \
-           .build/var/APP_PARAMETERS
-	$(call print_target)
-	$(MARKETPLACE_TOOLS_PATH)/scripts/watch.sh \
-	    --namespace='$(call namespace_parameter)'
-
-
-###################################################
-# Placeholder targets that provide user guidance. #
-###################################################
-
-# Note: Ideally all of these targets would be marked as PHONY, but it's
-# not clear how to achieve that with pattern targets.
-
-%registry_prefix: app/phony
-	@$(call print_notice,The $@ target has been replaced by .build/var/REGISTRY. Please replace */registry_prefix target with .build/var/REGISTRY.)
-	@exit 1
-
-
-%tag_prefix: app/phony
-	@$(call print_notice,The $@ target has been replaced by .build/var/TAG. Please replace */tag_prefix target with .build/var/TAG.)
-	@exit 1
-
-
-app/setup: app/phony
-	@$(call print_notice,The $@ target is deprecated. Please removed.)
-	@exit 1
+	docker run \
+	    --volume "/var/run/docker.sock:/var/run/docker.sock:ro" \
+	    --volume "$(HOME)/.kube:/root/mount/.kube:ro" \
+	    --volume "$(HOME)/.config/gcloud:/root/mount/.config/gcloud:ro" \
+	    --rm \
+	    "gcr.io/cloud-marketplace-tools/k8s/dev:$(MARKETPLACE_TOOLS_TAG)" \
+	    -- \
+	    /scripts/verify \
+	          --deployer='$(APP_DEPLOYER_IMAGE)' \
+	          --parameters='$(call combined_parameters)'
 
 
 endif

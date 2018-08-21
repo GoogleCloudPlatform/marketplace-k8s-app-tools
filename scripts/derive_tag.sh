@@ -14,28 +14,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set -e
-set -o pipefail
+set -eo pipefail
 
-for i in "$@"
-do
-case $i in
-  --name=*)
-    name="${i#*=}"
-    shift
-    ;;
-  --namespace=*)
-    namespace="${i#*=}"
-    shift
-    ;;
-  *)
-    >&2 echo "Unrecognized flag: $i"
-    exit 1
-    ;;
-esac
-done
+if [[ ! -z "$(git status --porcelain)" ]]; then
+  >&2 echo "     -----------------------------------------------------------"
+  >&2 echo "    /                                                         /"
+  >&2 echo "   /  The marketplace-k8s-app-tools submodule is not clean.  /"
+  >&2 echo "  /  Please clean the marketplace-k8s-app-tools submodule.  /"
+  >&2 echo " /                                                         /"
+  >&2 echo "-----------------------------------------------------------"
+  echo -n ''
+  exit 1
+fi
 
-[[ -z "$name" ]] && >&2 echo "--name required" && exit 1
-[[ -z "$namespace" ]] && >&2 echo "--namespace required" && exit 1
-
-kubectl delete "application/$name" --namespace="$namespace" --ignore-not-found
+echo -n "sha_$(git rev-parse HEAD)"
