@@ -106,12 +106,14 @@ class Schema:
       raise InvalidSchema('Undefined property names found in required: {}'
                           .format(', '.join(bad_required_names)))
 
-    self._app_api_version = dictionary.get('application_api_version', None)
+    self._app_api_version = dictionary.get(
+        'applicationApiVersion', dictionary.get('application_api_version',
+                                                None))
 
   def validate(self):
     """Fully validates the schema, raising InvalidSchema if fails."""
     if self.app_api_version is None:
-      raise InvalidSchema('application_api_version is required')
+      raise InvalidSchema('applicationApiVersion is required')
 
   @property
   def app_api_version(self):

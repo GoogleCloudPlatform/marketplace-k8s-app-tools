@@ -443,16 +443,35 @@ class ConfigHelperTest(unittest.TestCase):
 
   def test_validate_good(self):
     schema = config_helper.Schema.load_yaml("""
-        application_api_version: v1beta1
+        applicationApiVersion: v1beta1
         properties:
           simple:
             type: string
         """)
     schema.validate()
 
+  def test_app_api_version_alternative_names(self):
+    schema = config_helper.Schema.load_yaml("""
+        applicationApiVersion: v1beta1
+        properties:
+          simple:
+            type: string
+        """)
+    schema.validate()
+    self.assertEqual(schema.app_api_version, 'v1beta1')
+
+    schema = config_helper.Schema.load_yaml("""
+        application_api_version: v1beta1
+        properties:
+          simple:
+            type: string
+        """)
+    schema.validate()
+    self.assertEqual(schema.app_api_version, 'v1beta1')
+
   def test_validate_missing_app_api_version(self):
     self.assertRaisesRegexp(
-        config_helper.InvalidSchema, 'application_api_version',
+        config_helper.InvalidSchema, 'applicationApiVersion',
         lambda: config_helper.Schema.load_yaml("""
             properties:
               simple:
