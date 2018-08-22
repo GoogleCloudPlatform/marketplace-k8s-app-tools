@@ -24,7 +24,7 @@ class ExpandConfigTest(unittest.TestCase):
 
   def test_defaults(self):
     schema = config_helper.Schema.load_yaml("""
-        application_api_version: v1beta1
+        applicationApiVersion: v1beta1
         properties:
           p1:
             type: string
@@ -39,7 +39,7 @@ class ExpandConfigTest(unittest.TestCase):
 
   def test_invalid_value_type(self):
     schema = config_helper.Schema.load_yaml("""
-        application_api_version: v1beta1
+        applicationApiVersion: v1beta1
         properties:
           p1:
             type: string
@@ -50,7 +50,7 @@ class ExpandConfigTest(unittest.TestCase):
 
   def test_generate_properties_for_image_split_by_colon(self):
     schema = config_helper.Schema.load_yaml("""
-        application_api_version: v1beta1
+        applicationApiVersion: v1beta1
         properties:
           i1:
             type: string
@@ -71,7 +71,7 @@ class ExpandConfigTest(unittest.TestCase):
 
   def test_generate_properties_for_string_base64_encoded(self):
     schema = config_helper.Schema.load_yaml("""
-        application_api_version: v1beta1
+        applicationApiVersion: v1beta1
         properties:
           s1:
             type: string
@@ -89,7 +89,7 @@ class ExpandConfigTest(unittest.TestCase):
 
   def test_generate_password(self):
     schema = config_helper.Schema.load_yaml("""
-        application_api_version: v1beta1
+        applicationApiVersion: v1beta1
         properties:
           p1:
             type: string
@@ -106,7 +106,7 @@ class ExpandConfigTest(unittest.TestCase):
 
   def test_write_values(self):
     schema = config_helper.Schema.load_yaml("""
-        application_api_version: v1beta1
+        applicationApiVersion: v1beta1
         properties:
           propertyInt:
             type: int
