@@ -28,6 +28,9 @@ $(shell echo '$(APP_PARAMETERS)' '$(APP_TEST_PARAMETERS)' \
     | docker run -i --entrypoint=/usr/bin/jq --rm $(APP_DEPLOYER_IMAGE) -s '.[0] * .[1]')
 endef
 
+KUBE_CONFIG ?= $(HOME)/.kube
+GCLOUD_CONFIG ?= $(HOME)/.config/gcloud
+
 
 .build/app: | .build
 	mkdir -p "$@"
@@ -54,8 +57,8 @@ app/install:: app/build \
 	$(call print_target)
 	docker run \
 	    --volume "/var/run/docker.sock:/var/run/docker.sock:ro" \
-	    --volume "$(HOME)/.kube:/root/mount/.kube:ro" \
-	    --volume "$(HOME)/.config/gcloud:/root/mount/.config/gcloud:ro" \
+	    --volume "$(KUBE_CONFIG):/root/mount/.kube:ro" \
+	    --volume "$(GCLOUD_CONFIG):/root/mount/.config/gcloud:ro" \
 	    --rm \
 	    "gcr.io/cloud-marketplace-tools/k8s/dev:$(MARKETPLACE_TOOLS_TAG)" \
 	    -- \
@@ -76,8 +79,8 @@ app/install-test:: app/build \
 	$(call print_target)
 	docker run \
 	    --volume "/var/run/docker.sock:/var/run/docker.sock:ro" \
-	    --volume "$(HOME)/.kube:/root/mount/.kube:ro" \
-	    --volume "$(HOME)/.config/gcloud:/root/mount/.config/gcloud:ro" \
+	    --volume "$(KUBE_CONFIG):/root/mount/.kube:ro" \
+	    --volume "$(GCLOUD_CONFIG):/root/mount/.config/gcloud:ro" \
 	    --rm \
 	    "gcr.io/cloud-marketplace-tools/k8s/dev:$(MARKETPLACE_TOOLS_TAG)" \
 	    -- \
@@ -108,8 +111,8 @@ app/verify: app/build \
 	$(call print_target)
 	docker run \
 	    --volume "/var/run/docker.sock:/var/run/docker.sock:ro" \
-	    --volume "$(HOME)/.kube:/root/mount/.kube:ro" \
-	    --volume "$(HOME)/.config/gcloud:/root/mount/.config/gcloud:ro" \
+	    --volume "$(KUBE_CONFIG):/root/mount/.kube:ro" \
+	    --volume "$(GCLOUD_CONFIG):/root/mount/.config/gcloud:ro" \
 	    --rm \
 	    "gcr.io/cloud-marketplace-tools/k8s/dev:$(MARKETPLACE_TOOLS_TAG)" \
 	    -- \

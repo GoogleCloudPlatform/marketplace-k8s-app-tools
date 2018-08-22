@@ -6,6 +6,7 @@ COMMIT ?= $(shell git rev-parse HEAD | fold -w 12 | head -n 1)
 
 makefile_dir := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
 include $(makefile_dir)/common.Makefile
+include $(makefile_dir)/var.Makefile
 
 
 .build/marketplace: | .build
@@ -16,6 +17,7 @@ include $(makefile_dir)/common.Makefile
                         $(MARKETPLACE_TOOLS_PATH)/marketplace/dev/* \
                         $(MARKETPLACE_TOOLS_PATH)/scripts/* \
                         $(MARKETPLACE_TOOLS_PATH)/marketplace.Makefile \
+                        .build/var/MARKETPLACE_TOOLS_TAG \
                         | .build/marketplace
 	$(call print_target)
 	cd "$(MARKETPLACE_TOOLS_PATH)" ; \
@@ -33,6 +35,7 @@ include $(makefile_dir)/common.Makefile
 .build/marketplace/deployer/envsubst: $(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_util/* \
                                       $(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_envsubst_base/* \
                                       .build/marketplace/delete_deprecated \
+                                      .build/var/MARKETPLACE_TOOLS_TAG \
                                       | .build/marketplace/deployer
 	$(call print_target)
 	cd "$(MARKETPLACE_TOOLS_PATH)"; \
@@ -46,6 +49,8 @@ include $(makefile_dir)/common.Makefile
 .build/marketplace/deployer/helm: $(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_util/* \
                                   $(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_helm_base/* \
                                   .build/marketplace/delete_deprecated \
+                                  .build/var/COMMIT \
+                                  .build/var/MARKETPLACE_TOOLS_TAG \
                                   | .build/marketplace/deployer
 	$(call print_target)
 	cd $(MARKETPLACE_TOOLS_PATH) \
