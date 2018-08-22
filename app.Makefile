@@ -63,8 +63,8 @@ app/install:: app/build \
 	    "gcr.io/cloud-marketplace-tools/k8s/dev:$(MARKETPLACE_TOOLS_TAG)" \
 	    -- \
 	    /scripts/install \
-	          --deployer="$(APP_DEPLOYER_IMAGE)" \
-	          --parameters="$(APP_PARAMETERS)" \
+	          --deployer='$(APP_DEPLOYER_IMAGE)' \
+	          --parameters='$(APP_PARAMETERS)' \
 	          --entrypoint="/bin/deploy.sh"
 
 
@@ -85,8 +85,8 @@ app/install-test:: app/build \
 	    "gcr.io/cloud-marketplace-tools/k8s/dev:$(MARKETPLACE_TOOLS_TAG)" \
 	    -- \
 	    /scripts/install \
-	          --deployer="$(APP_DEPLOYER_IMAGE)" \
-	          --parameters="$(call combined_parameters)" \
+	          --deployer='$(APP_DEPLOYER_IMAGE)' \
+	          --parameters='$(call combined_parameters)' \
 	          --entrypoint="/bin/deploy_with_tests.sh"
 
 
