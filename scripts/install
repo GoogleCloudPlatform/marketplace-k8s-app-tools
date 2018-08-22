@@ -65,12 +65,8 @@ namespace="$(print_config.py \
     --schema_file=/data/schema.yaml \
     --values_file=/data/values.yaml \
     --param='{"x-google-marketplace": {"type": "NAMESPACE"}}')"
-app_version="$(cat /data/schema.yaml \
-  | yaml2json \
-  | jq -r 'if .application_api_version
-           then .application_api_version
-           else "v1alpha1"
-           end')"
+app_version="$(print_app_api_version.py \
+    --schema_file=/data/schema.yaml)"
 
 # Create Application instance.
 kubectl apply --namespace="$namespace" --filename=- <<EOF

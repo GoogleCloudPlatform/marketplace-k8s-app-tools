@@ -15,7 +15,6 @@ include $(makefile_dir)/common.Makefile
 .build/marketplace/dev: $(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_util/* \
                         $(MARKETPLACE_TOOLS_PATH)/marketplace/dev/* \
                         $(MARKETPLACE_TOOLS_PATH)/scripts/* \
-                        $(MARKETPLACE_TOOLS_PATH)/scripts/driver/* \
                         $(MARKETPLACE_TOOLS_PATH)/marketplace.Makefile \
                         | .build/marketplace
 	$(call print_target)
