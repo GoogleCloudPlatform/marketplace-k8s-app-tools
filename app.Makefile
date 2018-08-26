@@ -57,9 +57,9 @@ app/install:: app/build \
               | .build/marketplace/dev
 	$(call print_target)
 	docker run \
-	    --volume "/var/run/docker.sock:/var/run/docker.sock:ro" \
-	    --volume "$(KUBE_CONFIG):/root/mount/.kube:ro" \
-	    --volume "$(GCLOUD_CONFIG):/root/mount/.config/gcloud:ro" \
+	    --mount "type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock,readonly" \
+	    --mount "type=bind,source=$(KUBE_CONFIG),target=/root/mount/.kube,readonly" \
+	    --mount "type=bind,source=$(GCLOUD_CONFIG),target=/root/mount/.config/gcloud,readonly" \
 	    --rm \
 	    "gcr.io/cloud-marketplace-tools/k8s/dev:$(MARKETPLACE_TOOLS_TAG)" \
 	    -- \
@@ -80,9 +80,9 @@ app/install-test:: app/build \
                    | .build/marketplace/dev
 	$(call print_target)
 	docker run \
-	    --volume "/var/run/docker.sock:/var/run/docker.sock:ro" \
-	    --volume "$(KUBE_CONFIG):/root/mount/.kube:ro" \
-	    --volume "$(GCLOUD_CONFIG):/root/mount/.config/gcloud:ro" \
+	    --mount "type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock,readonly" \
+	    --mount "type=bind,source=$(KUBE_CONFIG),target=/root/mount/.kube,readonly" \
+	    --mount "type=bind,source=$(GCLOUD_CONFIG),target=/root/mount/.config/gcloud,readonly" \
 	    --rm \
 	    "gcr.io/cloud-marketplace-tools/k8s/dev:$(MARKETPLACE_TOOLS_TAG)" \
 	    -- \
