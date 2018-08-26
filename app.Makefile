@@ -53,7 +53,8 @@ app/install:: app/build \
               .build/var/APP_DEPLOYER_IMAGE \
               .build/var/APP_PARAMETERS \
               .build/var/HOME \
-              .build/var/MARKETPLACE_TOOLS_TAG
+              .build/var/MARKETPLACE_TOOLS_TAG \
+              | .build/marketplace/dev
 	$(call print_target)
 	docker run \
 	    --volume "/var/run/docker.sock:/var/run/docker.sock:ro" \
@@ -75,7 +76,8 @@ app/install-test:: app/build \
                    .build/var/APP_PARAMETERS \
                    .build/var/APP_TEST_PARAMETERS \
                    .build/var/HOME \
-                   .build/var/MARKETPLACE_TOOLS_TAG
+                   .build/var/MARKETPLACE_TOOLS_TAG \
+                   | .build/marketplace/dev
 	$(call print_target)
 	docker run \
 	    --volume "/var/run/docker.sock:/var/run/docker.sock:ro" \
@@ -107,12 +109,14 @@ app/verify: app/build \
             .build/var/APP_PARAMETERS \
             .build/var/APP_TEST_PARAMETERS \
             .build/var/HOME \
-            .build/var/MARKETPLACE_TOOLS_TAG
+            .build/var/MARKETPLACE_TOOLS_TAG \
+            | .build/marketplace/dev
 	$(call print_target)
 	docker run \
-	    --volume "/var/run/docker.sock:/var/run/docker.sock:ro" \
-	    --volume "$(KUBE_CONFIG):/root/mount/.kube:ro" \
-	    --volume "$(GCLOUD_CONFIG):/root/mount/.config/gcloud:ro" \
+	    --mount "type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock,readonly" \
+	    --mount "type=bind,source=$(KUBE_CONFIG),target=/root/mount/.kube,readonly" \
+	    --mount "type=bind,source=$(GCLOUD_CONFIG),target=/root/mount/.config/gcloud,readonly" \
+	    --link metadata:metadata.google.internal \
 	    --rm \
 	    "gcr.io/cloud-marketplace-tools/k8s/dev:$(MARKETPLACE_TOOLS_TAG)" \
 	    -- \
