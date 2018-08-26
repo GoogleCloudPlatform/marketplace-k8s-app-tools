@@ -30,7 +30,7 @@ endef
 
 KUBE_CONFIG ?= $(HOME)/.kube
 GCLOUD_CONFIG ?= $(HOME)/.config/gcloud
-METADATA_LINK ?= $(shell curl --silent metadata.google.internal > /dev/null && echo '--link metadata:metadata.google.internal') \
+EXTRA_DOCKER_PARAMS ?= ""
 
 .build/app: | .build
 	mkdir -p "$@"
@@ -60,7 +60,7 @@ app/install:: app/build \
 	    --mount "type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock,readonly" \
 	    --mount "type=bind,source=$(KUBE_CONFIG),target=/root/mount/.kube,readonly" \
 	    --mount "type=bind,source=$(GCLOUD_CONFIG),target=/root/mount/.config/gcloud,readonly" \
-	    "$(METADATA_LINK)" \
+	    $(EXTRA_DOCKER_PARAMS) \
 	    --rm \
 	    "gcr.io/cloud-marketplace-tools/k8s/dev:$(MARKETPLACE_TOOLS_TAG)" \
 	    -- \
@@ -84,7 +84,7 @@ app/install-test:: app/build \
 	    --mount "type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock,readonly" \
 	    --mount "type=bind,source=$(KUBE_CONFIG),target=/root/mount/.kube,readonly" \
 	    --mount "type=bind,source=$(GCLOUD_CONFIG),target=/root/mount/.config/gcloud,readonly" \
-	    "$(METADATA_LINK)" \
+	    $(EXTRA_DOCKER_PARAMS) \
 	    --rm \
 	    "gcr.io/cloud-marketplace-tools/k8s/dev:$(MARKETPLACE_TOOLS_TAG)" \
 	    -- \
@@ -118,7 +118,7 @@ app/verify: app/build \
 	    --mount "type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock,readonly" \
 	    --mount "type=bind,source=$(KUBE_CONFIG),target=/root/mount/.kube,readonly" \
 	    --mount "type=bind,source=$(GCLOUD_CONFIG),target=/root/mount/.config/gcloud,readonly" \
-	    "$(METADATA_LINK)" \
+	    $(EXTRA_DOCKER_PARAMS) \
 	    --rm \
 	    "gcr.io/cloud-marketplace-tools/k8s/dev:$(MARKETPLACE_TOOLS_TAG)" \
 	    -- \
