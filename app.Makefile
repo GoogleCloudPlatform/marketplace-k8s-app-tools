@@ -116,7 +116,6 @@ app/verify: app/build \
 	    --mount "type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock,readonly" \
 	    --mount "type=bind,source=$(KUBE_CONFIG),target=/root/mount/.kube,readonly" \
 	    --mount "type=bind,source=$(GCLOUD_CONFIG),target=/root/mount/.config/gcloud,readonly" \
-	    --link metadata:metadata.google.internal \
 	    --rm \
 	    "gcr.io/cloud-marketplace-tools/k8s/dev:$(MARKETPLACE_TOOLS_TAG)" \
 	    -- \
