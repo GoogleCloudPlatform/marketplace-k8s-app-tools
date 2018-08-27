@@ -30,7 +30,7 @@ endef
 
 KUBE_CONFIG ?= $(HOME)/.kube
 GCLOUD_CONFIG ?= $(HOME)/.config/gcloud
-
+EXTRA_DOCKER_PARAMS ?= ""
 
 .build/app: | .build
 	mkdir -p "$@"
@@ -56,9 +56,10 @@ app/install:: app/build \
               .build/var/MARKETPLACE_TOOLS_TAG
 	$(call print_target)
 	docker run \
-	    --volume "/var/run/docker.sock:/var/run/docker.sock:ro" \
-	    --volume "$(KUBE_CONFIG):/root/mount/.kube:ro" \
-	    --volume "$(GCLOUD_CONFIG):/root/mount/.config/gcloud:ro" \
+	    --mount "type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock,readonly" \
+	    --mount "type=bind,source=$(KUBE_CONFIG),target=/root/mount/.kube,readonly" \
+	    --mount "type=bind,source=$(GCLOUD_CONFIG),target=/root/mount/.config/gcloud,readonly" \
+	    $(EXTRA_DOCKER_PARAMS) \
 	    --rm \
 	    "gcr.io/cloud-marketplace-tools/k8s/dev:$(MARKETPLACE_TOOLS_TAG)" \
 	    -- \
@@ -78,9 +79,10 @@ app/install-test:: app/build \
                    .build/var/MARKETPLACE_TOOLS_TAG
 	$(call print_target)
 	docker run \
-	    --volume "/var/run/docker.sock:/var/run/docker.sock:ro" \
-	    --volume "$(KUBE_CONFIG):/root/mount/.kube:ro" \
-	    --volume "$(GCLOUD_CONFIG):/root/mount/.config/gcloud:ro" \
+	    --mount "type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock,readonly" \
+	    --mount "type=bind,source=$(KUBE_CONFIG),target=/root/mount/.kube,readonly" \
+	    --mount "type=bind,source=$(GCLOUD_CONFIG),target=/root/mount/.config/gcloud,readonly" \
+	    $(EXTRA_DOCKER_PARAMS) \
 	    --rm \
 	    "gcr.io/cloud-marketplace-tools/k8s/dev:$(MARKETPLACE_TOOLS_TAG)" \
 	    -- \
@@ -110,9 +112,10 @@ app/verify: app/build \
             .build/var/MARKETPLACE_TOOLS_TAG
 	$(call print_target)
 	docker run \
-	    --volume "/var/run/docker.sock:/var/run/docker.sock:ro" \
-	    --volume "$(KUBE_CONFIG):/root/mount/.kube:ro" \
-	    --volume "$(GCLOUD_CONFIG):/root/mount/.config/gcloud:ro" \
+	    --mount "type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock,readonly" \
+	    --mount "type=bind,source=$(KUBE_CONFIG),target=/root/mount/.kube,readonly" \
+	    --mount "type=bind,source=$(GCLOUD_CONFIG),target=/root/mount/.config/gcloud,readonly" \
+	    $(EXTRA_DOCKER_PARAMS) \
 	    --rm \
 	    "gcr.io/cloud-marketplace-tools/k8s/dev:$(MARKETPLACE_TOOLS_TAG)" \
 	    -- \
