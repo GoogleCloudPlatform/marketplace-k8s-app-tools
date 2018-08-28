@@ -17,14 +17,25 @@
 set -eo pipefail
 
 if [[ ! -z "$(git status --porcelain)" ]]; then
+  >&2 echo ""
   >&2 echo "     -----------------------------------------------------------"
   >&2 echo "    /                                                         /"
   >&2 echo "   /  The marketplace-k8s-app-tools submodule is not clean.  /"
   >&2 echo "  /  Please clean the marketplace-k8s-app-tools submodule.  /"
   >&2 echo " /                                                         /"
   >&2 echo "-----------------------------------------------------------"
+  >&2 echo ""
   echo -n ''
   exit 1
 fi
 
-echo -n "sha_$(git rev-parse HEAD)"
+# Default to the "v.X.X" tag to which this commit points.
+TAG="$(git tag --points-at HEAD \
+		| grep -E '^v[0-9]+(\.[0-9]+)*$' \
+		| head -n 1 \
+|| echo '')"
+
+# Fall back to the "sha_abcdef1" tag named after this commit.
+[[ -z "$TAG" ]] && TAG="sha_$(git rev-parse HEAD)"
+
+echo "$TAG"
