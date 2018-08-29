@@ -30,7 +30,7 @@ endef
 
 KUBE_CONFIG ?= $(HOME)/.kube
 GCLOUD_CONFIG ?= $(HOME)/.config/gcloud
-EXTRA_DOCKER_PARAMS ?= ""
+EXTRA_DOCKER_PARAMS ?=
 
 .build/app: | .build
 	mkdir -p "$@"
