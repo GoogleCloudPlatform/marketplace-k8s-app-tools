@@ -44,7 +44,7 @@ def main():
       values,
       deployer_image=args.deployer_image,
       deployer_entrypoint=args.deployer_entrypoint)
-  print yaml.safe_dump_all(manifests, default_flow_style=False, indent=2)
+  print(yaml.safe_dump_all(manifests, default_flow_style=False, indent=2))
 
 
 def process(schema, values, deployer_image, deployer_entrypoint):
