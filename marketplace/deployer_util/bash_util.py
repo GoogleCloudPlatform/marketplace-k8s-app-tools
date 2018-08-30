@@ -26,7 +26,7 @@ class Command:
 
   def __init__(self, cmd, print_call=False, print_result=False):
     if print_call:
-      print cmd
+      print(cmd)
 
     parsedCmd = shlex.split(cmd)
     self._process = subprocess.Popen(
@@ -43,7 +43,7 @@ class Command:
 
   def pipe(self, cmd):
     if self._print_call:
-      print "| " + cmd
+      print("| " + cmd)
 
     parsedCmd = shlex.split(cmd)
     p2 = subprocess.Popen(
@@ -60,7 +60,7 @@ class Command:
     self._output, self._error = self._process.communicate()
     self._exitcode = self._process.returncode
     if self._print_result:
-      print "result: " + str((self._exitcode, self._output, self._error))
+      print("result: " + str((self._exitcode, self._output, self._error)))
 
     if self._exitcode > 0:
       raise CommandException(self._error)
