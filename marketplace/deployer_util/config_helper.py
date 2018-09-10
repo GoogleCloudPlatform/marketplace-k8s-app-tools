@@ -103,8 +103,9 @@ class Schema:
         x for x in self._required if x not in self._properties
     ]
     if bad_required_names:
-      raise InvalidSchema('Undefined property names found in required: {}'
-                          .format(', '.join(bad_required_names)))
+      raise InvalidSchema(
+          'Undefined property names found in required: {}'.format(
+              ', '.join(bad_required_names)))
 
     self._app_api_version = dictionary.get(
         'applicationApiVersion', dictionary.get('application_api_version',
