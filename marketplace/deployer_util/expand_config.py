@@ -97,8 +97,8 @@ def expand(values_dict, schema):
   for k, v in generated.iteritems():
     if k in result:
       raise InvalidProperty(
-          'The property is to be generated, but already has a value: {}'
-          .format(k))
+          'The property is to be generated, but already has a value: {}'.format(
+              k))
     result[k] = v
   return result
 
