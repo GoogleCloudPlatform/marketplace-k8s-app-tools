@@ -30,8 +30,8 @@ def main():
   parser.add_argument('--timeout')
   args = parser.parse_args()
 
-  log("INFO Wait {} seconds for the application '{}' to get into ready state".
-      format(args.timeout, args.name))
+  log("INFO Wait {} seconds for the application '{}' to get into ready state"
+      .format(args.timeout, args.name))
   previous_healthy = False
 
   min_time_before_healthy = 30
@@ -73,12 +73,12 @@ def main():
         break
 
     if previous_healthy != healthy:
-      log("INFO Initialization: Found applications/{} ready status to be {}.".
-          format(args.name, healthy))
+      log("INFO Initialization: Found applications/{} ready status to be {}."
+          .format(args.name, healthy))
       previous_healthy = healthy
       if healthy:
-        log("INFO Wait {} seconds to make sure app stays in healthy state.".
-            format(min_time_before_healthy))
+        log("INFO Wait {} seconds to make sure app stays in healthy state."
+            .format(min_time_before_healthy))
         healthy_start_time = time.time()
 
     if healthy:
@@ -88,8 +88,8 @@ def main():
 
     if time.time() - poll_start_time > args.timeout:
       raise Exception(
-          "ERROR Application did not get ready before timeout of {} seconds".
-          format(args.timeout))
+          "ERROR Application did not get ready before timeout of {} seconds"
+          .format(args.timeout))
 
     time.sleep(poll_interval)
 
