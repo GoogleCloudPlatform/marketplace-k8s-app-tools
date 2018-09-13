@@ -1,0 +1,17 @@
+properties:
+application_api_version: v1beta1
+properties:
+  name:
+    type: string
+    x-google-marketplace:
+      type: NAME
+  namespace:
+    type: string
+    x-google-marketplace:
+      type: NAMESPACE
+  rbac.create:
+    type: boolean
+    default: false
+required:
+- name
+- namespace
