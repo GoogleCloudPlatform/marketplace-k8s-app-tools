@@ -18,11 +18,6 @@ set -eox pipefail
 
 # This is the entry point for the test deployment
 
-overlay_test_schema.py \
-  --orig "/data-test/schema.yaml" \
-  --dest "/data/schema.yaml"
-rm -f /data-test/schema.yaml
-
 /bin/expand_config.py
 export NAME="$(/bin/print_config.py --param '{"x-google-marketplace": {"type": "NAME"}}')"
 export NAMESPACE="$(/bin/print_config.py --param '{"x-google-marketplace": {"type": "NAMESPACE"}}')"
@@ -36,26 +31,9 @@ app_api_version=$(kubectl get "applications/$NAME" \
   --namespace="$NAMESPACE" \
   --output=jsonpath='{.apiVersion}')
 
-create_manifests.sh --mode="test"
+patch_assembly_phase.sh --status="Pending"
 
-# Assign owner references for the resources.
-/bin/set_ownership.py \
-  --app_name "$NAME" \
-  --app_uid "$app_uid" \
-  --app_api_version "$app_api_version" \
-  --manifests "/data/manifest-expanded" \
-  --dest "/data/resources.yaml"
-
-separate_tester_resources.py \
-  --app_uid "$app_uid" \
-  --app_name "$NAME" \
-  --app_api_version "$app_api_version" \
-  --manifests "/data/resources.yaml" \
-  --out_manifests "/data/resources.yaml" \
-  --out_test_manifests "/data/tester.yaml"
-
-# Apply the manifest.
-kubectl apply --namespace="$NAMESPACE" --filename="/data/resources.yaml"
+/bin/deploy.sh
 
 patch_assembly_phase.sh --status="Success"
 
@@ -64,13 +42,6 @@ wait_for_ready.py \
   --namespace $NAMESPACE \
   --timeout 300
 
-tester_manifest="/data/tester.yaml"
-if [[ -e "$tester_manifest" ]]; then
-  cat $tester_manifest
-
-  run_tester.py \
-    --namespace $NAMESPACE \
-    --manifest $tester_manifest
-fi
+helm tiller run "$NAMESPACE" -- helm test "$NAME"
 
 clean_iam_resources.sh

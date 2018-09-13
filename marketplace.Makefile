@@ -5,6 +5,7 @@ __MARKETPLACE_MAKEFILE__ := included
 COMMIT ?= $(shell git rev-parse HEAD | fold -w 12 | head -n 1)
 
 makefile_dir := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
+include $(makefile_dir)/gcloud.Makefile
 include $(makefile_dir)/common.Makefile
 include $(makefile_dir)/var.Makefile
 
@@ -60,6 +61,36 @@ include $(makefile_dir)/var.Makefile
 	    -f marketplace/deployer_helm_base/Dockerfile \
 	    .
 	@touch "$@"
+
+
+.build/marketplace/deployer/helm_tiller: $(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_util/* \
+                                         $(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_helm_tiller_base/* \
+                                         .build/marketplace/delete_deprecated \
+                                         .build/var/MARKETPLACE_TOOLS_TAG \
+                                         | .build/marketplace/deployer
+	$(call print_target)
+	cd $(MARKETPLACE_TOOLS_PATH) \
+	&& docker build \
+	    --tag "gcr.io/cloud-marketplace-tools/k8s/deployer_helm_tiller:$(MARKETPLACE_TOOLS_TAG)" \
+	    -f marketplace/deployer_helm_tiller_base/Dockerfile \
+	    .
+	@touch "$@"
+
+.build/marketplace/deployer/helm_tiller/tester: .build/marketplace/deployer/helm_tiller
+	$(call print_target)
+	cd $(MARKETPLACE_TOOLS_PATH) \
+	&& docker build \
+	    --build-arg "MARKETPLACE_TOOLS_TAG=$(MARKETPLACE_TOOLS_TAG)" \
+	    --tag "$(REGISTRY)/k8s/deployer_helm_tiller/tester:$(MARKETPLACE_TOOLS_TAG)" \
+	    -f marketplace/deployer_helm_tiller_base/test/Dockerfile \
+	    . \
+	&& docker push "$(REGISTRY)/k8s/deployer_helm_tiller/tester:$(MARKETPLACE_TOOLS_TAG)"
+
+.test/marketplace/deployer/helm_tiller: .build/marketplace/deployer/helm_tiller/tester
+	APP_DEPLOYER_IMAGE="$(REGISTRY)/k8s/deployer_helm_tiller/tester:$(MARKETPLACE_TOOLS_TAG)" \
+	APP_PARAMETERS="{\"hooks_image\": \"$(REGISTRY)/k8s/deployer_helm_tiller/tester:$(MARKETPLACE_TOOLS_TAG)\"}" \
+	APP_TEST_PARAMETERS="{}" \
+	make -f app.Makefile app/verify
 
 
 .build/marketplace/delete_deprecated: | .build/marketplace
