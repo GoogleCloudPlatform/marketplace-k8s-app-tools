@@ -16,23 +16,25 @@
 
 set -eox pipefail
 
-# This is the entry point for the test deployment
+for i in "$@"
+do
+case $i in
+  --name=*)
+    name="${i#*=}"
+    shift
+    ;;
+  --namespace=*)
+    namespace="${i#*=}"
+    shift
+    ;;
+  *)
+    >&2 echo "Unrecognized flag: $i"
+    exit 1
+    ;;
+esac
+done
 
-/bin/expand_config.py
-NAME="$(/bin/print_config.py --param '{"x-google-marketplace": {"type": "NAME"}}')"
-NAMESPACE="$(/bin/print_config.py --param '{"x-google-marketplace": {"type": "NAMESPACE"}}')"
-export NAME
-export NAMESPACE
+[[ -z "$name" ]] && >&2 echo "--name required" && exit 1
+[[ -z "$namespace" ]] && >&2 echo "--namespace required" && exit 1
 
-/bin/deploy_internal.sh
-
-patch_assembly_phase.sh --status="Success"
-
-wait_for_ready.py \
-  --name $NAME \
-  --namespace $NAMESPACE \
-  --timeout 300
-
-helm tiller run "$NAMESPACE" -- helm test "$NAME"
-
-clean_iam_resources.sh
+kubectl delete "applications/$name"

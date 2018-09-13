@@ -43,32 +43,7 @@ NAMESPACE="$(/bin/print_config.py --param '{"x-google-marketplace": {"type": "NA
 export NAME
 export NAMESPACE
 
-echo "Deploying application \"$NAME\""
-
-app_uid=$(kubectl get "applications/$NAME" \
-  --namespace="$NAMESPACE" \
-  --output=jsonpath='{.metadata.uid}')
-app_api_version=$(kubectl get "applications/$NAME" \
-  --namespace="$NAMESPACE" \
-  --output=jsonpath='{.apiVersion}')
-
-create_manifests.sh
-
-# Assign owner references for the resources.
-/bin/set_ownership.py \
-  --app_name "$NAME" \
-  --app_uid "$app_uid" \
-  --app_api_version "$app_api_version" \
-  --manifests "/data/manifest-expanded" \
-  --dest "/data/resources.yaml"
-
-# Ensure assembly phase is "Pending", until successful kubectl apply.
-/bin/setassemblyphase.py \
-  --manifest "/data/resources.yaml" \
-  --status "Pending"
-
-# Apply the manifest.
-kubectl apply --namespace="$NAMESPACE" --filename="/data/resources.yaml"
+bin/deploy_internal.sh
 
 patch_assembly_phase.sh --status="Success"
 
