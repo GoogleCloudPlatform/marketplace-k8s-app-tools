@@ -28,12 +28,18 @@ $(shell echo '$(APP_PARAMETERS)' '$(APP_TEST_PARAMETERS)' \
     | docker run -i --entrypoint=/usr/bin/jq --rm $(APP_DEPLOYER_IMAGE) -s '.[0] * .[1]')
 endef
 
-KUBE_CONFIG ?= $(HOME)/.kube
-GCLOUD_CONFIG ?= $(HOME)/.config/gcloud
-EXTRA_DOCKER_PARAMS ?=
 
 .build/app: | .build
 	mkdir -p "$@"
+
+
+.build/app/dev: .build/var/MARKETPLACE_TOOLS_TAG \
+              | .build/app
+	$(call print_target)
+	docker run \
+	    "gcr.io/cloud-marketplace-tools/k8s/dev:$(MARKETPLACE_TOOLS_TAG)" \
+	    cat /scripts/dev > "$@"
+	chmod a+x "$@"
 
 
 .PHONY: app/phony
@@ -53,20 +59,14 @@ app/install:: app/build \
               .build/var/APP_DEPLOYER_IMAGE \
               .build/var/APP_PARAMETERS \
               .build/var/HOME \
-              .build/var/MARKETPLACE_TOOLS_TAG
+              .build/var/MARKETPLACE_TOOLS_TAG \
+              | .build/app/dev
 	$(call print_target)
-	docker run \
-	    --mount "type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock,readonly" \
-	    --mount "type=bind,source=$(KUBE_CONFIG),target=/root/mount/.kube,readonly" \
-	    --mount "type=bind,source=$(GCLOUD_CONFIG),target=/root/mount/.config/gcloud,readonly" \
-	    $(EXTRA_DOCKER_PARAMS) \
-	    --rm \
-	    "gcr.io/cloud-marketplace-tools/k8s/dev:$(MARKETPLACE_TOOLS_TAG)" \
-	    -- \
+	.build/app/dev \
 	    /scripts/install \
-	          --deployer='$(APP_DEPLOYER_IMAGE)' \
-	          --parameters='$(APP_PARAMETERS)' \
-	          --entrypoint="/bin/deploy.sh"
+	        --deployer='$(APP_DEPLOYER_IMAGE)' \
+	        --parameters='$(APP_PARAMETERS)' \
+	        --entrypoint="/bin/deploy.sh"
 
 
 # Installs the application into target namespace on the cluster.
@@ -76,20 +76,14 @@ app/install-test:: app/build \
                    .build/var/APP_PARAMETERS \
                    .build/var/APP_TEST_PARAMETERS \
                    .build/var/HOME \
-                   .build/var/MARKETPLACE_TOOLS_TAG
+                   .build/var/MARKETPLACE_TOOLS_TAG \
+	           | .build/app/dev
 	$(call print_target)
-	docker run \
-	    --mount "type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock,readonly" \
-	    --mount "type=bind,source=$(KUBE_CONFIG),target=/root/mount/.kube,readonly" \
-	    --mount "type=bind,source=$(GCLOUD_CONFIG),target=/root/mount/.config/gcloud,readonly" \
-	    $(EXTRA_DOCKER_PARAMS) \
-	    --rm \
-	    "gcr.io/cloud-marketplace-tools/k8s/dev:$(MARKETPLACE_TOOLS_TAG)" \
-	    -- \
+	.build/app/dev \
 	    /scripts/install \
-	          --deployer='$(APP_DEPLOYER_IMAGE)' \
-	          --parameters='$(call combined_parameters)' \
-	          --entrypoint="/bin/deploy_with_tests.sh"
+	        --deployer='$(APP_DEPLOYER_IMAGE)' \
+	        --parameters='$(call combined_parameters)' \
+	        --entrypoint="/bin/deploy_with_tests.sh"
 
 
 # Uninstalls the application from the target namespace on the cluster.
@@ -109,16 +103,10 @@ app/verify: app/build \
             .build/var/APP_PARAMETERS \
             .build/var/APP_TEST_PARAMETERS \
             .build/var/HOME \
-            .build/var/MARKETPLACE_TOOLS_TAG
+            .build/var/MARKETPLACE_TOOLS_TAG \
+            | .build/app/dev
 	$(call print_target)
-	docker run \
-	    --mount "type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock,readonly" \
-	    --mount "type=bind,source=$(KUBE_CONFIG),target=/root/mount/.kube,readonly" \
-	    --mount "type=bind,source=$(GCLOUD_CONFIG),target=/root/mount/.config/gcloud,readonly" \
-	    $(EXTRA_DOCKER_PARAMS) \
-	    --rm \
-	    "gcr.io/cloud-marketplace-tools/k8s/dev:$(MARKETPLACE_TOOLS_TAG)" \
-	    -- \
+	.build/app/dev \
 	    /scripts/verify \
 	          --deployer='$(APP_DEPLOYER_IMAGE)' \
 	          --parameters='$(call combined_parameters)'
