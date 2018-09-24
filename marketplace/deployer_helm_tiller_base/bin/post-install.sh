@@ -69,6 +69,7 @@ echo "$component_kinds" | while read group kind; do
                 kind: .kind,
                 metadata: .metadata 
               }
+            | del(.metadata.creationTimestamp)
             | .metadata.ownerReferences = 
               [
                 {
@@ -86,8 +87,8 @@ echo "$component_kinds" | while read group kind; do
   echo
 done
 
-find . -type f -size 0 -delete
+find "$manifests_directory" -type f -size 0 -delete
 
-if [[ ! $(ls -A "$manifests_directory") ]]; then
+if [[ ! -z "$(ls -A "$manifests_directory")" ]]; then
   kubectl apply -f "$manifests_directory"
 fi
