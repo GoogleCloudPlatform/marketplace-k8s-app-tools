@@ -76,7 +76,8 @@ include $(makefile_dir)/var.Makefile
 	    .
 	@touch "$@"
 
-.build/marketplace/deployer/helm_tiller.tester: .build/marketplace/deployer/helm_tiller
+.build/marketplace/deployer/helm_tiller.tester: .build/marketplace/deployer/helm_tiller \
+	                                              marketplace/deployer_helm_tiller_base/test/* \
 	$(call print_target)
 	cd $(MARKETPLACE_TOOLS_PATH) \
 	&& docker build \
@@ -87,9 +88,9 @@ include $(makefile_dir)/var.Makefile
 	&& docker push "$(REGISTRY)/k8s/deployer_helm_tiller/tester:$(MARKETPLACE_TOOLS_TAG)"
 	@touch "$@"
 
-PHONY: test/marketplace/deployer/helm_tiller
+.PHONY: test/marketplace/deployer/helm_tiller
 test/marketplace/deployer/helm_tiller: .build/marketplace/deployer/helm_tiller.tester \
-                                        .build/marketplace/dev
+                                       .build/marketplace/dev
 	APP_DEPLOYER_IMAGE="$(REGISTRY)/k8s/deployer_helm_tiller/tester:$(MARKETPLACE_TOOLS_TAG)" \
 	APP_PARAMETERS="{}" \
 	APP_TEST_PARAMETERS="{}" \
