@@ -84,7 +84,7 @@ steps:
   args:
   - build
   - --build-arg
-  - BASE_TAG=sha_$COMMIT_SHA
+  - FROM=gcr.io/$PROJECT_ID/k8s/deployer_helm:sha_$COMMIT_SHA
   - --tag
   - gcr.io/$PROJECT_ID/k8s/deployer_helm/onbuild:sha_$COMMIT_SHA
   - --tag
