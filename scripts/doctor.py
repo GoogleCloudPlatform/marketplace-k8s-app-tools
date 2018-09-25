@@ -80,16 +80,16 @@ def check_gcloud(args):
 
 def check_gcloud_login(args):
   p = subprocess.run(['gcloud', 'config', 'get-value', 'account'],
-                      stdout=subprocess.PIPE,
-                      stderr=subprocess.DEVNULL)
+                     stdout=subprocess.PIPE,
+                     stderr=subprocess.DEVNULL)
   if p.returncode == 0:
     if p.stdout:
       account = p.stdout.decode('utf-8')
       if '(unset)' not in account:
         return TaskEvent(success=True)
   return TaskEvent(
-            success=False,
-            message='''
+      success=False,
+      message='''
 You need to be logged in with gcloud. Run:
 
 gcloud auth login
@@ -203,13 +203,11 @@ def make_run_event(p, success, message):
   stdouterr = '\n'.join([x for x in [stdout, stderr] if x])
   return TaskEvent(
       success=success,
-      message=message.format(stdout=stdout,
-                             stderr=stderr,
-                             stdouterr=stdouterr))
-
+      message=message.format(stdout=stdout, stderr=stderr, stdouterr=stdouterr))
 
 
 def run(args, **kwargs):
+
   def execute_task(task, event_queue):
     try:
       event = task.function(args, **task.args)
