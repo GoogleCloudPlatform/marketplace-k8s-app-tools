@@ -82,6 +82,26 @@ def expand(values_dict, schema):
             k, v))
       generate_properties_for_image(prop, v, generated)
 
+    # TODO: Handle CERTIFICATE properties.
+    #
+    # Strawman Approach:
+    #
+    # CERTIFICATE property is expected to have a json value of the following form:
+    # {
+    #   "key": "...",
+    #   "crt": "..."
+    # }
+    # 
+    # If not specified, generate a CERTIFICATE property value via openssl.
+    #
+    # Generate a property with key equal to certificate.base64EncodedKey
+    # and value equal to the "key" field of the json contained in
+    # CERTIFICATE property.
+    #
+    # Generate a property with crt equal to certificate.base64EncodedCrt
+    # and value equal to the "crt" field of the json contained in
+    # CERTIFICATE property.
+
     if v is not None and prop.string:
       if not isinstance(v, str):
         raise InvalidProperty('Invalid value for STRING property {}: {}'.format(
