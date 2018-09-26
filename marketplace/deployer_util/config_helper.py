@@ -378,7 +378,18 @@ class SchemaXCertificate:
 
   def __init__(self, dictionary):
     self._type = dictionary['type']
+    generated_properties = dictionary.get('generatedProperties', {})
 
+    self._base64_encoded_key = generated_properties.get('base64EncodedKey', None)
+    self._base64_encoded_crt = generated_properties.get('base64EncodedCrt', None)
+
+  @property
+  def base64_encoded_key(self):
+    return self._base64_encoded_key
+
+  @property
+  def base64_encoded_crt(self):
+    return self._base64_encoded_crt
 
 class SchemaXString:
   """Wrapper class providing convenient access to STRING property."""

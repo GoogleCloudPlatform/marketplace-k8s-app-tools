@@ -51,7 +51,6 @@ fi
 # Replace the environment variables placeholders from the manifest templates
 for manifest_template_file in "$data_dir"/manifest/*; do
   manifest_file=$(basename "$manifest_template_file" | sed 's/.template$//')
-  # TODO: Implement CERTIFICATE property handling here.
   cat "$manifest_template_file" \
     | /bin/config_env.py envsubst "${env_vars}" \
     > "$manifest_dir/$manifest_file"

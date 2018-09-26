@@ -437,6 +437,10 @@ properties:
     type: string
     x-google-marketplace:
       type: CERTIFICATE
+      certificate:
+        generatedProperties:
+          base64EncodedKey: keyEncoded
+          base64EncodedCrt: crtEncoded
 ```
 
 #### type: STRING
