@@ -358,6 +358,7 @@ It defines how this object will be handled. Each type has a different set of pro
 - `REPORTING_SECRET`: The Secret resource name containing the usage reporting credentials
 - `SERVICE_ACCOUNT`: The name of a pre-provisioned k8s `ServiceAccount`. If it does not exist, one is created.
 - `STORAGE_CLASS`: The name of a pre-provisioned k8s `StorageClass`. If it does not exist, one is created.
+- `CERTIFICATE`: The name of a pre-provisioned k8s Secret specifying a `Certificate`. If it does not exist, one is created.
 - `STRING`: A string that needs special handling.
 
 ---
@@ -424,6 +425,18 @@ properties:
       type: STORAGE_CLASS
       storageClass:
         type: SSD
+```
+
+#### type: CERTIFICATE
+
+This is used to represent a certificate.
+
+```yaml
+properties:
+  certificate:
+    type: string
+    x-google-marketplace:
+      type: CERTIFICATE
 ```
 
 #### type: STRING

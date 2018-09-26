@@ -75,6 +75,7 @@ fi
 # Run helm expansion.
 for chart in "$data_dir/extracted"/*; do
   chart_manifest_file=$(basename "$chart" | sed 's/.tar.gz$//').yaml
+  # TODO: Implement CERTIFICATE property handling here.
   helm template "$chart/chart" \
     --name="$NAME" \
     --namespace="$NAMESPACE" \

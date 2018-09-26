@@ -32,6 +32,7 @@ XTYPE_PASSWORD = 'GENERATED_PASSWORD'
 XTYPE_REPORTING_SECRET = 'REPORTING_SECRET'
 XTYPE_SERVICE_ACCOUNT = 'SERVICE_ACCOUNT'
 XTYPE_STORAGE_CLASS = 'STORAGE_CLASS'
+XTYPE_CERTIFICATE = 'CERTIFICATE'
 XTYPE_STRING = 'STRING'
 
 
@@ -194,6 +195,9 @@ class SchemaProperty:
       elif xt == XTYPE_STORAGE_CLASS:
         d = self._x.get('storageClass', {})
         self._storage_class = SchemaXStorageClass(d)
+      elif xt == XTYPE_CERTIFICATE:
+        d = self._x.get('certificate', {})
+        self._certificate = SchemaXCertificate(d)
       elif xt == XTYPE_STRING:
         d = self._x.get('string', {})
         self._string = SchemaXString(d)
@@ -367,6 +371,13 @@ class SchemaXStorageClass:
   @property
   def ssd(self):
     return self._type == 'SSD'
+
+
+class SchemaXCertificate:
+  """Wrapper class providing convenient access to CERTIFICATE property."""
+
+  def __init__(self, dictionary):
+    self._type = dictionary['type']
 
 
 class SchemaXString:
