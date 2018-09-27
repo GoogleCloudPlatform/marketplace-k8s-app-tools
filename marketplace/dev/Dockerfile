@@ -34,6 +34,5 @@ COPY scripts/* /scripts/
 COPY marketplace/dev/*.sh /bin/
 RUN mkdir -p /data/
 
-
-
 ENTRYPOINT ["/bin/docker_entrypoint.sh"]
+CMD ["echo", "It works"]
