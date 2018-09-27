@@ -15,6 +15,7 @@
 # limitations under the License.
 
 import base64
+import json
 import os
 from argparse import ArgumentParser
 
@@ -102,6 +103,12 @@ def expand(values_dict, schema):
     # and value equal to the "crt" field of the json contained in
     # CERTIFICATE property.
 
+    if v is not None and prop.certificate:
+      if not isinstance(v, str):
+        raise InvalidProperty('Invalid value for CERTIFICATE property {}: {}'.format(
+            k, v))
+      generate_properties_for_certificate(prop, v, generated)
+
     if v is not None and prop.string:
       if not isinstance(v, str):
         raise InvalidProperty('Invalid value for STRING property {}: {}'.format(
@@ -150,6 +157,14 @@ def generate_properties_for_image(prop, value, result):
     before_value, after_value = parts
     result[before_name] = before_value
     result[after_name] = after_value
+
+
+def generate_properties_for_certificate(prop, value, result):
+  certificate = json.loads(value)
+  if prop.certificate.base64_encoded_key:
+    result[prop.certificate.base64_encoded_key] = base64.b64encode(certificate["key"])
+  if prop.certificate.base64_encoded_crt:
+    result[prop.certificate.base64_encoded_crt] = base64.b64encode(certificate["crt"])
 
 
 def generate_properties_for_string(prop, value, result):

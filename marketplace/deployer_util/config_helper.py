@@ -150,6 +150,7 @@ class SchemaProperty:
     self._service_account = None
     self._storage_class = None
     self._string = None
+    self._certificate = None
 
     if not NAME_RE.match(name):
       raise InvalidSchema('Invalid property name: {}'.format(name))
@@ -250,6 +251,10 @@ class SchemaProperty:
   @property
   def storage_class(self):
     return self._storage_class
+
+  @property
+  def certificate(self):
+    return self._certificate
 
   @property
   def string(self):
@@ -377,7 +382,6 @@ class SchemaXCertificate:
   """Wrapper class providing convenient access to CERTIFICATE property."""
 
   def __init__(self, dictionary):
-    self._type = dictionary['type']
     generated_properties = dictionary.get('generatedProperties', {})
 
     self._base64_encoded_key = generated_properties.get('base64EncodedKey', None)
