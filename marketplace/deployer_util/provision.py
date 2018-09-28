@@ -277,7 +277,8 @@ def provision_service_account(schema, prop, app_name, namespace):
         },
         'roleRef': {
             'apiGroup': 'rbac.authorization.k8s.io',
-            'kind': 'Role',
+            # Note: predefined ones are actually cluster roles.
+            'kind': 'ClusterRole',
             'name': role,
         },
         'subjects': subjects,
