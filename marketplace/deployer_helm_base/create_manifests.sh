@@ -52,8 +52,8 @@ function extract_manifest() {
 
 
   # Expand the chart template.
-  if [[ -d "$data_chart" && "$(ls -Al "$data_chart")" ]]; then
-    for chart in "$data_chart"/*; do
+  if [[ -d "$data_chart" ]]; then
+    for chart in $(find "$data_chart" -maxdepth 1 -type f -name "*.tar.gz"); do
       chart_manifest_file=$(basename "$chart" | sed 's/.tar.gz$//')
       mkdir "$extracted/$chart_manifest_file"
       tar xfC "$chart" "$extracted/$chart_manifest_file"
