@@ -87,6 +87,26 @@ class ExpandConfigTest(unittest.TestCase):
         's1.encoded': 'dGVzdA==',
     }, result)
 
+  def test_generate_certificate(self):
+    schema = config_helper.Schema.load_yaml("""
+        applicationApiVersion: v1beta1
+        properties:
+          c1:
+            type: string
+            x-google-marketplace:
+              type: CERTIFICATE
+              certificate:
+                generatedProperties:
+                  base64EncodedKey: c1.Base64Key
+                  base64EncodedCrt: c1.Base64Crt
+        """)
+    result = expand_config.expand({}, schema)
+    self.assertEqual({
+        'c1': '{"key": "key", "crt": "vrt"}',
+        'c1.Base64Key': 'a2V5',
+        'c1.Base64Crt': 'dnJ0',
+    }, result)
+
   def test_generate_properties_for_certificate(self):
     schema = config_helper.Schema.load_yaml("""
         applicationApiVersion: v1beta1

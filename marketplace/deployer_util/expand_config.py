@@ -17,6 +17,7 @@
 import base64
 import json
 import os
+import OpenSSL
 from argparse import ArgumentParser
 
 import yaml
@@ -103,6 +104,9 @@ def expand(values_dict, schema):
     # and value equal to the "crt" field of the json contained in
     # CERTIFICATE property.
 
+    if v is None and prop.certificate:
+      v = generate_certificate()
+
     if v is not None and prop.certificate:
       if not isinstance(v, str):
         raise InvalidProperty('Invalid value for CERTIFICATE property {}: {}'.format(
@@ -157,6 +161,22 @@ def generate_properties_for_image(prop, value, result):
     before_value, after_value = parts
     result[before_name] = before_value
     result[after_name] = after_value
+
+
+def generate_certificate():
+  key = OpenSSL.crypto.PKey()
+  key.generate_key(OpenSSL.crypto.TYPE_RSA, 2048)
+
+  crt = OpenSSL.crypto.X509()
+  crt.set_pubkey(key)
+  crt.gmtime_adj_notBefore(0)
+  crt.gmtime_adj_notAfter(10*365*24*60*60)
+  crt.sign(key, 'sha1')
+
+  return json.dumps({
+    "key": OpenSSL.crypto.dump_privatekey(OpenSSL.crypto.FILETYPE_PEM, key),
+    "crt": OpenSSL.crypto.dump_certificate(OpenSSL.crypto.FILETYPE_PEM, crt)
+  })
 
 
 def generate_properties_for_certificate(prop, value, result):

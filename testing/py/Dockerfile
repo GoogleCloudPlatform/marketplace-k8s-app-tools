@@ -2,12 +2,14 @@ FROM python
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
+        libssl-dev \
         python-pip \
-	python-setuptools \
+        python-setuptools \
         python-yaml \
-    && rm -rf /var/lib/apt/lists/*
-
-RUN pip2 install google-cloud-storage
-
-# Install lint tools.
-RUN pip2 install futures pyflakes yapf
+    && rm -rf /var/lib/apt/lists/* \
+    && pip2 install \
+        futures \
+        google-cloud-storage \
+        pyflakes \
+        pyopenssl \
+        yapf
