@@ -572,9 +572,87 @@ TODO
 
 ### Images in staging GCR
 
-TODO: structure
-TODO: tag
-TODO: schema.yaml images, and substitutions
+The staging GCR hosts all application and deployer images that
+Marketplace will copy and republishin into the public
+`marketplace.gcr.io`. Images in the staging repo are never
+visible to the end users. As an example, let's assume your staging
+repo is `gcr.io/your-company/wordpress`.
+
+For each solution, there are always __at least__ one deployer image
+and one primary application image. These two have predefined names:
+`deployer` and `wordpress`. For this example, let's
+say your application uses an additional image called `mariadb`.
+
+Each track of your application is associated with a track tag, which
+should be the same name. If you don't know what a track is, see the
+general
+[onboarding guide](https://cloud.google.com/marketplace/docs/partners/kubernetes-solutions/set-up-environment#product-identifiers).
+See [this section](building-deployer.md#publishing-a-new-version)
+for more information about tags. Let's say your application has a
+track named `v6`.
+
+Your GCR repo should have the following images:
+
+```text
+gcr.io/your-company/wordpress:v6
+gcr.io/your-company/wordpress/deployer:v6
+gcr.io/your-company/wordpress/mariadb:v6
+```
+
+Then your schema should look similar to the following:
+
+```yaml
+properties:
+  image.primary:
+    type: string
+    default: gcr.io/your-company/wordpress:v6
+    x-google-marketplace:
+      type: IMAGE
+  image.database:
+    type: string
+    default: gcr.io/your-company/wordpress/mariadb:v6
+    x-google-marketplace:
+      type: IMAGE
+```
+
+The default values in your schema are important, as this
+is how Marketplace knows where to find the application images.
+
+#### CI/CD
+
+Note that all these images share the same registry
+(`gcr.io/your-company/wordpress`) and the same tag (`v6`).
+To facilitate CI/CD, where you have separate repos and tags
+for testing and staging, assuming that you build your deployer
+image using the `onbuild` variation of the base deployer,
+you can use 2 environment variables `$REGISTRY` and `$TAG`
+in your `schema.yaml`. At build time, specify these docker
+`ARG`s.
+
+Your schema should look something like this:
+
+```yaml
+properties:
+  image.primary:
+    type: string
+    default: $REGISTRY:$TAG
+    x-google-marketplace:
+      type: IMAGE
+  image.database:
+    type: string
+    default: $REGISTRY/mariadb:$TAG
+    x-google-marketplace:
+      type: IMAGE
+```
+
+The docker build command looks like this:
+
+```shell
+docker build \
+  --build-arg REGISTRY=gcr.io/your-company/wordpress \
+  --build-arg TAG=v6 \
+  --tag gcr.io/your-company/wordpress/deployer:v6 .
+```
 
 ### Running a verification
 
@@ -585,7 +663,8 @@ must pass all verifications in order to be approved.
 Use the following command:
 
 ```shell
-mpdev /scripts/verify --deployer=$REGISTRY/$APP_NAME/deployer
+mpdev /scripts/verify \
+  --deployer=gcr.io/your-company/wordpress/deployer:v6
 ```
 
 This script will create a new test namespace, deploy the app,
