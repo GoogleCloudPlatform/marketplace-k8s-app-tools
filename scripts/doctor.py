@@ -195,7 +195,7 @@ output of what went wrong when querying for cluster nodes:
 #              when the VM is stopped.
 #              gcloud beta compute instances set-scopes debian-workstation --zone=us-west1-c --scopes=userinfo-email,cloud-platform
 # TODO(huyhg): Check for sufficient IAM privilege (GKE admin).
-
+# TODO(huyhg): Add application CRD.
 
 def make_run_event(p, success, message):
   stdout = (p.stdout or b'').decode('utf-8').strip()
