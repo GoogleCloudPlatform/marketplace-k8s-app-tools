@@ -19,6 +19,7 @@ fi
 
 docker run \
   --mount "type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock,readonly" \
+  --net=host \
   ${kube_mount[*]} \
   ${gcloud_mount[*]} \
   ${EXTRA_DOCKER_PARAMS[*]} \
