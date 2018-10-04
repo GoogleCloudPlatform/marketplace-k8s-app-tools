@@ -522,5 +522,6 @@ class ConfigHelperTest(unittest.TestCase):
             - type: text
             """).validate())
 
+
 if __name__ == 'main':
   unittest.main()
