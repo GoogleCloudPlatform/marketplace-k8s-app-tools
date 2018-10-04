@@ -57,6 +57,9 @@ properties:
 required:
 - propertyString
 - propertyPassword
+form:
+- type: text
+  description: My arbitrary <i>description</i>
 """
 
 
@@ -71,6 +74,7 @@ class ConfigHelperTest(unittest.TestCase):
       schema_from_str = config_helper.Schema.load_yaml(SCHEMA)
       self.assertEqual(schema.properties, schema_from_str.properties)
       self.assertEqual(schema.required, schema_from_str.required)
+      self.assertEqual(schema.form, schema_from_str.form)
 
   def test_bad_required(self):
     schema_yaml = """
@@ -478,6 +482,45 @@ class ConfigHelperTest(unittest.TestCase):
                 type: string
             """).validate())
 
+  def test_validate_bad_form_too_many_items(self):
+    self.assertRaisesRegexp(
+        config_helper.InvalidSchema, 'form',
+        lambda: config_helper.Schema.load_yaml("""
+            applicationApiVersion: v1beta1
+            form:
+            - type: text
+              description: My arbitrary <i>description</i>
+            - type: text
+              description: My arbitrary <i>description</i>
+            """).validate())
+
+  def test_validate_bad_form_missing_type(self):
+    self.assertRaisesRegexp(
+        config_helper.InvalidSchema, 'form',
+        lambda: config_helper.Schema.load_yaml("""
+            applicationApiVersion: v1beta1
+            form:
+            - description: My arbitrary <i>description</i>
+            """).validate())
+
+  def test_validate_bad_form_unrecognized_type(self):
+    self.assertRaisesRegexp(
+        config_helper.InvalidSchema, 'form',
+        lambda: config_helper.Schema.load_yaml("""
+            applicationApiVersion: v1beta1
+            form:
+            - type: magical
+              description: My arbitrary <i>description</i>
+            """).validate())
+
+  def test_validate_bad_form_missing_description(self):
+    self.assertRaisesRegexp(
+        config_helper.InvalidSchema, 'form',
+        lambda: config_helper.Schema.load_yaml("""
+            applicationApiVersion: v1beta1
+            form:
+            - type: text
+            """).validate())
 
 if __name__ == 'main':
   unittest.main()

@@ -34,6 +34,8 @@ XTYPE_SERVICE_ACCOUNT = 'SERVICE_ACCOUNT'
 XTYPE_STORAGE_CLASS = 'STORAGE_CLASS'
 XTYPE_STRING = 'STRING'
 
+FORM_TYPES = ('text',)
+
 
 class InvalidName(Exception):
   pass
@@ -111,22 +113,39 @@ class Schema:
         'applicationApiVersion', dictionary.get('application_api_version',
                                                 None))
 
+    self._form = dictionary.get('form', [])
+
   def validate(self):
     """Fully validates the schema, raising InvalidSchema if fails."""
     if self.app_api_version is None:
       raise InvalidSchema('applicationApiVersion is required')
+
+    if len(self.form) > 1:
+      raise InvalidSchema('form must not contain more than 1 item.')
+
+    for item in self.form:
+      if 'type' not in item:
+        raise InvalidSchema('form items must have a type.')
+      if item['type'] not in FORM_TYPES:
+        raise InvalidSchema('Unrecognized form type: {}', item['type'])
+      if 'description' not in item:
+        raise InvalidSchema('form items must have a description.')
 
   @property
   def app_api_version(self):
     return self._app_api_version
 
   @property
+  def properties(self):
+    return self._properties
+
+  @property
   def required(self):
     return self._required
 
   @property
-  def properties(self):
-    return self._properties
+  def form(self):
+    return self._form
 
   def properties_matching(self, definition):
     return [
