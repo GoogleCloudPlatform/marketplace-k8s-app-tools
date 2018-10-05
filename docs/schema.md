@@ -13,7 +13,7 @@ The schema file must exist at the well known location `/data/schema.yaml` in the
 This is a simple example of a schema.yaml file:
 
 ```yaml
-application_api_version: v1beta
+application_api_version: v1beta1
 properties:
   name:
     type: string
@@ -58,7 +58,7 @@ database:
 replicas: 3
 ```
 
-We can define the following schema:
+We can define the following abbreviated schema:
 
 ```yaml
 properties:
@@ -91,10 +91,10 @@ They can be referenced in helm charts just like a regular value from `values.yam
 Example of `schema.yaml`
 
 ```yaml
-application_api_version: v1beta
+application_api_version: v1beta1
 properties:
   port:
-    type: string
+    type: integer
   name:
     type: string
     x-google-marketplace:
@@ -140,10 +140,10 @@ mysql:
   image: <path to image>
 ```
 
-the property can ve referenced in the schema file as `mysql.image`
+the property can be referenced in the schema file as `mysql.image`
 
 ```yaml
-application_api_version: v1beta
+application_api_version: v1beta1
 properties:
   mysql.image:
     type: string
@@ -157,7 +157,7 @@ They can be referenced in manifests by its name in `schema.yaml`, prefixed with 
 Example of `schema.yaml`
 
 ```yaml
-application_api_version: v1beta
+application_api_version: v1beta1
 properties:
   port:
     type: string
