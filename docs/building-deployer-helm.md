@@ -106,6 +106,9 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: "{{ .Release.Name }}"
+  componentKinds:
+  - group: batch/v1
+    kind: Job
 ```
 
 ### Build your deployer container
