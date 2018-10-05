@@ -188,6 +188,25 @@ You can see your application in GKE UI by following this link:
 https://console.cloud.google.com/kubernetes/application?project=YOUR_PROJECT
 ```
 
+### Troubleshooting
+
+The deployer job/pod might fail if your application tries to create
+cluster-wide objects, such as `CustomResourceDefinition`, `StorageClass`,
+or `ClusterRole` and `ClusterRoleBinding`. This is because the deployer
+is only allowed to create namespaced resources.
+
+- `ClusterRole` and `ClusterRoleBinding`: Please see the RBAC section
+  in Part 2 below.
+- `StorageClass`: If your application uses a storage class, see Part 2
+  on how to configure your schema. If your application provides a
+  `StorageClass` (i.e. your application is a storage provisioner),
+  the resource must be created by the application with a properly
+  configured service account. See RBAC section in Part 2 on how to set
+  up such a service account.
+- Other cluster scoped resources: These resources must be created by
+  the application with a properly configured service account. See RBAC
+  section in Part 2 on how to set up such a service account.
+
 ## Part 1b (recommended): Creating a wrapper chart
 
 It is recommended to create a new top level chart for your application
@@ -267,6 +286,47 @@ application.
 
 `schema.yaml` is a basic JSON schema with Marketplace extensions.
 See this [document](schema.md) for more references.
+
+### Declare RBAC requirements (and disable RBAC in the chart)
+
+While helm
+[recommends](https://github.com/helm/helm/blob/master/docs/chart_best_practices/rbac.md)
+that charts should create RBAC resources by default, Marketplace
+requires that charts __must not__ create k8s service accounts or
+RBAC resources.
+
+Modify your charts' `values.yaml` to disable service account and RBAC
+resource creation. If you created the recommended wrapper chart, you
+can easily add override values to do this.
+
+There should be a service account value that the charts take. The
+service account is specified under `podSpec` attribute of workload
+types, like `Deployment`, `StatefulSet`. Assume it to be
+`{{ .Values.controller.serviceAccount }}`, you can add the
+following property to your schema.
+
+```yaml
+properties:
+  controller.serviceAccount:
+    type: string
+    x-google-marketplace:
+      type: SERVICE_ACCOUNT
+      serviceAccount
+        roles:
+        - type: ClusterRole
+          rulesType: PREDEFINED
+          rulesFromRoleName: edit
+```
+
+(Don't forget to include the name of the subchart if you're modifying
+the subchart's value, e.g. `wordpress.controller.serviceAccount` with
+our wrapper chart example above.)
+
+At deploy time, the service account with appropriate role bindings is
+created by the UI and passed to the deployer. The UI also allows the
+end user to select an existing service account instead. In the example
+above, a service account with a cluster role `edit` (a system default
+cluster role) should be passed to the deployer.
 
 ### Parameterize the images
 
@@ -373,47 +433,6 @@ image names.
 _One last reminder_: __all__ images in all charts and subcharts
 __must__ be parameterized this way. Only official Marketplace
 images are allowed to run in end user's environment.
-
-### Declare RBAC requirements (and disable RBAC in the chart)
-
-While helm
-[recommends](https://github.com/helm/helm/blob/master/docs/chart_best_practices/rbac.md)
-that charts should create RBAC resources by default, Marketplace
-requires that charts __must not__ create k8s service accounts or
-RBAC resources.
-
-Modify your charts' `values.yaml` to disable service account and RBAC
-resource creation. If you created the recommended wrapper chart, you
-can easily add override values to do this.
-
-There should be a service account value that the charts take. The
-service account is specified under `podSpec` attribute of workload
-types, like `Deployment`, `StatefulSet`. Assume it to be
-`{{ .Values.controller.serviceAccount }}`, you can add the
-following property to your schema.
-
-```yaml
-properties:
-  controller.serviceAccount:
-    type: string
-    x-google-marketplace:
-      type: SERVICE_ACCOUNT
-      serviceAccount
-        roles:
-        - type: ClusterRole
-          rulesType: PREDEFINED
-          rulesFromRoleName: edit
-```
-
-(Don't forget to include the name of the subchart if you're modifying
-the subchart's value, e.g. `wordpress.controller.serviceAccount` with
-our wrapper chart example above.)
-
-At deploy time, the service account with appropriate role bindings is
-created by the UI and passed to the deployer. The UI also allows the
-end user to select an existing service account instead. In the example
-above, a service account with a cluster role `edit` (a system default
-cluster role) should be passed to the deployer.
 
 ### Declare parameters user can configure
 
