@@ -49,7 +49,8 @@ def main():
       gcloud_login=(check_gcloud_login, ['gcloud']),
       gcloud_project=(check_gcloud_default_project, ['gcloud_login']),
       kubectl=check_kubectl,
-      kubectl_nodes=(check_kubectl_nodes, ['kubectl']))
+      kubectl_nodes=(check_kubectl_nodes, ['kubectl']),
+      crd=(check_crd, ['kubectl_nodes']))
   if all_good:
     print('\nEverything looks good to go!!')
 
@@ -185,6 +186,29 @@ output of what went wrong when querying for cluster nodes:
   return TaskEvent(success=True)
 
 
+def check_crd(args):
+  p = subprocess.run(['kubectl', 'get', 'crd/applications.app.k8s.io'],
+                     stdout=subprocess.DEVNULL,
+                     stderr=subprocess.DEVNULL)
+  if p.returncode != 0:
+    return make_run_event(
+        p=p,
+        success=False,
+        message='''
+Application CRD is not installed in your cluster.
+
+Run the following to install it:
+
+curl https://raw.githubusercontent.com/GoogleCloudPlatform/marketplace-k8s-app-tools/master/crd/app-crd.yaml \
+  | kubectl --kubeconfig ~/onprem-kube/config apply -f -
+
+For more details about the application CRD, see
+https://github.com/kubernetes-sigs/application
+''')
+  return TaskEvent(success=True)
+
+
+# TODO(huyhg): Check connected cluster to be GKE of the project.
 # TODO(huyhg): Check gcloud auth configure-docker.
 # TODO(huyhg): Check RBAC cluster-admin for user.
 # TODO(huyhg): Check userinfo scope for GCE VM.
@@ -195,7 +219,6 @@ output of what went wrong when querying for cluster nodes:
 #              when the VM is stopped.
 #              gcloud beta compute instances set-scopes debian-workstation --zone=us-west1-c --scopes=userinfo-email,cloud-platform
 # TODO(huyhg): Check for sufficient IAM privilege (GKE admin).
-# TODO(huyhg): Add application CRD.
 
 
 def make_run_event(p, success, message):
