@@ -6,7 +6,7 @@ KUBE_CONFIG=${KUBE_CONFIG:-$HOME/.kube}
 GCLOUD_CONFIG=${GCLOUD_CONFIG:-$HOME/.config/gcloud}
 EXTRA_DOCKER_PARAMS=${EXTRA_DOCKER_PARAMS:-}
 MARKETPLACE_TOOLS_TAG=${MARKETPLACE_TOOLS_TAG:-latest}
-MARKETPLACE_TOOLS_CONTAINER=${MARKETPLACE_TOOLS_CONTAINER:-gcr.io/cloud-marketplace-tools/k8s/dev}
+MARKETPLACE_TOOLS_IMAGE=${MARKETPLACE_TOOLS_IMAGE:-gcr.io/cloud-marketplace-tools/k8s/dev}
 
 kube_mount=""
 if [[ -e "${KUBE_CONFIG}" ]]; then
@@ -24,5 +24,5 @@ docker run \
   ${gcloud_mount[*]} \
   ${EXTRA_DOCKER_PARAMS[*]} \
   --rm \
-  "${MARKETPLACE_TOOLS_CONTAINER}:${MARKETPLACE_TOOLS_TAG}" \
+  "${MARKETPLACE_TOOLS_IMAGE}:${MARKETPLACE_TOOLS_TAG}" \
   "$@"
