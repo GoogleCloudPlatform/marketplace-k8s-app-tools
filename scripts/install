@@ -93,6 +93,7 @@ echo "${parameters}" \
     --values_file=- \
     --deployer_image="${deployer}" \
     --deployer_entrypoint="${entrypoint}" \
+    --application_uid="${app_uid}" \
   | set_app_labels.py \
     --manifests=- \
     --dest=- \
