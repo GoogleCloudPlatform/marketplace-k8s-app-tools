@@ -31,7 +31,7 @@ RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add - && \
 
 COPY marketplace/deployer_util/* /bin/
 COPY scripts/* /scripts/
-COPY marketplace/dev/*.sh /bin/
+COPY marketplace/dev/bin/* /bin/
 RUN mkdir -p /data/
 
 ENTRYPOINT ["/bin/docker_entrypoint.sh"]
