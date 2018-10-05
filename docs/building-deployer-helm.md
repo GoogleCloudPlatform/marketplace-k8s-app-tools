@@ -1,5 +1,10 @@
 # Building Helm Deployer
 
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL
+NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED",  "MAY", and
+"OPTIONAL" in this document are to be interpreted as described in
+RFC 2119.
+
 ## TODO FEATURES:
 - [X] create an onbuild version of the base deployers
 - [X] create a doctor tool
@@ -296,19 +301,19 @@ to use `mariadb.image.repository`.
 
 If you following the recommendation of creating a wrapper
 chart `wordpress-mp`, the two properties should be
-`wordpress-mp.wordpress.image.repository` and
-`wordpress-mp.wordpress.mariadb.image.repository`. The schema
+`wordpress.image.repository` and
+`wordpress.mariadb.image.repository`. The schema
 file should then look something like this:
 
 ```yaml
 # THIS DOES NOT WORK. READ FURTHER!
 properties:
-  wordpress-mp.wordpress.image.repository:
+  wordpress.image.repository:
     type: string
     default: bitnami/wordpress   # This is needed.
     x-google-marketplace:        # This annotation is how the system
       type: IMAGE                # knows to pass the image name.
-  wordpress-mp.wordpress.mariadb.image.repository:
+  wordpress.mariadb.image.repository:
     type: string
     default: bitnami/mariadb
     x-google-marketplace:
@@ -334,9 +339,9 @@ properties:
           # We only support splitByColon.
           # See https://github.com/GoogleCloudPlatform/marketplace-k8s-app-tools/releases/tag/v0.6.1
           splitToRegistryRepoTag:
-            registry: wordpress-mp.wordpress.image.registry
-            repository: wordpress-mp.wordpress.image.repository
-            tag: registry: wordpress-mp.wordpress.image.tag
+            registry: wordpress.image.registry
+            repository: wordpress.image.repository
+            tag: registry: wordpress.image.tag
   mariadbImage:
     type: string
     default: gcr.io/your-company/mariadb:10.1.133
@@ -345,9 +350,9 @@ properties:
       image:
         generatedProperties:
           splitToRegistryRepoTag:
-            registry: wordpress-mp.wordpress.mariadb.image.registry
-            repository: wordpress-mp.wordpress.mariadb.image.repository
-            tag: registry: wordpress-mp.wordpress.mariadb.image.tag
+            registry: wordpress.mariadb.image.registry
+            repository: wordpress.mariadb.image.repository
+            tag: registry: wordpress.mariadb.image.tag
 ```
 
 Note that `wordpressImage` is also available to your helm chart
@@ -384,8 +389,10 @@ Modify your charts' `values.yaml` to disable service account and RBAC
 resource creation. If you created the recommended wrapper chart, you
 can easily add override values to do this.
 
-There should be a service account value that the charts take. Assume
-it to be `{{ .Values.controller.serviceAccount }}`, you can add the
+There should be a service account value that the charts take. The
+service account is specified under `podSpec` attribute of workload
+types, like `Deployment`, `StatefulSet`. Assume it to be
+`{{ .Values.controller.serviceAccount }}`, you can add the
 following property to your schema.
 
 ```yaml
@@ -394,11 +401,16 @@ properties:
     type: string
     x-google-marketplace:
       type: SERVICE_ACCOUNT
-      roles:
-      - type: ClusterRole
-        rulesType: PREDEFINED
-        rulesFromRoleName: edit
+      serviceAccount
+        roles:
+        - type: ClusterRole
+          rulesType: PREDEFINED
+          rulesFromRoleName: edit
 ```
+
+(Don't forget to include the name of the subchart if you're modifying
+the subchart's value, e.g. `wordpress.controller.serviceAccount` with
+our wrapper chart example above.)
 
 At deploy time, the service account with appropriate role bindings is
 created by the UI and passed to the deployer. The UI also allows the

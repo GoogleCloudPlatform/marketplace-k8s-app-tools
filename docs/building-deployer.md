@@ -1,5 +1,10 @@
 # Building Application Deployer
 
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL
+NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED",  "MAY", and
+"OPTIONAL" in this document are to be interpreted as described in
+RFC 2119.
+
 ## Overview
 
 Each application version is defined by one and only one **deployer image**. It
