@@ -44,8 +44,8 @@ to the staging repo.
 ### Tags
 
 The deployer image **must** carry the primary track ID as its docker tag.
-Marketplace uses the _latest_ image of that primary track ID tag when it looks
-for new versions of each track. The deployer image **should** also carry a uniquethat
+Marketplace uses the image last tagged with that primary track ID tag when it looks
+for new versions of each track. The deployer image **should** also carry a unique
 version as its docker tag.
 
 The application images are located from references in the deployer's `schema.yaml`.
