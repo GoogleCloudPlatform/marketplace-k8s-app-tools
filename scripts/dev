@@ -2,7 +2,7 @@
 
 set -eo pipefail
 
-KUBE_CONFIG=${KUBE_CONFIG:-$HOME/.kube}
+KUBE_CONFIG=${KUBE_CONFIG:-$HOME/.kube/config}
 GCLOUD_CONFIG=${GCLOUD_CONFIG:-$HOME/.config/gcloud}
 EXTRA_DOCKER_PARAMS=${EXTRA_DOCKER_PARAMS:-}
 MARKETPLACE_TOOLS_TAG=${MARKETPLACE_TOOLS_TAG:-latest}
@@ -10,7 +10,7 @@ MARKETPLACE_TOOLS_IMAGE=${MARKETPLACE_TOOLS_IMAGE:-gcr.io/cloud-marketplace-tool
 
 kube_mount=""
 if [[ -e "${KUBE_CONFIG}" ]]; then
-  kube_mount=(--mount "type=bind,source=${KUBE_CONFIG},target=/mount/config/.kube,readonly")
+  kube_mount=(--mount "type=bind,source=${KUBE_CONFIG},target=/mount/config/.kube/config,readonly")
 fi
 gcloud_mount=""
 if [[ -e "${GCLOUD_CONFIG}" ]]; then
