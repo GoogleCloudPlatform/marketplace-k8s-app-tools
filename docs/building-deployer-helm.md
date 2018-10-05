@@ -335,13 +335,10 @@ properties:
       type: IMAGE
       image:
         generatedProperties:
-          # NOTE: this doesn't work yet.
-          # We only support splitByColon.
-          # See https://github.com/GoogleCloudPlatform/marketplace-k8s-app-tools/releases/tag/v0.6.1
           splitToRegistryRepoTag:
             registry: wordpress.image.registry
-            repository: wordpress.image.repository
-            tag: registry: wordpress.image.tag
+            repo: wordpress.image.repository
+            tag: wordpress.image.tag
   mariadbImage:
     type: string
     default: gcr.io/your-company/mariadb:10.1.133
@@ -351,8 +348,8 @@ properties:
         generatedProperties:
           splitToRegistryRepoTag:
             registry: wordpress.mariadb.image.registry
-            repository: wordpress.mariadb.image.repository
-            tag: registry: wordpress.mariadb.image.tag
+            repo: wordpress.mariadb.image.repository
+            tag: wordpress.mariadb.image.tag
 ```
 
 Note that `wordpressImage` is also available to your helm chart
