@@ -52,6 +52,8 @@ app_api_version=$(kubectl get "applications/$NAME" \
   --namespace="$NAMESPACE" \
   --output=jsonpath='{.apiVersion}')
 
+/bin/expand_config.py --app_uid "$app_uid"
+
 create_manifests.sh
 
 # Assign owner references for the resources.

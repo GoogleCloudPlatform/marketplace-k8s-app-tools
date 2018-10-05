@@ -33,7 +33,6 @@ The manifests include the deployer-related resources.
 def main():
   parser = ArgumentParser(description=_PROG_HELP)
   schema_values_common.add_to_argument_parser(parser)
-  parser.add_argument('--application_uid', required=True)
   parser.add_argument('--deployer_image', required=True)
   parser.add_argument('--deployer_entrypoint', default=None)
   args = parser.parse_args()
@@ -44,13 +43,11 @@ def main():
       schema,
       values,
       deployer_image=args.deployer_image,
-      deployer_entrypoint=args.deployer_entrypoint,
-      application_uid=args.application_uid)
+      deployer_entrypoint=args.deployer_entrypoint)
   print(yaml.safe_dump_all(manifests, default_flow_style=False, indent=2))
 
 
-def process(schema, values, deployer_image, deployer_entrypoint,
-            application_uid):
+def process(schema, values, deployer_image, deployer_entrypoint):
   props = {}
   manifests = []
   app_name = get_name(schema, values)
@@ -83,8 +80,6 @@ def process(schema, values, deployer_image, deployer_entrypoint,
           schema, prop, app_name=app_name, namespace=namespace)
       props[prop.name] = value
       manifests += sc_manifests
-    elif prop.xtype == 'APPLICATION_UID':
-      props[prop.name] = application_uid
 
   # Merge input and provisioned properties.
   app_params = dict(list(values.iteritems()) + list(props.iteritems()))

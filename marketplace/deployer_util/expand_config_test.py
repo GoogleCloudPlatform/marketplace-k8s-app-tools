@@ -127,6 +127,18 @@ class ExpandConfigTest(unittest.TestCase):
     self.assertEqual({'p1'}, set(result))
     self.assertIsNotNone(re.match(r'^[a-zA-Z0-9]{8}$', result['p1']))
 
+  def test_application_uid(self):
+    schema = config_helper.Schema.load_yaml("""
+        applicationApiVersion: v1beta1
+        properties:
+          application_uid:
+            type: string
+            x-google-marketplace:
+              type: APPLICATION_UID
+        """)
+    result = expand_config.expand({}, schema, app_uid='1234-abcd')
+    self.assertEqual({'application_uid': '1234-abcd'}, result)
+
   def test_write_values(self):
     schema = config_helper.Schema.load_yaml("""
         applicationApiVersion: v1beta1
