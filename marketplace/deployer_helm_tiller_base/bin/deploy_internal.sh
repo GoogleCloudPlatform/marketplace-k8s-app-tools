@@ -32,7 +32,8 @@ for chart in /data/chart/*; do
       --name="$NAME" \
       --namespace="$NAMESPACE" \
       --set "template_mode=true" \
-      --values=<(print_config.py --output=yaml) \
+      --values=<(print_config.py \
+      --output=yaml) \
       "$chart" \
     | yaml2json \
     | jq 'select( .kind == "Application" )' \
@@ -48,7 +49,8 @@ for chart in /data/chart/*; do
     helm install \
         --name="$NAME" \
         --namespace="$NAMESPACE" \
-        --values=<(print_config.py --output=yaml) \
+        --values=<(print_config.py \
+        --output=yaml) \
         "$chart"
 
   # Establish an ownerReference back to the Application resource, so that
@@ -59,8 +61,7 @@ for chart in /data/chart/*; do
   kubectl get secrets \
       --namespace="$NAMESPACE" \
       --selector="OWNER=TILLER,NAME=$NAME" \
-      --output=yaml \
-    | yaml2json \
+      --output=json \
     | jq '.items[]
             | {
                 apiVersion: .apiVersion,

@@ -45,8 +45,7 @@ app_api_version="$(kubectl get "applications/$name" \
     --output=jsonpath='{.apiVersion}')"
 component_kinds="$(kubectl get "applications/$name" \
     --namespace="$namespace" \
-    --output=yaml \
-  | yaml2json \
+    --output=json \
   | jq -r '.spec.componentKinds[]
              | [.group, .kind]
              | @csv' \
@@ -58,39 +57,51 @@ echo "$component_kinds" | while read group kind; do
   kubectl get "$kind" \
       --namespace="$namespace" \
       --selector="heritage=Tiller,release=$name" \
-      --output=yaml \
-    | yaml2json \
+      --output=json \
     | jq '.items[]
             | {
                 apiVersion: .apiVersion,
                 kind: .kind,
-                metadata: .metadata
-              }
-            | del(.metadata.creationTimestamp)
-            | .metadata.ownerReferences +=
-              [
-                {
-                  apiVersion: $app_api_version,
-                  kind: "Application",
-                  name: $name,
-                  uid: $app_uid,
-                  blockOwnerDeletion: true
+                metadata: {
+                  namespace: .metadata.namespace,
+                  name: .metadata.name
                 }
-              ]
-            | .metadata.labels["app.kubernetes.io/name"] = $name
-            | .metadata.labels["app.kubernetes.io/namespace"] = $namespace
+              }
          ' \
       --arg name "$name" \
       --arg namespace "$namespace" \
-      --arg app_uid "$app_uid" \
-      --arg app_api_version "$app_api_version" \
   > "$manifests_directory/$kind.json"
   echo
 done
 
 find "$manifests_directory" -type f -size 0 -delete
 
+patch="$(echo '{}' \
+  | jq '{
+          "metadata": {
+            "ownerReferences": [
+              {
+                "apiVersion": $app_api_version,
+                "kind": "Application",
+                "name": $name,
+                "uid": $app_uid,
+                "blockOwnerDeletion": true
+              }
+            ],
+            "labels": {
+              "app.kubernetes.io/name": $name,
+              "app.kubernetes.io/namespace": $namespace
+            }
+          }
+        }' \
+        --arg name "$name" \
+        --arg namespace "$namespace" \
+        --arg app_uid "$app_uid" \
+        --arg app_api_version "$app_api_version")"
+
 if [[ ! -z "$(ls -A "$manifests_directory")" ]]; then
 	cat "$manifests_directory"/*
-  kubectl apply -f "$manifests_directory"
+  kubectl patch \
+      --filename "$manifests_directory" \
+      --patch "$patch"
 fi
