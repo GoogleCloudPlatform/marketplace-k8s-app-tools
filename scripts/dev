@@ -2,6 +2,8 @@
 
 set -eo pipefail
 
+# KUBE_CONFIG can point to a kubeconfig file or
+# the standard kubectl config directory.
 KUBE_CONFIG=${KUBE_CONFIG:-$HOME/.kube/config}
 GCLOUD_CONFIG=${GCLOUD_CONFIG:-$HOME/.config/gcloud}
 EXTRA_DOCKER_PARAMS=${EXTRA_DOCKER_PARAMS:-}
@@ -9,8 +11,12 @@ MARKETPLACE_TOOLS_TAG=${MARKETPLACE_TOOLS_TAG:-latest}
 MARKETPLACE_TOOLS_IMAGE=${MARKETPLACE_TOOLS_IMAGE:-gcr.io/cloud-marketplace-tools/k8s/dev}
 
 kube_mount=""
-if [[ -e "${KUBE_CONFIG}" ]]; then
+if [[ -f "${KUBE_CONFIG}" ]]; then
+  # Mount as a file.
   kube_mount=(--mount "type=bind,source=${KUBE_CONFIG},target=/mount/config/.kube/config,readonly")
+elif [[ -d "${KUBE_CONFIG}" ]]; then
+  # Mount as a directory.
+  kube_mount=(--mount "type=bind,source=${KUBE_CONFIG},target=/mount/config/.kube,readonly")
 fi
 gcloud_mount=""
 if [[ -e "${GCLOUD_CONFIG}" ]]; then
