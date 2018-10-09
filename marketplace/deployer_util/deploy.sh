@@ -37,7 +37,6 @@ handle_failure() {
 }
 trap "handle_failure" EXIT
 
-/bin/expand_config.py
 NAME="$(/bin/print_config.py --param '{"x-google-marketplace": {"type": "NAME"}}')"
 NAMESPACE="$(/bin/print_config.py --param '{"x-google-marketplace": {"type": "NAMESPACE"}}')"
 export NAME

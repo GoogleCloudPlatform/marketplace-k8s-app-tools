@@ -23,7 +23,6 @@ overlay_test_schema.py \
   --dest "/data/schema.yaml"
 rm -f /data-test/schema.yaml
 
-/bin/expand_config.py
 export NAME="$(/bin/print_config.py --param '{"x-google-marketplace": {"type": "NAME"}}')"
 export NAMESPACE="$(/bin/print_config.py --param '{"x-google-marketplace": {"type": "NAMESPACE"}}')"
 

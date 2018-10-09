@@ -139,6 +139,21 @@ class ExpandConfigTest(unittest.TestCase):
     result = expand_config.expand({}, schema, app_uid='1234-abcd')
     self.assertEqual({'application_uid': '1234-abcd'}, result)
 
+  def test_application_uid_raises_when_unspecified(self):
+    schema = config_helper.Schema.load_yaml("""
+        applicationApiVersion: v1beta1
+        properties:
+          application_uid:
+            type: string
+            x-google-marketplace:
+              type: APPLICATION_UID
+        """)
+    self.assertRaises(
+        expand_config.InvalidProperty,
+        expand_config.expand, {},
+        schema,
+        app_uid=None)
+
   def test_write_values(self):
     schema = config_helper.Schema.load_yaml("""
         applicationApiVersion: v1beta1

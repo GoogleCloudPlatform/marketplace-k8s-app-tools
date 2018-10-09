@@ -77,7 +77,11 @@ def expand(values_dict, schema, app_uid=''):
       result[k] = generate_password(prop.password)
       continue
 
-    if v is None and prop.xtype == 'APPLICATION_UID' and app_uid:
+    if v is None and prop.xtype == 'APPLICATION_UID':
+      if not app_uid:
+        raise InvalidProperty(
+            'Property {} is of type APPLICATION_UID, but value was specified'
+            .format(k, v))
       result[k] = app_uid
       continue
 
