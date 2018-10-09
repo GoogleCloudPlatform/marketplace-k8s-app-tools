@@ -130,6 +130,8 @@ class ConfigHelperTest(unittest.TestCase):
     self.assertIsNone(schema.properties['propertyPassword'].default)
     self.assertEqual('GENERATED_PASSWORD',
                      schema.properties['propertyPassword'].xtype)
+    self.assertEqual('My arbitrary <i>description</i>',
+                     schema.form[0]['description'])
 
   def test_invalid_name(self):
     self.assertRaises(
