@@ -272,8 +272,10 @@ def provision_service_account(schema, prop, app_name, namespace):
         'apiVersion': 'rbac.authorization.k8s.io/v1',
         'kind': 'RoleBinding',
         'metadata': {
-            'name': '{}:{}:{}-rb'.format(app_name, prop.name, role),
-            'namespace': namespace,
+            'name':
+                dns1123_name('{}:{}:{}-crb'.format(app_name, prop.name, role)),
+            'namespace':
+                namespace,
         },
         'roleRef': {
             'apiGroup': 'rbac.authorization.k8s.io',
@@ -289,7 +291,8 @@ def provision_service_account(schema, prop, app_name, namespace):
         'kind': 'ClusterRoleBinding',
         'metadata': {
             'name':
-                '{}:{}:{}:{}-rb'.format(namespace, app_name, prop.name, role),
+                dns1123_name('{}:{}:{}:{}-crb'.format(namespace, app_name,
+                                                      prop.name, role)),
             'namespace':
                 namespace,
         },
@@ -300,7 +303,7 @@ def provision_service_account(schema, prop, app_name, namespace):
         },
         'subjects': subjects,
     })
-  return sa_name, add_preprovisioned_labels(manifests, sa_name)
+  return sa_name, add_preprovisioned_labels(manifests, prop.name)
 
 
 def provision_storage_class(schema, prop, app_name, namespace):
@@ -319,7 +322,7 @@ def provision_storage_class(schema, prop, app_name, namespace):
             'type': 'pd-ssd',
         }
     }]
-    return sc_name, add_preprovisioned_labels(manifests, sc_name)
+    return sc_name, add_preprovisioned_labels(manifests, prop.name)
   else:
     raise Exception('Do not know how to provision for property {}'.format(
         prop.name))
