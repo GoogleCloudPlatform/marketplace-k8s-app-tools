@@ -57,6 +57,9 @@ properties:
 required:
 - propertyString
 - propertyPassword
+form:
+- widget: help
+  description: My arbitrary <i>description</i>
 """
 
 
@@ -71,6 +74,7 @@ class ConfigHelperTest(unittest.TestCase):
       schema_from_str = config_helper.Schema.load_yaml(SCHEMA)
       self.assertEqual(schema.properties, schema_from_str.properties)
       self.assertEqual(schema.required, schema_from_str.required)
+      self.assertEqual(schema.form, schema_from_str.form)
 
   def test_bad_required(self):
     schema_yaml = """
@@ -126,6 +130,8 @@ class ConfigHelperTest(unittest.TestCase):
     self.assertIsNone(schema.properties['propertyPassword'].default)
     self.assertEqual('GENERATED_PASSWORD',
                      schema.properties['propertyPassword'].xtype)
+    self.assertEqual('My arbitrary <i>description</i>',
+                     schema.form[0]['description'])
 
   def test_invalid_name(self):
     self.assertRaises(
@@ -476,6 +482,46 @@ class ConfigHelperTest(unittest.TestCase):
             properties:
               simple:
                 type: string
+            """).validate())
+
+  def test_validate_bad_form_too_many_items(self):
+    self.assertRaisesRegexp(
+        config_helper.InvalidSchema, 'form',
+        lambda: config_helper.Schema.load_yaml("""
+            applicationApiVersion: v1beta1
+            form:
+            - widget: help
+              description: My arbitrary <i>description</i>
+            - widget: help
+              description: My arbitrary <i>description</i>
+            """).validate())
+
+  def test_validate_bad_form_missing_type(self):
+    self.assertRaisesRegexp(
+        config_helper.InvalidSchema, 'form',
+        lambda: config_helper.Schema.load_yaml("""
+            applicationApiVersion: v1beta1
+            form:
+            - description: My arbitrary <i>description</i>
+            """).validate())
+
+  def test_validate_bad_form_unrecognized_type(self):
+    self.assertRaisesRegexp(
+        config_helper.InvalidSchema, 'form',
+        lambda: config_helper.Schema.load_yaml("""
+            applicationApiVersion: v1beta1
+            form:
+            - widget: magical
+              description: My arbitrary <i>description</i>
+            """).validate())
+
+  def test_validate_bad_form_missing_description(self):
+    self.assertRaisesRegexp(
+        config_helper.InvalidSchema, 'form',
+        lambda: config_helper.Schema.load_yaml("""
+            applicationApiVersion: v1beta1
+            form:
+            - widget: help
             """).validate())
 
 
