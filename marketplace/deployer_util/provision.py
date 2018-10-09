@@ -273,7 +273,7 @@ def provision_service_account(schema, prop, app_name, namespace):
         'kind': 'RoleBinding',
         'metadata': {
             'name':
-                dns1123_name('{}:{}:{}-crb'.format(app_name, prop.name, role)),
+                limit_name('{}:{}:{}-rb'.format(app_name, prop.name, role)),
             'namespace':
                 namespace,
         },
@@ -291,8 +291,8 @@ def provision_service_account(schema, prop, app_name, namespace):
         'kind': 'ClusterRoleBinding',
         'metadata': {
             'name':
-                dns1123_name('{}:{}:{}:{}-crb'.format(namespace, app_name,
-                                                      prop.name, role)),
+                limit_name('{}:{}:{}:{}-crb'.format(namespace, app_name,
+                                                    prop.name, role)),
             'namespace':
                 namespace,
         },
@@ -359,17 +359,19 @@ def dns1123_name(name):
   fixed = re.sub(r'[.]', '-', fixed)
   fixed = re.sub(r'[^a-z0-9-]', '', fixed)
   fixed = fixed.strip('-')
-  if len(fixed) > 64:
-    fixed = fixed[:59]
+  fixed = limit_name(fixed)
+  return fixed
 
-  # Add a hash at the end if the name has been modified.
-  if fixed != name:
+def limit_name(name, length=64):
+  result = name
+  if len(result) > length:
+    result = result[:length - 5]
     # Hash and get the first 4 characters of the hash.
     m = hashlib.sha256()
     m.update(name)
     h4sh = m.hexdigest()[:4]
-    fixed = '{}-{}'.format(fixed, h4sh)
-  return fixed
+    result = '{}-{}'.format(result, h4sh)
+  return result
 
 
 def add_preprovisioned_labels(manifests, prop_name):
