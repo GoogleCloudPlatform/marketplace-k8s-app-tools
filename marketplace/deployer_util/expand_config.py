@@ -130,6 +130,23 @@ def generate_properties_for_image(prop, value, result):
     before_value, after_value = parts
     result[before_name] = before_value
     result[after_name] = after_value
+  if prop.image._split_to_registry_repo_tag:
+    reg_name, repo_name, tag_name = prop.image._split_to_registry_repo_tag
+    parts = value.split(':', 1)
+    if len(parts) != 2:
+      raise InvalidProperty(
+          'Property {} has a value that does not contain a tag'.format(
+              prop.name, value))
+    nontag_value, tag_value = parts
+    parts = nontag_value.split('/', 1)
+    if len(parts) != 2:
+      raise InvalidProperty(
+          'Property {} has a value that does not include a registry'.format(
+              prop.name, value))
+    reg_value, repo_value = parts
+    result[reg_name] = reg_value
+    result[repo_name] = repo_value
+    result[tag_name] = tag_value
 
 
 def generate_properties_for_string(prop, value, result):

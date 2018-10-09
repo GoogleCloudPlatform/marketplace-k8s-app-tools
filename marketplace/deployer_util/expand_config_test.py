@@ -69,6 +69,29 @@ class ExpandConfigTest(unittest.TestCase):
         'i1.after': 'bar',
     }, result)
 
+  def test_generate_properties_for_image_split_to_registry_repo_tag(self):
+    schema = config_helper.Schema.load_yaml("""
+        applicationApiVersion: v1beta1
+        properties:
+          i1:
+            type: string
+            x-google-marketplace:
+              type: IMAGE
+              image:
+                generatedProperties:
+                  splitToRegistryRepoTag:
+                    registry: i1.registry
+                    repo: i1.repo
+                    tag: i1.tag
+        """)
+    result = expand_config.expand({'i1': 'gcr.io/foo/bar:baz'}, schema)
+    self.assertEqual({
+        'i1': 'gcr.io/foo/bar:baz',
+        'i1.registry': 'gcr.io',
+        'i1.repo': 'foo/bar',
+        'i1.tag': 'baz',
+    }, result)
+
   def test_generate_properties_for_string_base64_encoded(self):
     schema = config_helper.Schema.load_yaml("""
         applicationApiVersion: v1beta1

@@ -318,6 +318,7 @@ class SchemaXImage:
 
   def __init__(self, dictionary):
     self._split_by_colon = None
+    self._split_to_registry_repo_tag = None
 
     generated_properties = dictionary.get('generatedProperties', {})
     if 'splitByColon' in generated_properties:
@@ -328,11 +329,25 @@ class SchemaXImage:
       if 'after' not in s:
         raise InvalidSchema('"after" attribute is required within splitByColon')
       self._split_by_colon = (s['before'], s['after'])
+    if 'splitToRegistryRepoTag' in generated_properties:
+      s = generated_properties['splitToRegistryRepoTag']
+      parts = ['registry', 'repo', 'tag']
+      for name in parts:
+        if name not in s:
+          raise InvalidSchema(
+              '"{}" attribute is required within splitToRegistryRepoTag'.format(
+                  name))
+      self._split_to_registry_repo_tag = tuple([s[name] for name in parts])
 
   @property
   def split_by_colon(self):
     """Return 2-tuple of before- and after-colon names, or None"""
     return self._split_by_colon
+
+  @property
+  def _split_to_registry_repo_tag(self):
+    """Return 3-tuple, or None"""
+    return self._split_to_registry_repo_tag
 
 
 SchemaXPassword = collections.namedtuple(
