@@ -58,7 +58,7 @@ required:
 - propertyString
 - propertyPassword
 form:
-- type: text
+- widget: help
   description: My arbitrary <i>description</i>
 """
 
@@ -488,9 +488,9 @@ class ConfigHelperTest(unittest.TestCase):
         lambda: config_helper.Schema.load_yaml("""
             applicationApiVersion: v1beta1
             form:
-            - type: text
+            - widget: help
               description: My arbitrary <i>description</i>
-            - type: text
+            - widget: help
               description: My arbitrary <i>description</i>
             """).validate())
 
@@ -509,7 +509,7 @@ class ConfigHelperTest(unittest.TestCase):
         lambda: config_helper.Schema.load_yaml("""
             applicationApiVersion: v1beta1
             form:
-            - type: magical
+            - widget: magical
               description: My arbitrary <i>description</i>
             """).validate())
 
@@ -519,7 +519,7 @@ class ConfigHelperTest(unittest.TestCase):
         lambda: config_helper.Schema.load_yaml("""
             applicationApiVersion: v1beta1
             form:
-            - type: text
+            - widget: help
             """).validate())
 
 
