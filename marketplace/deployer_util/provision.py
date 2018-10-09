@@ -273,7 +273,7 @@ def provision_service_account(schema, prop, app_name, namespace):
         'kind': 'RoleBinding',
         'metadata': {
             'name':
-                limit_name('{}:{}:{}-rb'.format(app_name, prop.name, role)),
+                limit_name('{}:{}:{}-rb'.format(app_name, prop.name, role), 64),
             'namespace':
                 namespace,
         },
@@ -291,8 +291,9 @@ def provision_service_account(schema, prop, app_name, namespace):
         'kind': 'ClusterRoleBinding',
         'metadata': {
             'name':
-                limit_name('{}:{}:{}:{}-crb'.format(namespace, app_name,
-                                                    prop.name, role)),
+                limit_name(
+                    '{}:{}:{}:{}-crb'.format(namespace, app_name, prop.name,
+                                             role), 64),
             'namespace':
                 namespace,
         },
@@ -359,10 +360,11 @@ def dns1123_name(name):
   fixed = re.sub(r'[.]', '-', fixed)
   fixed = re.sub(r'[^a-z0-9-]', '', fixed)
   fixed = fixed.strip('-')
-  fixed = limit_name(fixed)
+  fixed = limit_name(fixed, 64)
   return fixed
 
-def limit_name(name, length=64):
+
+def limit_name(name, length=127):
   result = name
   if len(result) > length:
     result = result[:length - 5]
