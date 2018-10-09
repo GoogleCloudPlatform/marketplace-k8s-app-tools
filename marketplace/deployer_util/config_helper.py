@@ -34,7 +34,7 @@ XTYPE_SERVICE_ACCOUNT = 'SERVICE_ACCOUNT'
 XTYPE_STORAGE_CLASS = 'STORAGE_CLASS'
 XTYPE_STRING = 'STRING'
 
-FORM_TYPES = ['help']
+WIDGET_TYPES = ['help']
 
 
 class InvalidName(Exception):
@@ -126,7 +126,7 @@ class Schema:
     for item in self.form:
       if 'widget' not in item:
         raise InvalidSchema('form items must have a widget.')
-      if item['widget'] not in FORM_TYPES:
+      if item['widget'] not in WIDGET_TYPES:
         raise InvalidSchema('Unrecognized form widget: {}', item['widget'])
       if 'description' not in item:
         raise InvalidSchema('form items must have a description.')
