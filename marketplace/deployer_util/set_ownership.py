@@ -79,7 +79,7 @@ def main():
       raise Exception("Set of resources in {:s} includes more than one of "
                       "Application kind".format(args.manifests))
 
-    kinds = map(lambda x: x["kind"], apps[0]["spec"]["componentKinds"])
+    kinds = map(lambda x: x["kind"], apps[0]["spec"].get("componentKinds", []))
 
     excluded_kinds = ["PersistentVolumeClaim", "Application"]
     included_kinds = [kind for kind in kinds if kind not in excluded_kinds]
