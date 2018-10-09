@@ -29,7 +29,9 @@ RUN mkdir -p /bin/helm-downloaded \
     && mv /bin/helm-downloaded/linux-amd64/helm /bin/ \
     && rm -rf /bin/helm-downloaded \
     && helm init --client-only \
-    && helm plugin install https://github.com/rimusz/helm-tiller
+    && helm plugin install https://github.com/rimusz/helm-tiller \
+    && helm plugin install https://github.com/nouney/helm-gcs \
+    && helm repo add cloud-marketplace-tools gs://cloud-marketplace-tools-charts/
 
 COPY marketplace/deployer_util/* /bin/
 COPY marketplace/deployer_helm_tiller_base/bin/* /bin/

@@ -76,6 +76,26 @@ include $(makefile_dir)/var.Makefile
 	    .
 	@touch "$@"
 
+
+.build/marketplace/deployer/marketplace-k8s-app-tools-helm-hooks:
+	mkdir -p "$@"
+
+
+# Note: Run after bumping.
+MARKETPLACE_K8S_APP_TOOLS_HELM_HOOKS_VERSION := 0.0.2
+.build/marketplace/deployer/marketplace-k8s-app-tools-helm-hooks/marketplace-k8s-app-tools-helm-hooks-$(MARKETPLACE_K8S_APP_TOOLS_HELM_HOOKS_VERSION).tgz: \
+		$(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_helm_tiller_base/marketplace-k8s-app-tools-helm-hooks/* \
+		.build/marketplace/delete_deprecated \
+		.build/marketplace/deployer/marketplace-k8s-app-tools-helm-hooks \
+		.build/var/MARKETPLACE_TOOLS_TAG \
+		| .build/marketplace/deployer
+	$(call print_target)
+	cd $(MARKETPLACE_TOOLS_PATH) \
+	&& helm package marketplace/deployer_helm_tiller_base/marketplace-k8s-app-tools-helm-hooks/ \
+	      --version "$(MARKETPLACE_K8S_APP_TOOLS_HELM_HOOKS_VERSION)" \
+	      --destination .build/marketplace/deployer/marketplace-k8s-app-tools-helm-hooks \
+	&& helm gcs push .build/marketplace/deployer/marketplace-k8s-app-tools-helm-hooks/marketplace-k8s-app-tools-helm-hooks-$(MARKETPLACE_K8S_APP_TOOLS_HELM_HOOKS_VERSION).tgz cloud-marketplace-tools --force
+
 .build/marketplace/deployer/helm_tiller/tester: .build/marketplace/deployer/helm_tiller
 	$(call print_target)
 	cd $(MARKETPLACE_TOOLS_PATH) \
@@ -88,7 +108,7 @@ include $(makefile_dir)/var.Makefile
 
 .test/marketplace/deployer/helm_tiller: .build/marketplace/deployer/helm_tiller/tester
 	APP_DEPLOYER_IMAGE="$(REGISTRY)/k8s/deployer_helm_tiller/tester:$(MARKETPLACE_TOOLS_TAG)" \
-	APP_PARAMETERS="{\"hooks_image\": \"$(REGISTRY)/k8s/deployer_helm_tiller/tester:$(MARKETPLACE_TOOLS_TAG)\"}" \
+	APP_PARAMETERS="{\"marketplace-k8s-app-tools-helm-hooks.image\": \"$(REGISTRY)/k8s/deployer_helm_tiller/tester:$(MARKETPLACE_TOOLS_TAG)\"}" \
 	APP_TEST_PARAMETERS="{}" \
 	make -f app.Makefile app/verify
 

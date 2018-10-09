@@ -9,11 +9,21 @@ properties:
     type: string
     x-google-marketplace:
       type: NAMESPACE
-  hooks_image:
+  marketplace-k8s-app-tools-helm-hooks.image:
     type: string
     x-google-marketplace:
       type: IMAGE
+  marketplace-k8s-app-tools-helm-hooks.service_account:
+    type: string
+    x-google-marketplace:
+      type: SERVICE_ACCOUNT
+      serviceAccount:
+        roles:
+        - type: Role
+          rulesType: PREDEFINED
+          rulesFromRoleName: cluster-admin
 required:
 - name
 - namespace
-- hooks_image
+- marketplace-k8s-app-tools-helm-hooks.image
+- marketplace-k8s-app-tools-helm-hooks.service_account
