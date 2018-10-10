@@ -5,17 +5,6 @@ NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED",  "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in
 RFC 2119.
 
-## TODO FEATURES:
-- [X] create an onbuild version of the base deployers
-- [X] create a doctor tool
-- [ ] static verification (add to onbuild)
-- [ ] schema.yaml substitution tool (onbuild to use this)
-- [ ] fix the helm chart path
-- [ ] support non tar'ed chart
-- [ ] a script to re-publish partner images before
-  running verification
-- [ ] splitToRegistryRepoTag
-
 ## Prerequisites
 
 See [this doc](tool-prerequisites.md).
