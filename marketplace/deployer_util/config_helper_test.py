@@ -54,6 +54,10 @@ properties:
     x-google-marketplace:
       type: GENERATED_PASSWORD
       length: 4
+  applicationUid:
+    type: string
+    x-google-marketplace:
+      type: APPLICATION_UID
 required:
 - propertyString
 - propertyPassword
@@ -97,7 +101,8 @@ class ConfigHelperTest(unittest.TestCase):
         'propertyIntWithDefault', 'propertyInteger',
         'propertyIntegerWithDefault', 'propertyNumber',
         'propertyNumberWithDefault', 'propertyBoolean',
-        'propertyBooleanWithDefault', 'propertyImage', 'propertyPassword'
+        'propertyBooleanWithDefault', 'propertyImage', 'propertyPassword',
+        'applicationUid'
     }, set(schema.properties))
     self.assertEqual(str, schema.properties['propertyString'].type)
     self.assertIsNone(schema.properties['propertyString'].default)
@@ -133,13 +138,20 @@ class ConfigHelperTest(unittest.TestCase):
     self.assertEqual('My arbitrary <i>description</i>',
                      schema.form[0]['description'])
 
-  def test_invalid_name(self):
+  def test_invalid_names(self):
     self.assertRaises(
         config_helper.InvalidSchema, lambda: config_helper.Schema.load_yaml("""
             properties:
               bad/name:
                 type: string
             """))
+
+  def test_valid_names(self):
+    config_helper.Schema.load_yaml("""
+        properties:
+          a-good_name:
+            type: string
+        """)
 
   def test_required(self):
     schema = config_helper.Schema.load_yaml(SCHEMA)
@@ -455,6 +467,16 @@ class ConfigHelperTest(unittest.TestCase):
               type: REPORTING_SECRET
         """)
     self.assertIsNotNone(schema.properties['rs'].reporting_secret)
+
+  def test_application_uid_type(self):
+    schema = config_helper.Schema.load_yaml("""
+        properties:
+          u:
+            type: string
+            x-google-marketplace:
+              type: APPLICATION_UID
+        """)
+    self.assertIsNotNone(schema.properties['u'])
 
   def test_unknown_type(self):
     self.assertRaises(
