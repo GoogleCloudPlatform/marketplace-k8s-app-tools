@@ -23,8 +23,16 @@ overlay_test_schema.py \
   --dest "/data/schema.yaml"
 rm -f /data-test/schema.yaml
 
-export NAME="$(/bin/print_config.py --param '{"x-google-marketplace": {"type": "NAME"}}')"
-export NAMESPACE="$(/bin/print_config.py --param '{"x-google-marketplace": {"type": "NAMESPACE"}}')"
+NAME="$(/bin/print_config.py \
+    --param '{"x-google-marketplace": {"type": "NAME"}}' \
+    --values_file /data/values.yaml \
+    --values_dir /data/values)"
+NAMESPACE="$(/bin/print_config.py \
+    --param '{"x-google-marketplace": {"type": "NAMESPACE"}}' \
+    --values_file /data/values.yaml \
+    --values_dir /data/values)"
+export NAME
+export NAMESPACE
 
 echo "Deploying application \"$NAME\" in test mode"
 
