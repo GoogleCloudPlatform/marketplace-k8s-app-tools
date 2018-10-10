@@ -272,8 +272,10 @@ def provision_service_account(schema, prop, app_name, namespace):
         'apiVersion': 'rbac.authorization.k8s.io/v1',
         'kind': 'RoleBinding',
         'metadata': {
-            'name': '{}:{}:{}-rb'.format(app_name, prop.name, role),
-            'namespace': namespace,
+            'name':
+                limit_name('{}:{}:{}-rb'.format(app_name, prop.name, role), 64),
+            'namespace':
+                namespace,
         },
         'roleRef': {
             'apiGroup': 'rbac.authorization.k8s.io',
@@ -289,7 +291,9 @@ def provision_service_account(schema, prop, app_name, namespace):
         'kind': 'ClusterRoleBinding',
         'metadata': {
             'name':
-                '{}:{}:{}:{}-rb'.format(namespace, app_name, prop.name, role),
+                limit_name(
+                    '{}:{}:{}:{}-crb'.format(namespace, app_name, prop.name,
+                                             role), 64),
             'namespace':
                 namespace,
         },
@@ -300,7 +304,7 @@ def provision_service_account(schema, prop, app_name, namespace):
         },
         'subjects': subjects,
     })
-  return sa_name, add_preprovisioned_labels(manifests, sa_name)
+  return sa_name, add_preprovisioned_labels(manifests, prop.name)
 
 
 def provision_storage_class(schema, prop, app_name, namespace):
@@ -319,7 +323,7 @@ def provision_storage_class(schema, prop, app_name, namespace):
             'type': 'pd-ssd',
         }
     }]
-    return sc_name, add_preprovisioned_labels(manifests, sc_name)
+    return sc_name, add_preprovisioned_labels(manifests, prop.name)
   else:
     raise Exception('Do not know how to provision for property {}'.format(
         prop.name))
@@ -356,17 +360,20 @@ def dns1123_name(name):
   fixed = re.sub(r'[.]', '-', fixed)
   fixed = re.sub(r'[^a-z0-9-]', '', fixed)
   fixed = fixed.strip('-')
-  if len(fixed) > 64:
-    fixed = fixed[:59]
+  fixed = limit_name(fixed, 64)
+  return fixed
 
-  # Add a hash at the end if the name has been modified.
-  if fixed != name:
+
+def limit_name(name, length=127):
+  result = name
+  if len(result) > length:
+    result = result[:length - 5]
     # Hash and get the first 4 characters of the hash.
     m = hashlib.sha256()
     m.update(name)
     h4sh = m.hexdigest()[:4]
-    fixed = '{}-{}'.format(fixed, h4sh)
-  return fixed
+    result = '{}-{}'.format(result, h4sh)
+  return result
 
 
 def add_preprovisioned_labels(manifests, prop_name):
