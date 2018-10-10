@@ -138,13 +138,20 @@ class ConfigHelperTest(unittest.TestCase):
     self.assertEqual('My arbitrary <i>description</i>',
                      schema.form[0]['description'])
 
-  def test_invalid_name(self):
+  def test_invalid_names(self):
     self.assertRaises(
         config_helper.InvalidSchema, lambda: config_helper.Schema.load_yaml("""
             properties:
               bad/name:
                 type: string
             """))
+
+  def test_valid_names(self):
+    config_helper.Schema.load_yaml("""
+        properties:
+          a-good_name:
+            type: string
+        """)
 
   def test_required(self):
     schema = config_helper.Schema.load_yaml(SCHEMA)

@@ -22,7 +22,7 @@ import sys
 
 import yaml
 
-NAME_RE = re.compile(r'[a-zA-z0-9_\.]+$')
+NAME_RE = re.compile(r'[a-zA-z0-9_\.\-]+$')
 
 XGOOGLE = 'x-google-marketplace'
 XTYPE_NAME = 'NAME'
