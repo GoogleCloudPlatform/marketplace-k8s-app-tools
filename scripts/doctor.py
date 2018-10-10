@@ -208,17 +208,21 @@ https://github.com/kubernetes-sigs/application
   return TaskEvent(success=True)
 
 
-# TODO(huyhg): Check connected cluster to be GKE of the project.
-# TODO(huyhg): Check gcloud auth configure-docker.
-# TODO(huyhg): Check RBAC cluster-admin for user.
-# TODO(huyhg): Check userinfo scope for GCE VM.
-#              Also, to use the Google Kubernetes Engine API from a GCE VM
-#              you need to add the cloud platform scope
-#              ("https://www.googleapis.com/auth/cloud-platform")
-#              to your VM when it is created. Scopes can be editted
-#              when the VM is stopped.
-#              gcloud beta compute instances set-scopes debian-workstation --zone=us-west1-c --scopes=userinfo-email,cloud-platform
-# TODO(huyhg): Check for sufficient IAM privilege (GKE admin).
+# TODO(huyhg):
+# - Check connected cluster to be GKE of the project.
+# - Check gcloud auth configure-docker.
+# - Check RBAC cluster-admin for user.
+# - Check userinfo scope for GCE VM.
+#   Also, to use the Google Kubernetes Engine API from a GCE VM
+#   you need to add the cloud platform scope
+#   ("https://www.googleapis.com/auth/cloud-platform")
+#   to your VM when it is created. Scopes can be editted
+#   when the VM is stopped.
+# - gcloud beta compute instances set-scopes debian-workstation --zone=us-west1-c --scopes=userinfo-email,cloud-platform
+# - Check for sufficient IAM privilege (GKE admin).
+# - Check GCR is enabled for the project
+# - If on GCE VM and using the default Compute service account
+#   make sure it has k8s engine admin role.
 
 
 def make_run_event(p, success, message):
