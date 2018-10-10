@@ -80,8 +80,8 @@ def expand(values_dict, schema, app_uid=''):
     if v is None and prop.xtype == 'APPLICATION_UID':
       if not app_uid:
         raise InvalidProperty(
-            'Property {} is of type APPLICATION_UID, but no value was specified'
-            .format(k, v))
+            'Property {} is of type APPLICATION_UID, but --app_uid was not '
+            'specified.'.format(k, v))
       result[k] = app_uid
       continue
 
