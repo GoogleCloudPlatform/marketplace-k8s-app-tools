@@ -33,6 +33,7 @@ XTYPE_REPORTING_SECRET = 'REPORTING_SECRET'
 XTYPE_SERVICE_ACCOUNT = 'SERVICE_ACCOUNT'
 XTYPE_STORAGE_CLASS = 'STORAGE_CLASS'
 XTYPE_STRING = 'STRING'
+XTYPE_APPLICATION_UID = 'APPLICATION_UID'
 
 WIDGET_TYPES = ['help']
 
@@ -195,7 +196,7 @@ class SchemaProperty:
         raise InvalidSchema('Property {} has {} without a type'.format(
             name, XGOOGLE))
       xt = self._x['type']
-      if xt in (XTYPE_NAME, XTYPE_NAMESPACE):
+      if xt in (XTYPE_NAME, XTYPE_NAMESPACE, XTYPE_APPLICATION_UID):
         pass
       elif xt == XTYPE_IMAGE:
         d = self._x.get('image', {})

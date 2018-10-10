@@ -23,7 +23,6 @@ overlay_test_schema.py \
   --dest "/data/schema.yaml"
 rm -f /data-test/schema.yaml
 
-/bin/expand_config.py
 export NAME="$(/bin/print_config.py --param '{"x-google-marketplace": {"type": "NAME"}}')"
 export NAMESPACE="$(/bin/print_config.py --param '{"x-google-marketplace": {"type": "NAMESPACE"}}')"
 
@@ -35,6 +34,8 @@ app_uid=$(kubectl get "applications/$NAME" \
 app_api_version=$(kubectl get "applications/$NAME" \
   --namespace="$NAMESPACE" \
   --output=jsonpath='{.apiVersion}')
+
+/bin/expand_config.py --app_uid "$app_uid"
 
 create_manifests.sh --mode="test"
 

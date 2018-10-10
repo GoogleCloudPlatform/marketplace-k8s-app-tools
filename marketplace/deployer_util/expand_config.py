@@ -45,15 +45,19 @@ def main():
       '--final_values_file',
       help='Where the final value file should be written to',
       default='/data/final_values.yaml')
+  parser.add_argument(
+      '--app_uid',
+      help='The application UID for populating into APPLICATION_UID properties.',
+      default='')
   args = parser.parse_args()
 
   schema = schema_values_common.load_schema(args)
   values = schema_values_common.load_values(args)
-  values = expand(values, schema)
+  values = expand(values, schema, app_uid=args.app_uid)
   write_values(values, args.final_values_file)
 
 
-def expand(values_dict, schema):
+def expand(values_dict, schema, app_uid=''):
   """Returns the expanded values according to schema."""
   schema.validate()
 
@@ -71,6 +75,14 @@ def expand(values_dict, schema):
         raise InvalidProperty(
             'Property {} is expected to be of type string'.format(k))
       result[k] = generate_password(prop.password)
+      continue
+
+    if v is None and prop.xtype == 'APPLICATION_UID':
+      if not app_uid:
+        raise InvalidProperty(
+            'Property {} is of type APPLICATION_UID, but --app_uid was not '
+            'specified.'.format(k, v))
+      result[k] = app_uid
       continue
 
     if v is None and prop.default is not None:
