@@ -6,6 +6,6 @@ keywords:
 - marketplace
 - helm
 maintainers:
-- email: cloud-marketplace-eng@google.copm
-  name: google-cloud-marketplace
+- email: trironkk@google.com
+  name: TK Kiatkungwanglai
 name: marketplace-k8s-app-tools-helm-hooks
