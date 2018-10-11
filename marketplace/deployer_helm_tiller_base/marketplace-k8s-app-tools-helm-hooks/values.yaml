@@ -1,0 +1,2 @@
+imagePullPolicy: IfNotPresent
+hookDeletePolicy: hook-succeeded

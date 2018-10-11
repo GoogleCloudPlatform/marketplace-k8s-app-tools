@@ -37,11 +37,22 @@ handle_failure() {
 }
 trap "handle_failure" EXIT
 
-/bin/expand_config.py
-NAME="$(/bin/print_config.py --param '{"x-google-marketplace": {"type": "NAME"}}')"
-NAMESPACE="$(/bin/print_config.py --param '{"x-google-marketplace": {"type": "NAMESPACE"}}')"
+NAME="$(/bin/print_config.py \
+  --param '{"x-google-marketplace": {"type": "NAME"}}' \
+  --values_file /data/values.yaml \
+  --values_dir /data/values)"
+NAMESPACE="$(/bin/print_config.py \
+  --param '{"x-google-marketplace": {"type": "NAMESPACE"}}' \
+  --values_file /data/values.yaml \
+  --values_dir /data/values)"
 export NAME
 export NAMESPACE
+
+app_uid=$(kubectl get "applications/$NAME" \
+  --namespace="$NAMESPACE" \
+  --output=jsonpath='{.metadata.uid}')
+
+/bin/expand_config.py --app_uid="$app_uid"
 
 bin/deploy_internal.sh
 

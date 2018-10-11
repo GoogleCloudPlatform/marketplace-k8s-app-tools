@@ -31,9 +31,14 @@ for chart in /data/chart/*; do
   helm template \
       --name="$NAME" \
       --namespace="$NAMESPACE" \
-      --set "template_mode=true" \
-      --values=<(print_config.py \
-      --output=yaml) \
+      --values=<(print_config.py --output=yaml) \
+			--set "$(cat /data/schema.yaml \
+                 | yaml2json \
+                 | jq -r '.properties
+                            | to_entries
+                            | .[]
+                            | select(.value["x-google-marketplace"].type == "APPLICATION_UID")
+                            | .key')=" \
       "$chart" \
     | yaml2json \
     | jq 'select( .kind == "Application" )' \
@@ -49,8 +54,7 @@ for chart in /data/chart/*; do
     helm install \
         --name="$NAME" \
         --namespace="$NAMESPACE" \
-        --values=<(print_config.py \
-        --output=yaml) \
+        --values=<(print_config.py --output=yaml) \
         "$chart"
 
   # Establish an ownerReference back to the Application resource, so that
@@ -58,7 +62,30 @@ for chart in /data/chart/*; do
   # Note: This is fragile, as any time that tiller updates the release
   # it will remove the ownerReference. Also, any future Secret resources
   # created by tiller will not have this ownerReference established.
-  kubectl get secrets \
+  patch="$(echo '{}' \
+    | jq '{
+            "metadata": {
+              "ownerReferences": [
+                {
+                  "apiVersion": $app_api_version,
+                  "kind": "Application",
+                  "name": $name,
+                  "uid": $app_uid,
+                  "blockOwnerDeletion": true
+                }
+              ],
+              "labels": {
+                "app.kubernetes.io/name": $name,
+                "app.kubernetes.io/namespace": $namespace
+              }
+            }
+          }' \
+          --arg name "$NAME" \
+          --arg namespace "$NAMESPACE" \
+          --arg app_uid "$app_uid" \
+          --arg app_api_version "$app_api_version")"
+
+	kubectl get secrets \
       --namespace="$NAMESPACE" \
       --selector="OWNER=TILLER,NAME=$NAME" \
       --output=json \
@@ -66,24 +93,16 @@ for chart in /data/chart/*; do
             | {
                 apiVersion: .apiVersion,
                 kind: .kind,
-                metadata: .metadata
-              }
-            | del(.metadata.creationTimestamp)
-            | del(.metadata.resourceVersion)
-            | .metadata.ownerReferences +=
-              [
-                {
-                  apiVersion: $app_api_version,
-                  kind: "Application",
-                  name: $name,
-                  uid: $app_uid,
-                  blockOwnerDeletion: true
+                metadata: {
+                  namespace: .metadata.namespace,
+                  name: .metadata.name
                 }
-              ]
+              }
          ' \
       --arg name "$NAME" \
-      --arg namespace "$namespace" \
-      --arg app_uid "$app_uid" \
-      --arg app_api_version "$app_api_version" \
-    | kubectl apply -f -
+      --arg namespace "$NAMESPACE" \
+    | kubectl patch \
+        --namespace="$NAMESPACE" \
+        --patch="$patch" \
+        --filename -
 done

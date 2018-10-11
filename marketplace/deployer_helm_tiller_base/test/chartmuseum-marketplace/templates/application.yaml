@@ -1,4 +1,4 @@
-{{- if .Values.template_mode }}
+{{- if not .Values.application_uid }}
 
 apiVersion: app.k8s.io/v1beta1
 kind: Application

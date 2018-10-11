@@ -9,6 +9,10 @@ properties:
     type: string
     x-google-marketplace:
       type: NAMESPACE
+  application_uid:
+    type: string
+    x-google-marketplace:
+      type: APPLICATION_UID
   marketplace-k8s-app-tools-helm-hooks.image:
     type: string
     x-google-marketplace:
@@ -25,5 +29,6 @@ properties:
 required:
 - name
 - namespace
+- application_uid
 - marketplace-k8s-app-tools-helm-hooks.image
 - marketplace-k8s-app-tools-helm-hooks.service_account
