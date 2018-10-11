@@ -1,13 +1,29 @@
 #!/bin/bash
+#
+# Copyright 2018 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+set -eo pipefail
 
 # If host kubernetes configuration is mounted, copy it to the container's
 # default $KUBECONFIG location after adjusting system-specific fields.
-if [[ -e "/root/mount/.kube/config" ]]; then
+if [[ -e "/mount/config/.kube/config" ]]; then
   mkdir -p "$HOME/.kube"
 
   # Adjusting cmd-path for gcp auth-providers to this container's gcloud
   # installation location.
-  cat /root/mount/.kube/config \
+  cat /mount/config/.kube/config \
     | yaml2json \
     | jq \
           --arg gcloud "$(readlink -f "$(which gcloud)")" \
@@ -24,7 +40,7 @@ fi
 # configuration with it.
 # Note: We do this to ensure the directory is writable without providing
 # write access to host gcloud configuration directory.
-if [[ -e "/root/mount/.config/gcloud" ]]; then
+if [[ -e "/mount/config/.config/gcloud" ]]; then
   rm -rf "$HOME/.config/gcloud"
-  cp -r "/root/mount/.config/gcloud" "$HOME/.config"
+  cp -r "/mount/config/.config/gcloud" "$HOME/.config"
 fi
