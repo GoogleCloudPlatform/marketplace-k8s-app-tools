@@ -31,7 +31,8 @@ RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add - && \
 
 COPY marketplace/deployer_util/* /bin/
 COPY scripts/* /scripts/
-COPY marketplace/dev/setup_kubeconfig.sh /bin/setup_kubeconfig.sh
+COPY marketplace/dev/bin/* /bin/
 RUN mkdir -p /data/
 
-ENTRYPOINT ["/bin/bash"]
+ENTRYPOINT ["/bin/docker_entrypoint.sh"]
+CMD ["echo", "It works"]
