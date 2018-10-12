@@ -39,8 +39,7 @@ class MissingRequiredProperty(Exception):
 
 def main():
   parser = ArgumentParser(description=_PROG_HELP)
-  schema_values_common.add_to_argument_parser(
-      parser, values_file='/data/values.yaml', values_dir='/data/values')
+  schema_values_common.add_to_argument_parser(parser)
   parser.add_argument(
       '--final_values_file',
       help='Where the final value file should be written to',

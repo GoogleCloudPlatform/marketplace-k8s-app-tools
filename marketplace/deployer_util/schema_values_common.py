@@ -16,30 +16,31 @@ import functools
 
 import config_helper
 
-CODEC_ASCII = 'ascii'
-CODEC_UTF8 = 'utf_8'
+VALUES_FILE = {
+    'stdin': '-',
+    'raw': '/data/values.yaml',
+    'expanded': '/data/final_values.yaml',
+}
+
+VALUES_DIR = {
+    'stdin': '/dev/null',
+    'raw': '/data/values',
+    'expanded': '/data/final_values',
+}
 
 
-def add_to_argument_parser(parser,
-                           values_file='/data/final_values.yaml',
-                           values_dir='/data/final_values'):
-  parser.add_argument(
-      '--values_file',
-      help='Yaml file to read values from. Takes precendence '
-      'over --values_dir if the file exists. '
-      'Use "-" to specify reading from stdin',
-      default=values_file)
-  parser.add_argument(
-      '--values_dir', help='Where to read value files', default=values_dir)
-  parser.add_argument(
-      '--values_dir_encoding',
-      help='Encoding of --values_dir file contents',
-      choices=[CODEC_UTF8, CODEC_ASCII],
-      default=CODEC_UTF8)
+def add_to_argument_parser(parser):
   parser.add_argument(
       '--schema_file',
       help='Path to the schema file',
       default='/data/schema.yaml')
+
+  parser.add_argument(
+      '--values_mode',
+      help='"expanded" for expanded, and "raw" for not, and stdin for '
+      'specified via standard in.',
+      choices=VALUES_FILE.keys(),
+      default='expanded')
 
 
 def memoize(func):
@@ -62,7 +63,7 @@ def load_schema(parsed_args):
 
 @memoize
 def load_values(parsed_args):
-  return config_helper.load_values(parsed_args.values_file,
-                                   parsed_args.values_dir,
-                                   parsed_args.values_dir_encoding,
+  values_file = VALUES_FILE[parsed_args.values_mode]
+  values_dir = VALUES_DIR[parsed_args.values_mode]
+  return config_helper.load_values(values_file, values_dir,
                                    load_schema(parsed_args))
