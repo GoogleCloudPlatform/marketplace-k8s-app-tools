@@ -56,10 +56,10 @@ echo "$parameters" \
 # Extract name, namespace, and api version.
 name="$(print_config.py \
     --values_mode raw \
-    --param='{"x-google-marketplace": {"type": "NAME"}}')"
+    --xtype NAME)"
 namespace="$(print_config.py \
     --values_mode raw \
-    --param='{"x-google-marketplace": {"type": "NAMESPACE"}}')"
+    --xtype NAMESPACE)"
 app_version="$(print_app_api_version.py)"
 
 # Create Application instance.

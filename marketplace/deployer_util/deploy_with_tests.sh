@@ -24,10 +24,10 @@ overlay_test_schema.py \
 rm -f /data-test/schema.yaml
 
 NAME="$(/bin/print_config.py \
-    --param '{"x-google-marketplace": {"type": "NAME"}}' \
+    --xtype NAME \
     --values_mode raw)"
 NAMESPACE="$(/bin/print_config.py \
-    --param '{"x-google-marketplace": {"type": "NAMESPACE"}}' \
+    --xtype NAMESPACE \
     --values_mode raw)"
 export NAME
 export NAMESPACE
