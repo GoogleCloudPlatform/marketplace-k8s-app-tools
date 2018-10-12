@@ -5,8 +5,8 @@ keywords:
 - marketplace
 - helm
 maintainers:
-- email: trironkk@google.com
-  name: TK Kiatkungwanglai
+- email: cloud-marketplace-tools@google.com
+  name: Marketplace Tools
 name: marketplace-hooks
 urls:
 - https://cloud-marketplace-tools-charts.storage.googleapis.com/marketplace-hooks-0.0.1.tgz
