@@ -55,6 +55,8 @@ steps:
   - '-'
   args:
   - build
+  - --build-arg
+  - VERSION=$COMMIT_SHA
   - --tag
   - gcr.io/$PROJECT_ID/k8s/deployer_envsubst:sha_$COMMIT_SHA
   - --tag
@@ -69,6 +71,8 @@ steps:
   - '-'
   args:
   - build
+  - --build-arg
+  - VERSION=$COMMIT_SHA
   - --tag
   - gcr.io/$PROJECT_ID/k8s/deployer_helm:sha_$COMMIT_SHA
   - --tag

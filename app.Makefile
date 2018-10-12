@@ -5,6 +5,7 @@ __APP_MAKEFILE__ := included
 
 makefile_dir := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
 include $(makefile_dir)/common.Makefile
+include $(makefile_dir)/marketplace.Makefile
 include $(makefile_dir)/var.Makefile
 
 
@@ -29,13 +30,82 @@ $(shell echo '$(APP_PARAMETERS)' '$(APP_TEST_PARAMETERS)' \
 endef
 
 
+##### Tools development targets #####
+
+
 .build/app: | .build
 	mkdir -p "$@"
+
+
+.build/app/base_deployer: | .build/app
+	mkdir -p "$@"
+
+
+##### Tools development targets #####
+
+
+# Your deployer target should depend on the appropriate
+# .build/app/base_deployer/* if you're modifying the
+# tools (i.e. base deployer) code. Your deployer's Dockerfile
+# should also use a FROM base image with the right tag.
+# Easiest to have this FROM line:
+#
+# ARG MARKETPLACE_TOOLS_TAG
+# FROM gcr.io/cloud-marketplace-tools/k8s/deployer_helm:$MARKETPLACE_TOOLS_TAG
+#
+# Then your deployer make target looks like this:
+#
+# .build/deployer: .build/var/MARKETPLACE_TOOLS_TAG \
+#                  .build/app/base_deployer/helm
+#     docker build \
+#         --build-arg MARKETPLACE_TOOLS_TAG=$(MARKETPLACE_TOOLS_TAG) \
+#         ...
+
+
+.build/app/base_deployer/envsubst: .build/var/MARKETPLACE_TOOLS_TAG \
+                                   | .build/app/base_deployer
+	$(call print_target)
+	@ if [[ -z "$$(docker image ls -q "gcr.io/cloud-marketplace-tools/k8s/deployer_envsubst:$(MARKETPLACE_TOOLS_TAG)")" ]]; then \
+	  if ! docker pull "gcr.io/cloud-marketplace-tools/k8s/deployer_envsubst:$(MARKETPLACE_TOOLS_TAG)" 2> /dev/null; then \
+	    make .build/marketplace/deployer/envsubst; \
+	  fi; \
+	fi
+	@touch "$@"
+
+
+.build/app/base_deployer/helm: .build/var/MARKETPLACE_TOOLS_TAG \
+                               | .build/app/base_deployer
+	$(call print_target)
+	@ if [[ -z "$$(docker image ls -q "gcr.io/cloud-marketplace-tools/k8s/deployer_helm:$(MARKETPLACE_TOOLS_TAG)")" ]]; then \
+	  if ! docker pull "gcr.io/cloud-marketplace-tools/k8s/deployer_helm:$(MARKETPLACE_TOOLS_TAG)" 2> /dev/null; then \
+	    make .build/marketplace/deployer/helm; \
+	  fi; \
+	fi
+	@touch "$@"
+
+
+.build/app/base_deployer/helm_onbuild: .build/var/MARKETPLACE_TOOLS_TAG \
+                                       | .build/app/base_deployer
+	$(call print_target)
+	@ if [[ -z "$$(docker image ls -q "gcr.io/cloud-marketplace-tools/k8s/deployer_helm/onbuild:$(MARKETPLACE_TOOLS_TAG)")" ]]; then \
+	  if ! docker pull "gcr.io/cloud-marketplace-tools/k8s/deployer_helm/onbuild:$(MARKETPLACE_TOOLS_TAG)" 2> /dev/null; then \
+	    make .build/marketplace/deployer/helm; \
+	  fi; \
+	fi
+	@touch "$@"
+
+
+#####################################
 
 
 .build/app/dev: .build/var/MARKETPLACE_TOOLS_TAG \
               | .build/app
 	$(call print_target)
+	@ if [[ -z "$$(docker image ls -q "gcr.io/cloud-marketplace-tools/k8s/dev:$(MARKETPLACE_TOOLS_TAG)")" ]]; then \
+	  if ! docker pull "gcr.io/cloud-marketplace-tools/k8s/dev:$(MARKETPLACE_TOOLS_TAG)" 2> /dev/null; then \
+	    make .build/marketplace/dev; \
+	  fi; \
+	fi
 	docker run \
 	    "gcr.io/cloud-marketplace-tools/k8s/dev:$(MARKETPLACE_TOOLS_TAG)" \
 	    cat /scripts/dev > "$@"
@@ -44,6 +114,9 @@ endef
 
 .PHONY: app/phony
 app/phony: ;
+
+
+########### Main  targets ###########
 
 
 # Builds the application containers and push them to the registry.

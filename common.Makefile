@@ -28,7 +28,7 @@ $(info ---- MARKETPLACE_TOOLS_PATH = $(MARKETPLACE_TOOLS_PATH))
 
 # MARKETPLACE_TOOLS_TAG is the tag of the container images published
 # by marketplace-k8s-app-tools.
-MARKETPLACE_TOOLS_TAG ?= $(shell cd $(MARKETPLACE_TOOLS_PATH) && $(MARKETPLACE_TOOLS_PATH)/scripts/derive_tag.sh)
+MARKETPLACE_TOOLS_TAG := $(shell cd $(MARKETPLACE_TOOLS_PATH) && scripts/derive_tag.sh)
 export MARKETPLACE_TOOLS_TAG
 
 $(info ---- MARKETPLACE_TOOLS_TAG = $(MARKETPLACE_TOOLS_TAG))

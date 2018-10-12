@@ -40,6 +40,7 @@ include $(makefile_dir)/var.Makefile
 	$(call print_target)
 	cd "$(MARKETPLACE_TOOLS_PATH)"; \
 	docker build \
+	    --build-arg VERSION="$(COMMIT)" \
 	    --tag "gcr.io/cloud-marketplace-tools/k8s/deployer_envsubst:$(MARKETPLACE_TOOLS_TAG)" \
 	    -f marketplace/deployer_envsubst_base/Dockerfile \
 	    .
@@ -49,7 +50,6 @@ include $(makefile_dir)/var.Makefile
 .build/marketplace/deployer/helm: $(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_util/* \
                                   $(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_helm_base/* \
                                   .build/marketplace/delete_deprecated \
-                                  .build/var/COMMIT \
                                   .build/var/MARKETPLACE_TOOLS_TAG \
                                   | .build/marketplace/deployer
 	$(call print_target)
@@ -58,6 +58,12 @@ include $(makefile_dir)/var.Makefile
 	    --build-arg VERSION="$(COMMIT)" \
 	    --tag "gcr.io/cloud-marketplace-tools/k8s/deployer_helm:$(MARKETPLACE_TOOLS_TAG)" \
 	    -f marketplace/deployer_helm_base/Dockerfile \
+	    .
+	cd $(MARKETPLACE_TOOLS_PATH) \
+	&& docker build \
+	    --build-arg FROM="gcr.io/cloud-marketplace-tools/k8s/deployer_helm:$(MARKETPLACE_TOOLS_TAG)" \
+	    --tag "gcr.io/cloud-marketplace-tools/k8s/deployer_helm/onbuild:$(MARKETPLACE_TOOLS_TAG)" \
+	    -f marketplace/deployer_helm_base/onbuild/Dockerfile \
 	    .
 	@touch "$@"
 
