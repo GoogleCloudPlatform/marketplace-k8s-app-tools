@@ -96,22 +96,6 @@ MARKETPLACE_K8S_APP_TOOLS_HELM_HOOKS_VERSION := 0.0.2
 	      --destination .build/marketplace/deployer/marketplace-k8s-app-tools-helm-hooks \
 	&& helm gcs push .build/marketplace/deployer/marketplace-k8s-app-tools-helm-hooks/marketplace-k8s-app-tools-helm-hooks-$(MARKETPLACE_K8S_APP_TOOLS_HELM_HOOKS_VERSION).tgz cloud-marketplace-tools --force
 
-.build/marketplace/deployer/helm_tiller/tester: .build/marketplace/deployer/helm_tiller
-	$(call print_target)
-	cd $(MARKETPLACE_TOOLS_PATH) \
-	&& docker build \
-	    --build-arg "MARKETPLACE_TOOLS_TAG=$(MARKETPLACE_TOOLS_TAG)" \
-	    --tag "$(REGISTRY)/k8s/deployer_helm_tiller/tester:$(MARKETPLACE_TOOLS_TAG)" \
-	    -f marketplace/deployer_helm_tiller_base/test/Dockerfile \
-	    . \
-	&& docker push "$(REGISTRY)/k8s/deployer_helm_tiller/tester:$(MARKETPLACE_TOOLS_TAG)"
-
-.test/marketplace/deployer/helm_tiller: .build/marketplace/deployer/helm_tiller/tester
-	APP_DEPLOYER_IMAGE="$(REGISTRY)/k8s/deployer_helm_tiller/tester:$(MARKETPLACE_TOOLS_TAG)" \
-	APP_PARAMETERS="{\"marketplace-k8s-app-tools-helm-hooks.image\": \"$(REGISTRY)/k8s/deployer_helm_tiller/tester:$(MARKETPLACE_TOOLS_TAG)\"}" \
-	APP_TEST_PARAMETERS="{}" \
-	make -f app.Makefile app/verify
-
 
 .build/marketplace/delete_deprecated: | .build/marketplace
 # For BSD compatibility, we can't use xargs -r.
