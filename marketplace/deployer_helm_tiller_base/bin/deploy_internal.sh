@@ -32,7 +32,7 @@ for chart in /data/chart/*; do
       --name="$NAME" \
       --namespace="$NAMESPACE" \
       --values=<(print_config.py --output=yaml) \
-			--set "$(cat /data/schema.yaml \
+      --set "$(cat /data/schema.yaml \
                  | yaml2json \
                  | jq -r '.properties
                             | to_entries
@@ -85,7 +85,7 @@ for chart in /data/chart/*; do
           --arg app_uid "$app_uid" \
           --arg app_api_version "$app_api_version")"
 
-	kubectl get secrets \
+  kubectl get secrets \
       --namespace="$NAMESPACE" \
       --selector="OWNER=TILLER,NAME=$NAME" \
       --output=json \
