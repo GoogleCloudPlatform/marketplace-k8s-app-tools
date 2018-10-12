@@ -38,8 +38,7 @@ class PrintConfigTest(unittest.TestCase):
               """.encode('utf_8'))
       f.flush()
 
-      values = config_helper.load_values(f.name, '/non/existence/dir', 'utf_8',
-                                         schema)
+      values = config_helper.load_values(f.name, '/non/existence/dir', schema)
       self.assertEqual({'propertyInt': 3, 'propertyString': 'abc'}, values)
 
   def test_output_shell_vars(self):

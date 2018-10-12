@@ -168,6 +168,5 @@ class ExpandConfigTest(unittest.TestCase):
     values = {'propertyInt': 4, 'propertyStr': 'Value', 'propertyNum': 1.0}
     with tempfile.NamedTemporaryFile('w') as tf:
       expand_config.write_values(values, tf.name)
-      actual = config_helper.load_values(tf.name, '/non/existent/dir', 'utf_8',
-                                         schema)
+      actual = config_helper.load_values(tf.name, '/non/existent/dir', schema)
       self.assertEqual(values, actual)
