@@ -56,11 +56,11 @@ echo "$parameters" \
 # Extract name, namespace, and api version.
 name="$(print_config.py \
     --schema_file=/data/schema.yaml \
-    --values_file=/data/values.yaml \
+    --mode raw \
     --param='{"x-google-marketplace": {"type": "NAME"}}')"
 namespace="$(print_config.py \
     --schema_file=/data/schema.yaml \
-    --values_file=/data/values.yaml \
+    --mode raw \
     --param='{"x-google-marketplace": {"type": "NAMESPACE"}}')"
 app_version="$(print_app_api_version.py \
     --schema_file=/data/schema.yaml)"
@@ -87,7 +87,7 @@ app_uid=$(kubectl get "applications/$name" \
 # We set the application as the owner for all of these resources.
 echo "${parameters}" \
   | provision.py \
-    --values_file=- \
+    --mode=stdin \
     --deployer_image="${deployer}" \
     --deployer_entrypoint="${entrypoint}" \
   | set_app_labels.py \
