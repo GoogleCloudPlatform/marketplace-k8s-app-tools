@@ -16,17 +16,16 @@ import functools
 
 import config_helper
 
-
 VALUES_FILE = {
-  'stdin': '-',
-  'raw': '/data/values.yaml',
-  'expanded': '/data/final_values.yaml',
+    'stdin': '-',
+    'raw': '/data/values.yaml',
+    'expanded': '/data/final_values.yaml',
 }
 
 VALUES_DIR = {
-  'stdin': '/dev/null',
-  'raw': '/data/values',
-  'expanded': '/data/final_values',
+    'stdin': '/dev/null',
+    'raw': '/data/values',
+    'expanded': '/data/final_values',
 }
 
 
@@ -37,10 +36,12 @@ def add_to_argument_parser(parser):
       default='/data/schema.yaml')
 
   parser.add_argument(
-      '--mode',
-      help='"expanded" for expanded, and "raw" for not.',
+      '--values_mode',
+      help='"expanded" for expanded, and "raw" for not, and stdin for '
+      'specified via standard in.',
       choices=VALUES_FILE.keys(),
       default='expanded')
+
 
 def memoize(func):
   cache = func.cache = {}
@@ -62,8 +63,7 @@ def load_schema(parsed_args):
 
 @memoize
 def load_values(parsed_args):
-  values_file = VALUES_FILE[parsed_args.mode]
-  values_dir = VALUES_DIR[parsed_args.mode]
-  return config_helper.load_values(values_file,
-                                   values_dir,
+  values_file = VALUES_FILE[parsed_args.values_mode]
+  values_dir = VALUES_DIR[parsed_args.values_mode]
+  return config_helper.load_values(values_file, values_dir,
                                    load_schema(parsed_args))
