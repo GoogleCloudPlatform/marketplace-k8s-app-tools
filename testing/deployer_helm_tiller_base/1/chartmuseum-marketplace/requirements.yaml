@@ -1,7 +1,7 @@
 dependencies:
-- name: marketplace-k8s-app-tools-helm-hooks
-  version: 0.0.2
-  repository: gs://cloud-marketplace-tools-charts/
+- name: marketplace-hooks
+  version: 0.0.1
+  repository: https://cloud-marketplace-tools-charts.storage.googleapis.com/
 - name: chartmuseum
   version: 1.6.0
   repository: https://kubernetes-charts.storage.googleapis.com/

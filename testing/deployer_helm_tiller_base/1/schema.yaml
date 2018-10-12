@@ -13,11 +13,11 @@ properties:
     type: string
     x-google-marketplace:
       type: APPLICATION_UID
-  marketplace-k8s-app-tools-helm-hooks.image:
+  marketplace-hooks.image:
     type: string
     x-google-marketplace:
       type: IMAGE
-  marketplace-k8s-app-tools-helm-hooks.service_account:
+  marketplace-hooks.service_account:
     type: string
     x-google-marketplace:
       type: SERVICE_ACCOUNT
@@ -30,5 +30,5 @@ required:
 - name
 - namespace
 - application_uid
-- marketplace-k8s-app-tools-helm-hooks.image
-- marketplace-k8s-app-tools-helm-hooks.service_account
+- marketplace-hooks.image
+- marketplace-hooks.service_account

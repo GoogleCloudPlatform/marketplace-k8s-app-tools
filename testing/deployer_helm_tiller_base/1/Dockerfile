@@ -8,6 +8,6 @@ COPY chartmuseum-marketplace /tmp/chartmuseum-marketplace
 RUN mkdir -p /data/chart \
  && cd /data/chart \
  && helm dependency build /tmp/chartmuseum-marketplace \
+ && helm package /tmp/chartmuseum-marketplace --destination /data/chart/ \
  && find /tmp/chartmuseum-marketplace \
- && helm package /tmp/chartmuseum-marketplace \
  && rm -rf /tmp/chartmuseum-marketplace

@@ -21,7 +21,7 @@ docker run \
   > dev
 chmod a+x dev
 
-app_parameters="{\"marketplace-k8s-app-tools-helm-hooks.image\": \"$image\"}"
+app_parameters="{\"marketplace-hooks.image\": \"$image\"}"
 ./dev \
   /scripts/verify \
       --deployer="$image" \

@@ -81,20 +81,22 @@ include $(makefile_dir)/var.Makefile
 	mkdir -p "$@"
 
 
-# Note: Run after bumping.
-MARKETPLACE_K8S_APP_TOOLS_HELM_HOOKS_VERSION := 0.0.2
-.build/marketplace/deployer/marketplace-k8s-app-tools-helm-hooks/marketplace-k8s-app-tools-helm-hooks-$(MARKETPLACE_K8S_APP_TOOLS_HELM_HOOKS_VERSION).tgz: \
-		$(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_helm_tiller_base/marketplace-k8s-app-tools-helm-hooks/* \
-		.build/marketplace/delete_deprecated \
-		.build/marketplace/deployer/marketplace-k8s-app-tools-helm-hooks \
+.build/marketplace/charts: | .build/marketplace
+	mkdir -p "$@"
+
+.build/marketplace/charts/marketplace-hooks: \
+		.build/marketplace/dev \
 		.build/var/MARKETPLACE_TOOLS_TAG \
-		| .build/marketplace/deployer
+		marketplace/charts/Dockerfile \
+		$(shell find marketplace/charts/ -type f) \
+		$(MARKETPLACE_TOOLS_PATH)/marketplace/charts/marketplace-hooks/* \
+		| .build/marketplace/charts
 	$(call print_target)
 	cd $(MARKETPLACE_TOOLS_PATH) \
-	&& helm package marketplace/deployer_helm_tiller_base/marketplace-k8s-app-tools-helm-hooks/ \
-	      --version "$(MARKETPLACE_K8S_APP_TOOLS_HELM_HOOKS_VERSION)" \
-	      --destination .build/marketplace/deployer/marketplace-k8s-app-tools-helm-hooks \
-	&& helm gcs push .build/marketplace/deployer/marketplace-k8s-app-tools-helm-hooks/marketplace-k8s-app-tools-helm-hooks-$(MARKETPLACE_K8S_APP_TOOLS_HELM_HOOKS_VERSION).tgz cloud-marketplace-tools --force
+	&& docker build \
+	    -f marketplace/charts/Dockerfile \
+	    marketplace/charts
+	@touch $@
 
 
 .build/marketplace/delete_deprecated: | .build/marketplace
