@@ -84,9 +84,11 @@ include $(makefile_dir)/var.Makefile
 .build/marketplace/charts: | .build/marketplace
 	mkdir -p "$@"
 
+CHART_BUCKET = marketplace-k8s-app-tools-charts
+MARKETPLACE_HOOKS_VERSION = 0.0.1
 .build/marketplace/charts/marketplace-hooks: \
-		.build/marketplace/dev \
-		.build/var/MARKETPLACE_TOOLS_TAG \
+		.build/var/CHART_BUCKET \
+		.build/var/MARKETPLACE_HOOKS_VERSION \
 		marketplace/charts/Dockerfile \
 		$(shell find marketplace/charts/ -type f) \
 		$(MARKETPLACE_TOOLS_PATH)/marketplace/charts/marketplace-hooks/* \
@@ -94,6 +96,8 @@ include $(makefile_dir)/var.Makefile
 	$(call print_target)
 	cd $(MARKETPLACE_TOOLS_PATH) \
 	&& docker build \
+	    --build-arg "CHART_BUCKET=$(CHART_BUCKET)" \
+	    --build-arg "VERSION=$(MARKETPLACE_HOOKS_VERSION)" \
 	    -f marketplace/charts/Dockerfile \
 	    marketplace/charts
 	@touch $@

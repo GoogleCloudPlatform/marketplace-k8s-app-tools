@@ -16,16 +16,24 @@ RUN mkdir -p /bin/helm-downloaded \
      && helm plugin install https://github.com/rimusz/helm-tiller \
      && helm repo add cloud-marketplace-tools https://cloud-marketplace-tools-charts.storage.googleapis.com
 
+ARG CHART_BUCKET
+ENV CHART_BUCKET $CHART_BUCKET
+
+ARG VERSION
+ENV VERSION $VERSION
+
 COPY . /charts
 
-RUN export VERSION=0.0.1 ; find /charts \
+RUN find /charts \
+    && echo VERSION="$VERSION" \
     && mkdir /charts-tgz/ \
+    && gsutil cp "gs://$CHART_BUCKET/index.yaml" /tmp/index.yaml \
     && helm package /charts/marketplace-hooks/ \
-      --version $VERSION \
-      --destination /charts-tgz/ \
-    && gsutil cp /charts-tgz/marketplace-hooks-$VERSION.tgz gs://cloud-marketplace-tools-charts/ \
+           --version "$VERSION" \
+           --destination /charts-tgz/ \
+    && gsutil cp "/charts-tgz/marketplace-hooks-$VERSION.tgz" "gs://$CHART_BUCKET/" \
     && helm repo index \
-      --url https://cloud-marketplace-tools-charts.storage.googleapis.com \
-      --merge ~/.helm/repository/cache/cloud-marketplace-tools-index.yaml \
-      /charts-tgz/ \
-    && gsutil cp /charts-tgz/index.yaml gs://cloud-marketplace-tools-charts/index.yaml
+           --url "https://$CHART_BUCKET.storage.googleapis.com" \
+           --merge /tmp/index.yaml \
+           /charts-tgz/ \
+    && gsutil cp /charts-tgz/index.yaml "gs://$CHART_BUCKET/index.yaml"
