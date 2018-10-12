@@ -39,7 +39,7 @@ namespace_key="$(/bin/extract_schema_key.py --type NAMESPACE)"
 # Provisioned manifests are inserted into the original schema
 # under top-level __manifests__ field.
 printf '{%s: "m4g1cn8m3", %s: "m4g1cn8m32p4c3"}' "${name_key}" "${namespace_key}" \
-  | /bin/provision.py --values_file=- --deployer_image="${deployer}" \
+  | /bin/provision.py --values_mode=stdin --deployer_image="${deployer}" \
   | /bin/set_app_labels.py --manifests=- --dest=- --name="m4g1cn8m3" --namespace="m4g1cn8m32p4c3" \
   | /bin/yaml2json \
   | jq -s . \

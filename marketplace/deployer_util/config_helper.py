@@ -50,16 +50,16 @@ class InvalidSchema(Exception):
   pass
 
 
-def load_values(values_file, values_dir, values_dir_encoding, schema):
+def load_values(values_file, values_dir, schema):
   if values_file == '-':
     return yaml.safe_load(sys.stdin.read())
   if values_file and os.path.isfile(values_file):
     with open(values_file, 'r') as f:
       return yaml.safe_load(f.read())
-  return _read_values_to_dict(values_dir, values_dir_encoding, schema)
+  return _read_values_to_dict(values_dir, schema)
 
 
-def _read_values_to_dict(values_dir, codec, schema):
+def _read_values_to_dict(values_dir, schema):
   """Returns a dict constructed from files in values_dir."""
   files = [
       f for f in os.listdir(values_dir)
@@ -71,7 +71,7 @@ def _read_values_to_dict(values_dir, codec, schema):
       raise InvalidName('Invalid config parameter name: {}'.format(filename))
     file_path = os.path.join(values_dir, filename)
     with open(file_path, "r") as f:
-      data = f.read().decode(codec)
+      data = f.read().decode('utf-8')
       result[filename] = data
 
   # Data read in as strings. Convert them to proper types defined in schema.
