@@ -1,5 +1,5 @@
 dependencies:
-- name: marketplace-hooks
+- name: marketplace-integration
   version: 0.0.1
   repository: https://cloud-marketplace-tools-charts.storage.googleapis.com/
 - name: chartmuseum

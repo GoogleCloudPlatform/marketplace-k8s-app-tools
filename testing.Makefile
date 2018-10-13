@@ -15,7 +15,7 @@ TEST_ID := $(shell cat /dev/urandom | tr -dc 'a-z0-9' | head -c 8)
 	mkdir -p "$@"
 
 .testing/deployer_helm_tiller_base/1: \
-		.build/marketplace/charts/marketplace-hooks \
+		.build/marketplace/charts/marketplace-integration \
 		.build/marketplace/deployer/helm_tiller \
 		.build/marketplace/dev \
 		.build/var/MARKETPLACE_TOOLS_TAG \

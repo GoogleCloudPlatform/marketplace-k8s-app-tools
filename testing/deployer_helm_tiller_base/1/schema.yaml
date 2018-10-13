@@ -13,11 +13,11 @@ properties:
     type: string
     x-google-marketplace:
       type: APPLICATION_UID
-  marketplace-hooks.image:
+  marketplace-integration.image:
     type: string
     x-google-marketplace:
       type: IMAGE
-  marketplace-hooks.service_account:
+  marketplace-integration.service_account:
     type: string
     x-google-marketplace:
       type: SERVICE_ACCOUNT
@@ -30,5 +30,5 @@ required:
 - name
 - namespace
 - application_uid
-- marketplace-hooks.image
-- marketplace-hooks.service_account
+- marketplace-integration.image
+- marketplace-integration.service_account

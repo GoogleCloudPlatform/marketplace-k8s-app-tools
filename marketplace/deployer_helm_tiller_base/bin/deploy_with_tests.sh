@@ -20,12 +20,10 @@ set -eox pipefail
 
 NAME="$(/bin/print_config.py \
   --param '{"x-google-marketplace": {"type": "NAME"}}' \
-  --values_file /data/values.yaml \
-  --values_dir /data/values)"
+  --values_mode raw)"
 NAMESPACE="$(/bin/print_config.py \
   --param '{"x-google-marketplace": {"type": "NAMESPACE"}}' \
-  --values_file /data/values.yaml \
-  --values_dir /data/values)"
+  --values_mode raw)"
 export NAME
 export NAMESPACE
 
@@ -33,7 +31,7 @@ app_uid=$(kubectl get "applications/$NAME" \
   --namespace="$NAMESPACE" \
   --output=jsonpath='{.metadata.uid}')
 
-/bin/expand_config.py --app_uid="$app_uid"
+/bin/expand_config.py --values_mode=raw --app_uid="$app_uid"
 
 /bin/deploy_internal.sh
 

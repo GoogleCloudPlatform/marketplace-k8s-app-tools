@@ -28,10 +28,10 @@ RUN find /charts \
     && echo VERSION="$VERSION" \
     && mkdir /charts-tgz/ \
     && gsutil cp "gs://$CHART_BUCKET/index.yaml" /tmp/index.yaml \
-    && helm package /charts/marketplace-hooks/ \
+    && helm package /charts/marketplace-integration/ \
            --version "$VERSION" \
            --destination /charts-tgz/ \
-    && gsutil cp "/charts-tgz/marketplace-hooks-$VERSION.tgz" "gs://$CHART_BUCKET/" \
+    && gsutil cp "/charts-tgz/marketplace-integration-$VERSION.tgz" "gs://$CHART_BUCKET/" \
     && helm repo index \
            --url "https://$CHART_BUCKET.storage.googleapis.com" \
            --merge /tmp/index.yaml \
