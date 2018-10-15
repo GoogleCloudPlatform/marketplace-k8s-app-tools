@@ -5,7 +5,6 @@ __MARKETPLACE_MAKEFILE__ := included
 COMMIT ?= $(shell git rev-parse HEAD | fold -w 12 | head -n 1)
 
 makefile_dir := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
-include $(makefile_dir)/gcloud.Makefile
 include $(makefile_dir)/common.Makefile
 include $(makefile_dir)/var.Makefile
 

@@ -57,5 +57,5 @@ ONBUILD RUN export CHART_NAME="$(find /tmp/onbuild -maxdepth 1 -mindepth 1 -type
             && cp /tmp/onbuild/schema.yaml /data/schema.yaml \
             && mkdir -p /data/chart \
             && cd /data/chart \
-            && helm package --dependency-update "/tmp/onbuild/$CHART_NAME" --destination /data/chart/ \
+            && helm package "/tmp/onbuild/$CHART_NAME" --destination /data/chart/ \
             && rm -rf /tmp/onbuild
