@@ -41,9 +41,12 @@ ENTRYPOINT ["/bin/bash", "/bin/deploy.sh"]
 
 ONBUILD COPY . /tmp/onbuild
 
+ONBUILD ARG HELM_DEPENDENCY_BUILD=false
+ONBUILD ENV HELM_DEPENDENCY_BUILD $HELM_DEPENDENCY_BUILD
+
 # Partner directory structure assertions.
 ONBUILD RUN if [ "$(find /tmp/onbuild -maxdepth 1 -mindepth 1 -type d -printf '\n' | wc -l)" -ne 1 ]; then \
-              >&2 echo "Too many directories." ; \
+              >&2 echo "Too many root-level charts." ; \
               find /tmp/onbuild ; \
               exit 1 ; \
             fi ; \
@@ -57,5 +60,8 @@ ONBUILD RUN export CHART_NAME="$(find /tmp/onbuild -maxdepth 1 -mindepth 1 -type
             && cp /tmp/onbuild/schema.yaml /data/schema.yaml \
             && mkdir -p /data/chart \
             && cd /data/chart \
+            && if [ "$HELM_DEPENDENCY_BUILD" = "true" ]; then \
+                 helm dependency update "/tmp/onbuild/$CHART_NAME" ; \
+               fi \
             && helm package "/tmp/onbuild/$CHART_NAME" --destination /data/chart/ \
             && rm -rf /tmp/onbuild
