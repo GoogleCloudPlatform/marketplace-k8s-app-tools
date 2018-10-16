@@ -26,10 +26,10 @@ handle_failure() {
     # /bin/expand_config.py might have failed.
     # We fall back to the unexpanded params to get the name and namespace.
     NAME="$(/bin/print_config.py \
-            --param '{"x-google-marketplace": {"type": "NAME"}}' \
+            --xtype NAME \
             --values_mode raw)"
     NAMESPACE="$(/bin/print_config.py \
-            --param '{"x-google-marketplace": {"type": "NAMESPACE"}}' \
+            --xtype NAMESPACE \
             --values_mode raw)"
     export NAME
     export NAMESPACE
@@ -40,10 +40,10 @@ handle_failure() {
 trap "handle_failure" EXIT
 
 NAME="$(/bin/print_config.py \
-  --param '{"x-google-marketplace": {"type": "NAME"}}' \
+  --xtype NAME \
   --values_mode raw)"
 NAMESPACE="$(/bin/print_config.py \
-  --param '{"x-google-marketplace": {"type": "NAMESPACE"}}' \
+  --xtype NAMESPACE \
   --values_mode raw)"
 export NAME
 export NAMESPACE

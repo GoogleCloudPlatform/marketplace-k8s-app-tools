@@ -32,13 +32,7 @@ for chart in /data/chart/*; do
       --name="$NAME" \
       --namespace="$NAMESPACE" \
       --values=<(print_config.py --output=yaml) \
-      --set "$(cat /data/schema.yaml \
-                 | yaml2json \
-                 | jq -r '.properties
-                            | to_entries
-                            | .[]
-                            | select(.value["x-google-marketplace"].type == "APPLICATION_UID")
-                            | .key')=" \
+      --set "$(print_config.py --xtype APPLICATION_UID --key true)=" \
       "$chart" \
     | yaml2json \
     | jq 'select( .kind == "Application" )' \
