@@ -14,7 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import json
 import re
 import sys
 
@@ -57,19 +56,19 @@ def main():
       choices=[OUTPUT_SHELL_VARS, OUTPUT_YAML],
       default=OUTPUT_YAML)
   parser.add_argument(
-      '--param',
-      help='If specified, outputs the value of a single '
-      'parameter unescaped. The value here is a JSON '
-      'which should partially match the parameter schema.')
+      '--xtype',
+      help='If specified, outputs the values of the given x-google-marketplace'
+      ' property.')
+  parser.add_argument(
+      '--key', help='If specified, outputs the keys, rather than the values')
   args = parser.parse_args()
 
   schema = schema_values_common.load_schema(args)
   values = schema_values_common.load_values(args)
 
   try:
-    if args.param:
-      definition = json.loads(args.param)
-      sys.stdout.write(output_param(values, schema, definition))
+    if args.xtype:
+      sys.stdout.write(output_xtype(values, schema, args.xtype, args.key))
       return
 
     if args.output == OUTPUT_SHELL_VARS:
@@ -80,13 +79,16 @@ def main():
     sys.stdout.flush()
 
 
-def output_param(values, schema, definition):
+def output_xtype(values, schema, xtype, print_keys):
+  definition = {"x-google-marketplace": {"type": xtype}}
   candidates = schema.properties_matching(definition)
   if len(candidates) != 1:
     raise InvalidParameter(
         'There must be exactly one parameter matching but found {}: {}'.format(
             len(candidates), definition))
   key = candidates[0].name
+  if print_keys:
+    return key
   if key not in values:
     raise InvalidParameter('Parameter {} has no value'.format(key))
   return str(values[key])

@@ -80,29 +80,42 @@ class PrintConfigTest(unittest.TestCase):
         })
 
   def test_output_param(self):
-    values = {'propertyInt': 1, 'propertyString': 'Value'}
+    values = {'name': 'name-1', 'namespace': 'namespace-1'}
     schema = config_helper.Schema.load_yaml("""
         properties:
-          propertyInt:
-            type: int
-          propertyString:
+          name:
             type: string
+            x-google-marketplace:
+              type: NAME
+          namespace:
+            type: string
+            x-google-marketplace:
+              type: NAMESPACE
         """)
+    self.assertEqual('name',
+                     print_config.output_xtype(values, schema, 'NAME', True))
     self.assertEqual(
-        '1', print_config.output_param(values, schema, {'name': 'propertyInt'}))
+        'namespace', print_config.output_xtype(values, schema, 'NAMESPACE',
+                                               True))
+    self.assertEqual('name-1',
+                     print_config.output_xtype(values, schema, 'NAME', False))
     self.assertEqual(
-        'Value',
-        print_config.output_param(values, schema, {'name': 'propertyString'}))
+        'namespace-1',
+        print_config.output_xtype(values, schema, 'NAMESPACE', False))
 
   def test_output_param_multiple(self):
     values = {'property1': 'Value1', 'property2': 'Value2'}
     schema = config_helper.Schema.load_yaml("""
         properties:
-          property1:
+          image1:
             type: string
-          property2:
+            x-google-marketplace:
+              type: IMAGE
+          image2:
             type: string
+            x-google-marketplace:
+              type: IMAGE
         """)
     self.assertRaises(
         print_config.InvalidParameter,
-        lambda: print_config.output_param(values, schema, {'type': 'string'}))
+        lambda: print_config.output_xtype(values, schema, 'IMAGE', True))
