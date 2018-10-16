@@ -76,28 +76,6 @@ include $(makefile_dir)/var.Makefile
 	@touch "$@"
 
 
-.build/marketplace/charts: | .build/marketplace
-	mkdir -p "$@"
-
-CHART_BUCKET = cloud-marketplace-tools-charts
-MARKETPLACE_INTEGRATION_VERSION = 0.0.1
-.build/marketplace/charts/marketplace-integration: \
-		.build/var/CHART_BUCKET \
-		.build/var/MARKETPLACE_INTEGRATION_VERSION \
-		marketplace/charts/Dockerfile \
-		$(shell find marketplace/charts/ -type f) \
-		$(MARKETPLACE_TOOLS_PATH)/marketplace/charts/marketplace-integration/* \
-		| .build/marketplace/charts
-	$(call print_target)
-	cd $(MARKETPLACE_TOOLS_PATH) \
-	&& docker build \
-	    --build-arg "CHART_BUCKET=$(CHART_BUCKET)" \
-	    --build-arg "VERSION=$(MARKETPLACE_INTEGRATION_VERSION)" \
-	    -f marketplace/charts/Dockerfile \
-	    marketplace/charts
-	@touch $@
-
-
 .build/marketplace/delete_deprecated: | .build/marketplace
 # For BSD compatibility, we can't use xargs -r.
 	@ \
