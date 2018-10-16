@@ -11,14 +11,14 @@ include $(makefile_dir)/var.Makefile
 # Extracts the name property from APP_PARAMETERS.
 define name_parameter
 $(shell echo '$(APP_PARAMETERS)' \
-    | docker run -i --entrypoint=/bin/print_config.py --rm $(APP_DEPLOYER_IMAGE) --values_mode stdin --param '{"x-google-marketplace": {"type": "NAME"}}')
+    | docker run -i --entrypoint=/bin/print_config.py --rm $(APP_DEPLOYER_IMAGE) --values_mode stdin --xtype NAME)
 endef
 
 
 # Extracts the namespace property from APP_PARAMETERS.
 define namespace_parameter
 $(shell echo '$(APP_PARAMETERS)' \
-    | docker run -i --entrypoint=/bin/print_config.py --rm $(APP_DEPLOYER_IMAGE) --values_mode stdin --param '{"x-google-marketplace": {"type": "NAMESPACE"}}')
+    | docker run -i --entrypoint=/bin/print_config.py --rm $(APP_DEPLOYER_IMAGE) --values_mode stdin --xtype NAMESPACE)
 endef
 
 
