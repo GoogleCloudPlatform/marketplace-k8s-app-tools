@@ -62,6 +62,36 @@ include $(makefile_dir)/var.Makefile
 	@touch "$@"
 
 
+.build/marketplace/deployer/helm_tiller: \
+		.build/var/MARKETPLACE_TOOLS_TAG \
+		$(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_helm_tiller_base/* \
+		$(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_util/* \
+		| .build/marketplace/deployer
+	$(call print_target)
+	cd $(MARKETPLACE_TOOLS_PATH) \
+	&& docker build \
+	    --tag "gcr.io/cloud-marketplace-tools/k8s/deployer_helm_tiller:$(MARKETPLACE_TOOLS_TAG)" \
+	    -f marketplace/deployer_helm_tiller_base/Dockerfile \
+	    .
+	@touch "$@"
+
+
+.build/marketplace/deployer/helm_tiller_onbuild: \
+		.build/marketplace/deployer/helm_tiller \
+		.build/var/MARKETPLACE_TOOLS_TAG \
+		$(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_helm_tiller_base/onbuild/* \
+		$(MARKETPLACE_TOOLS_PATH)/marketplace/deployer_util/* \
+		| .build/marketplace/deployer
+	$(call print_target)
+	cd $(MARKETPLACE_TOOLS_PATH) \
+	&& docker build \
+	    --build-arg FROM="gcr.io/cloud-marketplace-tools/k8s/deployer_helm_tiller:$(MARKETPLACE_TOOLS_TAG)" \
+	    --tag "gcr.io/cloud-marketplace-tools/k8s/deployer_helm_tiller/onbuild:$(MARKETPLACE_TOOLS_TAG)" \
+	    -f marketplace/deployer_helm_tiller_base/onbuild/Dockerfile \
+	    .
+	@touch "$@"
+
+
 .build/marketplace/delete_deprecated: | .build/marketplace
 # For BSD compatibility, we can't use xargs -r.
 	@ \
