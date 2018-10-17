@@ -23,7 +23,7 @@ ONBUILD RUN export CHART_NAME="$(find /tmp/onbuild/chart -maxdepth 1 -mindepth 1
             && mkdir -p /data/chart \
             && cd /data/chart \
             && if [ "$HELM_DEPENDENCY_BUILD" = "true" ]; then \
-                 helm dependency update "/tmp/onbuild/chart/$CHART_NAME" ; \
+                 helm dependency build "/tmp/onbuild/chart/$CHART_NAME" ; \
                fi \
             && helm package "/tmp/onbuild/chart/$CHART_NAME" --destination /data/chart/ \
             && rm -rf /tmp/onbuild
