@@ -8,35 +8,39 @@ include marketplace.Makefile
 
 TEST_ID := $(shell cat /dev/urandom | tr -dc 'a-z0-9' | head -c 8)
 
-.testing:
-	mkdir -p "$@"
+.testing/marketplace/deployer/helm_tiller_onbuild:
+	mkdir -p $@
 
-.testing/deployer_helm_tiller_base: | .testing
-	mkdir -p "$@"
-
-.testing/deployer_helm_tiller_base/1: \
-		.build/marketplace/deployer/helm_tiller \
+.testing/marketplace/deployer/helm_tiller_onbuild/helm-dependency-build: \
+		.build/marketplace/deployer/helm_tiller_onbuild \
 		.build/marketplace/dev \
 		.build/var/MARKETPLACE_TOOLS_TAG \
 		.build/var/REGISTRY \
-		$(shell find testing/deployer_helm_tiller_base/1 -type f) \
-		.testing/deployer_helm_tiller_base
+		$(shell find testing/deployer_helm_tiller_base/helm-dependency-build -type f) \
+    | .testing/marketplace/deployer/helm_tiller_onbuild
 	$(call print_target)
 	TEST_ID=$(TEST_ID) \
 	REGISTRY=$(REGISTRY) \
 	MARKETPLACE_TOOLS_TAG=$(MARKETPLACE_TOOLS_TAG) \
-	  ./testing/deployer_helm_tiller_base/1/test
+	  ./testing/marketplace/deployer/helm_tiller_onbuild/helm-dependency-build/test
 
-.testing/deployer_helm_tiller_base/2: \
-		.build/marketplace/deployer/helm_tiller \
+.testing/marketplace/deployer/helm_tiller_onbuild/standard: \
+		.build/marketplace/deployer/helm_tiller_onbuild \
 		.build/marketplace/dev \
 		.build/var/MARKETPLACE_TOOLS_TAG \
 		.build/var/REGISTRY \
-		$(shell find testing/deployer_helm_tiller_base/2 -type f) \
-		.testing/deployer_helm_tiller_base
+		$(shell find testing/deployer_helm_tiller_base/standard -type f) \
+    | .testing/marketplace/deployer/helm_tiller_onbuild
 	$(call print_target)
 	TEST_ID=$(TEST_ID) \
 	REGISTRY=$(REGISTRY) \
 	MARKETPLACE_TOOLS_TAG=$(MARKETPLACE_TOOLS_TAG) \
-	  ./testing/deployer_helm_tiller_base/2/test
+	  ./testing/marketplace/deployer/helm_tiller_onbuild/standard/test
+
+.PHONY: testing/marketplace/deployer/helm_tiller_onbuild
+testing/marketplace/deployer/helm_tiller_onbuild: \
+		.testing/marketplace/deployer/helm_tiller_onbuild/helm-dependency-build \
+		.testing/marketplace/deployer/helm_tiller_onbuild/standard
+	;
+
 endif
