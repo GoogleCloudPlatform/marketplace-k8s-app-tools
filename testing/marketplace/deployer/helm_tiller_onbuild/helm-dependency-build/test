@@ -2,11 +2,11 @@
 
 set -eox pipefail
 
-test_directory=$(mktemp --dry-run)
+test_directory="$(mktemp --dry-run)"
 cp -r $(dirname "$0") "$test_directory"
 cd "$test_directory"
 
-image="$REGISTRY/testing/deployer_helm_tiller_base/1:$MARKETPLACE_TOOLS_TAG-$TEST_ID"
+image="$REGISTRY/testing/deployer_helm_tiller_base/onbuild/helm-dependency-build:$MARKETPLACE_TOOLS_TAG-$TEST_ID"
 
 docker build \
     --build-arg "REGISTRY=$REGISTRY" \

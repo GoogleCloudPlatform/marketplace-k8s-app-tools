@@ -35,7 +35,7 @@
 
 steps:
 
-- id: Build dev
+- id: &BuildDev Build dev
   name: gcr.io/cloud-builders/docker
   waitFor:
   - '-'
@@ -107,7 +107,7 @@ steps:
   - marketplace/deployer_helm_tiller_base/Dockerfile
   - .
 
-- id: Build deployer_helm_tiller onbuild
+- id: &BuildHelmTillerOnbuild Build deployer_helm_tiller onbuild
   name: gcr.io/cloud-builders/docker
   waitFor:
   - *BuildHelmTiller
@@ -122,6 +122,42 @@ steps:
   - --file
   - marketplace/deployer_helm_tiller_base/onbuild/Dockerfile
   - .
+
+- id: &KubeConfig Initialize Kubernetes Credentials
+  name: gcr.io/cloud-builders/gcloud
+  args:
+  - container
+  - clusters
+  - get-credentials
+  - "cluster-1"
+  - --zone
+  - "us-west1-a"
+  - --project
+  - "$PROJECT_ID"
+
+- id: testing/marketplace/deployer/helm_tiller_onbuild/helm-dependency-build/test
+  name: gcr.io/$PROJECT_ID/k8s/dev:sha_$COMMIT_SHA
+  waitFor:
+  - *BuildDev
+  - *BuildHelmTillerOnbuild
+  - *KubeConfig
+  entrypoint: testing/marketplace/deployer/helm_tiller_onbuild/helm-dependency-build/test
+  env:
+  - MARKETPLACE_TOOLS_TAG=sha_$COMMIT_SHA
+  - TEST_ID=$COMMIT_SHA
+  - REGISTRY=gcr.io/$PROJECT_ID
+
+- id: testing/marketplace/deployer/helm_tiller_onbuild/standard/test
+  name: gcr.io/$PROJECT_ID/k8s/dev:sha_$COMMIT_SHA
+  waitFor:
+  - *BuildDev
+  - *BuildHelmTillerOnbuild
+  - *KubeConfig
+  entrypoint: testing/marketplace/deployer/helm_tiller_onbuild/standard/test
+  env:
+  - MARKETPLACE_TOOLS_TAG=sha_$COMMIT_SHA
+  - TEST_ID=$COMMIT_SHA
+  - REGISTRY=gcr.io/$PROJECT_ID
 
 images:
   - gcr.io/$PROJECT_ID/k8s/dev:sha_$COMMIT_SHA
