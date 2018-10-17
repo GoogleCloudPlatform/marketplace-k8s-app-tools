@@ -1,0 +1,44 @@
+{{- if not .Values.application_uid }}
+
+apiVersion: app.k8s.io/v1beta1
+kind: Application
+metadata:
+  name: "{{ .Release.Name }}"
+  namespace: "{{ .Release.Namespace }}"
+  annotations:
+    kubernetes-engine.cloud.google.com/icon: >-
+      data:image/png;base64,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
+  labels:
+    app.kubernetes.io/name: "{{ .Release.Name }}"
+spec:
+  descriptor:
+    type: Chart Museum
+    versions: '0.1'
+    description: |-
+      A test application forked from [stable/chartmuseum](https://github.com/helm/charts/tree/master/stable/chartmuseum).
+    maintainers:
+    - name: Google Click to Deploy
+      url: https://cloud.google.com/solutions/#click-to-deploy
+    links:
+    - description: Chart Museum
+      url: https://github.com/helm/chartmuseum
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: "{{ .Release.Name }}"
+  componentKinds:
+  - group: batch/v1
+    kind: Job
+  - group: apps/v1beta2
+    kind: Deployment
+  - group: v1
+    kind: PersistentVolumeClaim
+  - group: v1
+    kind: Service
+  - group: v1
+    kind: ServiceAccount
+  - group: extensions/v1beta1
+    kind: Ingress
+  - group: v1
+    kind: Secret
+
+{{- end }}

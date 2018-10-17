@@ -1,0 +1,7 @@
+dependencies:
+- name: marketplace-integration
+  version: 0.0.X
+  repository: https://cloud-marketplace-tools-charts.storage.googleapis.com/
+- name: chartmuseum
+  version: 1.6.X
+  repository: https://kubernetes-charts.storage.googleapis.com/
