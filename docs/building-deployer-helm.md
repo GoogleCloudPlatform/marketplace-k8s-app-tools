@@ -300,7 +300,7 @@ properties:
     type: string
     x-google-marketplace:
       type: SERVICE_ACCOUNT
-      serviceAccount
+      serviceAccount:
         roles:
         - type: ClusterRole
           rulesType: PREDEFINED
