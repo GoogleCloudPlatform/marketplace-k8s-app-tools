@@ -16,7 +16,7 @@ properties:
   marketplace-integration.image:
     type: string
     x-google-marketplace:
-      type: IMAGE
+      type: DEPLOYER_IMAGE
   marketplace-integration.service_account:
     type: string
     x-google-marketplace:

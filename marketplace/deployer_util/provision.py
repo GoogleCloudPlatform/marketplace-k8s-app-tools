@@ -53,6 +53,16 @@ def process(schema, values, deployer_image, deployer_entrypoint):
   app_name = get_name(schema, values)
   namespace = get_namespace(schema, values)
 
+  # Inject DEPLOYER_IMAGE property values if not already present.
+  for key, value in values.items():
+    if value:
+      continue
+    if key not in schema.properties:
+      continue
+    if not schema.properties[key].xtype == 'DEPLOYER_IMAGE':
+      continue
+    values[key] = deployer_image
+
   # Handle provisioning of reporting secrets from storage if a URI
   # is provided.
   for key, value in values.items():

@@ -28,6 +28,7 @@ XGOOGLE = 'x-google-marketplace'
 XTYPE_NAME = 'NAME'
 XTYPE_NAMESPACE = 'NAMESPACE'
 XTYPE_IMAGE = 'IMAGE'
+XTYPE_DEPLOYER_IMAGE = 'DEPLOYER_IMAGE'
 XTYPE_PASSWORD = 'GENERATED_PASSWORD'
 XTYPE_REPORTING_SECRET = 'REPORTING_SECRET'
 XTYPE_SERVICE_ACCOUNT = 'SERVICE_ACCOUNT'
@@ -201,6 +202,9 @@ class SchemaProperty:
       elif xt == XTYPE_IMAGE:
         d = self._x.get('image', {})
         self._image = SchemaXImage(d)
+      elif xt == XTYPE_DEPLOYER_IMAGE:
+        d = self._x.get('image', {})
+        self._image = SchemaXImage(d)
       elif xt == XTYPE_PASSWORD:
         d = self._x.get('generatedPassword', {})
         spec = {
@@ -315,7 +319,7 @@ class SchemaProperty:
 
 
 class SchemaXImage:
-  """Wrapper class providing convenient access to IMAGE property."""
+  """Wrapper class providing convenient access to IMAGE and DEPLOYER_IMAGE properties."""
 
   def __init__(self, dictionary):
     self._split_by_colon = None
