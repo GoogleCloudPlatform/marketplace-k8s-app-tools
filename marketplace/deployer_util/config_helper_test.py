@@ -257,44 +257,7 @@ class ConfigHelperTest(unittest.TestCase):
             x-google-marketplace:
               type: DEPLOYER_IMAGE
         """)
-    self.assertIsNotNone(schema.properties['di'].image)
-    self.assertIsNone(schema.properties['di'].image.split_by_colon)
-    self.assertIsNone(schema.properties['di'].image._split_to_registry_repo_tag)
-
-  def test_deployer_image_type_splitbycolon(self):
-    schema = config_helper.Schema.load_yaml("""
-        properties:
-          di:
-            type: string
-            x-google-marketplace:
-              type: DEPLOYER_IMAGE
-              deployerImage:
-                generatedProperties:
-                  splitByColon:
-                    before: image.before
-                    after: image.after
-        """)
-    self.assertIsNotNone(schema.properties['di'].image)
-    self.assertEqual(('image.before', 'image.after'),
-                     schema.properties['di'].image.split_by_colon)
-
-  def test_deployer_image_type_splittoregistryrepotag(self):
-    schema = config_helper.Schema.load_yaml("""
-        properties:
-          di:
-            type: string
-            x-google-marketplace:
-              type: DEPLOYER_IMAGE
-              deployerImage:
-                generatedProperties:
-                  splitToRegistryRepoTag:
-                    registry: image.registry
-                    repo: image.repo
-                    tag: image.tag
-        """)
-    self.assertIsNotNone(schema.properties['di'].image)
-    self.assertEqual(('image.registry', 'image.repo', 'image.tag'),
-                     schema.properties['di'].image._split_to_registry_repo_tag)
+    self.assertIsNotNone(schema.properties['di'])
 
   def test_password(self):
     schema = config_helper.Schema.load_yaml("""

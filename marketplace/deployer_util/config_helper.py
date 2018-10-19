@@ -197,13 +197,11 @@ class SchemaProperty:
         raise InvalidSchema('Property {} has {} without a type'.format(
             name, XGOOGLE))
       xt = self._x['type']
-      if xt in (XTYPE_NAME, XTYPE_NAMESPACE, XTYPE_APPLICATION_UID):
+      if xt in (XTYPE_NAME, XTYPE_NAMESPACE, XTYPE_APPLICATION_UID,
+                XTYPE_DEPLOYER_IMAGE):
         pass
       elif xt == XTYPE_IMAGE:
         d = self._x.get('image', {})
-        self._image = SchemaXImage(d)
-      elif xt == XTYPE_DEPLOYER_IMAGE:
-        d = self._x.get('deployerImage', {})
         self._image = SchemaXImage(d)
       elif xt == XTYPE_PASSWORD:
         d = self._x.get('generatedPassword', {})
