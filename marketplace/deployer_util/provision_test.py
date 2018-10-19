@@ -14,8 +14,11 @@
 
 import unittest
 
+import provision
 from provision import dns1123_name
 from provision import limit_name
+
+import config_helper
 
 
 class ProvisionTest(unittest.TestCase):
@@ -43,3 +46,17 @@ class ProvisionTest(unittest.TestCase):
   def assertModifiedName(self, text, expected):
     self.assertEqual(text[:-5], expected)
     self.assertRegexpMatches(text[-5:], r'-[a-f0-9]{4}')
+
+  def test_deployer_image_inject(self):
+    schema = config_helper.Schema.load_yaml('''
+    properties:
+      deployer_image:
+        type: string
+        x-google-marketplace:
+          type: DEPLOYER_IMAGE
+    ''')
+    values = {}
+    deployer_image = 'gcr.io/cloud-marketplace/partner/solution/deployer:latest'
+    self.assertEquals(
+        provision.inject_deployer_image_properties(
+            schema, deployer_image, values), {"deployer_image": deployer_image})

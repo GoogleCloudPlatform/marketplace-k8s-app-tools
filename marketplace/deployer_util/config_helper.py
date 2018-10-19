@@ -203,7 +203,7 @@ class SchemaProperty:
         d = self._x.get('image', {})
         self._image = SchemaXImage(d)
       elif xt == XTYPE_DEPLOYER_IMAGE:
-        d = self._x.get('image', {})
+        d = self._x.get('deployerImage', {})
         self._image = SchemaXImage(d)
       elif xt == XTYPE_PASSWORD:
         d = self._x.get('generatedPassword', {})

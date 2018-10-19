@@ -24,7 +24,7 @@ chmod a+x dev
 
 export MARKETPLACE_TOOLS_IMAGE="gcr.io/cloud-marketplace-tools/k8s/dev"
 
-app_parameters="{\"marketplace-integration.image\": \"$image\"}"
+app_parameters="{}"
 ./dev \
   /scripts/verify \
       --deployer="$image" \

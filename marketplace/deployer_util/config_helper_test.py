@@ -268,7 +268,7 @@ class ConfigHelperTest(unittest.TestCase):
             type: string
             x-google-marketplace:
               type: DEPLOYER_IMAGE
-              image:
+              deployerImage:
                 generatedProperties:
                   splitByColon:
                     before: image.before
@@ -285,7 +285,7 @@ class ConfigHelperTest(unittest.TestCase):
             type: string
             x-google-marketplace:
               type: DEPLOYER_IMAGE
-              image:
+              deployerImage:
                 generatedProperties:
                   splitToRegistryRepoTag:
                     registry: image.registry
