@@ -46,10 +46,6 @@ def main():
     full_name = "{}/{}".format(resource_def['kind'],
                                deep_get(resource_def, 'metadata', 'name'))
 
-    if resource_def['kind'] != 'Pod':
-      log("INFO Skip '{}'".format(full_name))
-      continue
-
     start_time = time.time()
     poll_interval = 4
     tester_timeout = 300
