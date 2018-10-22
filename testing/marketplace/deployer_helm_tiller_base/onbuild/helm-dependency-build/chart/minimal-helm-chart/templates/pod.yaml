@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ .Release.Name }}
+  labels:
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
+spec:
+  containers:
+  - name: {{ .Release.Name }}
+    image: gcr.io/cloud-marketplace-containers/google/nginx1:latest
