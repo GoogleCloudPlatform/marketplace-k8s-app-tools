@@ -1,4 +1,0 @@
-dependencies:
-- name: marketplace-integration
-  version: 0.0.X
-  repository: https://cloud-marketplace-tools-charts.storage.googleapis.com/
