@@ -9,8 +9,8 @@ cd "$test_directory"
 image="$REGISTRY/testing/deployer_helm_tiller_base/1:$MARKETPLACE_TOOLS_TAG-$TEST_ID"
 
 docker build \
-    --build-arg "MARKETPLACE_TOOLS_TAG=$MARKETPLACE_TOOLS_TAG" \
     --build-arg "HELM_DEPENDENCY_BUILD=true" \
+    --build-arg "MARKETPLACE_TOOLS_TAG=$MARKETPLACE_TOOLS_TAG" \
     --tag "$image" \
     .
 
