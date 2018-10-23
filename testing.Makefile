@@ -21,12 +21,12 @@ TEST_ID := $(shell cat /dev/urandom | tr -dc 'a-z0-9' | head -c 8)
 		.build/var/REGISTRY \
 		$(shell find testing/marketplace/deployer_helm_tiller_base/onbuild/helm-dependency-build -type f) \
 		testing.Makefile \
-    | .testing/marketplace/deployer/helm_tiller_onbuild
+		| .testing/marketplace/deployer/helm_tiller_onbuild
 	$(call print_target)
 	TEST_ID=$(TEST_ID) \
 	REGISTRY=$(REGISTRY) \
 	MARKETPLACE_TOOLS_TAG=$(MARKETPLACE_TOOLS_TAG) \
-    ./testing/marketplace/deployer_helm_tiller_base/onbuild/helm-dependency-build/test
+	  ./testing/marketplace/deployer_helm_tiller_base/onbuild/helm-dependency-build/run_test
 	@touch "$@"
 
 
@@ -37,12 +37,12 @@ TEST_ID := $(shell cat /dev/urandom | tr -dc 'a-z0-9' | head -c 8)
 		.build/var/REGISTRY \
 		$(shell find testing/marketplace/deployer_helm_tiller_base/onbuild/standard -type f) \
 		testing.Makefile \
-    | .testing/marketplace/deployer/helm_tiller_onbuild
+		| .testing/marketplace/deployer/helm_tiller_onbuild
 	$(call print_target)
 	TEST_ID=$(TEST_ID) \
 	REGISTRY=$(REGISTRY) \
 	MARKETPLACE_TOOLS_TAG=$(MARKETPLACE_TOOLS_TAG) \
-    ./testing/marketplace/deployer_helm_tiller_base/onbuild/standard/test
+	  ./testing/marketplace/deployer_helm_tiller_base/onbuild/standard/run_test
 	@touch "$@"
 
 
@@ -60,14 +60,14 @@ testing/marketplace/deployer/helm_tiller_onbuild: \
 		.build/marketplace/dev \
 		.build/var/MARKETPLACE_TOOLS_TAG \
 		.build/var/REGISTRY \
-		$(shell find testing/marketplace/deployer_envsubst/standard -type f) \
+		$(shell find testing/marketplace/deployer_envsubst_base/standard -type f) \
 		testing.Makefile \
-    | .testing/marketplace/deployer/envsubst
+		| .testing/marketplace/deployer/envsubst
 	$(call print_target)
 	TEST_ID=$(TEST_ID) \
 	REGISTRY=$(REGISTRY) \
 	MARKETPLACE_TOOLS_TAG=$(MARKETPLACE_TOOLS_TAG) \
-    ./testing/marketplace/deployer_envsubst_base/standard/test
+	  ./testing/marketplace/deployer_envsubst_base/standard/run_test
 	@touch "$@"
 
 .PHONY: testing/marketplace/deployer/envsubst
