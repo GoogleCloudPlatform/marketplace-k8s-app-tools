@@ -54,7 +54,7 @@ def process(schema, values, deployer_image, deployer_entrypoint):
   namespace = get_namespace(schema, values)
 
   # Inject DEPLOYER_IMAGE property values if not already present.
-  values = inject_deployer_image_properties(schema, deployer_image, values)
+  values = inject_deployer_image_properties(values, schema, deployer_image)
 
   # Handle provisioning of reporting secrets from storage if a URI
   # is provided.
@@ -97,7 +97,7 @@ def process(schema, values, deployer_image, deployer_entrypoint):
   return manifests
 
 
-def inject_deployer_image_properties(schema, deployer_image, values):
+def inject_deployer_image_properties(values, schema, deployer_image):
   for key in schema.properties:
     if key in values:
       continue

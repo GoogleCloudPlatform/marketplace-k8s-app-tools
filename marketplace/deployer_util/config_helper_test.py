@@ -51,7 +51,6 @@ properties:
       type: IMAGE
   propertyDeployerImage:
     type: string
-    default: gcr.io/google/deployer
     x-google-marketplace:
       type: DEPLOYER_IMAGE
   propertyPassword:
