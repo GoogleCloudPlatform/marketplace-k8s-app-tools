@@ -5,4 +5,5 @@ metadata:
 spec:
   containers:
   - name: $name
-    image: gcr.io/cloud-marketplace-containers/google/nginx1:latest
+    image: busybox
+    command: ['sleep', '3600']
