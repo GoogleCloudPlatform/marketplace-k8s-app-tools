@@ -28,6 +28,7 @@ XGOOGLE = 'x-google-marketplace'
 XTYPE_NAME = 'NAME'
 XTYPE_NAMESPACE = 'NAMESPACE'
 XTYPE_IMAGE = 'IMAGE'
+XTYPE_DEPLOYER_IMAGE = 'DEPLOYER_IMAGE'
 XTYPE_PASSWORD = 'GENERATED_PASSWORD'
 XTYPE_REPORTING_SECRET = 'REPORTING_SECRET'
 XTYPE_SERVICE_ACCOUNT = 'SERVICE_ACCOUNT'
@@ -196,7 +197,8 @@ class SchemaProperty:
         raise InvalidSchema('Property {} has {} without a type'.format(
             name, XGOOGLE))
       xt = self._x['type']
-      if xt in (XTYPE_NAME, XTYPE_NAMESPACE, XTYPE_APPLICATION_UID):
+      if xt in (XTYPE_NAME, XTYPE_NAMESPACE, XTYPE_APPLICATION_UID,
+                XTYPE_DEPLOYER_IMAGE):
         pass
       elif xt == XTYPE_IMAGE:
         d = self._x.get('image', {})
@@ -315,7 +317,7 @@ class SchemaProperty:
 
 
 class SchemaXImage:
-  """Wrapper class providing convenient access to IMAGE property."""
+  """Wrapper class providing convenient access to IMAGE and DEPLOYER_IMAGE properties."""
 
   def __init__(self, dictionary):
     self._split_by_colon = None

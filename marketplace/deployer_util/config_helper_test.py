@@ -49,6 +49,10 @@ properties:
     default: gcr.io/google/busybox
     x-google-marketplace:
       type: IMAGE
+  propertyDeployerImage:
+    type: string
+    x-google-marketplace:
+      type: DEPLOYER_IMAGE
   propertyPassword:
     type: string
     x-google-marketplace:
@@ -101,8 +105,8 @@ class ConfigHelperTest(unittest.TestCase):
         'propertyIntWithDefault', 'propertyInteger',
         'propertyIntegerWithDefault', 'propertyNumber',
         'propertyNumberWithDefault', 'propertyBoolean',
-        'propertyBooleanWithDefault', 'propertyImage', 'propertyPassword',
-        'applicationUid'
+        'propertyBooleanWithDefault', 'propertyImage', 'propertyDeployerImage',
+        'propertyPassword', 'applicationUid'
     }, set(schema.properties))
     self.assertEqual(str, schema.properties['propertyString'].type)
     self.assertIsNone(schema.properties['propertyString'].default)
@@ -131,6 +135,8 @@ class ConfigHelperTest(unittest.TestCase):
     self.assertEqual('gcr.io/google/busybox',
                      schema.properties['propertyImage'].default)
     self.assertEqual('IMAGE', schema.properties['propertyImage'].xtype)
+    self.assertEqual('DEPLOYER_IMAGE',
+                     schema.properties['propertyDeployerImage'].xtype)
     self.assertEqual(str, schema.properties['propertyPassword'].type)
     self.assertIsNone(schema.properties['propertyPassword'].default)
     self.assertEqual('GENERATED_PASSWORD',
@@ -241,6 +247,16 @@ class ConfigHelperTest(unittest.TestCase):
     self.assertIsNotNone(schema.properties['i'].image)
     self.assertEqual(('image.registry', 'image.repo', 'image.tag'),
                      schema.properties['i'].image._split_to_registry_repo_tag)
+
+  def test_deployer_image_type(self):
+    schema = config_helper.Schema.load_yaml("""
+        properties:
+          di:
+            type: string
+            x-google-marketplace:
+              type: DEPLOYER_IMAGE
+        """)
+    self.assertIsNotNone(schema.properties['di'])
 
   def test_password(self):
     schema = config_helper.Schema.load_yaml("""

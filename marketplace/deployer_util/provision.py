@@ -53,6 +53,9 @@ def process(schema, values, deployer_image, deployer_entrypoint):
   app_name = get_name(schema, values)
   namespace = get_namespace(schema, values)
 
+  # Inject DEPLOYER_IMAGE property values if not already present.
+  values = inject_deployer_image_properties(values, schema, deployer_image)
+
   # Handle provisioning of reporting secrets from storage if a URI
   # is provided.
   for key, value in values.items():
@@ -92,6 +95,16 @@ def process(schema, values, deployer_image, deployer_entrypoint):
       deployer_entrypoint=deployer_entrypoint,
       app_params=app_params)
   return manifests
+
+
+def inject_deployer_image_properties(values, schema, deployer_image):
+  for key in schema.properties:
+    if key in values:
+      continue
+    if not schema.properties[key].xtype == 'DEPLOYER_IMAGE':
+      continue
+    values[key] = deployer_image
+  return values
 
 
 def provision_from_storage(key, value, app_name, namespace):

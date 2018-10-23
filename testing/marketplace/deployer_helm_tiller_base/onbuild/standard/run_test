@@ -22,7 +22,7 @@ docker run \
   > dev
 chmod a+x dev
 
-app_parameters="{\"marketplace-integration.image\": \"$image\"}"
+app_parameters="{}"
 ./dev \
   /scripts/verify \
       --deployer="$image" \
