@@ -69,7 +69,7 @@ patch_assembly_phase.sh --status="Success"
 wait_for_ready.py \
   --name $NAME \
   --namespace $NAMESPACE \
-  --timeout 300
+  --timeout ${WAIT_FOR_READY_TIMEOUT:-300}
 
 tester_manifest="/data/tester.yaml"
 if [[ -e "$tester_manifest" ]]; then
@@ -77,7 +77,8 @@ if [[ -e "$tester_manifest" ]]; then
 
   run_tester.py \
     --namespace $NAMESPACE \
-    --manifest $tester_manifest
+    --manifest $tester_manifest \
+    --timeout ${TESTER_TIMEOUT:-300}
 fi
 
 clean_iam_resources.sh
