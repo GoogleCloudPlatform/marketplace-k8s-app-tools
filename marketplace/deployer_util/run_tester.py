@@ -30,6 +30,7 @@ def main():
   parser = ArgumentParser(description=_PROG_HELP)
   parser.add_argument('--namespace')
   parser.add_argument('--manifest')
+  parser.add_argument('--timeout', type=int, default=300)
   args = parser.parse_args()
 
   Command(
@@ -52,7 +53,7 @@ def main():
 
     start_time = time.time()
     poll_interval = 4
-    tester_timeout = 300
+    tester_timeout = args.timeout
 
     while True:
       try:
