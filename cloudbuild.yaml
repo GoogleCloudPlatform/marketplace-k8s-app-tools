@@ -35,7 +35,7 @@
 
 steps:
 
-- id: Build dev
+- id: &BuildDev Build dev
   name: gcr.io/cloud-builders/docker
   waitFor:
   - '-'
@@ -49,7 +49,7 @@ steps:
   - marketplace/dev/Dockerfile
   - .
 
-- id: Build deployer_envsubst
+- id: &BuildEnvsubst Build deployer_envsubst
   name: gcr.io/cloud-builders/docker
   waitFor:
   - '-'
@@ -122,6 +122,62 @@ steps:
   - --file
   - marketplace/deployer_helm_tiller_base/onbuild/Dockerfile
   - .
+
+- id: &GetKubectlCredentials Get Kubernetes Credentials
+  name: gcr.io/cloud-builders/gcloud
+  waitFor:
+  - '-'
+  args:
+  - container
+  - clusters
+  - get-credentials
+  - 'limani-integ'
+  - --region
+  - 'us-central1'
+  - --project
+  - '$PROJECT_ID'
+
+- id: &CopyKubectlCredentials Copy kubectl Credentials
+  name: gcr.io/google-appengine/debian9
+  waitFor:
+  - Get Kubernetes Credentials
+  entrypoint: bash
+  args:
+  - -exc
+  - |
+    mkdir -p /workspace/.kube/
+    cp -r $$HOME/.kube/ /workspace/
+
+- id: &CopyGcloudCredentials Copy gcloud Credentials
+  name: gcr.io/google-appengine/debian9
+  waitFor:
+  - Get Kubernetes Credentials
+  entrypoint: bash
+  args:
+  - -exc
+  - |
+    mkdir -p /workspace/.config/gcloud/
+    cp -r $$HOME/.config/gcloud/ /workspace/.config/
+
+- id: Verify
+  name: gcr.io/$PROJECT_ID/k8s/dev:sha_$COMMIT_SHA
+  waitFor:
+  - *BuildDev
+  - *BuildEnvsubst
+  - *BuildHelm
+  - *BuildHelmTiller
+  - *CopyGcloudCredentials
+  - *CopyKubectlCredentials
+  env:
+  - 'KUBE_CONFIG=/workspace/.kube'
+  - 'GCLOUD_CONFIG=/workspace/.config/gcloud'
+  # Use local Docker network named cloudbuild as described here:
+  # https://cloud.google.com/cloud-build/docs/overview#build_configuration_and_build_steps
+  - 'EXTRA_DOCKER_PARAMS=--net cloudbuild'
+  args:
+  - make
+  - --file=testing.Makefile
+  - testing/all
 
 images:
   - gcr.io/$PROJECT_ID/k8s/dev:sha_$COMMIT_SHA
