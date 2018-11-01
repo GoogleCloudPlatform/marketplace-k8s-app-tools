@@ -63,7 +63,7 @@ metadata:
   namespace: apptest-namespaces-gc
 spec:
   # Every 10 minutes.
-  schedule: "*/1 * * * *"
+  schedule: "*/10 * * * *"
   jobTemplate:
     spec:
       template:
