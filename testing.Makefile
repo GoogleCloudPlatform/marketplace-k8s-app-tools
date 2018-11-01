@@ -56,7 +56,7 @@ testing/marketplace/deployer/helm_tiller_onbuild: \
 	mkdir -p $@
 
 .testing/marketplace/deployer/envsubst/standard: \
-    .build/marketplace/deployer/envsubst \
+		.build/marketplace/deployer/envsubst \
 		.build/marketplace/dev \
 		.build/var/MARKETPLACE_TOOLS_TAG \
 		.build/var/REGISTRY \
@@ -73,4 +73,12 @@ testing/marketplace/deployer/helm_tiller_onbuild: \
 .PHONY: testing/marketplace/deployer/envsubst
 testing/marketplace/deployer/envsubst: \
 		.testing/marketplace/deployer/envsubst/standard
+
+
+.PHONY: testing/all
+testing/all: \
+		testing/marketplace/deployer/envsubst \
+		testing/marketplace/deployer/helm_tiller_onbuild
+
+
 endif
