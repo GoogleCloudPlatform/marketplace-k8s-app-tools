@@ -33,6 +33,10 @@
 #
 # Source: https://cloud.google.com/cloud-build/docs/configuring-builds/substitute-variable-values
 
+timeout: 1200s # 20m
+options:
+  machineType: 'N1_HIGHCPU_8'
+
 steps:
 
 - id: &BuildDev Build dev
