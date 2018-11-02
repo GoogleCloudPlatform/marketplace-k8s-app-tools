@@ -47,3 +47,10 @@ mpdev /scripts/doctor.py
 ```
 
 Save your gcloud project to an environment variable.
+
+
+## Install Application CRD
+
+```shell
+kubectl apply -f "https://raw.githubusercontent.com/GoogleCloudPlatform/marketplace-k8s-app-tools/master/crd/app-crd.yaml"
+```
