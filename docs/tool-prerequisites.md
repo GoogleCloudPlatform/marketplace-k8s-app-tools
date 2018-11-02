@@ -14,7 +14,6 @@ If you use helm, install [helm](https://github.com/helm/helm).
 Pull our dev container. It contains everything necessary for developing
 your application.
 
-
 ```shell
 docker pull gcr.io/cloud-marketplace-tools/k8s/dev
 ```
