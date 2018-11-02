@@ -32,6 +32,7 @@
 # $REVISION_ID: build.SourceProvenance.ResolvedRepoSource.Revision.CommitSha (only available for triggered builds)
 #
 # Source: https://cloud.google.com/cloud-build/docs/configuring-builds/substitute-variable-values
+timeout: 1200s # 20m
 
 steps:
 
@@ -177,6 +178,7 @@ steps:
   args:
   - make
   - --file=testing.Makefile
+  - -j4
   - testing/all
 
 images:
