@@ -38,6 +38,12 @@ Run the following to make sure that the dev tool is working:
 mpdev
 ```
 
+## Install Application CRD
+
+```shell
+kubectl apply -f "https://raw.githubusercontent.com/GoogleCloudPlatform/marketplace-k8s-app-tools/master/crd/app-crd.yaml"
+```
+
 ## Running the doctor tool
 
 Run the following to diagnose and correctly setup your environment.
