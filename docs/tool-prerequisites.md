@@ -14,6 +14,7 @@ If you use helm, install [helm](https://github.com/helm/helm).
 Pull our dev container. It contains everything necessary for developing
 your application.
 
+
 ```shell
 docker pull gcr.io/cloud-marketplace-tools/k8s/dev
 ```
@@ -38,6 +39,12 @@ Run the following to make sure that the dev tool is working:
 mpdev
 ```
 
+## Install Application CRD
+
+```shell
+kubectl apply -f "https://raw.githubusercontent.com/GoogleCloudPlatform/marketplace-k8s-app-tools/master/crd/app-crd.yaml"
+```
+
 ## Running the doctor tool
 
 Run the following to diagnose and correctly setup your environment.
@@ -47,10 +54,3 @@ mpdev /scripts/doctor.py
 ```
 
 Save your gcloud project to an environment variable.
-
-
-## Install Application CRD
-
-```shell
-kubectl apply -f "https://raw.githubusercontent.com/GoogleCloudPlatform/marketplace-k8s-app-tools/master/crd/app-crd.yaml"
-```
