@@ -199,8 +199,7 @@ Application CRD is not installed in your cluster.
 
 Run the following to install it:
 
-curl https://raw.githubusercontent.com/GoogleCloudPlatform/marketplace-k8s-app-tools/master/crd/app-crd.yaml \
-  | kubectl apply -f -
+kubectl apply -f "https://raw.githubusercontent.com/GoogleCloudPlatform/marketplace-k8s-app-tools/master/crd/app-crd.yaml"
 
 For more details about the application CRD, see
 https://github.com/kubernetes-sigs/application
