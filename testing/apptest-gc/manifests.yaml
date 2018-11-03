@@ -42,7 +42,7 @@ data:
         '.items[]
          | { "name": .metadata.name, "time": (now - (.metadata.creationTimestamp|fromdate)) }
          | select(.name | test("^apptest-\\w{8,16}$"))' \
-      | jq -r "select(.time <= $AGE_THRESHOLD) | .name"))
+      | jq -r "select(.time >= $AGE_THRESHOLD) | .name"))
 
     echo "Number of eligible namespaces: ${#namespaces[@]}"
 
@@ -75,6 +75,8 @@ spec:
             imagePullPolicy: Always
             args: ["/bin/bash", "/scripts/gc.sh"]
             env:
+            - name: AGE_THRESHOLD
+              value: '1800'
             - name: DRYRUN
               value: 'false'
             volumeMounts:
