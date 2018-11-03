@@ -23,7 +23,7 @@ __VAR_MAKEFILE__ := included
 
 
 .build/var:
-	mkdir -p .build/var
+	mkdir -p "$@"
 
 
 # Since we can't make pattern targets phony, we make them
