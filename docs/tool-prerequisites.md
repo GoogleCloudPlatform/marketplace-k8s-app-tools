@@ -19,8 +19,8 @@ docker pull gcr.io/cloud-marketplace-tools/k8s/dev
 ```
 
 Extract the helper script for running the dev tools. This command creates
-an executable `mpdev` in your user bin directory. (Note: there doesn't
-alreayd exist `bin` directory in your home directory, you'll need to create
+an executable `mpdev` in your user bin directory. (Note: there isn't
+already the `bin` directory in your home directory, you'll need to create
 it and add it to `$PATH`, or log out and log back in for it to be
 automatically added to `$PATH`.)
 
