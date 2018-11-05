@@ -1,0 +1,90 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: apptest-namespaces-gc
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: namespace-edit
+rules:
+- apiGroups: [""]
+  resources: ["namespaces"]
+  verbs: ["*"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: apptest-namespaces-gc-crb
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: namespace-edit
+subjects:
+- kind: ServiceAccount
+  name: default
+  namespace: apptest-namespaces-gc
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gc-script
+  namespace: apptest-namespaces-gc
+data:
+  gc.sh: |-
+    set -eox pipefail
+
+    AGE_THRESHOLD=${AGE_THRESHOLD:-1800}
+    DRYRUN=${DRYRUN:-true}
+
+    namespaces=($(kubectl get namespaces -o json \
+      | jq \
+        '.items[]
+         | { "name": .metadata.name, "time": (now - (.metadata.creationTimestamp|fromdate)) }
+         | select(.name | test("^apptest-\\w{8,16}$"))' \
+      | jq -r "select(.time >= $AGE_THRESHOLD) | .name"))
+
+    echo "Number of eligible namespaces: ${#namespaces[@]}"
+
+    if [[ "${#namespaces[@]}" -gt 0 ]]; then
+      for ns in ${namespaces[*]}; do
+        if [[ $DRYRUN == "false" ]]; then
+          kubectl delete namespace "$ns"
+        else
+          echo "Would delete $ns"
+        fi
+      done
+    fi
+
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: apptest-namespaces-gc
+  namespace: apptest-namespaces-gc
+spec:
+  # Every 10 minutes.
+  schedule: "*/10 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: gc
+            image: gcr.io/cloud-marketplace-tools/k8s/dev:latest
+            imagePullPolicy: Always
+            args: ["/bin/bash", "/scripts/gc.sh"]
+            env:
+            - name: AGE_THRESHOLD
+              value: '1800'
+            - name: DRYRUN
+              value: 'false'
+            volumeMounts:
+            - name: script
+              mountPath: /scripts
+          volumes:
+          - name: script
+            configMap:
+              name: gc-script
+          restartPolicy: Never
+      backoffLimit: 2
