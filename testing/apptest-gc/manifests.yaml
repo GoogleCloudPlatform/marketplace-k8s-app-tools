@@ -32,7 +32,7 @@ metadata:
   namespace: apptest-namespaces-gc
 data:
   gc.sh: |-
-    set -eo pipefail
+    set -eox pipefail
 
     AGE_THRESHOLD=${AGE_THRESHOLD:-1800}
     DRYRUN=${DRYRUN:-true}
