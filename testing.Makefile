@@ -2,17 +2,18 @@ ifndef __TESTING_MAKEFILE__
 
 __TESTING_MAKEFILE__ := included
 
+include common.Makefile
+
 # TODO: Move testing targets in top-level Makefile to here and include
 # this file in top-level Makefile.
 
-include common.Makefile
 include gcloud.Makefile
 include marketplace.Makefile
 
 TEST_ID := $(shell cat /dev/urandom | tr -dc 'a-z0-9' | head -c 8)
 
 .testing/marketplace/deployer/helm_tiller_onbuild:
-	mkdir -p $@
+	mkdir -p "$@"
 
 .testing/marketplace/deployer/helm_tiller_onbuild/helm-dependency-build: \
 		.build/marketplace/deployer/helm_tiller_onbuild \
@@ -53,7 +54,7 @@ testing/marketplace/deployer/helm_tiller_onbuild: \
 
 
 .testing/marketplace/deployer/envsubst:
-	mkdir -p $@
+	mkdir -p "$@"
 
 .testing/marketplace/deployer/envsubst/standard: \
 		.build/marketplace/deployer/envsubst \
