@@ -196,12 +196,15 @@ is only allowed to create namespaced resources.
   the application with a properly configured service account. See RBAC
   section in Part 2 on how to set up such a service account.
 
-## Part 1b (recommended): Creating a wrapper chart
+## Part 1b: Optional: Creating a wrapper chart
 
-It is recommended to create a new top level chart for your application
-version the works with Marketplace. This helps avoid or minimize
-modifications to the upstream chart. This top level chart has a single
-dependency which is the main chart.
+One way to import your upstream chart as-is is to create a wrapper
+charter. This top level chart has a single dependency which is the
+main chart.
+
+**NOTE**: The main caveat here is that existing upstream instructions
+for changing the values cannot be used as-is. All values have to be
+prefixed with the upstream chart name. See below for more details.
 
 In this example, we create a new `wordpress-mp` chart that uses the
 main `wordpress` chart. Create the following directory structure:
