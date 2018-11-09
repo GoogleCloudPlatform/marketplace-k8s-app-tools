@@ -273,7 +273,13 @@ dbPassword:
       type: GENERATED_PASSWORD
       generatedPassword:
         length: 16
+        includeSymbols: False  # Default is False
+        base64: True           # Default is True
 ```
+
+- `includeSymbols` if `True`, the special characters are included in the generated password.
+- `base64` if `True`, the generated password is passed as a base64-encoded value. This means it can be used directly in a `Secret` manifest. If the value is to be encoding in your helm template, this property should be set to `False`.
+
 ---
 
 ### type: SERVICE_ACCOUNT
