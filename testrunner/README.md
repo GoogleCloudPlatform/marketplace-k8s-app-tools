@@ -29,11 +29,14 @@ To build and run the docker container:
   # Make temporary directory
   mkdir -p tmp
 
-  # Copy the file and rename it
+  # Copy the binary and rename it
   cp bazel-bin/runner/main tmp/testrunner
 
+  # Copy all Docker specific files
+  cp docker/* tmp
+
   # Build container
-  docker build --tag=testrunner --file=runner/Dockerfile tmp
+  docker build --tag=testrunner tmp
 
   # Run the installed container, mounting the test definition
   # files as a volume.
@@ -44,27 +47,10 @@ To build and run the docker container:
 
 # Build GCP container
 
-Two workarounds before running the command below:
-
-- Make all the files globally readable, or bazel on cloudbuild
-  will eventually complain that files are not accessible.
+Execute the following.
 
   ```
-  chmod a+r -R *
-  ```
-
-- Remove all bazel symlinks (eventually some `.gcloudignore`
-  file will help automatically ignoring these files) to avoid
-  them being uploaded to cloudbuild.
-
-  ```
-  rm -r bazel-*
-  ```
-
-Then execute the following.
-
-  ```
-  gcloud container builds submit --config cloudbuild.yaml .
+  gcloud builds submit --config cloudbuild.yaml .
   ```
 
 This publishes a `testrunner` container in your project (i.e.
@@ -74,8 +60,6 @@ You can test by pulling the published image and run it.
 
   ```
   export PROJECT=$(gcloud config get-value project)
-
-  gcloud docker -- pull gcr.io/$PROJECT/testrunner
 
   docker run --rm \
     -v=$PWD/examples:/examples \
