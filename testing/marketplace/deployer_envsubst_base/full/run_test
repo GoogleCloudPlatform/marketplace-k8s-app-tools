@@ -1,0 +1,13 @@
+#!/bin/bash
+
+set -eox pipefail
+
+test_name="$(dirname "$0" | cut -d/ -f2-)"
+test_directory=$(mktemp --dry-run)
+cp -r $(dirname "$0") "$test_directory"
+cd "$test_directory"
+
+export REGISTRY="$REGISTRY/$test_name"
+export TAG="$MARKETPLACE_TOOLS_TAG-$TEST_ID"
+
+make app/verify
