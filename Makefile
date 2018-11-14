@@ -1,16 +1,16 @@
 ### Images publishing ###
 
 include marketplace.Makefile
-include testing.Makefile
+include tests.Makefile
 
 ### Testing ###
 
 .PHONY: lint/py
-lint/py: .build/testing/py
+lint/py: .build/tests/py
 	@docker run --rm \
 	  -v $(PWD):/data:ro \
 	  --entrypoint python2 \
-	  testing/py \
+	  tests/py \
 	  -m yapf --style chromium --recursive --diff \
 	  --exclude "data/vendor/" \
 	  --parallel \
@@ -19,17 +19,17 @@ lint/py: .build/testing/py
 	@docker run --rm \
 	  -v $(PWD):/data:ro \
 	  --entrypoint python2 \
-	  testing/py \
+	  tests/py \
 	  -m pyflakes "/data"
 	@$(call print_notice,No lint errors found.)
 
 
 .PHONY: format/py
-format/py: .build/testing/py
+format/py: .build/tests/py
 	@docker run --rm \
 	  -v $(PWD):/data \
 	  --entrypoint python2 \
-	  testing/py \
+	  tests/py \
 	  -m yapf --style chromium --recursive --in-place \
 	  --exclude "data/vendor/" \
 	  --verbose --parallel \
