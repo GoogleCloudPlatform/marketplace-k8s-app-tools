@@ -155,7 +155,7 @@ steps:
   args:
   - make
   - -j4
-  - testing/integration
+  - tests/integration
 
 images:
   - gcr.io/$PROJECT_ID/k8s/dev:sha_$COMMIT_SHA
