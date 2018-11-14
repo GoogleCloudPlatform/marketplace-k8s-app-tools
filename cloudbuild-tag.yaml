@@ -31,6 +31,7 @@ steps:
     helm package marketplace/charts/marketplace-integration/ \
         --version $TAG_NAME \
         --destination charts-tgz/
+    #TODO(trironkk): Update index.yaml.
 
 images:
 - gcr.io/$PROJECT_ID/k8s/dev:$TAG_NAME
