@@ -31,7 +31,6 @@ include var.Makefile
 
 
 .build/marketplace/deployer/envsubst: \
-		.build/marketplace/delete_deprecated \
 		.build/var/MARKETPLACE_TOOLS_TAG \
 		marketplace/deployer_envsubst_base/* \
 		marketplace/deployer_util/* \
@@ -47,7 +46,6 @@ include var.Makefile
 .build/marketplace/deployer/helm: \
 		marketplace/deployer_util/* \
 		marketplace/deployer_helm_base/* \
-		.build/marketplace/delete_deprecated \
 		.build/var/MARKETPLACE_TOOLS_TAG \
 		| .build/marketplace/deployer
 	$(call print_target)
