@@ -5,15 +5,6 @@ include testing.Makefile
 
 ### Testing ###
 
-PYTHON_TEST_DIRS = $(shell find . \
-                     -path ./vendor -prune -o \
-                     -name "*_test.py" -type f -print \
-                     | xargs -n 1 dirname | sort | uniq)
-
-# Append .__pytest__ to all python test directories to generate targets.
-PYTHON_TEST_TARGETS = $(foreach f,$(PYTHON_TEST_DIRS),$(f).__pytest__)
-
-
 .PHONY: lint/py
 lint/py: .build/testing/py
 	@docker run --rm \
@@ -43,28 +34,3 @@ format/py: .build/testing/py
 	  --exclude "data/vendor/" \
 	  --verbose --parallel \
 	  "/data"
-
-
-.PHONY: test/py
-test/py: $(PYTHON_TEST_TARGETS)
-	@$(call print_notice,All tests passed.)
-
-
-.PHONY: $(PYTHON_TEST_TARGETS)
-$(PYTHON_TEST_TARGETS): %.__pytest__: .build/testing/py
-	$(info === Running tests in directory $* ===)
-	@docker run --rm \
-	  -v $(PWD):/data:ro \
-	  --entrypoint python2 \
-	  testing/py \
-	  -m unittest discover -s "/data/$*" -p "*_test.py"
-
-
-.build/testing: | .build
-	mkdir -p "$@"
-
-
-.build/testing/py: testing/py/Dockerfile | .build/testing
-	$(call print_target)
-	docker build -t testing/py testing/py
-	@touch "$@"

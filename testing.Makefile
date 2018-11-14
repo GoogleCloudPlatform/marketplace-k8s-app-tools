@@ -3,10 +3,6 @@ ifndef __TESTING_MAKEFILE__
 __TESTING_MAKEFILE__ := included
 
 include common.Makefile
-
-# TODO: Move testing targets in top-level Makefile to here and include
-# this file in top-level Makefile.
-
 include gcloud.Makefile
 include marketplace.Makefile
 
@@ -76,10 +72,44 @@ testing/marketplace/deployer/envsubst: \
 		.testing/marketplace/deployer/envsubst/standard
 
 
-.PHONY: testing/all
-testing/all: \
+.PHONY: testing/integration
+testing/integration: \
 		testing/marketplace/deployer/envsubst \
 		testing/marketplace/deployer/helm_tiller_onbuild
+
+
+
+PYTHON_TEST_DIRS = $(shell find . \
+                     -path ./vendor -prune -o \
+                     -name "*_test.py" -type f -print \
+                     | xargs -n 1 dirname | sort | uniq)
+
+# Append .__pytest__ to all python test directories to generate targets.
+PYTHON_TEST_TARGETS = $(foreach f,$(PYTHON_TEST_DIRS),$(f).__pytest__)
+
+
+.PHONY: test/py
+testing/py: $(PYTHON_TEST_TARGETS)
+	@$(call print_notice,All tests passed.)
+
+
+.PHONY: $(PYTHON_TEST_TARGETS)
+$(PYTHON_TEST_TARGETS): %.__pytest__: .build/testing/py
+	$(info === Running tests in directory $* ===)
+	@docker run --rm \
+	  -v $(PWD):/data:ro \
+	  --entrypoint python2 \
+	  testing/py \
+	  -m unittest discover -s "/data/$*" -p "*_test.py"
+
+.build/testing: | .build
+	mkdir -p "$@"
+
+
+.build/testing/py: testing/py/Dockerfile | .build/testing
+	$(call print_target)
+	docker build -t testing/py testing/py
+	@touch "$@"
 
 
 endif
