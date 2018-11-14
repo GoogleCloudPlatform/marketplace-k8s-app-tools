@@ -33,140 +33,141 @@
 #
 # Source: https://cloud.google.com/cloud-build/docs/configuring-builds/substitute-variable-values
 timeout: 1200s # 20m
-options:
-  machineType: 'N1_HIGHCPU_8'
+# options:
+#   machineType: 'N1_HIGHCPU_8'
 
 steps:
 
-- id: &BuildDev Build dev
+# - id: &BuildDev Build dev
+#   name: gcr.io/cloud-builders/docker
+#   waitFor:
+#   - '-'
+#   args:
+#   - build
+#   - --tag
+#   - gcr.io/$PROJECT_ID/k8s/dev:sha_$COMMIT_SHA
+#   - --tag
+#   - gcr.io/$PROJECT_ID/k8s/dev:sha_$SHORT_SHA
+#   - --file
+#   - marketplace/dev/Dockerfile
+#   - .
+# 
+# - id: &BuildEnvsubst Build deployer_envsubst
+#   name: gcr.io/cloud-builders/docker
+#   waitFor:
+#   - '-'
+#   args:
+#   - build
+#   - --tag
+#   - gcr.io/$PROJECT_ID/k8s/deployer_envsubst:sha_$COMMIT_SHA
+#   - --tag
+#   - gcr.io/$PROJECT_ID/k8s/deployer_envsubst:sha_$SHORT_SHA
+#   - --file
+#   - marketplace/deployer_envsubst_base/Dockerfile
+#   - .
+# 
+# - id: &BuildHelm Build deployer_helm
+#   name: gcr.io/cloud-builders/docker
+#   waitFor:
+#   - '-'
+#   args:
+#   - build
+#   - --tag
+#   - gcr.io/$PROJECT_ID/k8s/deployer_helm:sha_$COMMIT_SHA
+#   - --tag
+#   - gcr.io/$PROJECT_ID/k8s/deployer_helm:sha_$SHORT_SHA
+#   - --file
+#   - marketplace/deployer_helm_base/Dockerfile
+#   - .
+# 
+# - id: Build deployer_helm onbuild
+#   name: gcr.io/cloud-builders/docker
+#   waitFor:
+#   - *BuildHelm
+#   args:
+#   - build
+#   - --build-arg
+#   - FROM=gcr.io/$PROJECT_ID/k8s/deployer_helm:sha_$COMMIT_SHA
+#   - --tag
+#   - gcr.io/$PROJECT_ID/k8s/deployer_helm/onbuild:sha_$COMMIT_SHA
+#   - --tag
+#   - gcr.io/$PROJECT_ID/k8s/deployer_helm/onbuild:sha_$SHORT_SHA
+#   - --file
+#   - marketplace/deployer_helm_base/onbuild/Dockerfile
+#   - .
+# 
+# - id: &BuildHelmTiller Build deployer_helm_tiller
+#   name: gcr.io/cloud-builders/docker
+#   waitFor:
+#   - '-'
+#   args:
+#   - build
+#   - --tag
+#   - gcr.io/$PROJECT_ID/k8s/deployer_helm_tiller:sha_$COMMIT_SHA
+#   - --tag
+#   - gcr.io/$PROJECT_ID/k8s/deployer_helm_tiller:sha_$SHORT_SHA
+#   - --file
+#   - marketplace/deployer_helm_tiller_base/Dockerfile
+#   - .
+# 
+# - id: Build deployer_helm_tiller onbuild
+#   name: gcr.io/cloud-builders/docker
+#   waitFor:
+#   - *BuildHelmTiller
+#   args:
+#   - build
+#   - --build-arg
+#   - FROM=gcr.io/$PROJECT_ID/k8s/deployer_helm_tiller:sha_$COMMIT_SHA
+#   - --tag
+#   - gcr.io/$PROJECT_ID/k8s/deployer_helm_tiller/onbuild:sha_$COMMIT_SHA
+#   - --tag
+#   - gcr.io/$PROJECT_ID/k8s/deployer_helm_tiller/onbuild:sha_$SHORT_SHA
+#   - --file
+#   - marketplace/deployer_helm_tiller_base/onbuild/Dockerfile
+#   - .
+# 
+# - id: &InitializeCredentials Initialize Credentials
+#   name: gcr.io/cloud-builders/gcloud
+#   waitFor:
+#   - '-'
+#   entrypoint: bash
+#   args:
+#   - -exc
+#   - |
+#     gcloud container clusters get-credentials 'limani-integ' --region 'us-central1' --project '$PROJECT_ID'
+#     mkdir -p /workspace/.kube/
+#     cp -r $$HOME/.kube/ /workspace/
+#     mkdir -p /workspace/.config/gcloud/
+#     cp -r $$HOME/.config/gcloud/ /workspace/.config/
+# 
+# - id: &Verify Verify
+#   name: gcr.io/$PROJECT_ID/k8s/dev:sha_$COMMIT_SHA
+#   waitFor:
+#   - *BuildDev
+#   - *InitializeCredentials
+#   env:
+#   - 'KUBE_CONFIG=/workspace/.kube'
+#   - 'GCLOUD_CONFIG=/workspace/.config/gcloud'
+#   # Use local Docker network named cloudbuild as described here:
+#   # https://cloud.google.com/cloud-build/docs/overview#build_configuration_and_build_steps
+#   - 'EXTRA_DOCKER_PARAMS=--net cloudbuild'
+#   - MARKETPLACE_TOOLS_TAG=testing-sha_$COMMIT_SHA
+#   args:
+#   - make
+#   - -j4
+#   - testing/all
+
+- id: &FetchFullHistory Fetch Full History
+  name: gcr.io/cloud-builders/git
+  args: [fetch, --depth=100]
+
+- id: Push artifacts
   name: gcr.io/cloud-builders/docker
   waitFor:
-  - '-'
-  args:
-  - build
-  - --tag
-  - gcr.io/$PROJECT_ID/k8s/dev:sha_$COMMIT_SHA
-  - --tag
-  - gcr.io/$PROJECT_ID/k8s/dev:sha_$SHORT_SHA
-  - --file
-  - marketplace/dev/Dockerfile
-  - .
-
-- id: &BuildEnvsubst Build deployer_envsubst
-  name: gcr.io/cloud-builders/docker
-  waitFor:
-  - '-'
-  args:
-  - build
-  - --tag
-  - gcr.io/$PROJECT_ID/k8s/deployer_envsubst:sha_$COMMIT_SHA
-  - --tag
-  - gcr.io/$PROJECT_ID/k8s/deployer_envsubst:sha_$SHORT_SHA
-  - --file
-  - marketplace/deployer_envsubst_base/Dockerfile
-  - .
-
-- id: &BuildHelm Build deployer_helm
-  name: gcr.io/cloud-builders/docker
-  waitFor:
-  - '-'
-  args:
-  - build
-  - --tag
-  - gcr.io/$PROJECT_ID/k8s/deployer_helm:sha_$COMMIT_SHA
-  - --tag
-  - gcr.io/$PROJECT_ID/k8s/deployer_helm:sha_$SHORT_SHA
-  - --file
-  - marketplace/deployer_helm_base/Dockerfile
-  - .
-
-- id: Build deployer_helm onbuild
-  name: gcr.io/cloud-builders/docker
-  waitFor:
-  - *BuildHelm
-  args:
-  - build
-  - --build-arg
-  - FROM=gcr.io/$PROJECT_ID/k8s/deployer_helm:sha_$COMMIT_SHA
-  - --tag
-  - gcr.io/$PROJECT_ID/k8s/deployer_helm/onbuild:sha_$COMMIT_SHA
-  - --tag
-  - gcr.io/$PROJECT_ID/k8s/deployer_helm/onbuild:sha_$SHORT_SHA
-  - --file
-  - marketplace/deployer_helm_base/onbuild/Dockerfile
-  - .
-
-- id: &BuildHelmTiller Build deployer_helm_tiller
-  name: gcr.io/cloud-builders/docker
-  waitFor:
-  - '-'
-  args:
-  - build
-  - --tag
-  - gcr.io/$PROJECT_ID/k8s/deployer_helm_tiller:sha_$COMMIT_SHA
-  - --tag
-  - gcr.io/$PROJECT_ID/k8s/deployer_helm_tiller:sha_$SHORT_SHA
-  - --file
-  - marketplace/deployer_helm_tiller_base/Dockerfile
-  - .
-
-- id: Build deployer_helm_tiller onbuild
-  name: gcr.io/cloud-builders/docker
-  waitFor:
-  - *BuildHelmTiller
-  args:
-  - build
-  - --build-arg
-  - FROM=gcr.io/$PROJECT_ID/k8s/deployer_helm_tiller:sha_$COMMIT_SHA
-  - --tag
-  - gcr.io/$PROJECT_ID/k8s/deployer_helm_tiller/onbuild:sha_$COMMIT_SHA
-  - --tag
-  - gcr.io/$PROJECT_ID/k8s/deployer_helm_tiller/onbuild:sha_$SHORT_SHA
-  - --file
-  - marketplace/deployer_helm_tiller_base/onbuild/Dockerfile
-  - .
-
-- id: &InitializeCredentials Initialize Credentials
-  name: gcr.io/cloud-builders/gcloud
-  waitFor:
-  - '-'
+  - *FetchFullHistory
   entrypoint: bash
   args:
   - -exc
   - |
-    gcloud container clusters get-credentials 'limani-integ' --region 'us-central1' --project '$PROJECT_ID'
-    mkdir -p /workspace/.kube/
-    cp -r $$HOME/.kube/ /workspace/
-    mkdir -p /workspace/.config/gcloud/
-    cp -r $$HOME/.config/gcloud/ /workspace/.config/
-
-- id: Verify
-  name: gcr.io/$PROJECT_ID/k8s/dev:sha_$COMMIT_SHA
-  waitFor:
-  - *BuildDev
-  - *InitializeCredentials
-  env:
-  - 'KUBE_CONFIG=/workspace/.kube'
-  - 'GCLOUD_CONFIG=/workspace/.config/gcloud'
-  # Use local Docker network named cloudbuild as described here:
-  # https://cloud.google.com/cloud-build/docs/overview#build_configuration_and_build_steps
-  - 'EXTRA_DOCKER_PARAMS=--net cloudbuild'
-  - MARKETPLACE_TOOLS_TAG=testing-sha_$COMMIT_SHA
-  args:
-  - make
-  - -j4
-  - testing/all
-
-images:
-  - gcr.io/$PROJECT_ID/k8s/dev:sha_$COMMIT_SHA
-  - gcr.io/$PROJECT_ID/k8s/dev:sha_$SHORT_SHA
-  - gcr.io/$PROJECT_ID/k8s/deployer_envsubst:sha_$COMMIT_SHA
-  - gcr.io/$PROJECT_ID/k8s/deployer_envsubst:sha_$SHORT_SHA
-  - gcr.io/$PROJECT_ID/k8s/deployer_helm:sha_$COMMIT_SHA
-  - gcr.io/$PROJECT_ID/k8s/deployer_helm:sha_$SHORT_SHA
-  - gcr.io/$PROJECT_ID/k8s/deployer_helm/onbuild:sha_$COMMIT_SHA
-  - gcr.io/$PROJECT_ID/k8s/deployer_helm/onbuild:sha_$SHORT_SHA
-  - gcr.io/$PROJECT_ID/k8s/deployer_helm_tiller:sha_$COMMIT_SHA
-  - gcr.io/$PROJECT_ID/k8s/deployer_helm_tiller:sha_$SHORT_SHA
-  - gcr.io/$PROJECT_ID/k8s/deployer_helm_tiller/onbuild:sha_$COMMIT_SHA
-  - gcr.io/$PROJECT_ID/k8s/deployer_helm_tiller/onbuild:sha_$SHORT_SHA
+    git log --graph --all --decorate --oneline
+    git describe --tags --always --dirty
