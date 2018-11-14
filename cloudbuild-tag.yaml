@@ -1,5 +1,6 @@
 steps:
-- id: Retag
+
+- id: Publish Images
   name: gcr.io/cloud-builders/docker
   entrypoint: bash
   args:
@@ -17,8 +18,28 @@ steps:
     docker pull gcr.io/$PROJECT_ID/k8s/deployer_envsubst:sha_$COMMIT_SHA
     docker tag gcr.io/$PROJECT_ID/k8s/deployer_envsubst:sha_$COMMIT_SHA gcr.io/$PROJECT_ID/k8s/deployer_envsubst:$TAG_NAME
 
+- id: Publish Charts
+  name: gcr.io/$PROJECT_ID/k8s/dev:sha_$COMMIT_SHA
+  waitFor:
+  - *BuildDev
+  entrypoint: bash
+  args:
+  - -exc
+  - |
+    mkdir charts-tgz/
+    helm init --client-only
+    helm package marketplace/charts/marketplace-integration/ \
+        --version $TAG_NAME \
+        --destination charts-tgz/
+
 images:
 - gcr.io/$PROJECT_ID/k8s/dev:$TAG_NAME
 - gcr.io/$PROJECT_ID/k8s/deployer_helm:$TAG_NAME
 - gcr.io/$PROJECT_ID/k8s/deployer_helm/onbuild:$TAG_NAME
 - gcr.io/$PROJECT_ID/k8s/deployer_envsubst:$TAG_NAME
+
+artifacts:
+  objects:
+    location: gs://$PROJECT_ID-charts/
+    paths:
+    - charts-tgz/*
