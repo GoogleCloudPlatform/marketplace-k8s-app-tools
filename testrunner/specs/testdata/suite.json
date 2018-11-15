@@ -36,29 +36,20 @@
       "bashTest": {
         "script": "echo \"Text1\"\n>2& echo \"Text2\"",
         "expect": {
-           "exitCode": [{
-             "equals": 0
-           },{
-             "notEquals": 1
-           }],
-          "stdout": [{
-            "contains": "Text1"
-          },{
-            "notContains": "Foo"
-          },{
-            "notContains": "Bar"
-          },{
+          "exitCode": {
+            "equals": 0,
+            "notEquals": 1
+          },
+          "stdout": {
+            "contains": "Text1",
+            "notContains": "Foo",
             "matches": "T.xt1"
-          }],
-          "stderr": [{
-            "contains": "Text2"
-          },{
-            "notContains": "Foo"
-          },{
-            "notContains": "Bar"
-          },{
+          },
+          "stderr": {
+            "contains": "Text2",
+            "notContains": "Foo",
             "matches": "T.xt2"
-          }]
+          }
         }
       }
     }

@@ -97,25 +97,21 @@ func validateResult(status int, stdout, stderr string, test *specs.BashTest) str
 	return ""
 }
 
-func validateErrorCode(status int, expect *[]specs.IntAssert) string {
+func validateErrorCode(status int, expect *specs.IntAssert) string {
 	if expect != nil {
-		for _, assert := range *expect {
-			result := asserts.DoAssert(status, assert)
-			if result != "" {
-				return result
-			}
+		result := asserts.DoAssert(status, expect)
+		if result != "" {
+			return result
 		}
 	}
 	return ""
 }
 
-func validateBufferedOutput(out string, expect *[]specs.StringAssert) string {
+func validateBufferedOutput(out string, expect *specs.StringAssert) string {
 	if expect != nil {
-		for _, assert := range *expect {
-			result := asserts.DoAssert(out, assert)
-			if result != "" {
-				return result
-			}
+		result := asserts.DoAssert(out, expect)
+		if result != "" {
+			return result
 		}
 	}
 	return ""

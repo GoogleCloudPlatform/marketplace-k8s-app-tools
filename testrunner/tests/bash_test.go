@@ -32,14 +32,14 @@ func (e *SimpleSetupExecutor) RunTest(test *specs.BashTest) (int, string, string
 func TestSimpleSetup(t *testing.T) {
 	shouldPass(t, &specs.BashTest{
 		Expect: &specs.CliExpect{
-			ExitCode: &[]specs.IntAssert{
-				{Equals: newInt(0)},
+			ExitCode: &specs.IntAssert{
+				Equals: newInt(0),
 			},
-			Stdout: &[]specs.StringAssert{
-				{Exactly: newString("FOO")},
+			Stdout: &specs.StringAssert{
+				Exactly: newString("FOO"),
 			},
-			Stderr: &[]specs.StringAssert{
-				{Exactly: newString("BAR")},
+			Stderr: &specs.StringAssert{
+				Exactly: newString("BAR"),
 			},
 		},
 	}, &SimpleSetupExecutor{})
@@ -54,14 +54,14 @@ func (e *FailingExecutor) RunTest(test *specs.BashTest) (int, string, string, er
 func TestFailingExecutor(t *testing.T) {
 	shouldFail(t, &specs.BashTest{
 		Expect: &specs.CliExpect{
-			ExitCode: &[]specs.IntAssert{
-				{Equals: newInt(0)},
+			ExitCode: &specs.IntAssert{
+				Equals: newInt(0),
 			},
-			Stdout: &[]specs.StringAssert{
-				{Exactly: newString("FOO")},
+			Stdout: &specs.StringAssert{
+				Exactly: newString("FOO"),
 			},
-			Stderr: &[]specs.StringAssert{
-				{Exactly: newString("BAR")},
+			Stderr: &specs.StringAssert{
+				Exactly: newString("BAR"),
 			},
 		},
 	}, &FailingExecutor{})
@@ -76,41 +76,40 @@ func (e *ExitCodeExecutor) RunTest(test *specs.BashTest) (int, string, string, e
 func TestExitCodeParsing(t *testing.T) {
 	shouldPass(t, &specs.BashTest{
 		Expect: &specs.CliExpect{
-			ExitCode: &[]specs.IntAssert{
-				{Equals: newInt(42)},
+			ExitCode: &specs.IntAssert{
+				Equals: newInt(42),
 			},
 		},
 	}, &ExitCodeExecutor{})
 
 	shouldPass(t, &specs.BashTest{
 		Expect: &specs.CliExpect{
-			ExitCode: &[]specs.IntAssert{
-				{Equals: newInt(42)},
-				{Equals: newInt(42)},
-				{NotEquals: newInt(41)},
-				{GreaterThan: newInt(41)},
+			ExitCode: &specs.IntAssert{
+				Equals:      newInt(42),
+				NotEquals:   newInt(41),
+				GreaterThan: newInt(41),
 			},
-			Stdout: &[]specs.StringAssert{
-				{Exactly: newString("")},
+			Stdout: &specs.StringAssert{
+				Exactly: newString(""),
 			},
-			Stderr: &[]specs.StringAssert{
-				{Exactly: newString("")},
-			},
-		},
-	}, &ExitCodeExecutor{})
-
-	shouldFail(t, &specs.BashTest{
-		Expect: &specs.CliExpect{
-			ExitCode: &[]specs.IntAssert{
-				{Equals: newInt(0)},
+			Stderr: &specs.StringAssert{
+				Exactly: newString(""),
 			},
 		},
 	}, &ExitCodeExecutor{})
 
 	shouldFail(t, &specs.BashTest{
 		Expect: &specs.CliExpect{
-			ExitCode: &[]specs.IntAssert{
-				{LessThan: newInt(40)},
+			ExitCode: &specs.IntAssert{
+				Equals: newInt(0),
+			},
+		},
+	}, &ExitCodeExecutor{})
+
+	shouldFail(t, &specs.BashTest{
+		Expect: &specs.CliExpect{
+			ExitCode: &specs.IntAssert{
+				LessThan: newInt(40),
 			},
 		},
 	}, &ExitCodeExecutor{})
@@ -125,40 +124,40 @@ func (e *StdoutExecutor) RunTest(test *specs.BashTest) (int, string, string, err
 func TestStdoutParsing(t *testing.T) {
 	shouldPass(t, &specs.BashTest{
 		Expect: &specs.CliExpect{
-			Stdout: &[]specs.StringAssert{
-				{Exactly: newString("Lorem ipsum dolor sit amet, consectetur adipiscing elit.\nProin nibh augue, suscipit a, scelerisque sed, lacinia in, mi.")},
+			Stdout: &specs.StringAssert{
+				Exactly: newString("Lorem ipsum dolor sit amet, consectetur adipiscing elit.\nProin nibh augue, suscipit a, scelerisque sed, lacinia in, mi."),
 			},
 		},
 	}, &StdoutExecutor{})
 
 	shouldPass(t, &specs.BashTest{
 		Expect: &specs.CliExpect{
-			ExitCode: &[]specs.IntAssert{
-				{Equals: newInt(0)},
+			ExitCode: &specs.IntAssert{
+				Equals: newInt(0),
 			},
-			Stdout: &[]specs.StringAssert{
-				{Exactly: newString("Lorem ipsum dolor sit amet, consectetur adipiscing elit.\nProin nibh augue, suscipit a, scelerisque sed, lacinia in, mi.")},
-				{Contains: newString("consectetur a")},
+			Stdout: &specs.StringAssert{
+				Exactly:  newString("Lorem ipsum dolor sit amet, consectetur adipiscing elit.\nProin nibh augue, suscipit a, scelerisque sed, lacinia in, mi."),
+				Contains: newString("consectetur a"),
 			},
-			Stderr: &[]specs.StringAssert{
-				{Exactly: newString("")},
-			},
-		},
-	}, &StdoutExecutor{})
-
-	shouldFail(t, &specs.BashTest{
-		Expect: &specs.CliExpect{
-			Stdout: &[]specs.StringAssert{
-				{Exactly: newString("Proin nibh augue, suscipit a, scelerisque sed, lacinia in, mi.")},
-				{Contains: newString("consecteturadipiscingadipiscing")},
+			Stderr: &specs.StringAssert{
+				Exactly: newString(""),
 			},
 		},
 	}, &StdoutExecutor{})
 
 	shouldFail(t, &specs.BashTest{
 		Expect: &specs.CliExpect{
-			Stdout: &[]specs.StringAssert{
-				{NotContains: newString("Lorem")},
+			Stdout: &specs.StringAssert{
+				Exactly:  newString("Proin nibh augue, suscipit a, scelerisque sed, lacinia in, mi."),
+				Contains: newString("consecteturadipiscingadipiscing"),
+			},
+		},
+	}, &StdoutExecutor{})
+
+	shouldFail(t, &specs.BashTest{
+		Expect: &specs.CliExpect{
+			Stdout: &specs.StringAssert{
+				NotContains: newString("Lorem"),
 			},
 		},
 	}, &StdoutExecutor{})
