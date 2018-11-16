@@ -23,6 +23,9 @@ Build and run the binary:
 To build and run the docker container:
 
   ```
+  # Run tests
+  bazel test //tests:go_default_test
+
   # Build binary
   bazel build //runner:main
 
