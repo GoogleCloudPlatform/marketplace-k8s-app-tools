@@ -23,7 +23,7 @@ actions:
       false
     expect:
       statusCode:
-        - notEquals: 0
+        notEquals: 0
 - name: Contains text in output
   bashTest:
     script: |-
@@ -31,11 +31,10 @@ actions:
       echo "some text to test"
     expect:
       statusCode:
-        - equals: 0
+        equals: 0
       stdout:
-        - contains: "some text"
-        - exclude: "random text"
-        - exclude: "other text"
+        contains: 'some text'
+        notContains: 'random text'
 - name: Stdout contains some regexp
   bashTest:
     script: |-
@@ -43,7 +42,7 @@ actions:
       echo "some text to test"
     expect:
       stdout:
-        - matches: "t.xt"
+        matches: 't.xt'
 - name: Stderr contains some regexp
   bashTest:
     script: |-
@@ -51,4 +50,4 @@ actions:
       >&2 echo "some text to test"
     expect:
       stderr:
-        - matches: "t.xt"
+        matches: 't.xt'
