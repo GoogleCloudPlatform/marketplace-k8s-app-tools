@@ -67,7 +67,7 @@ Two workarounds before running the command below:
 Then execute the following.
 
   ```
-  gcloud container builds submit --config cloudbuild.yaml .
+  gcloud builds submit --config cloudbuild.yaml .
   ```
 
 This publishes a `testrunner` container in your project (i.e.
