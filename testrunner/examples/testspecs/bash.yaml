@@ -28,7 +28,7 @@ actions:
   bashTest:
     script: |-
       set -eu
-      echo 'some text to test'
+      echo "some text to test"
     expect:
       statusCode:
         equals: 0
@@ -39,7 +39,7 @@ actions:
   bashTest:
     script: |-
       set -eu
-      echo 'some text to test'
+      echo "some text to test"
     expect:
       stdout:
         matches: 't.xt'
@@ -47,7 +47,7 @@ actions:
   bashTest:
     script: |-
       set -eu
-      >&2 echo 'some text to test'
+      >&2 echo "some text to test"
     expect:
       stderr:
         matches: 't.xt'
