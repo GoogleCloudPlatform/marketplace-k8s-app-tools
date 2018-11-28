@@ -67,19 +67,19 @@ tests/marketplace/deployer/helm_tiller_onbuild: \
 	  ./tests/marketplace/deployer_envsubst_base/standard/run_test
 	@touch "$@"
 
-.testing/marketplace/deployer/envsubst/full: \
+.tests/marketplace/deployer/envsubst/full: \
 		.build/marketplace/deployer/envsubst \
 		.build/marketplace/dev \
 		.build/var/MARKETPLACE_TOOLS_TAG \
 		.build/var/REGISTRY \
-		$(shell find testing/marketplace/deployer_envsubst_base/full -type f) \
-		testing.Makefile \
-		| .testing/marketplace/deployer/envsubst
+		$(shell find tests/marketplace/deployer_envsubst_base/full -type f) \
+		tests.Makefile \
+		| .tests/marketplace/deployer/envsubst
 	$(call print_target)
 	TEST_ID=$(TEST_ID) \
 	REGISTRY=$(REGISTRY) \
 	MARKETPLACE_TOOLS_TAG=$(MARKETPLACE_TOOLS_TAG) \
-	  ./testing/marketplace/deployer_envsubst_base/full/run_test
+	  ./tests/marketplace/deployer_envsubst_base/full/run_test
 	@touch "$@"
 
 .PHONY: tests/marketplace/deployer/envsubst
