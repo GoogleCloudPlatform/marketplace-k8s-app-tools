@@ -169,6 +169,7 @@ steps:
   args:
   - make
   - -j4
+  - --output-sync
   - tests/integration
 
 images:
