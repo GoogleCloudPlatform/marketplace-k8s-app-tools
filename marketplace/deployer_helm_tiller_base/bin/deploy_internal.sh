@@ -23,6 +23,14 @@ app_api_version=$(kubectl get "applications/$NAME" \
   --namespace="$NAMESPACE" \
   --output=jsonpath='{.apiVersion}')
 
+# Log information and, at the same time, catch errors early and separately.
+# This is a work around for the fact that process and command substitutions
+# do not propagate errors.
+echo -n "Application UID: " && print_config.py --xtype APPLICATION_UID --key true && echo ""
+echo "=== values.yaml ==="
+/bin/print_config.py --output=yaml
+echo "==================="
+
 for chart in /data/chart/*; do
   # Expand and apply the template for the Application resource.
   # Note: This must be done out-of-band because the Application resource
