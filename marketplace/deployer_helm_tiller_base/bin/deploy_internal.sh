@@ -28,7 +28,7 @@ app_api_version=$(kubectl get "applications/$NAME" \
 # do not propagate errors.
 echo -n "Application UID: " && print_config.py --xtype APPLICATION_UID --key true && echo ""
 echo "=== values.yaml ==="
-/bin/print_config.py --output=yaml
+print_config.py --output=yaml
 echo "==================="
 
 for chart in /data/chart/*; do
