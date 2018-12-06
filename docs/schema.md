@@ -358,6 +358,10 @@ Nested under `x-google-marketplace`, this can be used for specifying constraints
 Example:
 
 ```yaml
+properties:
+  # Property definitions...
+required:
+  # Required properties...
 x-google-marketplace:
   clusterConstraints:
     resources:
