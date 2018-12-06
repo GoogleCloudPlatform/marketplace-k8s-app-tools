@@ -51,7 +51,7 @@ type GcpAction struct {
 }
 
 type BashTest struct {
-	Script string      `json:"script"`
+	Script string     `json:"script"`
 	Expect *CliExpect `json:"expect"`
 }
 
@@ -62,9 +62,9 @@ type HttpExpect struct {
 }
 
 type CliExpect struct {
-	ExitCode *[]IntAssert    `json:"exitCode,omitempty"`
-	Stdout   *[]StringAssert `json:"stdout,omitempty"`
-	Stderr   *[]StringAssert `json:"stderr,omitempty"`
+	ExitCode *IntAssert    `json:"exitCode,omitempty"`
+	Stdout   *StringAssert `json:"stdout,omitempty"`
+	Stderr   *StringAssert `json:"stderr,omitempty"`
 }
 
 type SetRuntimeConfigVarGcpAction struct {

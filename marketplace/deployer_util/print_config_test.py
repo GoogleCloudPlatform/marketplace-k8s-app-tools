@@ -54,11 +54,11 @@ class PrintConfigTest(unittest.TestCase):
         'propertyInt': 1,
         'propertyString': 'unnested',
         'dotted.propertyInt': 2,
-        'dotted.propertyString': 'nested_1',
-        'double.propertyInt': 3,
-        'double.propertyString': 'nested_2',
-        'double.dotted.propertyInt': 4,
-        'double.dotted.propertyString': 'double_nested_1'
+        'dotted.propertyString': 'nested',
+        'dotted.dotted.propertyInt': 3,
+        'dotted.dotted.propertyString': 'double_nested',
+        'dotted.dotted.dotted.propertyInt': 4,
+        'dotted.dotted.dotted.propertyString': 'triple_nested',
     }
     actual = print_config.output_yaml(values)
     self.assertEquals(
@@ -67,14 +67,14 @@ class PrintConfigTest(unittest.TestCase):
             'propertyString': 'unnested',
             'dotted': {
                 'propertyInt': 2,
-                'propertyString': 'nested_1'
-            },
-            'double': {
-                'propertyInt': 3,
-                'propertyString': 'nested_2',
+                'propertyString': 'nested',
                 'dotted': {
-                    'propertyInt': 4,
-                    'propertyString': 'double_nested_1'
+                    'propertyInt': 3,
+                    'propertyString': 'double_nested',
+                    'dotted': {
+                        'propertyInt': 4,
+                        'propertyString': 'triple_nested',
+                    },
                 },
             }
         })
