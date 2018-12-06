@@ -24,15 +24,13 @@ actions:
       >2& echo "Text2"
     expect:
       exitCode:
-        - equals: 0
-        - notEquals: 1
+        equals: 0
+        notEquals: 1
       stdout:
-        - contains: "Text1"
-        - notContains: "Foo"
-        - notContains: "Bar"
-        - matches: "T.xt1"
+        contains: "Text1"
+        notContains: "Foo"
+        matches: "T.xt1"
       stderr:
-        - contains: "Text2"
-        - notContains: "Foo"
-        - notContains: "Bar"
-        - matches: "T.xt2"
+        contains: "Text2"
+        notContains: "Foo"
+        matches: "T.xt2"

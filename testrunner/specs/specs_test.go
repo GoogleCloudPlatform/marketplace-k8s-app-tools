@@ -82,21 +82,19 @@ func expectedSuite() *Suite {
 				BashTest: &BashTest{
 					Script: "echo \"Text1\"\n>2& echo \"Text2\"",
 					Expect: &CliExpect{
-						ExitCode: &[]IntAssert{
-							{Equals: newInt(0)},
-							{NotEquals: newInt(1)},
+						ExitCode: &IntAssert{
+							Equals:    newInt(0),
+							NotEquals: newInt(1),
 						},
-						Stdout: &[]StringAssert{
-							{Contains: newString("Text1")},
-							{NotContains: newString("Foo")},
-							{NotContains: newString("Bar")},
-							{Matches: newString("T.xt1")},
+						Stdout: &StringAssert{
+							Contains:    newString("Text1"),
+							NotContains: newString("Foo"),
+							Matches:     newString("T.xt1"),
 						},
-						Stderr: &[]StringAssert{
-							{Contains: newString("Text2")},
-							{NotContains: newString("Foo")},
-							{NotContains: newString("Bar")},
-							{Matches: newString("T.xt2")},
+						Stderr: &StringAssert{
+							Contains:    newString("Text2"),
+							NotContains: newString("Foo"),
+							Matches:     newString("T.xt2"),
 						},
 					},
 				},
