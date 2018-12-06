@@ -5,16 +5,16 @@ steps:
   args:
   - -exc
   - |
-    docker pull gcr.io/$PROJECT_ID/k8s/dev:sha_$COMMIT_SHA
+    docker pull gcr.io/marketplace-k8s-app-tools/k8s/dev:sha_$COMMIT_SHA
     docker tag gcr.io/$PROJECT_ID/k8s/dev:sha_$COMMIT_SHA gcr.io/$PROJECT_ID/k8s/dev:$TAG_NAME
 
-    docker pull gcr.io/$PROJECT_ID/k8s/deployer_helm:sha_$COMMIT_SHA
+    docker pull gcr.io/marketplace-k8s-app-tools/k8s/deployer_helm:sha_$COMMIT_SHA
     docker tag gcr.io/$PROJECT_ID/k8s/deployer_helm:sha_$COMMIT_SHA gcr.io/$PROJECT_ID/k8s/deployer_helm:$TAG_NAME
 
-    docker pull gcr.io/$PROJECT_ID/k8s/deployer_helm/onbuild:sha_$COMMIT_SHA
+    docker pull gcr.io/marketplace-k8s-app-tools/k8s/deployer_helm/onbuild:sha_$COMMIT_SHA
     docker tag gcr.io/$PROJECT_ID/k8s/deployer_helm/onbuild:sha_$COMMIT_SHA gcr.io/$PROJECT_ID/k8s/deployer_helm/onbuild:$TAG_NAME
 
-    docker pull gcr.io/$PROJECT_ID/k8s/deployer_envsubst:sha_$COMMIT_SHA
+    docker pull gcr.io/marketplace-k8s-app-tools/k8s/deployer_envsubst:sha_$COMMIT_SHA
     docker tag gcr.io/$PROJECT_ID/k8s/deployer_envsubst:sha_$COMMIT_SHA gcr.io/$PROJECT_ID/k8s/deployer_envsubst:$TAG_NAME
 
 images:
