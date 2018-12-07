@@ -28,6 +28,8 @@ RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add - && \
     apt-get -y update && \
     apt-get -y install docker-ce=17.12.0~ce-0~ubuntu
 
+RUN gcloud auth configure-docker
+
 COPY marketplace/deployer_util/* /bin/
 COPY scripts/* /scripts/
 COPY marketplace/dev/bin/* /bin/
