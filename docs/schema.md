@@ -13,7 +13,7 @@ The schema file must exist at the well known location `/data/schema.yaml` in the
 This is a simple example of a schema.yaml file:
 
 ```yaml
-application_api_version: v1beta1
+applicationApiVersion: v1beta1
 properties:
   name:
     type: string
@@ -91,7 +91,7 @@ They can be referenced in helm charts just like a regular value from `values.yam
 Example of `schema.yaml`
 
 ```yaml
-application_api_version: v1beta1
+applicationApiVersion: v1beta1
 properties:
   port:
     type: integer
@@ -143,7 +143,7 @@ mysql:
 the property can be referenced in the schema file as `mysql.image`
 
 ```yaml
-application_api_version: v1beta1
+applicationApiVersion: v1beta1
 properties:
   mysql.image:
     type: string
@@ -157,7 +157,7 @@ They can be referenced in manifests by its name in `schema.yaml`, prefixed with 
 Example of `schema.yaml`
 
 ```yaml
-application_api_version: v1beta1
+applicationApiVersion: v1beta1
 properties:
   port:
     type: string
@@ -191,7 +191,7 @@ Usage example of the value of `port` in a helm chart:
 Schema.yaml specification
 ---
 
-## application_api_version
+## applicationApiVersion
 
 Specifies the version of the application CRD.
 
@@ -350,3 +350,47 @@ properties:
 ```
 
 In the example above, manifests can reference to the password as `explicitPassword`, as well as to its base64Encoded value as `explicitPasswordEncoded`.
+
+## clusterConstraints
+
+Nested under `x-google-marketplace`, this can be used for specifying constraints on the kubernetes cluster. These constraints help determine if the application can be successfully deployed to the cluster. The UI can filter out ineligible clusters following these constraints.
+
+Example:
+
+```yaml
+properties:
+  # Property definitions...
+required:
+  # Required properties...
+x-google-marketplace:
+  clusterConstraints:
+    resources:
+    - replicas: 3
+      requests:
+        cpu: 500m
+        memory: 256Mi
+      affinity:
+        simpleNodeAffinity:
+          type: REQUIRE_ONE_NODE_PER_REPLICA
+```
+
+The above example requires a cluster with at least three nodes, each with compute resources for running one pod requiring 500 milicores of CPU and 256MiB of memory.
+
+Each entry under `resources` is roughly equivalent to a workload in the application.
+
+`affinity` defines the relationship between the nodes and the replicas. `simpleNodeAffinity` is the only affinity definition we currently support. It has 2 types:
+- `REQUIRE_ONE_NODE_PER_REPLICA`: each replica must be scheduled on a different node. i.e. the number of nodes must be at least the number of replicas.
+- `REQUIRE_MINIMUM_NODE_COUNT`: the minimum number of nodes is specified separately in `minimumNodeCount`. For example:
+
+```yaml
+x-google-marketplace:
+  clusterConstraints:
+    resources:
+    - replicas: 5
+      requests:
+        cpu: 500m
+      affinity:
+        simpleNodeAffinity:
+          type: REQUIRE_MINIMUM_NODE_COUNT
+          minimumNodeCount: 3
+```
