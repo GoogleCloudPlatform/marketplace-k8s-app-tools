@@ -1,0 +1,10 @@
+apiVersion: v1
+description: Marketplace Helm Integration
+home: https://github.com/GoogleCloudPlatform/marketplace-k8s-app-tools/tree/master/marketplace/charts/marketplace-integration
+keywords:
+- marketplace
+- helm
+maintainers:
+- email: cloud-marketplace-tools@google.com
+  name: Marketplace Tools
+name: marketplace-integration
