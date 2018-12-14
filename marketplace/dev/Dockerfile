@@ -36,6 +36,8 @@ RUN mkdir -p /bin/helm-downloaded \
      && rm -rf /bin/helm-downloaded \
      && helm init --client-only
 
+RUN gcloud auth configure-docker
+
 COPY marketplace/deployer_util/* /bin/
 COPY scripts/* /scripts/
 COPY marketplace/dev/bin/* /bin/
