@@ -1,0 +1,77 @@
+application_api_version: v1beta1
+properties:
+  name:
+    type: string
+    x-google-marketplace:
+      type: NAME
+  namespace:
+    type: string
+    x-google-marketplace:
+      type: NAMESPACE
+  imageWordpress:
+    type: string
+    default: $REGISTRY:$TAG
+    x-google-marketplace:
+      type: IMAGE
+      image:
+        generatedProperties:
+          splitByColon:
+            before: imageWordpressRepo
+            after: imageWordpressTag
+  imageInit:
+    type: string
+    default: $REGISTRY/init:$TAG
+    x-google-marketplace:
+      type: IMAGE
+  imageMysql:
+    type: string
+    default: $REGISTRY/mysql:$TAG
+    x-google-marketplace:
+      type: IMAGE
+  imageUbbagent:
+    type: string
+    default: $REGISTRY/ubbagent:$TAG
+    x-google-marketplace:
+      type: IMAGE
+  dbPassword:
+    type: string
+    x-google-marketplace:
+      type: GENERATED_PASSWORD
+      generatedPassword:
+        length: 16
+  customString:
+    title: Blog title
+    description: WordPress requires a blog title for setup. This can be changed later.
+    type: string
+    default: 'My blog'
+    maxLength: 128
+    pattern: '[A-Za-z0-9 -]+'
+  customInteger:
+    title: Server replicas
+    type: integer
+    default: 1
+    minimum: 1
+    maximum: 128
+  customBoolean:
+    title: A custom boolean parameter.
+    type: boolean
+    default: false
+  reportingSecret:
+    type: string
+    x-google-marketplace:
+      type: REPORTING_SECRET
+required:
+- name
+- namespace
+- imageWordpress
+- imageInit
+- imageMysql
+- imageUbbagent
+- dbPassword
+- customString
+- customInteger
+- customBoolean
+- reportingSecret
+form:
+- widget: help
+  description: My arbitrary <i>description</i>

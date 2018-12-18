@@ -1,4 +1,4 @@
 .build/
-.testing/
+.tests/
 *.pyc
 *.swp

@@ -1,0 +1,187 @@
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: $name-db-secret
+  labels:
+    app.kubernetes.io/name: "$name"
+    app.kubernetes.io/component: db-secret
+type: Opaque
+data:
+  password: "$dbPassword"
+---
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: $name-mysql
+  labels: &MysqlDeploymentLabels
+    app.kubernetes.io/name: "$name"
+    app.kubernetes.io/component: wordpress-mysql
+spec:
+  replicas: 1
+  selector:
+    matchLabels: *MysqlDeploymentLabels
+  template:
+    metadata:
+      labels: *MysqlDeploymentLabels
+    spec:
+      containers:
+      - image: $imageMysql
+        name: mysql
+        env:
+        - name: "MYSQL_ROOT_PASSWORD"
+          valueFrom:
+            secretKeyRef:
+              name: $name-db-secret
+              key: password
+        volumeMounts:
+        - name: data
+          mountPath: /var/lib/mysql
+          subPath: data
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: $name-mysql-pvc
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: $name-mysql-pvc
+  labels:
+    app.kubernetes.io/name: "$name"
+    app.kubernetes.io/component: wordpress-mysql
+spec:
+  accessModes: [ReadWriteOnce]
+  storageClassName: standard
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: $name-mysql-svc
+  labels:
+    app.kubernetes.io/name: "$name"
+    app.kubernetes.io/component: wordpress-mysql
+spec:
+  ports:
+  - port: 3306
+  selector:
+    app.kubernetes.io/name: $name
+    app.kubernetes.io/component: wordpress-mysql
+  clusterIP: None
+---
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: $name-wordpress
+  labels: &WordpressDeploymentLabels
+    app.kubernetes.io/name: "$name"
+    app.kubernetes.io/component: wordpress-webserver
+spec:
+  replicas: 1
+  selector:
+    matchLabels: *WordpressDeploymentLabels
+  template:
+    metadata:
+      labels: *WordpressDeploymentLabels
+    spec:
+      initContainers:
+      - image: $imageInit
+        name: wordpress-init
+        env:
+        - name: AGENT_LOCAL_PORT
+          value: "6080"
+        volumeMounts:
+        - name: data
+          mountPath: /var/www/html
+          subPath: wp
+        - name: ubbagent-config
+          mountPath: /etc/ubbagent
+      containers:
+      - image: $imageWordpressRepo:$imageWordpressTag
+        name: wordpress
+        env:
+        - name: WORDPRESS_DB_HOST
+          value: $name-mysql-svc
+        - name: WORDPRESS_DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: $name-db-secret
+              key: password
+        - name: WORDPRESS_DB_USER
+          value: root
+        ports:
+        - name: http
+          containerPort: 80
+        volumeMounts:
+        - name: data
+          mountPath: /var/www/html
+          subPath: wp
+      - image: $imageUbbagent
+        name: ubbagent
+        env:
+        - name: AGENT_CONFIG_FILE
+          value: /etc/ubbagent/config.yaml
+        - name: AGENT_LOCAL_PORT
+          value: "6080"
+        - name: AGENT_STATE_DIR
+          value: /var/lib/ubbagent
+        - name: AGENT_REPORT_DIR
+          value: /var/lib/ubbagent/reports
+        - name: AGENT_ENCODED_KEY
+          valueFrom:
+            secretKeyRef:
+              name: "$reportingSecret"
+              key: reporting-key
+        - name: AGENT_CONSUMER_ID
+          valueFrom:
+            secretKeyRef:
+              name: "$reportingSecret"
+              key: consumer-id
+        volumeMounts:
+        - name: ubbagent-config
+          mountPath: /etc/ubbagent
+        - name: ubbagent-state
+          mountPath: /var/lib/ubbagent
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: $name-wordpress-pvc
+      - name: ubbagent-config
+        emptyDir: {}
+      # TODO(volkman): state directory should maybe be on a PV.
+      - name: ubbagent-state
+        emptyDir: {}
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: $name-wordpress-pvc
+  labels:
+    app.kubernetes.io/name: "$name"
+    app.kubernetes.io/component: wordpress-webserver
+spec:
+  accessModes: [ReadWriteOnce]
+  storageClassName: standard
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: $name-wordpress-svc
+  labels:
+    app.kubernetes.io/name: "$name"
+    app.kubernetes.io/component: wordpress-webserver
+spec:
+  ports:
+  - name: http
+    port: 80
+    targetPort: http
+  selector:
+    app.kubernetes.io/name: "$name"
+    app.kubernetes.io/component: wordpress-webserver
+  type: ClusterIP
