@@ -17,6 +17,12 @@ steps:
     docker pull gcr.io/marketplace-k8s-app-tools/k8s/deployer_helm/onbuild:sha_$COMMIT_SHA
     docker tag gcr.io/marketplace-k8s-app-tools/k8s/deployer_helm/onbuild:sha_$COMMIT_SHA gcr.io/$PROJECT_ID/k8s/deployer_helm/onbuild:$TAG_NAME
 
+    docker pull gcr.io/marketplace-k8s-app-tools/k8s/deployer_helm_tiller:sha_$COMMIT_SHA
+    docker tag gcr.io/marketplace-k8s-app-tools/k8s/deployer_helm_tiller:sha_$COMMIT_SHA gcr.io/$PROJECT_ID/k8s/deployer_helm_tiller:$TAG_NAME
+
+    docker pull gcr.io/marketplace-k8s-app-tools/k8s/deployer_helm_tiller/onbuild:sha_$COMMIT_SHA
+    docker tag gcr.io/marketplace-k8s-app-tools/k8s/deployer_helm_tiller/onbuild:sha_$COMMIT_SHA gcr.io/$PROJECT_ID/k8s/deployer_helm_tiller/onbuild:$TAG_NAME
+
     docker pull gcr.io/marketplace-k8s-app-tools/k8s/deployer_envsubst:sha_$COMMIT_SHA
     docker tag gcr.io/marketplace-k8s-app-tools/k8s/deployer_envsubst:sha_$COMMIT_SHA gcr.io/$PROJECT_ID/k8s/deployer_envsubst:$TAG_NAME
 
@@ -39,6 +45,8 @@ images:
 - gcr.io/$PROJECT_ID/k8s/dev:$TAG_NAME
 - gcr.io/$PROJECT_ID/k8s/deployer_helm:$TAG_NAME
 - gcr.io/$PROJECT_ID/k8s/deployer_helm/onbuild:$TAG_NAME
+- gcr.io/$PROJECT_ID/k8s/deployer_helm_tiller:$TAG_NAME
+- gcr.io/$PROJECT_ID/k8s/deployer_helm_tiller/onbuild:$TAG_NAME
 - gcr.io/$PROJECT_ID/k8s/deployer_envsubst:$TAG_NAME
 
 artifacts:
