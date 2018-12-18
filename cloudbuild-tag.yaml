@@ -29,7 +29,7 @@ steps:
 - id: Publish Charts
   name: gcr.io/$PROJECT_ID/k8s/dev:$TAG_NAME
   waitFor:
-  - &PublishImages
+  - *PublishImages
   entrypoint: bash
   args:
   - -exc
