@@ -39,7 +39,10 @@ steps:
     helm package marketplace/charts/marketplace-integration/ \
         --version $TAG_NAME \
         --destination charts-tgz/
-    #TODO(trironkk): Update index.yaml.
+
+    gsutil cp gs://$PROJECT_ID/charts/index.yaml index.yaml
+    helm repo index --merge index.yaml charts-tgz/
+    cp index.yaml charts-tgz/index.yaml
 
 images:
 - gcr.io/$PROJECT_ID/k8s/dev:$TAG_NAME
