@@ -142,7 +142,6 @@ steps:
 
     gsutil cp gs://$PROJECT_ID-charts/index.yaml index.yaml
     helm repo index --merge index.yaml charts-tgz/
-    cp index.yaml charts-tgz/index.yaml
 
 - id: &InitializeCredentials Initialize Credentials
   name: gcr.io/cloud-builders/gcloud
