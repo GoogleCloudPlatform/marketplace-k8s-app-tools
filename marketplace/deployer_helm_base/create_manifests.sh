@@ -72,6 +72,13 @@ if [[ "$mode" = "test" ]]; then
     --test_manifest "$test_data_dir/extracted"
 fi
 
+# Log information and, at the same time, catch errors early and separately.
+# This is a work around for the fact that process and command substitutions
+# do not propagate errors.
+echo "=== values.yaml ==="
+/bin/print_config.py --output=yaml
+echo "==================="
+
 # Run helm expansion.
 for chart in "$data_dir/extracted"/*; do
   chart_manifest_file=$(basename "$chart" | sed 's/.tar.gz$//').yaml

@@ -23,6 +23,9 @@ Build and run the binary:
 To build and run the docker container:
 
   ```
+  # Run tests
+  bazel test //tests:go_default_test
+
   # Build binary
   bazel build //runner:main
 
@@ -48,6 +51,12 @@ To build and run the docker container:
 # Build GCP container
 
 Execute the following.
+
+  ```
+  rm -r bazel-*
+  ```
+
+Then execute the following.
 
   ```
   gcloud builds submit --config cloudbuild.yaml .

@@ -28,7 +28,7 @@ if [[ -e "/mount/config/.kube/config" ]]; then
     | jq \
           --arg gcloud "$(readlink -f "$(which gcloud)")" \
           '.users = [ .users[] |
-                      if .user["auth-provider"]["name"] == "gcp"
+                      if .user["auth-provider"]["name"] == "gcp" and .user["auth-provider"]["config"]["cmd-path"]
                         then .user["auth-provider"]["config"]["cmd-path"] = $gcloud
                         else .
                       end

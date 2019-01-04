@@ -5,7 +5,7 @@ matrix:
     services:
     - docker
   - language: generic
-    env: TARGET=test/py
+    env: TARGET=tests/py
     services:
     - docker
 
