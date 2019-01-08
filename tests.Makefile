@@ -84,14 +84,14 @@ tests/marketplace/deployer/helm_tiller_onbuild: \
 
 .PHONY: tests/marketplace/deployer/envsubst
 tests/marketplace/deployer/envsubst: \
-		.tests/marketplace/deployer/envsubst/full \
+#		.tests/marketplace/deployer/envsubst/full \
 		.tests/marketplace/deployer/envsubst/standard
 
 
 .PHONY: tests/integration
 tests/integration: \
-		tests/marketplace/deployer/envsubst \
-		tests/marketplace/deployer/helm_tiller_onbuild
+		tests/marketplace/deployer/envsubst
+#		tests/marketplace/deployer/helm_tiller_onbuild
 
 
 

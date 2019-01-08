@@ -96,52 +96,52 @@ steps:
   - marketplace/deployer_helm_base/onbuild/Dockerfile
   - .
 
-- id: &BuildHelmTiller Build deployer_helm_tiller
-  name: gcr.io/cloud-builders/docker
-  waitFor:
-  - '-'
-  args:
-  - build
-  - --tag
-  - gcr.io/$PROJECT_ID/k8s/deployer_helm_tiller:sha_$COMMIT_SHA
-  - --tag
-  - gcr.io/$PROJECT_ID/k8s/deployer_helm_tiller:sha_$SHORT_SHA
-  - --file
-  - marketplace/deployer_helm_tiller_base/Dockerfile
-  - .
-
-- id: Build deployer_helm_tiller onbuild
-  name: gcr.io/cloud-builders/docker
-  waitFor:
-  - *BuildHelmTiller
-  args:
-  - build
-  - --build-arg
-  - FROM=gcr.io/$PROJECT_ID/k8s/deployer_helm_tiller:sha_$COMMIT_SHA
-  - --tag
-  - gcr.io/$PROJECT_ID/k8s/deployer_helm_tiller/onbuild:sha_$COMMIT_SHA
-  - --tag
-  - gcr.io/$PROJECT_ID/k8s/deployer_helm_tiller/onbuild:sha_$SHORT_SHA
-  - --file
-  - marketplace/deployer_helm_tiller_base/onbuild/Dockerfile
-  - .
-
-- id: &BuildMarketplaceIntegrationChart Build marketplace-integration Chart
-  name: gcr.io/$PROJECT_ID/k8s/dev:sha_$COMMIT_SHA
-  waitFor:
-  - *BuildDev
-  entrypoint: bash
-  args:
-  - -exc
-  - |
-    mkdir charts-tgz/
-    helm init --client-only
-    helm package marketplace/charts/marketplace-integration/ \
-        --version "0.0.0+sha.$COMMIT_SHA" \
-        --destination charts-tgz/
-
-    gsutil cp gs://$PROJECT_ID-charts/index.yaml index.yaml
-    helm repo index --merge index.yaml charts-tgz/
+# - id: &BuildHelmTiller Build deployer_helm_tiller
+#   name: gcr.io/cloud-builders/docker
+#   waitFor:
+#   - '-'
+#   args:
+#   - build
+#   - --tag
+#   - gcr.io/$PROJECT_ID/k8s/deployer_helm_tiller:sha_$COMMIT_SHA
+#   - --tag
+#   - gcr.io/$PROJECT_ID/k8s/deployer_helm_tiller:sha_$SHORT_SHA
+#   - --file
+#   - marketplace/deployer_helm_tiller_base/Dockerfile
+#   - .
+#
+# - id: Build deployer_helm_tiller onbuild
+#   name: gcr.io/cloud-builders/docker
+#   waitFor:
+#   - *BuildHelmTiller
+#   args:
+#   - build
+#   - --build-arg
+#   - FROM=gcr.io/$PROJECT_ID/k8s/deployer_helm_tiller:sha_$COMMIT_SHA
+#   - --tag
+#   - gcr.io/$PROJECT_ID/k8s/deployer_helm_tiller/onbuild:sha_$COMMIT_SHA
+#   - --tag
+#   - gcr.io/$PROJECT_ID/k8s/deployer_helm_tiller/onbuild:sha_$SHORT_SHA
+#   - --file
+#   - marketplace/deployer_helm_tiller_base/onbuild/Dockerfile
+#   - .
+#
+# - id: &BuildMarketplaceIntegrationChart Build marketplace-integration Chart
+#   name: gcr.io/$PROJECT_ID/k8s/dev:sha_$COMMIT_SHA
+#   waitFor:
+#   - *BuildDev
+#   entrypoint: bash
+#   args:
+#   - -exc
+#   - |
+#     mkdir charts-tgz/
+#     helm init --client-only
+#     helm package marketplace/charts/marketplace-integration/ \
+#         --version "0.0.0+sha.$COMMIT_SHA" \
+#         --destination charts-tgz/
+#
+#     gsutil cp gs://$PROJECT_ID-charts/index.yaml index.yaml
+#     helm repo index --merge index.yaml charts-tgz/
 
 - id: &InitializeCredentials Initialize Credentials
   name: gcr.io/cloud-builders/gcloud
@@ -184,13 +184,13 @@ images:
   - gcr.io/$PROJECT_ID/k8s/deployer_helm:sha_$SHORT_SHA
   - gcr.io/$PROJECT_ID/k8s/deployer_helm/onbuild:sha_$COMMIT_SHA
   - gcr.io/$PROJECT_ID/k8s/deployer_helm/onbuild:sha_$SHORT_SHA
-  - gcr.io/$PROJECT_ID/k8s/deployer_helm_tiller:sha_$COMMIT_SHA
-  - gcr.io/$PROJECT_ID/k8s/deployer_helm_tiller:sha_$SHORT_SHA
-  - gcr.io/$PROJECT_ID/k8s/deployer_helm_tiller/onbuild:sha_$COMMIT_SHA
-  - gcr.io/$PROJECT_ID/k8s/deployer_helm_tiller/onbuild:sha_$SHORT_SHA
+  # - gcr.io/$PROJECT_ID/k8s/deployer_helm_tiller:sha_$COMMIT_SHA
+  # - gcr.io/$PROJECT_ID/k8s/deployer_helm_tiller:sha_$SHORT_SHA
+  # - gcr.io/$PROJECT_ID/k8s/deployer_helm_tiller/onbuild:sha_$COMMIT_SHA
+  # - gcr.io/$PROJECT_ID/k8s/deployer_helm_tiller/onbuild:sha_$SHORT_SHA
 
-artifacts:
-  objects:
-    location: gs://$PROJECT_ID-charts/
-    paths:
-    - charts-tgz/*
+# artifacts:
+#   objects:
+#     location: gs://$PROJECT_ID-charts/
+#     paths:
+#     - charts-tgz/*
