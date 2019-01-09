@@ -111,8 +111,9 @@ def dump(outfile, resources, included_kinds, app_name, app_uid,
   to_be_dumped = []
   for resource in resources:
     if included_kinds is None or resource["kind"] in included_kinds:
-      log("Application '{:s}' owns '{:s}/{:s}'".format(
-          app_name, resource["kind"], resource["metadata"]["name"]))
+      name = resource["metadata"]["name"] if "metadata" in resource else None
+      log("Application '{:s}' owns '{:s}/{:s}'".format(app_name,
+                                                       resource["kind"], name))
       resource = copy.deepcopy(resource)
       set_resource_ownership(
           app_uid=app_uid,
