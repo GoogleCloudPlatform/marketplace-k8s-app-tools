@@ -16,7 +16,7 @@ steps:
 
 # Run tests
 - name: gcr.io/cloud-builders/bazel
-  args: ['test', '//tests:go_default_test']
+  args: ['test', '//...']
 
 # Build binary
 - name: gcr.io/cloud-builders/bazel
@@ -28,7 +28,7 @@ steps:
 
 # Copy binary from symlinked directory and rename it
 - name: gcr.io/google-appengine/debian9
-  args: ['cp', 'bazel-bin/runner/main', 'tmp/testrunner']
+  args: ['cp', 'bazel-bin/runner/testrunner', 'tmp/testrunner']
 
 # Copy Dockerfile
 - name: gcr.io/google-appengine/debian9

@@ -16,9 +16,7 @@ licenses(["notice"])  # Apache 2.0
 
 exports_files(["LICENSE"])
 
-load(
-    "@io_bazel_rules_go//go:def.bzl",
-    "go_prefix",
-)
+load("@bazel_gazelle//:def.bzl", "gazelle")
 
-go_prefix("github.com/GoogleCloudPlatform/marketplace-k8s-app-tools/testrunner")
+# gazelle:prefix github.com/GoogleCloudPlatform/marketplace-k8s-app-tools/testrunner
+gazelle(name = "gazelle")
