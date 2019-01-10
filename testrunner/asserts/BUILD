@@ -22,9 +22,8 @@ load(
 
 go_library(
     name = "go_default_library",
-    srcs = [
-        "asserts.go",
-    ],
+    srcs = ["asserts.go"],
+    importpath = "github.com/GoogleCloudPlatform/marketplace-k8s-app-tools/testrunner/asserts",
     deps = [
         "//specs:go_default_library",
         "@in_gopkg_xmlpath_v2//:go_default_library",
@@ -35,11 +34,7 @@ go_library(
 go_test(
     name = "go_default_test",
     size = "small",
-    srcs = [
-        "asserts_test.go",
-    ],
-    deps = [
-        ":go_default_library",
-        "//specs:go_default_library",
-    ],
+    srcs = ["asserts_test.go"],
+    embed = [":go_default_library"],
+    deps = ["//specs:go_default_library"],
 )

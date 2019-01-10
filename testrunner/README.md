@@ -24,7 +24,7 @@ To build and run the docker container:
 
   ```
   # Run tests
-  bazel test //tests:go_default_test
+  bazel test //...
 
   # Build binary
   bazel build //runner:main
@@ -33,7 +33,7 @@ To build and run the docker container:
   mkdir -p tmp
 
   # Copy the file and rename it
-  cp bazel-bin/runner/main tmp/testrunner
+  cp bazel-bin/runner/testrunner tmp/testrunner
 
   # Build container
   docker build --tag=testrunner --file=runner/Dockerfile tmp

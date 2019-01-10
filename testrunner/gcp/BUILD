@@ -14,11 +14,7 @@
 
 package(default_visibility = ["//visibility:public"])
 
-load(
-    "@io_bazel_rules_go//go:def.bzl",
-    "go_library",
-    "go_test",
-)
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
 
 go_library(
     name = "go_default_library",
@@ -26,6 +22,7 @@ go_library(
         "gcp.go",
         "runtimeconfig.go",
     ],
+    importpath = "github.com/GoogleCloudPlatform/marketplace-k8s-app-tools/testrunner/gcp",
     deps = [
         "//asserts:go_default_library",
         "//specs:go_default_library",

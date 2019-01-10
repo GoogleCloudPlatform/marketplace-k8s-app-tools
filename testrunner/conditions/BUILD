@@ -14,17 +14,12 @@
 
 package(default_visibility = ["//visibility:public"])
 
-load(
-    "@io_bazel_rules_go//go:def.bzl",
-    "go_library",
-    "go_test",
-)
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
 
 go_library(
     name = "go_default_library",
-    srcs = [
-        "conditions.go",
-    ],
+    srcs = ["conditions.go"],
+    importpath = "github.com/GoogleCloudPlatform/marketplace-k8s-app-tools/testrunner/conditions",
     deps = [
         "//asserts:go_default_library",
         "//specs:go_default_library",

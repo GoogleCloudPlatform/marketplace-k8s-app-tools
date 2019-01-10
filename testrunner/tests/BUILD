@@ -26,6 +26,7 @@ go_library(
         "bash.go",
         "http.go",
     ],
+    importpath = "github.com/GoogleCloudPlatform/marketplace-k8s-app-tools/testrunner/tests",
     deps = [
         "//asserts:go_default_library",
         "//specs:go_default_library",
@@ -39,8 +40,8 @@ go_test(
         "bash_test.go",
         "http_test.go",
     ],
+    embed = [":go_default_library"],
     deps = [
-        ":go_default_library",
         "//specs:go_default_library",
         "@com_github_ghodss_yaml//:go_default_library",
     ],
