@@ -38,17 +38,9 @@ steps:
 - name: gcr.io/cloud-builders/docker
   args:
   - 'build'
-  - '--tag=gcr.io/$PROJECT_ID/testrunner:0.1.0'
+  - '--tag=gcr.io/$PROJECT_ID/testrunner:latest'
   - 'tmp'
-
-# Add aliast tag
-- name: gcr.io/cloud-builders/docker
-  args:
-  - 'tag'
-  - 'gcr.io/$PROJECT_ID/testrunner:0.1.0'
-  - 'gcr.io/$PROJECT_ID/testrunner:latest'
 
 # Push the image.
 images:
-  - 'gcr.io/$PROJECT_ID/testrunner:0.1.0'
   - 'gcr.io/$PROJECT_ID/testrunner:latest'
