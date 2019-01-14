@@ -21,7 +21,6 @@ load(
 
 go_library(
     name = "go_default_library",
-    srcs = [
-        "flags.go",
-    ],
+    srcs = ["flags.go"],
+    importpath = "github.com/GoogleCloudPlatform/marketplace-k8s-app-tools/testrunner/flags",
 )

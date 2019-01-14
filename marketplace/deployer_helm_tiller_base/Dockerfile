@@ -30,7 +30,7 @@ RUN mkdir -p /bin/helm-downloaded \
     && rm -rf /bin/helm-downloaded \
     && helm init --client-only \
     && helm plugin install https://github.com/rimusz/helm-tiller \
-    && helm repo add cloud-marketplace-tools-charts https://cloud-marketplace-tools-charts.storage.googleapis.com
+    && helm repo add cloud-marketplace-tools-charts https://cloud-marketplace-tools.storage.googleapis.com/charts
 
 COPY marketplace/deployer_util/* /bin/
 COPY marketplace/deployer_helm_tiller_base/bin/* /bin/

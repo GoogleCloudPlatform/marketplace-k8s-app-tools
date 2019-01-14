@@ -22,9 +22,8 @@ load(
 
 go_library(
     name = "go_default_library",
-    srcs = [
-        "specs.go",
-    ],
+    srcs = ["specs.go"],
+    importpath = "github.com/GoogleCloudPlatform/marketplace-k8s-app-tools/testrunner/specs",
     deps = [
         "@com_github_ghodss_yaml//:go_default_library",
     ],
@@ -33,12 +32,8 @@ go_library(
 go_test(
     name = "go_default_test",
     size = "small",
-    srcs = [
-        "specs_test.go",
-    ],
+    srcs = ["specs_test.go"],
     data = glob(["testdata/*"]),
-    deps = [
-        ":go_default_library",
-        "@com_github_ghodss_yaml//:go_default_library",
-    ],
+    embed = [":go_default_library"],
+    deps = ["@com_github_ghodss_yaml//:go_default_library"],
 )

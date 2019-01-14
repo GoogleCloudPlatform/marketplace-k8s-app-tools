@@ -12,14 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load(
-    "@io_bazel_rules_go//go:def.bzl",
-    "go_binary",
-)
-load(
-    "@io_bazel_rules_docker//go:image.bzl",
-    "go_image",
-)
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
 
 binary_srcs = [
     "main.go",
@@ -37,12 +30,24 @@ binary_deps = [
 
 go_binary(
     name = "main",
-    srcs = binary_srcs,
-    deps = binary_deps,
+    out = "testrunner",
+    embed = [":go_default_library"],
+    importpath = "github.com/GoogleCloudPlatform/marketplace-k8s-app-tools/testrunner/main",
+    visibility = ["//visibility:public"],
 )
 
-go_image(
-    name = "go_image",
-    srcs = binary_srcs,
-    deps = binary_deps,
+go_library(
+    name = "go_default_library",
+    srcs = ["main.go"],
+    importpath = "github.com/GoogleCloudPlatform/marketplace-k8s-app-tools/testrunner/runner",
+    visibility = ["//visibility:private"],
+    deps = [
+        "//asserts:go_default_library",
+        "//conditions:go_default_library",
+        "//flags:go_default_library",
+        "//gcp:go_default_library",
+        "//specs:go_default_library",
+        "//tests:go_default_library",
+        "@com_github_golang_glog//:go_default_library",
+    ],
 )
