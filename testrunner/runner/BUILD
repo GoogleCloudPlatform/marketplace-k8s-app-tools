@@ -14,20 +14,6 @@
 
 load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
 
-binary_srcs = [
-    "main.go",
-]
-
-binary_deps = [
-    "//asserts:go_default_library",
-    "//conditions:go_default_library",
-    "//flags:go_default_library",
-    "//gcp:go_default_library",
-    "//specs:go_default_library",
-    "//tests:go_default_library",
-    "@com_github_golang_glog//:go_default_library",
-]
-
 go_binary(
     name = "main",
     out = "testrunner",
