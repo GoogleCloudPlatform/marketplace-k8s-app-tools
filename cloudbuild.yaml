@@ -151,7 +151,7 @@ steps:
   args:
   - -exc
   - |
-    gcloud container clusters get-credentials 'testing-marketplace' --region 'us-central1' --project '$PROJECT_ID'
+    gcloud container clusters get-credentials $_CLUSTER_NAME --region $_CLUSTER_LOCATION --project '$PROJECT_ID'
     mkdir -p /workspace/.kube/
     cp -r $$HOME/.kube/ /workspace/
     mkdir -p /workspace/.config/gcloud/
