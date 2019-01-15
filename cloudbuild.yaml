@@ -151,7 +151,7 @@ steps:
   args:
   - -exc
   - |
-    gcloud container clusters get-credentials 'testing-marketplace' --region 'us-central1' --project '$PROJECT_ID'
+    gcloud container clusters get-credentials ${_CLUSTER_NAME} --region ${_CLUSTER_LOCATION} --project '$PROJECT_ID'
     mkdir -p /workspace/.kube/
     cp -r $$HOME/.kube/ /workspace/
     mkdir -p /workspace/.config/gcloud/
@@ -174,6 +174,10 @@ steps:
   - -j4
   - --output-sync
   - tests/integration
+
+substitutions:
+    _CLUSTER_NAME: cluster-1 # default cluster name
+    _CLUSTER_LOCATION: us-central1  # default cluster region
 
 images:
   - gcr.io/$PROJECT_ID/k8s/dev:sha_$COMMIT_SHA
