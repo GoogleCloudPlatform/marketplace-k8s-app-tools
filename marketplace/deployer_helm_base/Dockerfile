@@ -16,7 +16,7 @@ RUN pip install wheel \
     && pip install google-cloud-storage
 
 RUN wget -q -O /bin/kubectl \
-        https://storage.googleapis.com/kubernetes-release/release/v1.9.0/bin/linux/amd64/kubectl \
+        https://storage.googleapis.com/kubernetes-release/release/v1.13.2/bin/linux/amd64/kubectl \
     && chmod 755 /bin/kubectl
 
 RUN mkdir -p /bin/helm-downloaded \
