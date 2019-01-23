@@ -30,16 +30,17 @@ steps:
 - name: gcr.io/google-appengine/debian9
   args: ['cp', 'bazel-bin/runner/testrunner', 'tmp/testrunner']
 
-# Copy Dockerfile
+# Copy Dockerfile and checksums
 - name: gcr.io/google-appengine/debian9
-  args: ['cp', 'runner/Dockerfile', 'tmp/Dockerfile']
+  args: ['cp', 'docker/Dockerfile', 'docker/oss.sha512.checksums','tmp']
 
 # Build an image
 - name: gcr.io/cloud-builders/docker
   args:
   - 'build'
-  - '--tag=gcr.io/$PROJECT_ID/testrunner'
+  - '--tag=gcr.io/$PROJECT_ID/testrunner:latest'
   - 'tmp'
 
 # Push the image.
-images: ['gcr.io/$PROJECT_ID/testrunner']
+images:
+  - 'gcr.io/$PROJECT_ID/testrunner:latest'
