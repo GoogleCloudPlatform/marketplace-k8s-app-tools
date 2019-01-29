@@ -201,6 +201,32 @@ class ConfigHelperTest(unittest.TestCase):
         """)
     self.assertIsNotNone(schema.properties['ns'])
 
+  def test_application_uid_type(self):
+    schema = config_helper.Schema.load_yaml("""
+        properties:
+          u:
+            type: string
+            x-google-marketplace:
+              type: APPLICATION_UID
+        """)
+    self.assertIsNotNone(schema.properties['u'].application_uid)
+    self.assertIsNone(schema.properties['u'].application_uid.application_create)
+
+  def test_application_uid_type_create_application(self):
+    schema = config_helper.Schema.load_yaml("""
+        properties:
+          u:
+            type: string
+            x-google-marketplace:
+              type: APPLICATION_UID
+              applicationUid:
+                generatedProperties:
+                  createApplicationBoolean: application.create
+        """)
+    self.assertIsNotNone(schema.properties['u'].application_uid)
+    self.assertEqual('application.create',
+                     schema.properties['u'].application_uid.application_create)
+
   def test_image_type(self):
     schema = config_helper.Schema.load_yaml("""
         properties:
@@ -483,16 +509,6 @@ class ConfigHelperTest(unittest.TestCase):
               type: REPORTING_SECRET
         """)
     self.assertIsNotNone(schema.properties['rs'].reporting_secret)
-
-  def test_application_uid_type(self):
-    schema = config_helper.Schema.load_yaml("""
-        properties:
-          u:
-            type: string
-            x-google-marketplace:
-              type: APPLICATION_UID
-        """)
-    self.assertIsNotNone(schema.properties['u'])
 
   def test_unknown_type(self):
     self.assertRaises(

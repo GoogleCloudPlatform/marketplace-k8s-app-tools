@@ -26,6 +26,7 @@ app_api_version=$(kubectl get "applications/$NAME" \
 # Log information and, at the same time, catch errors early and separately.
 # This is a work around for the fact that process and command substitutions
 # do not propagate errors.
+/bin/expand_config.py --values_mode=raw --app_uid="$app_uid"
 echo -n "Application UID: " && print_config.py --xtype APPLICATION_UID --key true && echo ""
 echo "=== values.yaml ==="
 print_config.py --output=yaml
@@ -36,11 +37,11 @@ for chart in /data/chart/*; do
   # Note: This must be done out-of-band because the Application resource
   # is created before the deployer is invoked, but helm does not handle
   # pre-existing resources.
+  /bin/expand_config.py --values_mode=raw --app_uid=""
   helm template \
       --name="$NAME" \
       --namespace="$NAMESPACE" \
       --values=<(print_config.py --output=yaml) \
-      --set "$(print_config.py --xtype APPLICATION_UID --key true)=" \
       "$chart" \
     | yaml2json \
     | jq 'select( .kind == "Application" )' \
@@ -52,6 +53,7 @@ for chart in /data/chart/*; do
   # hook processing.
   # Note: The local tiller process is configured with --storage=secret,
   # which is recommended but not default behavior.
+  /bin/expand_config.py --values_mode=raw --app_uid="$app_uid"
   helm tiller run "$NAMESPACE" -- \
     helm install \
         --name="$NAME" \
