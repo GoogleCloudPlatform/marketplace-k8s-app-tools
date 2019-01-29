@@ -48,13 +48,7 @@ NAMESPACE="$(/bin/print_config.py \
 export NAME
 export NAMESPACE
 
-app_uid=$(kubectl get "applications/$NAME" \
-  --namespace="$NAMESPACE" \
-  --output=jsonpath='{.metadata.uid}')
-
-/bin/expand_config.py --values_mode=raw --app_uid="$app_uid"
-
-bin/deploy_internal.sh
+/bin/deploy_internal.sh
 
 patch_assembly_phase.sh --status="Success"
 

@@ -12,6 +12,9 @@ properties:
     type: string
     x-google-marketplace:
       type: APPLICATION_UID
+      applicationUid:
+        generatedProperties:
+          createApplicationBoolean: global.application.create
   marketplace-integration.image:
     type: string
     x-google-marketplace:
