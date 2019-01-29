@@ -48,7 +48,7 @@ NAMESPACE="$(/bin/print_config.py \
 export NAME
 export NAMESPACE
 
-bin/deploy_internal.sh
+/bin/deploy_internal.sh
 
 patch_assembly_phase.sh --status="Success"
 
