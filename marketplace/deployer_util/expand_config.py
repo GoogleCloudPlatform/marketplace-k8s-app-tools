@@ -46,7 +46,7 @@ def main():
       default='/data/final_values.yaml')
   parser.add_argument(
       '--app_uid',
-      help='The application UID for populating into APPLICATION_UID properties.',
+      help='The application UID for populating into APPLICATION_UID properties',
       default='')
   args = parser.parse_args()
 
@@ -76,12 +76,9 @@ def expand(values_dict, schema, app_uid=''):
       result[k] = generate_password(prop.password)
       continue
 
-    if v is None and prop.xtype == 'APPLICATION_UID':
-      if not app_uid:
-        raise InvalidProperty(
-            'Property {} is of type APPLICATION_UID, but --app_uid was not '
-            'specified.'.format(k, v))
-      result[k] = app_uid
+    if v is None and prop.application_uid:
+      result[k] = app_uid or ''
+      generate_properties_for_appuid(prop, app_uid, generated)
       continue
 
     if v is None and prop.default is not None:
@@ -128,6 +125,11 @@ def validate_value_types(values, schema):
       raise InvalidProperty(
           'Property {} is expected to be of type {}, but has value: {}'.format(
               k, prop.type, v))
+
+
+def generate_properties_for_appuid(prop, value, result):
+  if prop.application_uid.application_create:
+    result[prop.application_uid.application_create] = False if value else True
 
 
 def generate_properties_for_image(prop, value, result):

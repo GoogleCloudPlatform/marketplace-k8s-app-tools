@@ -165,6 +165,7 @@ class SchemaProperty:
     self._required = required
     self._default = dictionary.get('default', None)
     self._x = dictionary.get(XGOOGLE, None)
+    self._application_uid = None
     self._image = None
     self._password = None
     self._reporting_secret = None
@@ -197,9 +198,11 @@ class SchemaProperty:
         raise InvalidSchema('Property {} has {} without a type'.format(
             name, XGOOGLE))
       xt = self._x['type']
-      if xt in (XTYPE_NAME, XTYPE_NAMESPACE, XTYPE_APPLICATION_UID,
-                XTYPE_DEPLOYER_IMAGE):
+      if xt in (XTYPE_NAME, XTYPE_NAMESPACE, XTYPE_DEPLOYER_IMAGE):
         pass
+      elif xt == XTYPE_APPLICATION_UID:
+        d = self._x.get('applicationUid', {})
+        self._application_uid = SchemaXApplicationUid(d)
       elif xt == XTYPE_IMAGE:
         d = self._x.get('image', {})
         self._image = SchemaXImage(d)
@@ -249,6 +252,10 @@ class SchemaProperty:
     if self._x:
       return self._x['type']
     return None
+
+  @property
+  def application_uid(self):
+    return self._application_uid
 
   @property
   def image(self):
@@ -314,6 +321,19 @@ class SchemaProperty:
     if not isinstance(other, SchemaProperty):
       return False
     return other._name == self._name and other._d == self._d
+
+
+class SchemaXApplicationUid:
+  """Wrapper class providing convenient access to APPLICATION_UID properties."""
+
+  def __init__(self, dictionary):
+    generated_properties = dictionary.get('generatedProperties', {})
+    self._application_create = generated_properties.get(
+        'createApplicationBoolean', None)
+
+  @property
+  def application_create(self):
+    return self._application_create
 
 
 class SchemaXImage:

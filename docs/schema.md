@@ -259,6 +259,54 @@ It defines how this object will be handled. Each type has a different set of pro
 - `SERVICE_ACCOUNT`: The name of a pre-provisioned k8s `ServiceAccount`. If it does not exist, one is created.
 - `STORAGE_CLASS`: The name of a pre-provisioned k8s `StorageClass`. If it does not exist, one is created.
 - `STRING`: A string that needs special handling.
+- `APPLICATION_UID`: The uuid of the created `Application` object.
+
+---
+
+### type: APPLICATION_UID
+
+When the deployer runs, a placeholder `Application` object has already been created.
+The property of this type will receive its uuid.
+
+The template must also be ready handle the following two scenarios:
+- It receives an falsy/empty value for this property. In this case, the template must
+  include an `Application` object in its manifest. This object will be applied
+  to update the placeholder.
+- It receives a real uuid value for this property. In this case, the template must
+  NOT include an `Application` object in its manifest.
+
+Some tools like helm do not allow an object to pre-exist when the manifests are applied.
+Due to the existence of the placeholder, including an `Application` object in the manifest
+will result in helm failing to install the chart.
+
+```yaml
+properties:
+  appUid:
+    type: string
+    x-google-marketplace:
+      type: APPLICATION_UID
+      applicationUid:
+        generatedProperties:
+          createApplicationBoolean: global.application.create
+```
+
+- `createApplicationBoolean`: Denotes the name of a property to receive a boolean value.
+  This boolean instructs the template whether it should include an `Application` resource
+  in its manifest. This is essentially the negated truthy value of the main property.
+
+  In your helm chart, based on the above example, you can do one of the following:
+
+  ```yaml
+  {{- if not .Values.application_uid }}
+  # Application object definition
+  {{- end }}
+
+  # or ...
+
+  {{- if .Values.global.application.create }}
+  # Application object definition
+  {{- end }}
+  ```
 
 ---
 
@@ -267,7 +315,8 @@ It defines how this object will be handled. Each type has a different set of pro
 Example:
 
 ```yaml
-dbPassword:
+properties:
+  dbPassword:
     type: string
     x-google-marketplace:
       type: GENERATED_PASSWORD
