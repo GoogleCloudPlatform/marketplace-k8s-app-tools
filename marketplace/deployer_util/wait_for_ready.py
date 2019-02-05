@@ -102,6 +102,8 @@ def log(msg):
 def is_healthy(resource):
   if resource['kind'] == "Deployment":
     return is_deployment_ready(resource)
+  if resource['kind'] == "StatefulSet":
+    return is_sts_ready(resource)
   if resource['kind'] == "PersistentVolumeClaim":
     return is_pvc_ready(resource)
   if resource['kind'] == "Service":
@@ -120,8 +122,17 @@ def is_deployment_ready(resource):
   return False
 
 
+def is_sts_ready(resource):
+  if total_replicas(resource) == ready_replicas(resource):
+    return True
+
+  log("INFO StatefulSet '{}' replicas are not ready: {}/{}".format(
+      name(resource), ready_replicas(resource), total_replicas(resource)))
+  return False
+
+
 def is_pvc_ready(resource):
-  if resource['status']['phase'] == "Bound":
+  if phase(resource) == "Bound":
     return True
 
   log("INFO pvc/{} phase is '{}'. Expected: 'Bound'".format(
