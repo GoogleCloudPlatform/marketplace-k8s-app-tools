@@ -108,6 +108,8 @@ def is_healthy(resource):
     return is_pvc_ready(resource)
   if resource['kind'] == "Service":
     return is_service_ready(resource)
+  if resource['kind'] == "Ingress":
+    return is_ingress_ready(resource)
 
   # TODO(ruela): Handle more resource types.
   return True
@@ -148,6 +150,14 @@ def is_service_ready(resource):
     return True
 
   log("INFO service/{} service ip is not ready.".format(name(resource)))
+  return False
+
+
+def is_ingress_ready(resource):
+  if 'ingress' in resource['status']['loadBalancer']:
+    return True
+
+  log("INFO Ingress/{} is not ready.".format(name(resource)))
   return False
 
 
