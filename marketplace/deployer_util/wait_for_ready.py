@@ -104,6 +104,10 @@ def is_healthy(resource):
     return is_deployment_ready(resource)
   if resource['kind'] == "StatefulSet":
     return is_sts_ready(resource)
+  if resource['kind'] == "Pod":
+    return is_pod_ready(resource)
+  if resource['kind'] == "Job":
+    return is_job_ready(resource)
   if resource['kind'] == "PersistentVolumeClaim":
     return is_pvc_ready(resource)
   if resource['kind'] == "Service":
@@ -130,6 +134,22 @@ def is_sts_ready(resource):
 
   log("INFO StatefulSet '{}' replicas are not ready: {}/{}".format(
       name(resource), ready_replicas(resource), total_replicas(resource)))
+  return False
+
+
+def is_pod_ready(resource):
+  if conditions_status('Ready', resource):
+    return True
+
+  log("INFO Pod/{} is not ready.".format(name(resource)))
+  return False
+
+
+def is_job_ready(resource):
+  if conditions_status('Complete', resource):
+    return True
+
+  log("INFO Job/{} is not ready.".format(name(resource)))
   return False
 
 
@@ -167,6 +187,13 @@ def name(resource):
 
 def total_replicas(resource):
   return resource['spec']['replicas']
+
+
+def conditions_status(type, resource):
+  for condition in resource['status']['conditions']:
+    if condition['type'] == type and condition['status'] == 'True':
+        return True
+  return False
 
 
 def ready_replicas(resource):
