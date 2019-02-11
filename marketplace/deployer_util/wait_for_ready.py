@@ -188,7 +188,7 @@ def is_ingress_ready(resource):
 def is_deployer_job(resource):
   if 'app.kubernetes.io/component' in labels(resource):
     return (labels(resource)['app.kubernetes.io/component'] ==
-        'deployer.marketplace.cloud.google.com'):
+        'deployer.marketplace.cloud.google.com')
   return False
 
 
