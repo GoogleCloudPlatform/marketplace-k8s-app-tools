@@ -104,6 +104,10 @@ def is_healthy(resource):
     return is_deployment_ready(resource)
   if resource['kind'] == "StatefulSet":
     return is_sts_ready(resource)
+  if resource['kind'] == "Pod":
+    return is_pod_ready(resource)
+  if resource['kind'] == "Job":
+    return is_job_ready(resource)
   if resource['kind'] == "PersistentVolumeClaim":
     return is_pvc_ready(resource)
   if resource['kind'] == "Service":
@@ -130,6 +134,26 @@ def is_sts_ready(resource):
 
   log("INFO StatefulSet '{}' replicas are not ready: {}/{}".format(
       name(resource), ready_replicas(resource), total_replicas(resource)))
+  return False
+
+
+def is_pod_ready(resource):
+  if status_condition_is_true('Ready', resource):
+    return True
+
+  log("INFO Pod/{} is not ready.".format(name(resource)))
+  return False
+
+
+def is_job_ready(resource):
+  # Don't wait for Deployer.
+  if is_deployer_job(resource):
+    return True
+
+  if status_condition_is_true('Complete', resource):
+    return True
+
+  log("INFO Job/{} is not ready.".format(name(resource)))
   return False
 
 
@@ -161,12 +185,30 @@ def is_ingress_ready(resource):
   return False
 
 
+def is_deployer_job(resource):
+  if 'app.kubernetes.io/component' in labels(resource):
+    return (labels(resource)['app.kubernetes.io/component'] ==
+            'deployer.marketplace.cloud.google.com')
+  return False
+
+
 def name(resource):
   return resource['metadata']['name']
 
 
+def labels(resource):
+  return resource['metadata']['labels']
+
+
 def total_replicas(resource):
   return resource['spec']['replicas']
+
+
+def status_condition_is_true(condition_type, resource):
+  for condition in resource.get('status', {}).get('conditions', []):
+    if condition['type'] == condition_type:
+      return condition['status'] == 'True'
+  return False
 
 
 def ready_replicas(resource):
