@@ -31,11 +31,8 @@ class ExpandConfigTest(unittest.TestCase):
             default: Default
         """)
     self.assertEqual({'p1': 'Default'}, expand_config.expand({}, schema))
-    self.assertEqual({
-        'p1': 'Mine'
-    }, expand_config.expand({
-        'p1': 'Mine'
-    }, schema))
+    self.assertEqual({'p1': 'Mine'}, expand_config.expand({'p1': 'Mine'},
+                                                          schema))
 
   def test_invalid_value_type(self):
     schema = config_helper.Schema.load_yaml("""
@@ -44,9 +41,8 @@ class ExpandConfigTest(unittest.TestCase):
           p1:
             type: string
         """)
-    self.assertRaises(
-        expand_config.InvalidProperty,
-        lambda: expand_config.expand({'p1': 3}, schema))
+    self.assertRaises(expand_config.InvalidProperty, lambda: expand_config.
+                      expand({'p1': 3}, schema))
 
   def test_generate_properties_for_image_split_by_colon(self):
     schema = config_helper.Schema.load_yaml("""

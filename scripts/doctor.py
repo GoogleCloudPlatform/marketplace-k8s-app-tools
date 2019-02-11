@@ -267,12 +267,14 @@ def run(args, **kwargs):
         args=extra_args or {})
 
   # Dry-run to ensure valid DAG.
-  do_run(tasks, lambda task, event_queue: event_queue.put(
-      TaskEvent(name=task.name, success=True)))
+  do_run(
+      tasks, lambda task, event_queue: event_queue.put(
+          TaskEvent(name=task.name, success=True)))
 
   with ThreadPool(5) as pool:
-    return do_run(tasks, lambda task, event_queue: pool.apply_async(
-        execute_task, args=(task, event_queue)))
+    return do_run(
+        tasks, lambda task, event_queue: pool.apply_async(
+            execute_task, args=(task, event_queue)))
 
 
 def do_run(tasks, run_fn):
