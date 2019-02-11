@@ -190,9 +190,10 @@ def total_replicas(resource):
 
 
 def conditions_status(type, resource):
-  for condition in resource['status']['conditions']:
-    if condition['type'] == type and condition['status'] == 'True':
-        return True
+  if 'conditions' in resource['status']:
+    for condition in resource['status']['conditions']:
+      if condition['type'] == type and condition['status'] == 'True':
+          return True
   return False
 
 
