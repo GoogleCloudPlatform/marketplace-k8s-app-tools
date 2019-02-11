@@ -146,6 +146,10 @@ def is_pod_ready(resource):
 
 
 def is_job_ready(resource):
+  # Don't wait for Deployer.
+  if is_deployer_job(resource):
+    return True
+
   if conditions_status('Complete', resource):
     return True
 
@@ -181,8 +185,19 @@ def is_ingress_ready(resource):
   return False
 
 
+def is_deployer_job(resource):
+  if 'app.kubernetes.io/component' in labels(resource):
+    return (labels(resource)['app.kubernetes.io/component'] ==
+        'deployer.marketplace.cloud.google.com'):
+  return False
+
+
 def name(resource):
   return resource['metadata']['name']
+
+
+def labels(resource):
+  return resource['metadata']['labels']
 
 
 def total_replicas(resource):
