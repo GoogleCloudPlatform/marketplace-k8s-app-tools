@@ -188,7 +188,7 @@ def is_ingress_ready(resource):
 def is_deployer_job(resource):
   if 'app.kubernetes.io/component' in labels(resource):
     return (labels(resource)['app.kubernetes.io/component'] ==
-        'deployer.marketplace.cloud.google.com')
+            'deployer.marketplace.cloud.google.com')
   return False
 
 
@@ -208,7 +208,7 @@ def conditions_status(type, resource):
   if 'conditions' in resource['status']:
     for condition in resource['status']['conditions']:
       if condition['type'] == type:
-          return condition['status'] == 'True'
+        return condition['status'] == 'True'
   return False
 
 
