@@ -138,7 +138,7 @@ def is_sts_ready(resource):
 
 
 def is_pod_ready(resource):
-  if conditions_status('Ready', resource):
+  if status_condition_is_true('Ready', resource):
     return True
 
   log("INFO Pod/{} is not ready.".format(name(resource)))
@@ -150,7 +150,7 @@ def is_job_ready(resource):
   if is_deployer_job(resource):
     return True
 
-  if conditions_status('Complete', resource):
+  if status_condition_is_true('Complete', resource):
     return True
 
   log("INFO Job/{} is not ready.".format(name(resource)))
@@ -204,11 +204,10 @@ def total_replicas(resource):
   return resource['spec']['replicas']
 
 
-def conditions_status(type, resource):
-  if 'conditions' in resource['status']:
-    for condition in resource['status']['conditions']:
-      if condition['type'] == type:
-        return condition['status'] == 'True'
+def status_condition_is_true(condition_type, resource):
+  for condition in resource.get('status', {}).get('conditions', []):
+    if condition['type'] == condition_type:
+      return condition['status'] == 'True'
   return False
 
 
