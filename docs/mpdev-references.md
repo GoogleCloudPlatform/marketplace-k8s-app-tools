@@ -72,7 +72,7 @@ This script creates a new namespace, deploys the application, waits
 for it to turn green, run any smoke tests, and tears it down.
 
 ```shell
-mpdev /scripts/install \
+mpdev /scripts/verify \
   --deployer=<YOUR DEPLOYER IMAGE>
 ```
 
