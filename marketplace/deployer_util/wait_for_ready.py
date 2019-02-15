@@ -183,7 +183,7 @@ def is_ingress_ready(resource):
     if key == 'ingress.kubernetes.io/backends':
       data = json.loads(value)
       status = list(data.values())[0]
-      if status == "HEALTHY":
+      if status == 'HEALTHY':
         return True
 
   log("INFO Ingress/{} is not ready.".format(name(resource)))
