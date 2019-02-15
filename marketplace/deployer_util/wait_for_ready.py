@@ -16,6 +16,7 @@
 
 import sys
 import time
+import json
 
 from argparse import ArgumentParser
 from bash_util import Command
@@ -178,8 +179,12 @@ def is_service_ready(resource):
 
 
 def is_ingress_ready(resource):
-  if 'ingress' in resource['status']['loadBalancer']:
-    return True
+  for key, value in annotations(resource).items():
+    if key == 'ingress.kubernetes.io/backends':
+      data = json.loads(value)
+      status = list(data.values())[0]
+      if status == "HEALTHY":
+        return True
 
   log("INFO Ingress/{} is not ready.".format(name(resource)))
   return False
@@ -198,6 +203,10 @@ def name(resource):
 
 def labels(resource):
   return resource['metadata']['labels']
+
+
+def annotations(resource):
+  return resource['metadata']['annotations']
 
 
 def total_replicas(resource):
