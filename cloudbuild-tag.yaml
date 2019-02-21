@@ -35,7 +35,8 @@ steps:
   - -ceu
   - echo "$(.cloudbuild/should_tag_latest.sh gcr.io/$PROJECT_ID/k8s/dev $TAG_NAME)" > should_tag_latest
 
-- name: gcr.io/cloud-builders/docker
+- id: Maybe tag images latest
+  name: gcr.io/cloud-builders/docker
   wairFor:
   - *DetermineShouldTagLatest
   entrypoint: /bin/bash
