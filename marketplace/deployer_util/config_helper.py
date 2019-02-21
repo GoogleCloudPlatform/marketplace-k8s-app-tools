@@ -84,7 +84,7 @@ def _read_values_to_dict(values_dir, schema):
 
 
 class Schema:
-  """Wrapper class providing convenient access to a JSON schema."""
+  """Accesses a JSON schema."""
 
   @staticmethod
   def load_yaml_file(filepath):
@@ -97,6 +97,11 @@ class Schema:
     return Schema(yaml.load(yaml_str))
 
   def __init__(self, dictionary):
+    self._x_google_marketplace = None
+    if 'x-google-marketplace' in dictionary:
+      self._x_google_marketplace = SchemaXGoogleMarketplace(
+          dictionary['x-google-marketplace'])
+
     self._required = dictionary.get('required', [])
     self._properties = {
         k: SchemaProperty(k, v, k in self._required)
@@ -119,7 +124,12 @@ class Schema:
 
   def validate(self):
     """Fully validates the schema, raising InvalidSchema if fails."""
-    if self.app_api_version is None:
+    is_v2 = False
+    if self._x_google_marketplace is not None:
+      self._x_google_marketplace.validate()
+      is_v2 = self._x_google_marketplace.is_v2()
+
+    if not is_v2 and self._app_api_version is None:
       raise InvalidSchema('applicationApiVersion is required')
 
     if len(self.form) > 1:
@@ -129,9 +139,14 @@ class Schema:
       if 'widget' not in item:
         raise InvalidSchema('form items must have a widget.')
       if item['widget'] not in WIDGET_TYPES:
-        raise InvalidSchema('Unrecognized form widget: {}', item['widget'])
+        raise InvalidSchema('Unrecognized form widget: {}'.format(
+            item['widget']))
       if 'description' not in item:
         raise InvalidSchema('form items must have a description.')
+
+  @property
+  def x_google_marketplace(self):
+    return self._x_google_marketplace
 
   @property
   def app_api_version(self):
@@ -156,8 +171,182 @@ class Schema:
     ]
 
 
+_SCHEMA_VERSION_1 = 'v1'
+_SCHEMA_VERSION_2 = 'v2'
+_SCHEMA_VERSIONS = [_SCHEMA_VERSION_1, _SCHEMA_VERSION_2]
+
+
+class SchemaXGoogleMarketplace:
+  """Accesses the top level x-google-markplace."""
+
+  def __init__(self, dictionary):
+    self._app_api_version = None
+    self._published_version = None
+    self._images = None
+    self._cluster_constraints = None
+
+    self._schema_version = dictionary.get('schemaVersion', _SCHEMA_VERSION_1)
+    if self._schema_version not in _SCHEMA_VERSIONS:
+      raise InvalidSchema('Invalid schema version {}'.format(
+          self._schema_version))
+
+    if 'clusterConstraints' in dictionary:
+      self._cluster_constraints = SchemaClusterConstraints(
+          dictionary['clusterConstraints'])
+
+    if not self.is_v2():
+      return
+
+    if 'applicationApiVersion' not in dictionary:
+      raise InvalidSchema(
+          'x-google-marketplace.applicationApiVersion is required')
+    self._app_api_version = dictionary['applicationApiVersion']
+
+    if 'publishedVersion' not in dictionary:
+      raise InvalidSchema('x-google-marketplace.publishedVersion is required')
+    self._published_version = dictionary['publishedVersion']
+
+    if 'images' not in dictionary:
+      raise InvalidSchema('x-google-marketplace.images is required')
+    self._images = SchemaImages(dictionary['images'])
+
+  def validate(self):
+    pass
+
+  @property
+  def cluster_constraints(self):
+    return self._cluster_constraints
+
+  @property
+  def app_api_version(self):
+    return self._app_api_version
+
+  @property
+  def published_version(self):
+    return self._published_version
+
+  @property
+  def images(self):
+    return self._images
+
+  def is_v2(self):
+    return self._schema_version == _SCHEMA_VERSION_2
+
+
+class SchemaClusterConstraints:
+  """Accesses top level clusterConstraints."""
+
+  def __init__(self, dictionary):
+    self._k8s_version = dictionary.get('k8sVersion', None)
+    self._resources = None
+
+    if 'resources' in dictionary:
+      resources = dictionary['resources']
+      if not isinstance(resources, list):
+        raise InvalidSchema('clusterConstraints.resources must be a list')
+      self._resources = [SchemaResourceConstraints(r) for r in resources]
+
+  @property
+  def k8s_version(self):
+    return self._k8s_version
+
+  @property
+  def resources(self):
+    return self._resources
+
+
+class SchemaResourceConstraints:
+  """Accesses a single resource's constraints."""
+
+  def __init__(self, dictionary):
+    self._replicas = dictionary.get('replicas', None)
+    self._affinity = None
+    self._requests = None
+
+    if 'affinity' in dictionary:
+      self._affinity = SchemaResourceConstraintAffinity(dictionary['affinity'])
+
+    if 'requests' in dictionary:
+      self._requests = SchemaResourceConstraintRequests(dictionary['requests'])
+
+  @property
+  def replicas(self):
+    return self._replicas
+
+  @property
+  def affinity(self):
+    return self._affinity
+
+  @property
+  def requests(self):
+    return self._requests
+
+
+class SchemaResourceConstraintAffinity:
+  """Accesses a single resource's affinity constraints"""
+
+  def __init__(self, dictionary):
+    self._simple_node_affinity = None
+
+    if 'simpleNodeAffinity' in dictionary:
+      self._simple_node_affinity = SchemaSimpleNodeAffinity(
+          dictionary['simpleNodeAffinity'])
+
+  @property
+  def simple_node_affinity(self):
+    return self._simple_node_affinity
+
+
+class SchemaSimpleNodeAffinity:
+  """Accesses simple node affinity for resource constraints."""
+
+  def __init__(self, dictionary):
+    self._minimum_node_count = dictionary.get('minimumNodeCount', None)
+
+    if 'type' not in dictionary:
+      raise InvalidSchema('simpleNodeAffinity requires a type')
+    self._type = dictionary['type']
+
+    if (self._type == 'REQUIRE_MINIMUM_NODE_COUNT' and
+        self._minimum_node_count is None):
+      raise InvalidSchema(
+          'simpleNodeAffinity of type REQUIRE_MINIMUM_NODE_COUNT '
+          'requires minimumNodeCount')
+
+  @property
+  def affinity_type(self):
+    return self._type
+
+  @property
+  def minimum_node_count(self):
+    return self._minimum_node_count
+
+
+class SchemaResourceConstraintRequests:
+  """Accesses a single resource's requests."""
+
+  def __init__(self, dictionary):
+    self.cpu = dictionary.get('cpu', None)
+    self.memory = dictionary.get('memory', None)
+
+  @property
+  def cpu(self):
+    return self._cpu
+
+  @property
+  def memory(self):
+    return self._memory
+
+
+class SchemaImages:
+  """Accesses image definitions."""
+
+  def __init__(self, dictionary):
+    pass
+
+
 class SchemaProperty:
-  """Wrapper class providing convenient access to a JSON schema property."""
+  """Accesses a JSON schema property."""
 
   def __init__(self, name, dictionary, required):
     self._name = name
@@ -324,7 +513,7 @@ class SchemaProperty:
 
 
 class SchemaXApplicationUid:
-  """Wrapper class providing convenient access to APPLICATION_UID properties."""
+  """Accesses APPLICATION_UID properties."""
 
   def __init__(self, dictionary):
     generated_properties = dictionary.get('generatedProperties', {})
@@ -337,7 +526,7 @@ class SchemaXApplicationUid:
 
 
 class SchemaXImage:
-  """Wrapper class providing convenient access to IMAGE and DEPLOYER_IMAGE properties."""
+  """Accesses IMAGE and DEPLOYER_IMAGE properties."""
 
   def __init__(self, dictionary):
     self._split_by_colon = None
@@ -378,7 +567,7 @@ SchemaXPassword = collections.namedtuple(
 
 
 class SchemaXServiceAccount:
-  """Wrapper class providing convenient access to SERVICE_ACCOUNT property."""
+  """Accesses SERVICE_ACCOUNT property."""
 
   def __init__(self, dictionary):
     self._roles = dictionary.get('roles', [])
@@ -417,7 +606,7 @@ class SchemaXServiceAccount:
 
 
 class SchemaXStorageClass:
-  """Wrapper class providing convenient access to STORAGE_CLASS property."""
+  """Accesses STORAGE_CLASS property."""
 
   def __init__(self, dictionary):
     self._type = dictionary['type']
@@ -428,7 +617,7 @@ class SchemaXStorageClass:
 
 
 class SchemaXString:
-  """Wrapper class providing convenient access to STRING property."""
+  """Accesses STRING property."""
 
   def __init__(self, dictionary):
     generated_properties = dictionary.get('generatedProperties', {})
@@ -441,7 +630,7 @@ class SchemaXString:
 
 
 class SchemaXReportingSecret:
-  """Wrapper class providing convenient access to REPORTING_SECRET property."""
+  """Accesses REPORTING_SECRET property."""
 
   def __init__(self, dictionary):
     pass

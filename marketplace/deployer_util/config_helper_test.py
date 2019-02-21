@@ -341,8 +341,8 @@ class ConfigHelperTest(unittest.TestCase):
     self.assertEqual(False, schema.properties['pb'].str_to_type('False'))
     self.assertEqual(False, schema.properties['pb'].str_to_type('no'))
     self.assertEqual(False, schema.properties['pb'].str_to_type('No'))
-    self.assertRaises(config_helper.InvalidValue, lambda: schema.properties[
-        'pb'].str_to_type('bad'))
+    self.assertRaises(config_helper.InvalidValue,
+                      lambda: schema.properties['pb'].str_to_type('bad'))
 
   def test_invalid_default_type(self):
     self.assertRaises(
@@ -363,22 +363,28 @@ class ConfigHelperTest(unittest.TestCase):
             x-google-marketplace:
               type: GENERATED_PASSWORD
         """)
-    self.assertTrue(schema.properties['propertyInt'].matches_definition(
-        {'name': 'propertyInt'}))
-    self.assertFalse(schema.properties['propertyInt'].matches_definition(
-        {'name': 'propertyPassword'}))
-    self.assertTrue(schema.properties['propertyInt'].matches_definition(
-        {'type': 'int'}))
-    self.assertFalse(schema.properties['propertyInt'].matches_definition(
-        {'type': 'string'}))
-    self.assertFalse(schema.properties['propertyInt'].matches_definition(
-        {'x-google-marketplace': {
+    self.assertTrue(schema.properties['propertyInt'].matches_definition({
+        'name': 'propertyInt'
+    }))
+    self.assertFalse(schema.properties['propertyInt'].matches_definition({
+        'name': 'propertyPassword'
+    }))
+    self.assertTrue(schema.properties['propertyInt'].matches_definition({
+        'type': 'int'
+    }))
+    self.assertFalse(schema.properties['propertyInt'].matches_definition({
+        'type': 'string'
+    }))
+    self.assertFalse(schema.properties['propertyInt'].matches_definition({
+        'x-google-marketplace': {
             'type': 'GENERATED_PASSWORD'
-        }}))
-    self.assertTrue(schema.properties['propertyPassword'].matches_definition(
-        {'x-google-marketplace': {
+        }
+    }))
+    self.assertTrue(schema.properties['propertyPassword'].matches_definition({
+        'x-google-marketplace': {
             'type': 'GENERATED_PASSWORD'
-        }}))
+        }
+    }))
     self.assertTrue(schema.properties['propertyPassword'].matches_definition({
         'type': 'string',
         'x-google-marketplace': {
@@ -514,6 +520,81 @@ class ConfigHelperTest(unittest.TestCase):
                   type: UNKNOWN
             """))
 
+  def test_v2_fields(self):
+    schema = config_helper.Schema.load_yaml("""
+        x-google-marketplace:
+          schemaVersion: v2
+
+          applicationApiVersion: v1beta1
+          publishedVersion: 6.5.130
+          images:
+            main:
+              properties:
+                main.image:
+                  type: FULL
+        properties:
+          simple:
+            type: string
+        """)
+    schema.validate()
+    self.assertTrue(schema.x_google_marketplace.is_v2())
+    self.assertEqual(schema.x_google_marketplace.app_api_version, 'v1beta1')
+    self.assertEqual(schema.x_google_marketplace.published_version, '6.5.130')
+
+  def test_k8s_version_constraint(self):
+    schema = config_helper.Schema.load_yaml("""
+        applicationApiVersion: v1beta1
+        properties:
+          simple:
+            type: string
+        x-google-marketplace:
+          clusterConstraints:
+            k8sVersion: '>1.11'
+        """)
+    schema.validate()
+    self.assertEqual(
+        schema.x_google_marketplace.cluster_constraints.k8s_version, '>1.11')
+
+  def test_resource_constraints(self):
+    schema = config_helper.Schema.load_yaml("""
+        applicationApiVersion: v1beta1
+        properties:
+          simple:
+            type: string
+        x-google-marketplace:
+          clusterConstraints:
+            resources:
+            - replicas: 3
+              requests:
+                cpu: 100m
+                memory: 512Gi
+              affinity:
+                simpleNodeAffinity:
+                  type: REQUIRE_ONE_NODE_PER_REPLICA
+            - replicas: 5
+              affinity:
+                simpleNodeAffinity:
+                  type: REQUIRE_MINIMUM_NODE_COUNT
+                  minimumNodeCount: 4
+        """)
+    schema.validate()
+    resources = schema.x_google_marketplace.cluster_constraints.resources
+    self.assertTrue(isinstance(resources, list))
+    self.assertEqual(len(resources), 2)
+    self.assertEqual(resources[0].replicas, 3)
+    self.assertEqual(resources[0].requests.cpu, '100m')
+    self.assertEqual(resources[0].requests.memory, '512Gi')
+    self.assertEqual(resources[0].affinity.simple_node_affinity.affinity_type,
+                     'REQUIRE_ONE_NODE_PER_REPLICA')
+    self.assertIsNone(
+        resources[0].affinity.simple_node_affinity.minimum_node_count)
+    self.assertEqual(resources[1].replicas, 5)
+    self.assertIsNone(resources[1].requests)
+    self.assertEqual(resources[1].affinity.simple_node_affinity.affinity_type,
+                     'REQUIRE_MINIMUM_NODE_COUNT')
+    self.assertEqual(
+        resources[1].affinity.simple_node_affinity.minimum_node_count, 4)
+
   def test_validate_good(self):
     schema = config_helper.Schema.load_yaml("""
         applicationApiVersion: v1beta1
@@ -544,8 +625,8 @@ class ConfigHelperTest(unittest.TestCase):
 
   def test_validate_missing_app_api_version(self):
     self.assertRaisesRegexp(
-        config_helper.InvalidSchema,
-        'applicationApiVersion', lambda: config_helper.Schema.load_yaml("""
+        config_helper.InvalidSchema, 'applicationApiVersion',
+        lambda: config_helper.Schema.load_yaml("""
             properties:
               simple:
                 type: string
@@ -553,8 +634,8 @@ class ConfigHelperTest(unittest.TestCase):
 
   def test_validate_bad_form_too_many_items(self):
     self.assertRaisesRegexp(
-        config_helper.InvalidSchema,
-        'form', lambda: config_helper.Schema.load_yaml("""
+        config_helper.InvalidSchema, 'form',
+        lambda: config_helper.Schema.load_yaml("""
             applicationApiVersion: v1beta1
             form:
             - widget: help
@@ -565,8 +646,8 @@ class ConfigHelperTest(unittest.TestCase):
 
   def test_validate_bad_form_missing_type(self):
     self.assertRaisesRegexp(
-        config_helper.InvalidSchema,
-        'form', lambda: config_helper.Schema.load_yaml("""
+        config_helper.InvalidSchema, 'form',
+        lambda: config_helper.Schema.load_yaml("""
             applicationApiVersion: v1beta1
             form:
             - description: My arbitrary <i>description</i>
@@ -574,8 +655,8 @@ class ConfigHelperTest(unittest.TestCase):
 
   def test_validate_bad_form_unrecognized_type(self):
     self.assertRaisesRegexp(
-        config_helper.InvalidSchema,
-        'form', lambda: config_helper.Schema.load_yaml("""
+        config_helper.InvalidSchema, 'form',
+        lambda: config_helper.Schema.load_yaml("""
             applicationApiVersion: v1beta1
             form:
             - widget: magical
@@ -584,8 +665,8 @@ class ConfigHelperTest(unittest.TestCase):
 
   def test_validate_bad_form_missing_description(self):
     self.assertRaisesRegexp(
-        config_helper.InvalidSchema,
-        'form', lambda: config_helper.Schema.load_yaml("""
+        config_helper.InvalidSchema, 'form',
+        lambda: config_helper.Schema.load_yaml("""
             applicationApiVersion: v1beta1
             form:
             - widget: help
