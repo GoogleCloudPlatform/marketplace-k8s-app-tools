@@ -45,11 +45,17 @@ steps:
   - |
     if [[ "$(cat should_tag_latest)" == "true" ]]; then
       docker tag gcr.io/$PROJECT_ID/k8s/dev:$TAG_NAME gcr.io/$PROJECT_ID/k8s/dev:latest
+      docker push gcr.io/$PROJECT_ID/k8s/dev:latest
       docker tag gcr.io/$PROJECT_ID/k8s/deployer_helm:$TAG_NAME gcr.io/$PROJECT_ID/k8s/deployer_helm:latest
+      docker push gcr.io/$PROJECT_ID/k8s/deployer_helm:latest
       docker tag gcr.io/$PROJECT_ID/k8s/deployer_helm/onbuild:$TAG_NAME gcr.io/$PROJECT_ID/k8s/deployer_helm/onbuild:latest
+      docker push gcr.io/$PROJECT_ID/k8s/deployer_helm/onbuild:latest
       docker tag gcr.io/$PROJECT_ID/k8s/deployer_helm_tiller:$TAG_NAME gcr.io/$PROJECT_ID/k8s/deployer_helm_tiller:latest
+      docker push gcr.io/$PROJECT_ID/k8s/deployer_helm_tiller:latest
       docker tag gcr.io/$PROJECT_ID/k8s/deployer_helm_tiller/onbuild:$TAG_NAME gcr.io/$PROJECT_ID/k8s/deployer_helm_tiller/onbuild:latest
+      docker push gcr.io/$PROJECT_ID/k8s/deployer_helm_tiller/onbuild:latest
       docker tag gcr.io/$PROJECT_ID/k8s/deployer_envsubst:$TAG_NAME gcr.io/$PROJECT_ID/k8s/deployer_envsubst:latest
+      docker push gcr.io/$PROJECT_ID/k8s/deployer_envsubst:latest
     else
       echo "Not tagging latest"
     fi
