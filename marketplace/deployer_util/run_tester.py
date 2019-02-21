@@ -27,77 +27,77 @@ _PROG_HELP = "Deploy and run tester pods and wait for them to finish execution"
 
 
 def main():
-  parser = ArgumentParser(description=_PROG_HELP)
-  parser.add_argument('--namespace')
-  parser.add_argument('--manifest')
-  parser.add_argument('--timeout', type=int, default=300)
-  args = parser.parse_args()
+    parser = ArgumentParser(description=_PROG_HELP)
+    parser.add_argument('--namespace')
+    parser.add_argument('--manifest')
+    parser.add_argument('--timeout', type=int, default=300)
+    args = parser.parse_args()
 
-  Command(
-      '''
+    Command(
+        '''
       kubectl apply
       --namespace="{}"
       --filename="{}"
       '''.format(args.namespace, args.manifest),
-      print_call=True)
+        print_call=True)
 
-  resources = load_resources_yaml(args.manifest)
+    resources = load_resources_yaml(args.manifest)
 
-  for resource_def in resources:
-    full_name = "{}/{}".format(resource_def['kind'],
-                               deep_get(resource_def, 'metadata', 'name'))
+    for resource_def in resources:
+        full_name = "{}/{}".format(resource_def['kind'],
+                                   deep_get(resource_def, 'metadata', 'name'))
 
-    if resource_def['kind'] != 'Pod':
-      log("INFO Skip '{}'".format(full_name))
-      continue
+        if resource_def['kind'] != 'Pod':
+            log("INFO Skip '{}'".format(full_name))
+            continue
 
-    start_time = time.time()
-    poll_interval = 4
-    tester_timeout = args.timeout
+        start_time = time.time()
+        poll_interval = 4
+        tester_timeout = args.timeout
 
-    while True:
-      try:
-        resource = Command(
-            '''
+        while True:
+            try:
+                resource = Command(
+                    '''
           kubectl get "{}"
           --namespace="{}"
           -o=json
           '''.format(full_name, args.namespace),
-            print_call=True).json()
-      except CommandException as ex:
-        log(str(ex))
-        log("INFO retrying")
-        time.sleep(poll_interval)
-        continue
+                    print_call=True).json()
+            except CommandException as ex:
+                log(str(ex))
+                log("INFO retrying")
+                time.sleep(poll_interval)
+                continue
 
-      result = deep_get(resource, 'status', 'phase')
+            result = deep_get(resource, 'status', 'phase')
 
-      if result == "Failed":
-        print_logs(full_name, args.namespace)
-        raise Exception("ERROR Tester '{}' failed".format(full_name))
+            if result == "Failed":
+                print_logs(full_name, args.namespace)
+                raise Exception("ERROR Tester '{}' failed".format(full_name))
 
-      if result == "Succeeded":
-        print_logs(full_name, args.namespace)
-        log("INFO Tester '{}' succeeded".format(full_name))
-        break
+            if result == "Succeeded":
+                print_logs(full_name, args.namespace)
+                log("INFO Tester '{}' succeeded".format(full_name))
+                break
 
-      if time.time() - start_time > tester_timeout:
-        print_logs(full_name, args.namespace)
-        raise Exception("ERROR Tester '{}' timeout".format(full_name))
+            if time.time() - start_time > tester_timeout:
+                print_logs(full_name, args.namespace)
+                raise Exception("ERROR Tester '{}' timeout".format(full_name))
 
-      time.sleep(poll_interval)
+            time.sleep(poll_interval)
 
 
 def print_logs(full_name, namespace):
-  log(
-      Command('''kubectl logs {} --namespace="{}"'''.format(
-          full_name, namespace)).output)
+    log(
+        Command('''kubectl logs {} --namespace="{}"'''.format(
+            full_name, namespace)).output)
 
 
 def log(msg):
-  sys.stdout.write(msg + "\n")
-  sys.stdout.flush()
+    sys.stdout.write(msg + "\n")
+    sys.stdout.flush()
 
 
 if __name__ == "__main__":
-  main()
+    main()
