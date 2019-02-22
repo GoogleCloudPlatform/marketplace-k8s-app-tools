@@ -182,6 +182,7 @@ class SchemaXGoogleMarketplace:
   def __init__(self, dictionary):
     self._app_api_version = None
     self._published_version = None
+    self._published_version_meta = None
     self._images = None
     self._cluster_constraints = None
 
@@ -206,6 +207,12 @@ class SchemaXGoogleMarketplace:
       raise InvalidSchema('x-google-marketplace.publishedVersion is required')
     self._published_version = dictionary['publishedVersion']
 
+    if 'publishedVersionMetadata' not in dictionary:
+      raise InvalidSchema(
+          'x-google-marketplace.publishedVersionMetadata is required')
+    self._published_version_meta = SchemaVersionMeta(
+        dictionary['publishedVersionMetadata'])
+
     if 'images' not in dictionary:
       raise InvalidSchema('x-google-marketplace.images is required')
     self._images = {
@@ -226,6 +233,10 @@ class SchemaXGoogleMarketplace:
   @property
   def published_version(self):
     return self._published_version
+
+  @property
+  def published_version_meta(self):
+    return self._published_version_meta
 
   @property
   def images(self):
@@ -394,6 +405,30 @@ class SchemaImageProjectionProperty:
   @property
   def part_type(self):
     return self._type
+
+
+class SchemaVersionMeta:
+  """Accesses publishedVersionMetadata."""
+
+  def __init__(self, dictionary):
+    self._recommended = dictionary.get('recommended', False)
+    self._release_types = dictionary.get('releaseTypes', [])
+
+    if 'releaseNote' not in dictionary:
+      raise InvalidSchema('publishedVersionMetadata.releaseNote is required')
+    self._release_note = dictionary['releaseNote']
+
+  @property
+  def recommended(self):
+    return self._recommended
+
+  @property
+  def release_note(self):
+    return self._release_note
+
+  @property
+  def release_types(self):
+    return self._release_types
 
 
 class SchemaProperty:

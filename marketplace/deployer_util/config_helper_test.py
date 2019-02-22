@@ -526,7 +526,14 @@ class ConfigHelperTest(unittest.TestCase):
           schemaVersion: v2
 
           applicationApiVersion: v1beta1
+
           publishedVersion: 6.5.130
+          publishedVersionMetadata:
+            releaseNote: Bug fixes
+            releaseTypes:
+            - BUG_FIX
+            recommended: true
+
           images:
             main:
               properties:
@@ -545,16 +552,20 @@ class ConfigHelperTest(unittest.TestCase):
     schema.validate()
     self.assertTrue(schema.x_google_marketplace.is_v2())
     self.assertEqual(schema.x_google_marketplace.app_api_version, 'v1beta1')
+
     self.assertEqual(schema.x_google_marketplace.published_version, '6.5.130')
+    version_meta = schema.x_google_marketplace.published_version_meta
+    self.assertEqual(version_meta.release_note, 'Bug fixes')
+    self.assertListEqual(version_meta.release_types, ['BUG_FIX'])
+    self.assertTrue(version_meta.recommended)
+
     images = schema.x_google_marketplace.images
     self.assertTrue(isinstance(images, dict))
     self.assertEqual(len(images), 2)
-
     self.assertEqual(images['main'].name, 'main')
     self.assertEqual(len(images['main'].properties), 1)
     self.assertEqual(images['main'].properties['main.image'].name, 'main.image')
     self.assertEqual(images['main'].properties['main.image'].part_type, 'FULL')
-
     self.assertEqual(images['db'].name, 'db')
     self.assertEqual(len(images['db'].properties), 2)
     self.assertEqual(images['db'].properties['db.image.repo'].name,
