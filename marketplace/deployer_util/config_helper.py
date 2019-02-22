@@ -208,7 +208,9 @@ class SchemaXGoogleMarketplace:
 
     if 'images' not in dictionary:
       raise InvalidSchema('x-google-marketplace.images is required')
-    self._images = SchemaImages(dictionary['images'])
+    self._images = {
+        k: SchemaImage(k, v) for k, v in dictionary['images'].iteritems()
+    }
 
   def validate(self):
     pass
@@ -338,11 +340,60 @@ class SchemaResourceConstraintRequests:
     return self._memory
 
 
-class SchemaImages:
-  """Accesses image definitions."""
+class SchemaImage:
+  """Accesses an image definition."""
 
-  def __init__(self, dictionary):
-    pass
+  def __init__(self, name, dictionary):
+    self._name = name
+    self._properties = {
+        k: SchemaImageProjectionProperty(k, v)
+        for k, v in dictionary.get('properties', {}).iteritems()
+    }
+
+  @property
+  def name(self):
+    return self._name
+
+  @property
+  def properties(self):
+    return self._properties
+
+
+IMAGE_PROJECTION_TYPE_FULL = 'FULL'
+IMAGE_PROJECTION_TYPE_REPO = 'REPO_WITHOUT_REGISTRY'
+IMAGE_PROJECTION_TYPE_REGISTRY_REPO = 'REPO_WITH_REGISTRY'
+IMAGE_PROJECTION_TYPE_REGISTRY = 'REGISTRY'
+IMAGE_PROJECTION_TYPE_TAG = 'TAG'
+_IMAGE_PROJECTION_TYPES = [
+    IMAGE_PROJECTION_TYPE_FULL,
+    IMAGE_PROJECTION_TYPE_REPO,
+    IMAGE_PROJECTION_TYPE_REGISTRY_REPO,
+    IMAGE_PROJECTION_TYPE_REGISTRY,
+    IMAGE_PROJECTION_TYPE_TAG,
+]
+
+
+class SchemaImageProjectionProperty:
+  """Accesses a property that an image name projects to."""
+
+  def __init__(self, name, dictionary):
+    self._name = name
+    if 'type' not in dictionary:
+      raise InvalidSchema(
+          'Each property for an image in x-google-marketplace.images '
+          'must have a valid type')
+    self._type = dictionary['type']
+    if self._type not in _IMAGE_PROJECTION_TYPES:
+      raise InvalidSchema('image property {} has invalid type {}'.format(
+          name, self._type))
+
+  @property
+  def name(self):
+    return self._name
+
+  @property
+  def part_type(self):
+    return self._type
 
 
 class SchemaProperty:

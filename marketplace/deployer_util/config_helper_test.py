@@ -532,6 +532,12 @@ class ConfigHelperTest(unittest.TestCase):
               properties:
                 main.image:
                   type: FULL
+            db:
+              properties:
+                db.image.repo:
+                  type: REPO_WITH_REGISTRY
+                db.image.tag:
+                  type: TAG
         properties:
           simple:
             type: string
@@ -540,6 +546,24 @@ class ConfigHelperTest(unittest.TestCase):
     self.assertTrue(schema.x_google_marketplace.is_v2())
     self.assertEqual(schema.x_google_marketplace.app_api_version, 'v1beta1')
     self.assertEqual(schema.x_google_marketplace.published_version, '6.5.130')
+    images = schema.x_google_marketplace.images
+    self.assertTrue(isinstance(images, dict))
+    self.assertEqual(len(images), 2)
+
+    self.assertEqual(images['main'].name, 'main')
+    self.assertEqual(len(images['main'].properties), 1)
+    self.assertEqual(images['main'].properties['main.image'].name, 'main.image')
+    self.assertEqual(images['main'].properties['main.image'].part_type, 'FULL')
+
+    self.assertEqual(images['db'].name, 'db')
+    self.assertEqual(len(images['db'].properties), 2)
+    self.assertEqual(images['db'].properties['db.image.repo'].name,
+                     'db.image.repo')
+    self.assertEqual(images['db'].properties['db.image.repo'].part_type,
+                     'REPO_WITH_REGISTRY')
+    self.assertEqual(images['db'].properties['db.image.tag'].name,
+                     'db.image.tag')
+    self.assertEqual(images['db'].properties['db.image.tag'].part_type, 'TAG')
 
   def test_k8s_version_constraint(self):
     schema = config_helper.Schema.load_yaml("""
