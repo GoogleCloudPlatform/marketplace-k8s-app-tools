@@ -97,24 +97,15 @@ class Schema:
     return Schema(yaml.load(yaml_str))
 
   def __init__(self, dictionary):
-    self._x_google_marketplace = None
-    if 'x-google-marketplace' in dictionary:
-      self._x_google_marketplace = SchemaXGoogleMarketplace(
-          dictionary['x-google-marketplace'])
+    self._x_google_marketplace = _apply_or_none(
+        dictionary, 'x-google-marketplace',
+        lambda v: SchemaXGoogleMarketplace(v))
 
     self._required = dictionary.get('required', [])
     self._properties = {
         k: SchemaProperty(k, v, k in self._required)
         for k, v in dictionary.get('properties', {}).iteritems()
     }
-
-    bad_required_names = [
-        x for x in self._required if x not in self._properties
-    ]
-    if bad_required_names:
-      raise InvalidSchema(
-          'Undefined property names found in required: {}'.format(
-              ', '.join(bad_required_names)))
 
     self._app_api_version = dictionary.get(
         'applicationApiVersion', dictionary.get('application_api_version',
@@ -124,6 +115,14 @@ class Schema:
 
   def validate(self):
     """Fully validates the schema, raising InvalidSchema if fails."""
+    bad_required_names = [
+        x for x in self._required if x not in self._properties
+    ]
+    if bad_required_names:
+      raise InvalidSchema(
+          'Undefined property names found in required: {}'.format(
+              ', '.join(bad_required_names)))
+
     is_v2 = False
     if self._x_google_marketplace is not None:
       self._x_google_marketplace.validate()
@@ -198,26 +197,19 @@ class SchemaXGoogleMarketplace:
     if not self.is_v2():
       return
 
-    if 'applicationApiVersion' not in dictionary:
-      raise InvalidSchema(
-          'x-google-marketplace.applicationApiVersion is required')
-    self._app_api_version = dictionary['applicationApiVersion']
+    self._app_api_version = _get_or_invalid(
+        dictionary, 'applicationApiVersion',
+        'x-google-marketplace.applicationApiVersion is required')
+    self._published_version = _get_or_invalid(
+        dictionary, 'publishedVersion',
+        'x-google-marketplace.publishedVersion is required')
+    self._published_version_meta = _apply_or_invalid(
+        dictionary, 'publishedVersionMetadata', lambda v: SchemaVersionMeta(v),
+        'x-google-marketplace.publishedVersionMetadata is required')
 
-    if 'publishedVersion' not in dictionary:
-      raise InvalidSchema('x-google-marketplace.publishedVersion is required')
-    self._published_version = dictionary['publishedVersion']
-
-    if 'publishedVersionMetadata' not in dictionary:
-      raise InvalidSchema(
-          'x-google-marketplace.publishedVersionMetadata is required')
-    self._published_version_meta = SchemaVersionMeta(
-        dictionary['publishedVersionMetadata'])
-
-    if 'images' not in dictionary:
-      raise InvalidSchema('x-google-marketplace.images is required')
-    self._images = {
-        k: SchemaImage(k, v) for k, v in dictionary['images'].iteritems()
-    }
+    images = _get_or_invalid(dictionary, 'images',
+                             'x-google-marketplace.images is required')
+    self._images = {k: SchemaImage(k, v) for k, v in images.iteritems()}
 
   def validate(self):
     pass
@@ -273,14 +265,10 @@ class SchemaResourceConstraints:
 
   def __init__(self, dictionary):
     self._replicas = dictionary.get('replicas', None)
-    self._affinity = None
-    self._requests = None
-
-    if 'affinity' in dictionary:
-      self._affinity = SchemaResourceConstraintAffinity(dictionary['affinity'])
-
-    if 'requests' in dictionary:
-      self._requests = SchemaResourceConstraintRequests(dictionary['requests'])
+    self._affinity = _apply_or_none(
+        dictionary, 'affinity', lambda v: SchemaResourceConstraintAffinity(v))
+    self._requests = _apply_or_none(
+        dictionary, 'requests', lambda v: SchemaResourceConstraintRequests(v))
 
   @property
   def replicas(self):
@@ -299,11 +287,8 @@ class SchemaResourceConstraintAffinity:
   """Accesses a single resource's affinity constraints"""
 
   def __init__(self, dictionary):
-    self._simple_node_affinity = None
-
-    if 'simpleNodeAffinity' in dictionary:
-      self._simple_node_affinity = SchemaSimpleNodeAffinity(
-          dictionary['simpleNodeAffinity'])
+    self._simple_node_affinity = _apply_or_none(
+        dictionary, 'simpleNodeAffinity', lambda v: SchemaSimpleNodeAffinity(v))
 
   @property
   def simple_node_affinity(self):
@@ -315,10 +300,8 @@ class SchemaSimpleNodeAffinity:
 
   def __init__(self, dictionary):
     self._minimum_node_count = dictionary.get('minimumNodeCount', None)
-
-    if 'type' not in dictionary:
-      raise InvalidSchema('simpleNodeAffinity requires a type')
-    self._type = dictionary['type']
+    self._type = _get_or_invalid(dictionary, 'type',
+                                 'simpleNodeAffinity requires a type')
 
     if (self._type == 'REQUIRE_MINIMUM_NODE_COUNT' and
         self._minimum_node_count is None):
@@ -389,11 +372,10 @@ class SchemaImageProjectionProperty:
 
   def __init__(self, name, dictionary):
     self._name = name
-    if 'type' not in dictionary:
-      raise InvalidSchema(
-          'Each property for an image in x-google-marketplace.images '
-          'must have a valid type')
-    self._type = dictionary['type']
+    self._type = _get_or_invalid(
+        dictionary, 'type',
+        'Each property for an image in x-google-marketplace.images '
+        'must have a valid type')
     if self._type not in _IMAGE_PROJECTION_TYPES:
       raise InvalidSchema('image property {} has invalid type {}'.format(
           name, self._type))
@@ -413,10 +395,9 @@ class SchemaVersionMeta:
   def __init__(self, dictionary):
     self._recommended = dictionary.get('recommended', False)
     self._release_types = dictionary.get('releaseTypes', [])
-
-    if 'releaseNote' not in dictionary:
-      raise InvalidSchema('publishedVersionMetadata.releaseNote is required')
-    self._release_note = dictionary['releaseNote']
+    self._release_note = _get_or_invalid(
+        dictionary, 'releaseNote',
+        'publishedVersionMetadata.releaseNote is required')
 
   @property
   def recommended(self):
@@ -450,15 +431,14 @@ class SchemaProperty:
 
     if not NAME_RE.match(name):
       raise InvalidSchema('Invalid property name: {}'.format(name))
-    if 'type' not in dictionary:
-      raise InvalidSchema('Property {} has no type'.format(name))
-    self._type = {
-        'int': int,
-        'integer': int,
-        'string': str,
-        'number': float,
-        'boolean': bool,
-    }.get(dictionary['type'], None)
+    self._type = _apply_or_invalid(
+        dictionary, 'type', lambda v: {
+            'int': int,
+            'integer': int,
+            'string': str,
+            'number': float,
+            'boolean': bool,}.get(v, None),
+        'Property {} has no type'.format(name))
     if not self._type:
       raise InvalidSchema('Property {} has unsupported type: {}'.format(
           name, dictionary['type']))
@@ -469,10 +449,9 @@ class SchemaProperty:
             'Property {} has a default value of invalid type'.format(name))
 
     if self._x:
-      if 'type' not in self._x:
-        raise InvalidSchema('Property {} has {} without a type'.format(
-            name, XGOOGLE))
-      xt = self._x['type']
+      xt = _get_or_invalid(
+          self._x, 'type', 'Property {} has {} without a type'.format(
+              name, XGOOGLE))
       if xt in (XTYPE_NAME, XTYPE_NAMESPACE, XTYPE_DEPLOYER_IMAGE):
         pass
       elif xt == XTYPE_APPLICATION_UID:
@@ -621,21 +600,20 @@ class SchemaXImage:
     generated_properties = dictionary.get('generatedProperties', {})
     if 'splitByColon' in generated_properties:
       s = generated_properties['splitByColon']
-      if 'before' not in s:
-        raise InvalidSchema(
-            '"before" attribute is required within splitByColon')
-      if 'after' not in s:
-        raise InvalidSchema('"after" attribute is required within splitByColon')
-      self._split_by_colon = (s['before'], s['after'])
+      self._split_by_colon = (
+          _get_or_invalid(s, 'before',
+                          '"before" attribute is required within splitByColon'),
+          _get_or_invalid(s, 'after',
+                          '"after" attribute is required within splitByColon'))
     if 'splitToRegistryRepoTag' in generated_properties:
       s = generated_properties['splitToRegistryRepoTag']
       parts = ['registry', 'repo', 'tag']
-      for name in parts:
-        if name not in s:
-          raise InvalidSchema(
+      self._split_to_registry_repo_tag = tuple([
+          _get_or_invalid(
+              s, name,
               '"{}" attribute is required within splitToRegistryRepoTag'.format(
-                  name))
-      self._split_to_registry_repo_tag = tuple([s[name] for name in parts])
+                  name)) for name in parts
+      ])
 
   @property
   def split_by_colon(self):
@@ -720,3 +698,22 @@ class SchemaXReportingSecret:
 
   def __init__(self, dictionary):
     pass
+
+
+def _get_or_invalid(dictionary, key, error_msg):
+  if key not in dictionary:
+    raise InvalidSchema(error_msg)
+  return dictionary[key]
+
+
+def _apply_or_none(dictionary, key, apply_fn):
+  """Returns the result of apply_fn on the value if not None."""
+  if key not in dictionary:
+    return None
+  return apply_fn(dictionary[key])
+
+
+def _apply_or_invalid(dictionary, key, apply_fn, error_msg):
+  """Similar to _apply_or_none but key is required."""
+  value = _get_or_invalid(dictionary, key, error_msg)
+  return apply_fn(value)

@@ -85,6 +85,11 @@ class ConfigHelperTest(unittest.TestCase):
       self.assertEqual(schema.form, schema_from_str.form)
 
   def test_bad_required(self):
+
+    def load_and_validate(schema_yaml):
+      schema = config_helper.Schema.load_yaml(schema_yaml)
+      schema.validate()
+
     schema_yaml = """
                   properties:
                     propertyA:
@@ -95,8 +100,8 @@ class ConfigHelperTest(unittest.TestCase):
                   - propertyC
                   """
     self.assertRaisesRegexp(config_helper.InvalidSchema,
-                            r'propertyB, propertyC',
-                            config_helper.Schema.load_yaml, schema_yaml)
+                            r'propertyB, propertyC', load_and_validate,
+                            schema_yaml)
 
   def test_types_and_defaults(self):
     schema = config_helper.Schema.load_yaml(SCHEMA)
