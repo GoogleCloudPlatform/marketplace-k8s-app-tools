@@ -85,6 +85,11 @@ class ConfigHelperTest(unittest.TestCase):
       self.assertEqual(schema.form, schema_from_str.form)
 
   def test_bad_required(self):
+
+    def load_and_validate(schema_yaml):
+      schema = config_helper.Schema.load_yaml(schema_yaml)
+      schema.validate()
+
     schema_yaml = """
                   properties:
                     propertyA:
@@ -95,8 +100,8 @@ class ConfigHelperTest(unittest.TestCase):
                   - propertyC
                   """
     self.assertRaisesRegexp(config_helper.InvalidSchema,
-                            r'propertyB, propertyC',
-                            config_helper.Schema.load_yaml, schema_yaml)
+                            r'propertyB, propertyC', load_and_validate,
+                            schema_yaml)
 
   def test_types_and_defaults(self):
     schema = config_helper.Schema.load_yaml(SCHEMA)
@@ -513,6 +518,116 @@ class ConfigHelperTest(unittest.TestCase):
                 x-google-marketplace:
                   type: UNKNOWN
             """))
+
+  def test_v2_fields(self):
+    schema = config_helper.Schema.load_yaml("""
+        x-google-marketplace:
+          schemaVersion: v2
+
+          applicationApiVersion: v1beta1
+
+          publishedVersion: 6.5.130
+          publishedVersionMetadata:
+            releaseNote: Bug fixes
+            releaseTypes:
+            - BUG_FIX
+            recommended: true
+
+          images:
+            main:
+              properties:
+                main.image:
+                  type: FULL
+            db:
+              properties:
+                db.image.repo:
+                  type: REPO_WITH_REGISTRY
+                db.image.tag:
+                  type: TAG
+        properties:
+          simple:
+            type: string
+        """)
+    schema.validate()
+    self.assertTrue(schema.x_google_marketplace.is_v2())
+    self.assertEqual(schema.x_google_marketplace.app_api_version, 'v1beta1')
+
+    self.assertEqual(schema.x_google_marketplace.published_version, '6.5.130')
+    version_meta = schema.x_google_marketplace.published_version_meta
+    self.assertEqual(version_meta.release_note, 'Bug fixes')
+    self.assertListEqual(version_meta.release_types, ['BUG_FIX'])
+    self.assertTrue(version_meta.recommended)
+
+    images = schema.x_google_marketplace.images
+    self.assertTrue(isinstance(images, dict))
+    self.assertEqual(len(images), 2)
+    self.assertEqual(images['main'].name, 'main')
+    self.assertEqual(len(images['main'].properties), 1)
+    self.assertEqual(images['main'].properties['main.image'].name, 'main.image')
+    self.assertEqual(images['main'].properties['main.image'].part_type, 'FULL')
+    self.assertEqual(images['db'].name, 'db')
+    self.assertEqual(len(images['db'].properties), 2)
+    self.assertEqual(images['db'].properties['db.image.repo'].name,
+                     'db.image.repo')
+    self.assertEqual(images['db'].properties['db.image.repo'].part_type,
+                     'REPO_WITH_REGISTRY')
+    self.assertEqual(images['db'].properties['db.image.tag'].name,
+                     'db.image.tag')
+    self.assertEqual(images['db'].properties['db.image.tag'].part_type, 'TAG')
+
+  def test_k8s_version_constraint(self):
+    schema = config_helper.Schema.load_yaml("""
+        applicationApiVersion: v1beta1
+        properties:
+          simple:
+            type: string
+        x-google-marketplace:
+          clusterConstraints:
+            k8sVersion: '>1.11'
+        """)
+    schema.validate()
+    self.assertEqual(
+        schema.x_google_marketplace.cluster_constraints.k8s_version, '>1.11')
+
+  def test_resource_constraints(self):
+    schema = config_helper.Schema.load_yaml("""
+        applicationApiVersion: v1beta1
+        properties:
+          simple:
+            type: string
+        x-google-marketplace:
+          clusterConstraints:
+            resources:
+            - replicas: 3
+              requests:
+                cpu: 100m
+                memory: 512Gi
+              affinity:
+                simpleNodeAffinity:
+                  type: REQUIRE_ONE_NODE_PER_REPLICA
+            - replicas: 5
+              affinity:
+                simpleNodeAffinity:
+                  type: REQUIRE_MINIMUM_NODE_COUNT
+                  minimumNodeCount: 4
+        """)
+    schema.validate()
+    resources = schema.x_google_marketplace.cluster_constraints.resources
+    self.assertTrue(isinstance(resources, list))
+    self.assertEqual(len(resources), 2)
+    self.assertEqual(resources[0].replicas, 3)
+    self.assertEqual(resources[0].requests.cpu, '100m')
+    self.assertEqual(resources[0].requests.memory, '512Gi')
+    self.assertEqual(resources[0].affinity.simple_node_affinity.affinity_type,
+                     'REQUIRE_ONE_NODE_PER_REPLICA')
+    self.assertIsNone(
+        resources[0].affinity.simple_node_affinity.minimum_node_count)
+    self.assertEqual(resources[1].replicas, 5)
+    self.assertIsNone(resources[1].requests)
+    self.assertEqual(resources[1].affinity.simple_node_affinity.affinity_type,
+                     'REQUIRE_MINIMUM_NODE_COUNT')
+    self.assertEqual(
+        resources[1].affinity.simple_node_affinity.minimum_node_count, 4)
 
   def test_validate_good(self):
     schema = config_helper.Schema.load_yaml("""
