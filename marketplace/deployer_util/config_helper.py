@@ -97,7 +97,7 @@ class Schema:
     return Schema(yaml.load(yaml_str))
 
   def __init__(self, dictionary):
-    self._x_google_marketplace = _apply_or_none(
+    self._x_google_marketplace = _maybe_get_and_apply(
         dictionary,
         'x-google-marketplace', lambda v: SchemaXGoogleMarketplace(v))
 
@@ -197,18 +197,18 @@ class SchemaXGoogleMarketplace:
     if not self.is_v2():
       return
 
-    self._app_api_version = _get_or_invalid(
+    self._app_api_version = _must_get(
         dictionary, 'applicationApiVersion',
         'x-google-marketplace.applicationApiVersion is required')
-    self._published_version = _get_or_invalid(
+    self._published_version = _must_get(
         dictionary, 'publishedVersion',
         'x-google-marketplace.publishedVersion is required')
-    self._published_version_meta = _apply_or_invalid(
+    self._published_version_meta = _must_get_and_apply(
         dictionary, 'publishedVersionMetadata', lambda v: SchemaVersionMeta(v),
         'x-google-marketplace.publishedVersionMetadata is required')
 
-    images = _get_or_invalid(dictionary, 'images',
-                             'x-google-marketplace.images is required')
+    images = _must_get(dictionary, 'images',
+                       'x-google-marketplace.images is required')
     self._images = {k: SchemaImage(k, v) for k, v in images.iteritems()}
 
   def validate(self):
@@ -265,9 +265,9 @@ class SchemaResourceConstraints:
 
   def __init__(self, dictionary):
     self._replicas = dictionary.get('replicas', None)
-    self._affinity = _apply_or_none(
+    self._affinity = _maybe_get_and_apply(
         dictionary, 'affinity', lambda v: SchemaResourceConstraintAffinity(v))
-    self._requests = _apply_or_none(
+    self._requests = _maybe_get_and_apply(
         dictionary, 'requests', lambda v: SchemaResourceConstraintRequests(v))
 
   @property
@@ -287,7 +287,7 @@ class SchemaResourceConstraintAffinity:
   """Accesses a single resource's affinity constraints"""
 
   def __init__(self, dictionary):
-    self._simple_node_affinity = _apply_or_none(
+    self._simple_node_affinity = _maybe_get_and_apply(
         dictionary, 'simpleNodeAffinity', lambda v: SchemaSimpleNodeAffinity(v))
 
   @property
@@ -300,8 +300,8 @@ class SchemaSimpleNodeAffinity:
 
   def __init__(self, dictionary):
     self._minimum_node_count = dictionary.get('minimumNodeCount', None)
-    self._type = _get_or_invalid(dictionary, 'type',
-                                 'simpleNodeAffinity requires a type')
+    self._type = _must_get(dictionary, 'type',
+                           'simpleNodeAffinity requires a type')
 
     if (self._type == 'REQUIRE_MINIMUM_NODE_COUNT' and
         self._minimum_node_count is None):
@@ -372,7 +372,7 @@ class SchemaImageProjectionProperty:
 
   def __init__(self, name, dictionary):
     self._name = name
-    self._type = _get_or_invalid(
+    self._type = _must_get(
         dictionary, 'type',
         'Each property for an image in x-google-marketplace.images '
         'must have a valid type')
@@ -395,7 +395,7 @@ class SchemaVersionMeta:
   def __init__(self, dictionary):
     self._recommended = dictionary.get('recommended', False)
     self._release_types = dictionary.get('releaseTypes', [])
-    self._release_note = _get_or_invalid(
+    self._release_note = _must_get(
         dictionary, 'releaseNote',
         'publishedVersionMetadata.releaseNote is required')
 
@@ -431,7 +431,7 @@ class SchemaProperty:
 
     if not NAME_RE.match(name):
       raise InvalidSchema('Invalid property name: {}'.format(name))
-    self._type = _apply_or_invalid(
+    self._type = _must_get_and_apply(
         dictionary, 'type', lambda v: {
             'int': int,
             'integer': int,
@@ -449,9 +449,8 @@ class SchemaProperty:
             'Property {} has a default value of invalid type'.format(name))
 
     if self._x:
-      xt = _get_or_invalid(
-          self._x, 'type', 'Property {} has {} without a type'.format(
-              name, XGOOGLE))
+      xt = _must_get(self._x, 'type',
+                     'Property {} has {} without a type'.format(name, XGOOGLE))
       if xt in (XTYPE_NAME, XTYPE_NAMESPACE, XTYPE_DEPLOYER_IMAGE):
         pass
       elif xt == XTYPE_APPLICATION_UID:
@@ -601,15 +600,15 @@ class SchemaXImage:
     if 'splitByColon' in generated_properties:
       s = generated_properties['splitByColon']
       self._split_by_colon = (
-          _get_or_invalid(s, 'before',
-                          '"before" attribute is required within splitByColon'),
-          _get_or_invalid(s, 'after',
-                          '"after" attribute is required within splitByColon'))
+          _must_get(s, 'before',
+                    '"before" attribute is required within splitByColon'),
+          _must_get(s, 'after',
+                    '"after" attribute is required within splitByColon'))
     if 'splitToRegistryRepoTag' in generated_properties:
       s = generated_properties['splitToRegistryRepoTag']
       parts = ['registry', 'repo', 'tag']
       self._split_to_registry_repo_tag = tuple([
-          _get_or_invalid(
+          _must_get(
               s, name,
               '"{}" attribute is required within splitToRegistryRepoTag'.format(
                   name)) for name in parts
@@ -700,20 +699,21 @@ class SchemaXReportingSecret:
     pass
 
 
-def _get_or_invalid(dictionary, key, error_msg):
+def _must_get(dictionary, key, error_msg):
+  """Gets the value of the key, or raises InvalidSchema."""
   if key not in dictionary:
     raise InvalidSchema(error_msg)
   return dictionary[key]
 
 
-def _apply_or_none(dictionary, key, apply_fn):
-  """Returns the result of apply_fn on the value if not None."""
+def _maybe_get_and_apply(dictionary, key, apply_fn):
+  """Returns the result of apply_fn on the value of the key if not None."""
   if key not in dictionary:
     return None
   return apply_fn(dictionary[key])
 
 
-def _apply_or_invalid(dictionary, key, apply_fn, error_msg):
-  """Similar to _apply_or_none but key is required."""
-  value = _get_or_invalid(dictionary, key, error_msg)
+def _must_get_and_apply(dictionary, key, apply_fn, error_msg):
+  """Similar to _maybe_get_and_apply but raises InvalidSchema if no such key."""
+  value = _must_get(dictionary, key, error_msg)
   return apply_fn(value)
