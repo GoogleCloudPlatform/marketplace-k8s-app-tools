@@ -346,8 +346,8 @@ class ConfigHelperTest(unittest.TestCase):
     self.assertEqual(False, schema.properties['pb'].str_to_type('False'))
     self.assertEqual(False, schema.properties['pb'].str_to_type('no'))
     self.assertEqual(False, schema.properties['pb'].str_to_type('No'))
-    self.assertRaises(config_helper.InvalidValue,
-                      lambda: schema.properties['pb'].str_to_type('bad'))
+    self.assertRaises(config_helper.InvalidValue, lambda: schema.properties[
+        'pb'].str_to_type('bad'))
 
   def test_invalid_default_type(self):
     self.assertRaises(
@@ -368,28 +368,22 @@ class ConfigHelperTest(unittest.TestCase):
             x-google-marketplace:
               type: GENERATED_PASSWORD
         """)
-    self.assertTrue(schema.properties['propertyInt'].matches_definition({
-        'name': 'propertyInt'
-    }))
-    self.assertFalse(schema.properties['propertyInt'].matches_definition({
-        'name': 'propertyPassword'
-    }))
-    self.assertTrue(schema.properties['propertyInt'].matches_definition({
-        'type': 'int'
-    }))
-    self.assertFalse(schema.properties['propertyInt'].matches_definition({
-        'type': 'string'
-    }))
-    self.assertFalse(schema.properties['propertyInt'].matches_definition({
-        'x-google-marketplace': {
+    self.assertTrue(schema.properties['propertyInt'].matches_definition(
+        {'name': 'propertyInt'}))
+    self.assertFalse(schema.properties['propertyInt'].matches_definition(
+        {'name': 'propertyPassword'}))
+    self.assertTrue(schema.properties['propertyInt'].matches_definition(
+        {'type': 'int'}))
+    self.assertFalse(schema.properties['propertyInt'].matches_definition(
+        {'type': 'string'}))
+    self.assertFalse(schema.properties['propertyInt'].matches_definition(
+        {'x-google-marketplace': {
             'type': 'GENERATED_PASSWORD'
-        }
-    }))
-    self.assertTrue(schema.properties['propertyPassword'].matches_definition({
-        'x-google-marketplace': {
+        }}))
+    self.assertTrue(schema.properties['propertyPassword'].matches_definition(
+        {'x-google-marketplace': {
             'type': 'GENERATED_PASSWORD'
-        }
-    }))
+        }}))
     self.assertTrue(schema.properties['propertyPassword'].matches_definition({
         'type': 'string',
         'x-google-marketplace': {
@@ -665,8 +659,8 @@ class ConfigHelperTest(unittest.TestCase):
 
   def test_validate_missing_app_api_version(self):
     self.assertRaisesRegexp(
-        config_helper.InvalidSchema, 'applicationApiVersion',
-        lambda: config_helper.Schema.load_yaml("""
+        config_helper.InvalidSchema,
+        'applicationApiVersion', lambda: config_helper.Schema.load_yaml("""
             properties:
               simple:
                 type: string
@@ -674,8 +668,8 @@ class ConfigHelperTest(unittest.TestCase):
 
   def test_validate_bad_form_too_many_items(self):
     self.assertRaisesRegexp(
-        config_helper.InvalidSchema, 'form',
-        lambda: config_helper.Schema.load_yaml("""
+        config_helper.InvalidSchema,
+        'form', lambda: config_helper.Schema.load_yaml("""
             applicationApiVersion: v1beta1
             form:
             - widget: help
@@ -686,8 +680,8 @@ class ConfigHelperTest(unittest.TestCase):
 
   def test_validate_bad_form_missing_type(self):
     self.assertRaisesRegexp(
-        config_helper.InvalidSchema, 'form',
-        lambda: config_helper.Schema.load_yaml("""
+        config_helper.InvalidSchema,
+        'form', lambda: config_helper.Schema.load_yaml("""
             applicationApiVersion: v1beta1
             form:
             - description: My arbitrary <i>description</i>
@@ -695,8 +689,8 @@ class ConfigHelperTest(unittest.TestCase):
 
   def test_validate_bad_form_unrecognized_type(self):
     self.assertRaisesRegexp(
-        config_helper.InvalidSchema, 'form',
-        lambda: config_helper.Schema.load_yaml("""
+        config_helper.InvalidSchema,
+        'form', lambda: config_helper.Schema.load_yaml("""
             applicationApiVersion: v1beta1
             form:
             - widget: magical
@@ -705,8 +699,8 @@ class ConfigHelperTest(unittest.TestCase):
 
   def test_validate_bad_form_missing_description(self):
     self.assertRaisesRegexp(
-        config_helper.InvalidSchema, 'form',
-        lambda: config_helper.Schema.load_yaml("""
+        config_helper.InvalidSchema,
+        'form', lambda: config_helper.Schema.load_yaml("""
             applicationApiVersion: v1beta1
             form:
             - widget: help

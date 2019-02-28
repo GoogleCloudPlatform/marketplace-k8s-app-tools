@@ -31,11 +31,8 @@ class ExpandConfigTest(unittest.TestCase):
             default: Default
         """)
     self.assertEqual({'p1': 'Default'}, expand_config.expand({}, schema))
-    self.assertEqual({
-        'p1': 'Mine'
-    }, expand_config.expand({
-        'p1': 'Mine'
-    }, schema))
+    self.assertEqual({'p1': 'Mine'}, expand_config.expand({'p1': 'Mine'},
+                                                          schema))
 
   def test_invalid_value_type(self):
     schema = config_helper.Schema.load_yaml("""

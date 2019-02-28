@@ -98,8 +98,8 @@ class Schema:
 
   def __init__(self, dictionary):
     self._x_google_marketplace = _apply_or_none(
-        dictionary, 'x-google-marketplace',
-        lambda v: SchemaXGoogleMarketplace(v))
+        dictionary,
+        'x-google-marketplace', lambda v: SchemaXGoogleMarketplace(v))
 
     self._required = dictionary.get('required', [])
     self._properties = {
@@ -437,8 +437,8 @@ class SchemaProperty:
             'integer': int,
             'string': str,
             'number': float,
-            'boolean': bool,}.get(v, None),
-        'Property {} has no type'.format(name))
+            'boolean': bool,
+        }.get(v, None), 'Property {} has no type'.format(name))
     if not self._type:
       raise InvalidSchema('Property {} has unsupported type: {}'.format(
           name, dictionary['type']))
