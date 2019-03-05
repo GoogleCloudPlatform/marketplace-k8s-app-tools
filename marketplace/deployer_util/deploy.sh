@@ -52,7 +52,7 @@ echo "Deploying application \"$NAME\""
 
 # If Istio is enabled, it will take a few seconds before we can call the k8s API.
 # Instead of checking if Istio is enabled, it is simpler to try once and wait 
-# a few seconds if it fails.
+# a few seconds and retry if it fails.
 # https://github.com/istio/istio/issues/12187.
 get_app_uid() {
   kubectl get "applications/$NAME" \
