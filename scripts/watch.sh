@@ -43,9 +43,9 @@ function watch_function() {
   # TODO(trironkk): Extract printing and then running a command into a function.
   print_bar =
   echo "Application resources in the following namespace: \"$namespace\""
-  echo "$ kubectl get applications --namespace=\"$namespace\" --show-kind"
+  echo "$ kubectl get applications.app.k8s.io --namespace=\"$namespace\" --show-kind"
   print_bar -
-  kubectl get applications \
+  kubectl get applications.app.k8s.io \
       --namespace="$namespace" \
       --show-kind
 
