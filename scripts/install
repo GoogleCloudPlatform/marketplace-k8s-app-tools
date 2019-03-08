@@ -76,7 +76,7 @@ spec:
   assemblyPhase: "Pending"
 EOF
 
-app_uid=$(kubectl get "applications/$name" \
+app_uid=$(kubectl get "applications.app.k8s.io/$name" \
   --namespace="$namespace" \
   --output=jsonpath='{.metadata.uid}')
 

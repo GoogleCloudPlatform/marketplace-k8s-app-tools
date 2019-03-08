@@ -37,13 +37,13 @@ done
 [[ -z "$name" ]] && >&2 echo "--name required" && exit 1
 [[ -z "$namespace" ]] && >&2 echo "--namespace required" && exit 1
 
-app_uid="$(kubectl get "applications/$name" \
+app_uid="$(kubectl get "applications.app.k8s.io/$name" \
     --namespace="$namespace" \
     --output=jsonpath='{.metadata.uid}')"
-app_api_version="$(kubectl get "applications/$name" \
+app_api_version="$(kubectl get "applications.app.k8s.io/$name" \
     --namespace="$namespace" \
     --output=jsonpath='{.apiVersion}')"
-component_kinds="$(kubectl get "applications/$name" \
+component_kinds="$(kubectl get "applications.app.k8s.io/$name" \
     --namespace="$namespace" \
     --output=json \
   | jq -r '.spec.componentKinds[]
