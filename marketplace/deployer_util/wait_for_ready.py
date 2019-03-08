@@ -39,7 +39,7 @@ def main():
 
   application = Command(
       '''
-    kubectl get "applications/{}"
+    kubectl get "applications.app.k8s.io/{}"
       --namespace="{}"
       --output=json
     '''.format(args.name, args.namespace),
@@ -73,7 +73,7 @@ def main():
         break
 
     if previous_healthy != healthy:
-      log("INFO Initialization: Found applications/{} ready status to be {}."
+      log("INFO Initialization: Found applications.app.k8s.io/{} ready status to be {}."
           .format(args.name, healthy))
       previous_healthy = healthy
       if healthy:

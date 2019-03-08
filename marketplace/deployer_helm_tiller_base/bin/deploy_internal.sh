@@ -16,10 +16,10 @@
 
 set -eox pipefail
 
-app_uid=$(kubectl get "applications/$NAME" \
+app_uid=$(kubectl get "applications.app.k8s.io/$NAME" \
   --namespace="$NAMESPACE" \
   --output=jsonpath='{.metadata.uid}')
-app_api_version=$(kubectl get "applications/$NAME" \
+app_api_version=$(kubectl get "applications.app.k8s.io/$NAME" \
   --namespace="$NAMESPACE" \
   --output=jsonpath='{.apiVersion}')
 

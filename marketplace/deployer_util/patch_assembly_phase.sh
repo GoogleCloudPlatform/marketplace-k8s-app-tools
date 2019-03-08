@@ -45,7 +45,7 @@ echo "Marking deployment of application \"$NAME\" as \"$status\"."
 
 # --output=json is used to force kubectl to succeed even if the patch command
 # makes not change to the resource. Otherwise, this command exits 1.
-kubectl patch "applications/$NAME" \
+kubectl patch "applications.app.k8s.io/$NAME" \
   --output=json \
   --namespace="$NAMESPACE" \
   --type=merge \

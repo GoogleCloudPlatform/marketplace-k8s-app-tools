@@ -152,7 +152,7 @@ deletion_timeout=180
 echo "INFO Wait for the applications to be deleted"
 /scripts/wait_for_deletion.sh \
   --namespace="$NAMESPACE" \
-  --kind=applications \
+  --kind=applications.app.k8s.io \
   --timeout="$deletion_timeout" \
   || clean_and_exit "ERROR Some applications where not deleted"
 
