@@ -35,6 +35,7 @@ XTYPE_SERVICE_ACCOUNT = 'SERVICE_ACCOUNT'
 XTYPE_STORAGE_CLASS = 'STORAGE_CLASS'
 XTYPE_STRING = 'STRING'
 XTYPE_APPLICATION_UID = 'APPLICATION_UID'
+XTYPE_ISTIO_ENABLED = 'ISTIO_ENABLED'
 
 WIDGET_TYPES = ['help']
 
@@ -428,6 +429,7 @@ class SchemaProperty:
     self._service_account = None
     self._storage_class = None
     self._string = None
+    self._istio_enabled = None
 
     if not NAME_RE.match(name):
       raise InvalidSchema('Invalid property name: {}'.format(name))
@@ -451,7 +453,7 @@ class SchemaProperty:
     if self._x:
       xt = _must_get(self._x, 'type',
                      'Property {} has {} without a type'.format(name, XGOOGLE))
-      if xt in (XTYPE_NAME, XTYPE_NAMESPACE, XTYPE_DEPLOYER_IMAGE):
+      if xt in (XTYPE_NAME, XTYPE_NAMESPACE, XTYPE_DEPLOYER_IMAGE, XTYPE_ISTIO_ENABLED):
         pass
       elif xt == XTYPE_APPLICATION_UID:
         d = self._x.get('applicationUid', {})
