@@ -50,29 +50,7 @@ export NAMESPACE
 
 echo "Deploying application \"$NAME\""
 
-# If Istio is enabled, it will take a few seconds before we can call the k8s API.
-# Instead of checking if Istio is enabled, it is simple to poll for 30s until
-# it works or a specified timeout.
-# https://github.com/istio/istio/issues/12187.
-start_time=$(date +%s)
-poll_interval=1
-timeout=30
-
-while [[ -z "$app_uid" ]]; do
-  app_id=$(kubectl get "applications/$NAME" \
-    --namespace="$NAMESPACE" \
-    --output=jsonpath='{.metadata.uid}') || echo "Failed to get app_id"
-
-  if [[ -z "$app_uid" ]]; then
-    elapsed_time=$(( $(date +%s) - $start_time ))
-    if [[ "$elapsed_time" -gt "$timeout" ]]; then
-      exit 1
-    fi
-
-    sleep "$poll_interval"
-  fi
-done
-
+app_uid=$(get_app_uid_with_retry.sh)
 app_api_version=$(kubectl get "applications/$NAME" \
   --namespace="$NAMESPACE" \
   --output=jsonpath='{.apiVersion}')

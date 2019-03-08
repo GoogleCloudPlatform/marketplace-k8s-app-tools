@@ -16,9 +16,8 @@
 
 set -eox pipefail
 
-app_uid=$(kubectl get "applications/$NAME" \
-  --namespace="$NAMESPACE" \
-  --output=jsonpath='{.metadata.uid}')
+
+app_uid=$(get_app_uid_with_retry.sh)
 app_api_version=$(kubectl get "applications/$NAME" \
   --namespace="$NAMESPACE" \
   --output=jsonpath='{.apiVersion}')
