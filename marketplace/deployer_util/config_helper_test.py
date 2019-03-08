@@ -62,6 +62,10 @@ properties:
     type: string
     x-google-marketplace:
       type: APPLICATION_UID
+  istioEnabled:
+    type: boolean
+    x-google-marketplace:
+      type: ISTIO_ENABLED
 required:
 - propertyString
 - propertyPassword
@@ -111,7 +115,7 @@ class ConfigHelperTest(unittest.TestCase):
         'propertyIntegerWithDefault', 'propertyNumber',
         'propertyNumberWithDefault', 'propertyBoolean',
         'propertyBooleanWithDefault', 'propertyImage', 'propertyDeployerImage',
-        'propertyPassword', 'applicationUid'
+        'propertyPassword', 'applicationUid', 'istioEnabled'
     }, set(schema.properties))
     self.assertEqual(str, schema.properties['propertyString'].type)
     self.assertIsNone(schema.properties['propertyString'].default)
@@ -206,16 +210,15 @@ class ConfigHelperTest(unittest.TestCase):
         """)
     self.assertIsNotNone(schema.properties['ns'])
 
-  def test_application_uid_type(self):
+  def test_istio_enabled_type(self):
     schema = config_helper.Schema.load_yaml("""
         properties:
           u:
-            type: string
+            type: boolean
             x-google-marketplace:
-              type: APPLICATION_UID
+              type: ISTIO_ENABLED
         """)
-    self.assertIsNotNone(schema.properties['u'].application_uid)
-    self.assertIsNone(schema.properties['u'].application_uid.application_create)
+    self.assertIsNotNone(schema.properties['u'])
 
   def test_application_uid_type_create_application(self):
     schema = config_helper.Schema.load_yaml("""

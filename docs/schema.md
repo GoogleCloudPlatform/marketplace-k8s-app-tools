@@ -363,6 +363,7 @@ properties:
             resources: ['EtcdCluster']
             verbs: ['*']
 ```
+
 ---
 
 ### type: STORAGE_CLASS
@@ -380,6 +381,8 @@ properties:
       storageClass:
         type: SSD
 ```
+
+---
 
 ### type: STRING
 
@@ -399,6 +402,41 @@ properties:
 ```
 
 In the example above, manifests can reference to the password as `explicitPassword`, as well as to its base64Encoded value as `explicitPasswordEncoded`.
+
+---
+
+### type: ISTIO_ENABLED
+
+This used to tell the deployer whether Istio is enabled or not. That information is used by manifests to provision special handling to work with Istio.
+
+### Supported values
+- `True`: Istio is not enabled.
+- `False`: Istio is enabled.
+
+If `ISTIO_ENABLED` is not preset, it is assumed Istio is not enabled for the deployment.
+
+---
+
+## istioCompatibility
+
+Nested under `x-google-marketplace`, this indicates whether the application is compatible with Istio.
+
+### Supported values
+- `True`: The app is compatible with Istio.
+- `False`: The app is NOT compatible with Istio.
+
+```yaml
+properties:
+  # Property definitions...
+required:
+  # Required properties...
+x-google-marketplace:
+  istioCompatibility: True # or False
+```
+
+If `istioCompatibility` is not present, it is assumed that it is unknown whether the app is compatible with Istio or not.
+
+---
 
 ## clusterConstraints
 
