@@ -210,15 +210,16 @@ class ConfigHelperTest(unittest.TestCase):
         """)
     self.assertIsNotNone(schema.properties['ns'])
 
-  def test_istio_enabled_type(self):
+  def test_application_uid_type(self):
     schema = config_helper.Schema.load_yaml("""
         properties:
           u:
-            type: boolean
+            type: string
             x-google-marketplace:
-              type: ISTIO_ENABLED
+              type: APPLICATION_UID
         """)
-    self.assertIsNotNone(schema.properties['u'])
+    self.assertIsNotNone(schema.properties['u'].application_uid)
+    self.assertIsNone(schema.properties['u'].application_uid.application_create)
 
   def test_application_uid_type_create_application(self):
     schema = config_helper.Schema.load_yaml("""
