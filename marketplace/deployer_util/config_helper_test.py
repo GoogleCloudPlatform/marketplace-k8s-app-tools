@@ -593,19 +593,6 @@ class ConfigHelperTest(unittest.TestCase):
     self.assertEqual(
         schema.x_google_marketplace.cluster_constraints.k8s_version, '>1.11')
 
-  def test_istio_compatible(self):
-    schema = config_helper.Schema.load_yaml("""
-        applicationApiVersion: v1beta1
-        properties:
-          simple:
-            type: string
-        x-google-marketplace:
-          istioCompatible: true
-        """)
-    schema.validate()
-    self.assertEqual(
-        schema.x_google_marketplace.istio_compatible, True)
-
   def test_resource_constraints(self):
     schema = config_helper.Schema.load_yaml("""
         applicationApiVersion: v1beta1
@@ -645,6 +632,20 @@ class ConfigHelperTest(unittest.TestCase):
                      'REQUIRE_MINIMUM_NODE_COUNT')
     self.assertEqual(
         resources[1].affinity.simple_node_affinity.minimum_node_count, 4)
+
+  def test_istio(self):
+    schema = config_helper.Schema.load_yaml("""
+        applicationApiVersion: v1beta1
+        properties:
+          simple:
+            type: string
+        x-google-marketplace:
+          istio:
+            isSupported: True
+        """)
+    schema.validate()
+    self.assertEqual(
+        schema.x_google_marketplace.istio.is_supported, True)
 
   def test_validate_good(self):
     schema = config_helper.Schema.load_yaml("""

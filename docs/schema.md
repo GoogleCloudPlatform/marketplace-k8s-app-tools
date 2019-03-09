@@ -260,6 +260,7 @@ It defines how this object will be handled. Each type has a different set of pro
 - `STORAGE_CLASS`: The name of a pre-provisioned k8s `StorageClass`. If it does not exist, one is created.
 - `STRING`: A string that needs special handling.
 - `APPLICATION_UID`: The uuid of the created `Application` object.
+- `ISTIO_ENABLED`: Indicates whether Istio is enabled for the deployement.
 
 ---
 
@@ -407,23 +408,15 @@ In the example above, manifests can reference to the password as `explicitPasswo
 
 ### type: ISTIO_ENABLED
 
-This used to tell the deployer whether Istio is enabled or not. That information is used by manifests to provision special handling to work with Istio.
+This boolean property receives a True value if the environment is detected to have Istio enabled, and False otherwise. The deployer and template can take this signal to adapt the deployment accordingly.
 
-### Supported values
-- `True`: Istio is not enabled.
-- `False`: Istio is enabled.
-
-If `ISTIO_ENABLED` is not preset, it is assumed Istio is not enabled for the deployment.
+If `ISTIO_ENABLED` is not present, it is assumed Istio is NOT enabled for the deployment.
 
 ---
 
-## istioCompatible
+## istio
 
-Nested under `x-google-marketplace`, this indicates whether the application is compatible with Istio.
-
-### Supported values
-- `True`: The app is compatible with Istio.
-- `False`: The app is NOT compatible with Istio.
+Nested under `x-google-marketplace`, it holds information about compatibility between the app and the Istio service mesh.
 
 ```yaml
 properties:
@@ -431,10 +424,16 @@ properties:
 required:
   # Required properties...
 x-google-marketplace:
-  istioCompatible: True # or False
+  istio:
+    isSupported: True 
 ```
 
-If `istioCompatible` is not present, it is assumed that it is unknown whether the app is compatible with Istio or not.
+---
+
+### isSupported
+
+This boolean property receives a True value if the application is compatible with Istio, and False otherwise.
+If `isSupported` is not present, it is assumed that it is unknown whether the app supports Istio or not.
 
 ---
 

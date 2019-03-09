@@ -185,7 +185,7 @@ class SchemaXGoogleMarketplace:
     self._published_version_meta = None
     self._images = None
     self._cluster_constraints = None
-    self._istio_compatible = None
+    self._istio = None
 
     self._schema_version = dictionary.get('schemaVersion', _SCHEMA_VERSION_1)
     if self._schema_version not in _SCHEMA_VERSIONS:
@@ -196,8 +196,8 @@ class SchemaXGoogleMarketplace:
       self._cluster_constraints = SchemaClusterConstraints(
           dictionary['clusterConstraints'])
 
-    if 'istioCompatible' in dictionary:
-      self._istio_compatible = dictionary['istioCompatible']
+    if 'istio' in dictionary:
+      self._istio = SchemaIstio(dictionary['istio'])
 
     if not self.is_v2():
       return
@@ -224,8 +224,8 @@ class SchemaXGoogleMarketplace:
     return self._cluster_constraints
 
   @property
-  def istio_compatible(self):
-    return self._istio_compatible
+  def istio(self):
+    return self._istio
 
   @property
   def app_api_version(self):
@@ -341,6 +341,20 @@ class SchemaResourceConstraintRequests:
   @property
   def memory(self):
     return self._memory
+
+
+class SchemaIstio:
+  """Accesses top level istio."""
+
+  def __init__(self, dictionary):
+    self._is_supported = dictionary.get('isSupported', None)
+
+    if 'isSupported' in dictionary:
+      self._is_supported = dictionary['isSupported']
+
+  @property
+  def is_supported(self):
+    return self._is_supported
 
 
 class SchemaImage:
