@@ -453,7 +453,8 @@ class SchemaProperty:
     if self._x:
       xt = _must_get(self._x, 'type',
                      'Property {} has {} without a type'.format(name, XGOOGLE))
-      if xt in (XTYPE_NAME, XTYPE_NAMESPACE, XTYPE_DEPLOYER_IMAGE, XTYPE_ISTIO_ENABLED):
+      if xt in (XTYPE_NAME, XTYPE_NAMESPACE, XTYPE_DEPLOYER_IMAGE,
+                XTYPE_ISTIO_ENABLED):
         pass
       elif xt == XTYPE_APPLICATION_UID:
         d = self._x.get('applicationUid', {})
