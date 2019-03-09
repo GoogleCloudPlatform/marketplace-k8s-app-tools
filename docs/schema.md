@@ -417,7 +417,7 @@ If `ISTIO_ENABLED` is not preset, it is assumed Istio is not enabled for the dep
 
 ---
 
-## istioCompatibility
+## istioCompatible
 
 Nested under `x-google-marketplace`, this indicates whether the application is compatible with Istio.
 
@@ -431,10 +431,10 @@ properties:
 required:
   # Required properties...
 x-google-marketplace:
-  istioCompatibility: True # or False
+  istioCompatible: True # or False
 ```
 
-If `istioCompatibility` is not present, it is assumed that it is unknown whether the app is compatible with Istio or not.
+If `istioCompatible` is not present, it is assumed that it is unknown whether the app is compatible with Istio or not.
 
 ---
 

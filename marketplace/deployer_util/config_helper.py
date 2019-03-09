@@ -185,6 +185,7 @@ class SchemaXGoogleMarketplace:
     self._published_version_meta = None
     self._images = None
     self._cluster_constraints = None
+    self._istio_compatible = None
 
     self._schema_version = dictionary.get('schemaVersion', _SCHEMA_VERSION_1)
     if self._schema_version not in _SCHEMA_VERSIONS:
@@ -194,6 +195,9 @@ class SchemaXGoogleMarketplace:
     if 'clusterConstraints' in dictionary:
       self._cluster_constraints = SchemaClusterConstraints(
           dictionary['clusterConstraints'])
+
+    if 'istioCompatible' in dictionary:
+      self._istio_compatible = dictionary['istioCompatible']
 
     if not self.is_v2():
       return
@@ -218,6 +222,10 @@ class SchemaXGoogleMarketplace:
   @property
   def cluster_constraints(self):
     return self._cluster_constraints
+
+  @property
+  def istio_compatible(self):
+    return self._istio_compatible
 
   @property
   def app_api_version(self):
