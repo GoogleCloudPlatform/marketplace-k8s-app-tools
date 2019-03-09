@@ -644,8 +644,7 @@ class ConfigHelperTest(unittest.TestCase):
             isSupported: True
         """)
     schema.validate()
-    self.assertEqual(
-        schema.x_google_marketplace.istio.is_supported, True)
+    self.assertEqual(schema.x_google_marketplace.istio.is_supported, True)
 
   def test_validate_good(self):
     schema = config_helper.Schema.load_yaml("""
