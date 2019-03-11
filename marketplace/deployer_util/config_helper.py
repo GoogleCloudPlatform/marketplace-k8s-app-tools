@@ -349,9 +349,6 @@ class SchemaIstio:
   def __init__(self, dictionary):
     self._is_supported = dictionary.get('isSupported', None)
 
-    if 'isSupported' in dictionary:
-      self._is_supported = dictionary['isSupported']
-
   @property
   def is_supported(self):
     return self._is_supported
