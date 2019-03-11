@@ -62,6 +62,10 @@ properties:
     type: string
     x-google-marketplace:
       type: APPLICATION_UID
+  istioEnabled:
+    type: boolean
+    x-google-marketplace:
+      type: ISTIO_ENABLED
 required:
 - propertyString
 - propertyPassword
@@ -111,7 +115,7 @@ class ConfigHelperTest(unittest.TestCase):
         'propertyIntegerWithDefault', 'propertyNumber',
         'propertyNumberWithDefault', 'propertyBoolean',
         'propertyBooleanWithDefault', 'propertyImage', 'propertyDeployerImage',
-        'propertyPassword', 'applicationUid'
+        'propertyPassword', 'applicationUid', 'istioEnabled'
     }, set(schema.properties))
     self.assertEqual(str, schema.properties['propertyString'].type)
     self.assertIsNone(schema.properties['propertyString'].default)
@@ -628,6 +632,19 @@ class ConfigHelperTest(unittest.TestCase):
                      'REQUIRE_MINIMUM_NODE_COUNT')
     self.assertEqual(
         resources[1].affinity.simple_node_affinity.minimum_node_count, 4)
+
+  def test_istio(self):
+    schema = config_helper.Schema.load_yaml("""
+        applicationApiVersion: v1beta1
+        properties:
+          simple:
+            type: string
+        x-google-marketplace:
+          istio:
+            isSupported: True
+        """)
+    schema.validate()
+    self.assertEqual(schema.x_google_marketplace.istio.is_supported, True)
 
   def test_validate_good(self):
     schema = config_helper.Schema.load_yaml("""

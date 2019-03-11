@@ -260,6 +260,7 @@ It defines how this object will be handled. Each type has a different set of pro
 - `STORAGE_CLASS`: The name of a pre-provisioned k8s `StorageClass`. If it does not exist, one is created.
 - `STRING`: A string that needs special handling.
 - `APPLICATION_UID`: The uuid of the created `Application` object.
+- `ISTIO_ENABLED`: Indicates whether Istio is enabled for the deployement.
 
 ---
 
@@ -363,6 +364,7 @@ properties:
             resources: ['EtcdCluster']
             verbs: ['*']
 ```
+
 ---
 
 ### type: STORAGE_CLASS
@@ -380,6 +382,8 @@ properties:
       storageClass:
         type: SSD
 ```
+
+---
 
 ### type: STRING
 
@@ -399,6 +403,39 @@ properties:
 ```
 
 In the example above, manifests can reference to the password as `explicitPassword`, as well as to its base64Encoded value as `explicitPasswordEncoded`.
+
+---
+
+### type: ISTIO_ENABLED
+
+This boolean property receives a True value if the environment is detected to have Istio enabled, and False otherwise. The deployer and template can take this signal to adapt the deployment accordingly.
+
+If `ISTIO_ENABLED` is not present, it is assumed Istio is NOT enabled for the deployment.
+
+---
+
+## istio
+
+Nested under `x-google-marketplace`, it holds information about compatibility between the app and the Istio service mesh.
+
+```yaml
+properties:
+  # Property definitions...
+required:
+  # Required properties...
+x-google-marketplace:
+  istio:
+    isSupported: True 
+```
+
+---
+
+### isSupported
+
+This boolean property receives a True value if the application is compatible with Istio, and False otherwise.
+If `isSupported` is not present, it is assumed that it is unknown whether the app supports Istio or not.
+
+---
 
 ## clusterConstraints
 
