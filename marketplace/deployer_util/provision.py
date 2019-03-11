@@ -208,6 +208,11 @@ def provision_deployer(schema, app_name, namespace, deployer_image,
           },
           'spec': {
               'template': {
+                  'metadata': {
+                      'annotations': {
+                          'sidecar.istio.io/inject': "false",
+                      },
+                  },
                   'spec': pod_spec,
               },
               'backoffLimit': 0,

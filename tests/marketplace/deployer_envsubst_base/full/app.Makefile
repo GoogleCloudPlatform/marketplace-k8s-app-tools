@@ -113,6 +113,22 @@ app/verify: app/build \
 	          --parameters='$(call combined_parameters)'
 
 
+# Runs the verification pipeline.
+.PHONY: app/verify_istio
+app/verify_istio: app/build \
+            .build/var/APP_DEPLOYER_IMAGE \
+            .build/var/APP_PARAMETERS \
+            .build/var/APP_TEST_PARAMETERS \
+            .build/var/MARKETPLACE_TOOLS_TAG \
+            | .build/app/dev
+	$(call print_target)
+	.build/app/dev \
+	    /scripts/verify \
+	          --deployer='$(APP_DEPLOYER_IMAGE)' \
+	          --parameters='$(call combined_parameters)' \
+	          --istio=enabled
+
+
 # Runs diagnostic tool to make sure your environment is properly setup.
 app/doctor: | .build/app/dev
 	$(call print_target)
