@@ -35,6 +35,7 @@ XTYPE_SERVICE_ACCOUNT = 'SERVICE_ACCOUNT'
 XTYPE_STORAGE_CLASS = 'STORAGE_CLASS'
 XTYPE_STRING = 'STRING'
 XTYPE_APPLICATION_UID = 'APPLICATION_UID'
+XTYPE_ISTIO_ENABLED = 'ISTIO_ENABLED'
 
 WIDGET_TYPES = ['help']
 
@@ -191,6 +192,7 @@ class SchemaXGoogleMarketplace:
     self._published_version_meta = None
     self._images = None
     self._cluster_constraints = None
+    self._istio = None
 
     self._schema_version = dictionary.get('schemaVersion', _SCHEMA_VERSION_1)
     if self._schema_version not in _SCHEMA_VERSIONS:
@@ -200,6 +202,9 @@ class SchemaXGoogleMarketplace:
     if 'clusterConstraints' in dictionary:
       self._cluster_constraints = SchemaClusterConstraints(
           dictionary['clusterConstraints'])
+
+    if 'istio' in dictionary:
+      self._istio = SchemaIstio(dictionary['istio'])
 
     if not self.is_v2():
       return
@@ -224,6 +229,10 @@ class SchemaXGoogleMarketplace:
   @property
   def cluster_constraints(self):
     return self._cluster_constraints
+
+  @property
+  def istio(self):
+    return self._istio
 
   @property
   def app_api_version(self):
@@ -341,6 +350,17 @@ class SchemaResourceConstraintRequests:
     return self._memory
 
 
+class SchemaIstio:
+  """Accesses top level istio."""
+
+  def __init__(self, dictionary):
+    self._is_supported = dictionary.get('isSupported', None)
+
+  @property
+  def is_supported(self):
+    return self._is_supported
+
+
 class SchemaImage:
   """Accesses an image definition."""
 
@@ -435,6 +455,7 @@ class SchemaProperty:
     self._service_account = None
     self._storage_class = None
     self._string = None
+    self._istio_enabled = None
 
     if not NAME_RE.match(name):
       raise InvalidSchema('Invalid property name: {}'.format(name))
@@ -458,7 +479,8 @@ class SchemaProperty:
     if self._x:
       xt = _must_get(self._x, 'type',
                      'Property {} has {} without a type'.format(name, XGOOGLE))
-      if xt in (XTYPE_NAME, XTYPE_NAMESPACE, XTYPE_DEPLOYER_IMAGE):
+      if xt in (XTYPE_NAME, XTYPE_NAMESPACE, XTYPE_DEPLOYER_IMAGE,
+                XTYPE_ISTIO_ENABLED):
         pass
       elif xt == XTYPE_APPLICATION_UID:
         d = self._x.get('applicationUid', {})
