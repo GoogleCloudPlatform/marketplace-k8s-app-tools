@@ -645,11 +645,12 @@ class ConfigHelperTest(unittest.TestCase):
               type: OPTIONAL
         """)
     schema.validate()
-    self.assertEqual(schema.x_google_marketplace.cluster_constraints.istio.type, "OPTIONAL")
+    self.assertEqual(schema.x_google_marketplace.cluster_constraints.istio.type,
+                     "OPTIONAL")
 
   def test_istio_invalid_type(self):
     with self.assertRaisesRegexp(config_helper.InvalidSchema,
-                           "Invalid type of istio constraint"):
+                                 "Invalid type of istio constraint"):
       schema = config_helper.Schema.load_yaml("""
           applicationApiVersion: v1beta1
           properties:
