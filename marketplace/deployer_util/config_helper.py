@@ -356,8 +356,7 @@ class SchemaIstio:
 
   def __init__(self, dictionary):
     self._type = dictionary.get('type', None)
-    _must_contain_or_raise(self._type, _ISTIO_TYPES,
-                           "Invalid type of istio constraint")
+    _must_contain(self._type, _ISTIO_TYPES, "Invalid type of istio constraint")
 
   @property
   def type(self):
@@ -751,8 +750,8 @@ def _must_get_and_apply(dictionary, key, apply_fn, error_msg):
   return apply_fn(value)
 
 
-def _must_contain_or_raise(value, valid_list, error_msg):
+def _must_contain(value, valid_list, error_msg):
   """Validates that value is one of valid_list. Raises InvalidSchema if valid_list does not contain the value."""
   if value not in valid_list:
-    raise InvalidSchema(
-        "%s: %s. Expected one of: %s " % (error_msg, value, valid_list))
+    raise InvalidSchema("{}. Must be one of {}".format(error_msg,
+                                                       ', '.join(_ISTIO_TYPES)))
