@@ -45,7 +45,6 @@ def main():
 
   x = schema.x_google_marketplace
   meta = {
-      'version': x.published_version,
       'releaseNote': x.published_version_meta.release_note,
       'releaseDate': _utcnow_timestamp(),
       'url': args.deployer_image,
