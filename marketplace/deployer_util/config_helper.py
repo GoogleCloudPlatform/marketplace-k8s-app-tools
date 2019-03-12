@@ -185,7 +185,6 @@ class SchemaXGoogleMarketplace:
     self._published_version_meta = None
     self._images = None
     self._cluster_constraints = None
-    self._istio = None
 
     self._schema_version = dictionary.get('schemaVersion', _SCHEMA_VERSION_1)
     if self._schema_version not in _SCHEMA_VERSIONS:
@@ -195,9 +194,6 @@ class SchemaXGoogleMarketplace:
     if 'clusterConstraints' in dictionary:
       self._cluster_constraints = SchemaClusterConstraints(
           dictionary['clusterConstraints'])
-
-    if 'istio' in dictionary:
-      self._istio = SchemaIstio(dictionary['istio'])
 
     if not self.is_v2():
       return
@@ -222,10 +218,6 @@ class SchemaXGoogleMarketplace:
   @property
   def cluster_constraints(self):
     return self._cluster_constraints
-
-  @property
-  def istio(self):
-    return self._istio
 
   @property
   def app_api_version(self):
@@ -253,12 +245,16 @@ class SchemaClusterConstraints:
   def __init__(self, dictionary):
     self._k8s_version = dictionary.get('k8sVersion', None)
     self._resources = None
+    self._istio = None
 
     if 'resources' in dictionary:
       resources = dictionary['resources']
       if not isinstance(resources, list):
         raise InvalidSchema('clusterConstraints.resources must be a list')
       self._resources = [SchemaResourceConstraints(r) for r in resources]
+
+    if 'istio' in dictionary:
+      self._istio = SchemaIstio(dictionary['istio'])
 
   @property
   def k8s_version(self):
@@ -267,6 +263,10 @@ class SchemaClusterConstraints:
   @property
   def resources(self):
     return self._resources
+
+  @property
+  def istio(self):
+    return self._istio
 
 
 class SchemaResourceConstraints:
@@ -343,15 +343,25 @@ class SchemaResourceConstraintRequests:
     return self._memory
 
 
+_ISTIO_TYPE_OPTIONAL = "OPTIONAL"
+_ISTIO_TYPE_REQUIRED = "REQUIRED"
+_ISTIO_TYPE_UNSUPPORTED = "UNSUPPORTED"
+_ISTIO_TYPES = [
+    _ISTIO_TYPE_OPTIONAL, _ISTIO_TYPE_REQUIRED, _ISTIO_TYPE_UNSUPPORTED
+]
+
+
 class SchemaIstio:
   """Accesses top level istio."""
 
   def __init__(self, dictionary):
-    self._is_supported = dictionary.get('isSupported', None)
+    self._type = dictionary.get('type', None)
+    _must_contain_or_raise(self._type, _ISTIO_TYPES,
+                           "Invalid type of istio constraint")
 
   @property
-  def is_supported(self):
-    return self._is_supported
+  def type(self):
+    return self._type
 
 
 class SchemaImage:
@@ -739,3 +749,10 @@ def _must_get_and_apply(dictionary, key, apply_fn, error_msg):
   """Similar to _maybe_get_and_apply but raises InvalidSchema if no such key."""
   value = _must_get(dictionary, key, error_msg)
   return apply_fn(value)
+
+
+def _must_contain_or_raise(value, valid_list, error_msg):
+  """Validates that value is one of valid_list. Raises InvalidSchema if valid_list does not contain the value."""
+  if value not in valid_list:
+    raise InvalidSchema(
+        "%s: %s. Expected one of: %s " % (error_msg, value, valid_list))
