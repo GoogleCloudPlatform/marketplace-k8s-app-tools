@@ -38,7 +38,7 @@ The doctor tool inspects your setup and recommends potential
 fixes.
 
 ```shell
-mpdev /scripts/doctor.py
+mpdev doctor
 ```
 
 ### Install an application
@@ -47,12 +47,12 @@ This command is mostly equivalent to installing the application
 from Marketplace UI.
 
 ```shell
-mpdev /scripts/install \
+mpdev install \
   --deployer=<YOUR DEPLOYER IMAGE> \
   --parameters=<PARAMETERS AS JSON DICTIONARY>
 
 # For example:
-mpdev /scripts/install
+mpdev install
   --deployer=gcr.io/your-company/your-solution/deployer \
   --parameters='{"name": "test-deployment", "namespace": "test-ns"}'
 ```
@@ -72,7 +72,7 @@ This script creates a new namespace, deploys the application, waits
 for it to turn green, run any smoke tests, and tears it down.
 
 ```shell
-mpdev /scripts/verify \
+mpdev verify \
   --deployer=<YOUR DEPLOYER IMAGE>
 ```
 
