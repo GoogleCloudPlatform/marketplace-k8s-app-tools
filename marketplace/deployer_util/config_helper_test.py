@@ -651,7 +651,7 @@ class ConfigHelperTest(unittest.TestCase):
   def test_istio_invalid_type(self):
     with self.assertRaisesRegexp(config_helper.InvalidSchema,
                                  "Invalid type of istio constraint"):
-      schema = config_helper.Schema.load_yaml("""
+      config_helper.Schema.load_yaml("""
           applicationApiVersion: v1beta1
           properties:
             simple:
