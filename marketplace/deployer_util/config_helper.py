@@ -150,6 +150,8 @@ class Schema:
 
   @property
   def app_api_version(self):
+    if self.is_v2():
+      return self.x_google_marketplace.app_api_version
     return self._app_api_version
 
   @property
@@ -169,6 +171,11 @@ class Schema:
         v for k, v in self._properties.iteritems()
         if v.matches_definition(definition)
     ]
+
+  def is_v2(self):
+    if self.x_google_marketplace:
+      return self.x_google_marketplace.is_v2()
+    return False
 
 
 _SCHEMA_VERSION_1 = 'v1'

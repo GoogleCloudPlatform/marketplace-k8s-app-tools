@@ -1,0 +1,57 @@
+#!/bin/bash
+#
+# Copyright 2019 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+set -eo pipefail
+
+for i in "$@"
+do
+case $i in
+  --deployer_image=*)
+    deployer_image="${i#*=}"
+    shift
+    ;;
+  --gcs_repo=*)
+    gcs_repo="${i#*=}"
+    shift
+    ;;
+  *)
+    >&2 echo "Unrecognized flag: $i"
+    exit 1
+    ;;
+esac
+done
+
+[[ -z "$deployer_image" ]] && >&2 echo "--deployer_image required" && exit 1
+[[ -z "$gcs_repo" ]] && >&2 echo "--gcs_repo required" && exit 1
+! [[ "$gcs_repo" == gs://* ]] && >&2 echo "--gcs_repo must be a gs:// URL" && exit 1
+
+# Remove trailing slash.
+gcs_repo=${gcs_repo%/}
+
+# Extract schema and values files.
+docker run \
+    -i \
+    --entrypoint /bin/bash \
+    --rm "${deployer_image}" \
+    -c 'cat /data/schema.yaml' \
+> /data/schema.yaml
+
+mkdir -p /tmp/versions
+published_version="$(print_published_version.py)"
+print_version_metadata.py --deployer_image "${deployer_image}" > "/tmp/versions/${published_version}.yaml"
+
+gsutil cp "/tmp/versions/${published_version}.yaml" "${gcs_repo}/"
+echo "Version is available at ${gcs_repo}/${published_version}.yaml"

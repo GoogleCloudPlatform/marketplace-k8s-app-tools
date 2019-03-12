@@ -41,6 +41,9 @@ RUN gcloud auth configure-docker
 COPY marketplace/deployer_util/* /bin/
 COPY scripts/* /scripts/
 COPY marketplace/dev/bin/* /bin/
+RUN mv /scripts/doctor.py /scripts/doctor
+ENV PATH="/scripts:${PATH}"
+
 RUN mkdir -p /data/
 
 ENTRYPOINT ["/bin/docker_entrypoint.sh"]

@@ -1,0 +1,6 @@
+dependencies:
+- name: marketplace-integration
+  repository: https://cloud-marketplace-tools.storage.googleapis.com/charts
+  version: 0.7.3
+digest: sha256:75d5ed93bc2e31996a10727c4d093abfe524bec255cdeab6e17fd2e7df2e2daf
+generated: 2019-01-08T15:44:51.274785476Z
