@@ -414,29 +414,6 @@ If `ISTIO_ENABLED` is not present, it is assumed Istio is NOT enabled for the de
 
 ---
 
-## istio
-
-Nested under `x-google-marketplace`, it holds information about compatibility between the app and the Istio service mesh.
-
-```yaml
-properties:
-  # Property definitions...
-required:
-  # Required properties...
-x-google-marketplace:
-  istio:
-    isSupported: True 
-```
-
----
-
-### isSupported
-
-This boolean property receives a True value if the application is compatible with Istio, and False otherwise.
-If `isSupported` is not present, it is assumed that it is unknown whether the app supports Istio or not.
-
----
-
 ## clusterConstraints
 
 Nested under `x-google-marketplace`, this can be used for specifying constraints on the kubernetes cluster. These constraints help determine if the application can be successfully deployed to the cluster. The UI can filter out ineligible clusters following these constraints.
@@ -480,3 +457,27 @@ x-google-marketplace:
           type: REQUIRE_MINIMUM_NODE_COUNT
           minimumNodeCount: 3
 ```
+
+---
+
+### istio
+
+It holds information about compatibility between the app and the Istio service mesh installation in the cluster.
+
+```yaml
+properties:
+  # Property definitions...
+required:
+  # Required properties...
+x-google-marketplace:
+  clusterConstraints:
+    istio:
+      type: OPTIONAL | REQUIRED | UNSUPPORTED
+```
+
+#### Supported types
+- `OPTIONAL`: The app works with Istio but does not require it.
+- `REQUIRED`: The app requires Istio to work properly.
+- `UNSUPPORTED`: The app does not support Istio.
+
+If the compatibility with Istio is unknown, the property is omitted completely.

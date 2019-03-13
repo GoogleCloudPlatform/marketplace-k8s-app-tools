@@ -633,18 +633,34 @@ class ConfigHelperTest(unittest.TestCase):
     self.assertEqual(
         resources[1].affinity.simple_node_affinity.minimum_node_count, 4)
 
-  def test_istio(self):
+  def test_istio_valid_type(self):
     schema = config_helper.Schema.load_yaml("""
         applicationApiVersion: v1beta1
         properties:
           simple:
             type: string
         x-google-marketplace:
-          istio:
-            isSupported: True
+          clusterConstraints:
+            istio:
+              type: OPTIONAL
         """)
     schema.validate()
-    self.assertEqual(schema.x_google_marketplace.istio.is_supported, True)
+    self.assertEqual(schema.x_google_marketplace.cluster_constraints.istio.type,
+                     "OPTIONAL")
+
+  def test_istio_invalid_type(self):
+    with self.assertRaisesRegexp(config_helper.InvalidSchema,
+                                 "Invalid type of istio constraint"):
+      config_helper.Schema.load_yaml("""
+          applicationApiVersion: v1beta1
+          properties:
+            simple:
+              type: string
+          x-google-marketplace:
+            clusterConstraints:
+              istio:
+                type: INVALID_TYPE
+          """)
 
   def test_validate_good(self):
     schema = config_helper.Schema.load_yaml("""
