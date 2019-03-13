@@ -90,6 +90,18 @@ kubectl create namespace "$NAMESPACE"
 if [[ "$istio" = "enabled" ]]; then
   echo "INFO Enabling istio in \"$NAMESPACE\" (istio-injection=enabled)."
   kubectl label namespace "$NAMESPACE" istio-injection=enabled
+
+  istio_enabled_key="$(extract_schema_key.py \
+    --schema_file=/data/schema.yaml \
+    --type ISTIO_ENABLED)"
+
+  # Stitch in ISTIO_ENABLED parameter if applicable.
+  if [[ ! -z $istio_enabled_key ]]; then
+    parameters=$(echo "$parameters" \
+      | jq \
+        --arg istio_enabled_key "$istio_enabled_key" \
+        '.[$istio_enabled_key] = true')
+  fi
 fi
 
 function delete_namespace() {
