@@ -37,7 +37,7 @@ steps:
 
 - id: Maybe tag images latest
   name: gcr.io/cloud-builders/docker
-  wairFor:
+  waitFor:
   - *DetermineShouldTagLatest
   entrypoint: /bin/bash
   args:
