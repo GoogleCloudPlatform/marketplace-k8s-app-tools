@@ -260,7 +260,8 @@ It defines how this object will be handled. Each type has a different set of pro
 - `STORAGE_CLASS`: The name of a pre-provisioned k8s `StorageClass`. If it does not exist, one is created.
 - `STRING`: A string that needs special handling.
 - `APPLICATION_UID`: The uuid of the created `Application` object.
-- `ISTIO_ENABLED`: Indicates whether Istio is enabled for the deployement.
+- `ISTIO_ENABLED`: Indicates whether Istio is enabled for the deployment.
+- `INGRESS_AVAILABLE`: Indicates whether the cluster is detected to have Ingress support.
 
 ---
 
@@ -410,7 +411,11 @@ In the example above, manifests can reference to the password as `explicitPasswo
 
 This boolean property receives a True value if the environment is detected to have Istio enabled, and False otherwise. The deployer and template can take this signal to adapt the deployment accordingly.
 
-If `ISTIO_ENABLED` is not present, it is assumed Istio is NOT enabled for the deployment.
+---
+
+### type: INGRESS_AVAILABLE
+
+This boolean property receives a True value if the cluster is detected to have Ingress controller. The deployer and template can take this signal to adapt the deployment accordingly.
 
 ---
 
@@ -475,9 +480,12 @@ x-google-marketplace:
       type: OPTIONAL | REQUIRED | UNSUPPORTED
 ```
 
+If this is not specified, the UI will warn the user when the app is deployed into an istio enabled environment.
+
+Also see `ISTIO_ENABLED` property type.
+
 #### Supported types
+
 - `OPTIONAL`: The app works with Istio but does not require it.
 - `REQUIRED`: The app requires Istio to work properly.
 - `UNSUPPORTED`: The app does not support Istio.
-
-If the compatibility with Istio is unknown, the property is omitted completely.

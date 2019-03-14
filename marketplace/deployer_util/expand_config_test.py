@@ -146,6 +146,34 @@ class ExpandConfigTest(unittest.TestCase):
         'application.create': True
     }, result)
 
+  def test_istio_enabled_backward_compatibility(self):
+    schema = config_helper.Schema.load_yaml("""
+        applicationApiVersion: v1beta1
+        properties:
+          istioEnabled:
+            type: boolean
+            x-google-marketplace:
+              type: ISTIO_ENABLED
+        """)
+    result = expand_config.expand({}, schema)
+    self.assertEqual({'istioEnabled': False}, result)
+    result = expand_config.expand({'istioEnabled': True}, schema)
+    self.assertEqual({'istioEnabled': True}, result)
+
+  def test_ingress_available_backward_compatibility(self):
+    schema = config_helper.Schema.load_yaml("""
+        applicationApiVersion: v1beta1
+        properties:
+          ingressAvail:
+            type: boolean
+            x-google-marketplace:
+              type: INGRESS_AVAILABLE
+        """)
+    result = expand_config.expand({}, schema)
+    self.assertEqual({'ingressAvail': True}, result)
+    result = expand_config.expand({'ingressAvail': False}, schema)
+    self.assertEqual({'ingressAvail': False}, result)
+
   def test_write_values(self):
     schema = config_helper.Schema.load_yaml("""
         applicationApiVersion: v1beta1

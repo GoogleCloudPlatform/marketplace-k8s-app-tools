@@ -20,6 +20,7 @@ from argparse import ArgumentParser
 
 import yaml
 
+import config_helper
 import schema_values_common
 import storage
 
@@ -83,6 +84,12 @@ def process(schema, values, deployer_image, deployer_entrypoint):
           schema, prop, app_name=app_name, namespace=namespace)
       props[prop.name] = value
       manifests += sc_manifests
+    elif prop.xtype == config_helper.XTYPE_ISTIO_ENABLED:
+      # TODO: Really populate this value.
+      props[prop.name] = False
+    elif prop.xtype == config_helper.XTYPE_INGRESS_AVAILABLE:
+      # TODO: Really populate this value.
+      props[prop.name] = True
 
   # Merge input and provisioned properties.
   app_params = dict(list(values.iteritems()) + list(props.iteritems()))

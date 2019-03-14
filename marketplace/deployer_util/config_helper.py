@@ -36,6 +36,7 @@ XTYPE_STORAGE_CLASS = 'STORAGE_CLASS'
 XTYPE_STRING = 'STRING'
 XTYPE_APPLICATION_UID = 'APPLICATION_UID'
 XTYPE_ISTIO_ENABLED = 'ISTIO_ENABLED'
+XTYPE_INGRESS_AVAILABLE = 'INGRESS_AVAILABLE'
 
 WIDGET_TYPES = ['help']
 
@@ -464,7 +465,6 @@ class SchemaProperty:
     self._service_account = None
     self._storage_class = None
     self._string = None
-    self._istio_enabled = None
 
     if not NAME_RE.match(name):
       raise InvalidSchema('Invalid property name: {}'.format(name))
@@ -488,16 +488,20 @@ class SchemaProperty:
     if self._x:
       xt = _must_get(self._x, 'type',
                      'Property {} has {} without a type'.format(name, XGOOGLE))
-      if xt in (XTYPE_NAME, XTYPE_NAMESPACE, XTYPE_DEPLOYER_IMAGE,
-                XTYPE_ISTIO_ENABLED):
-        pass
+      if xt in (XTYPE_NAME, XTYPE_NAMESPACE, XTYPE_DEPLOYER_IMAGE):
+        _property_must_have_type(self, str)
+      elif xt in (XTYPE_ISTIO_ENABLED, XTYPE_INGRESS_AVAILABLE):
+        _property_must_have_type(self, bool)
       elif xt == XTYPE_APPLICATION_UID:
+        _property_must_have_type(self, str)
         d = self._x.get('applicationUid', {})
         self._application_uid = SchemaXApplicationUid(d)
       elif xt == XTYPE_IMAGE:
+        _property_must_have_type(self, str)
         d = self._x.get('image', {})
         self._image = SchemaXImage(d)
       elif xt == XTYPE_PASSWORD:
+        _property_must_have_type(self, str)
         d = self._x.get('generatedPassword', {})
         spec = {
             'length': d.get('length', 10),
@@ -506,15 +510,19 @@ class SchemaProperty:
         }
         self._password = SchemaXPassword(**spec)
       elif xt == XTYPE_SERVICE_ACCOUNT:
+        _property_must_have_type(self, str)
         d = self._x.get('serviceAccount', {})
         self._service_account = SchemaXServiceAccount(d)
       elif xt == XTYPE_STORAGE_CLASS:
+        _property_must_have_type(self, str)
         d = self._x.get('storageClass', {})
         self._storage_class = SchemaXStorageClass(d)
       elif xt == XTYPE_STRING:
+        _property_must_have_type(self, str)
         d = self._x.get('string', {})
         self._string = SchemaXString(d)
       elif xt == XTYPE_REPORTING_SECRET:
+        _property_must_have_type(self, str)
         d = self._x.get('reportingSecret', {})
         self._reporting_secret = SchemaXReportingSecret(d)
       else:
@@ -758,7 +766,20 @@ def _must_get_and_apply(dictionary, key, apply_fn, error_msg):
 
 
 def _must_contain(value, valid_list, error_msg):
-  """Validates that value is one of valid_list. Raises InvalidSchema if valid_list does not contain the value."""
+  """Validates that value in valid_list, or raises InvalidSchema."""
   if value not in valid_list:
     raise InvalidSchema("{}. Must be one of {}".format(error_msg,
                                                        ', '.join(_ISTIO_TYPES)))
+
+
+def _property_must_have_type(prop, expected_type):
+  if prop.type != expected_type:
+    readable_type = {
+        str: 'string',
+        bool: 'boolean',
+        int: 'integer',
+        float: 'float',
+    }.get(expected_type, expected_type.__name__)
+    raise InvalidSchema(
+        '{} x-google-marketplace type property must be of type {}'.format(
+            prop.xtype, readable_type))
