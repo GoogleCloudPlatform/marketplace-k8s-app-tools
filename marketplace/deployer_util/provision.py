@@ -36,6 +36,7 @@ def main():
   schema_values_common.add_to_argument_parser(parser)
   parser.add_argument('--deployer_image', required=True)
   parser.add_argument('--deployer_entrypoint', default=None)
+  parser.add_argument('--image_pull_secret', default=None)
   args = parser.parse_args()
 
   schema = schema_values_common.load_schema(args)
@@ -44,11 +45,13 @@ def main():
       schema,
       values,
       deployer_image=args.deployer_image,
-      deployer_entrypoint=args.deployer_entrypoint)
+      deployer_entrypoint=args.deployer_entrypoint,
+      image_pull_secret=args.image_pull_secret)
   print(yaml.safe_dump_all(manifests, default_flow_style=False, indent=2))
 
 
-def process(schema, values, deployer_image, deployer_entrypoint):
+def process(
+    schema, values, deployer_image, deployer_entrypoint, image_pull_secret):
   props = {}
   manifests = []
   app_name = get_name(schema, values)
@@ -76,7 +79,8 @@ def process(schema, values, deployer_image, deployer_entrypoint):
       continue
     if prop.service_account:
       value, sa_manifests = provision_service_account(
-          schema, prop, app_name=app_name, namespace=namespace)
+          schema, prop, app_name=app_name, namespace=namespace,
+          image_pull_secret=image_pull_secret)
       props[prop.name] = value
       manifests += sa_manifests
     elif prop.storage_class:
@@ -100,6 +104,7 @@ def process(schema, values, deployer_image, deployer_entrypoint):
       namespace=namespace,
       deployer_image=deployer_image,
       deployer_entrypoint=deployer_entrypoint,
+      image_pull_secret=image_pull_secret,
       app_params=app_params)
   return manifests
 
@@ -129,9 +134,19 @@ def provision_from_storage(key, value, app_name, namespace):
 
 
 def provision_deployer(schema, app_name, namespace, deployer_image,
-                       deployer_entrypoint, app_params):
+                       deployer_entrypoint, app_params,
+                       image_pull_secret):
   """Provisions resources to run the deployer."""
   sa_name = dns1123_name('{}-deployer-sa'.format(app_name))
+  labels = {
+      'app.kubernetes.io/component': 'deployer.marketplace.cloud.google.com',
+      'marketplace.cloud.google.com/deployer': 'Dependent',
+  }
+  job_labels = {
+      'app.kubernetes.io/component': 'deployer.marketplace.cloud.google.com',
+      'marketplace.cloud.google.com/deployer': 'Main',
+  }
+
   pod_spec = {
       'serviceAccountName':
           sa_name,
@@ -158,25 +173,25 @@ def provision_deployer(schema, app_name, namespace, deployer_image,
   }
   if deployer_entrypoint:
     pod_spec['containers'][0]['command'] = [deployer_entrypoint]
-  labels = {
-      'app.kubernetes.io/component': 'deployer.marketplace.cloud.google.com',
-      'marketplace.cloud.google.com/deployer': 'Dependent',
+
+  service_account = {
+      'apiVersion': 'v1',
+      'kind': 'ServiceAccount',
+      'metadata': {
+          'name': sa_name,
+          'namespace': namespace,
+          'labels': labels,
+      },
   }
-  job_labels = {
-      'app.kubernetes.io/component': 'deployer.marketplace.cloud.google.com',
-      'marketplace.cloud.google.com/deployer': 'Main',
-  }
+  if image_pull_secret:
+    service_account['imagePullSecrets'] = [
+        {
+            'name': image_pull_secret,
+        }
+    ]
 
   return [
-      {
-          'apiVersion': 'v1',
-          'kind': 'ServiceAccount',
-          'metadata': {
-              'name': sa_name,
-              'namespace': namespace,
-              'labels': labels,
-          },
-      },
+      service_account,
       {
           'apiVersion': 'rbac.authorization.k8s.io/v1',
           'kind': 'RoleBinding',
@@ -228,21 +243,30 @@ def provision_deployer(schema, app_name, namespace, deployer_image,
   ]
 
 
-def provision_service_account(schema, prop, app_name, namespace):
+def provision_service_account(
+    schema, prop, app_name, namespace, image_pull_secret):
   sa_name = dns1123_name('{}-{}'.format(app_name, prop.name))
   subjects = [{
       'kind': 'ServiceAccount',
       'name': sa_name,
       'namespace': namespace,
   }]
-  manifests = [{
+  service_account = {
       'apiVersion': 'v1',
       'kind': 'ServiceAccount',
       'metadata': {
           'name': sa_name,
           'namespace': namespace,
       },
-  }]
+  }
+  if image_pull_secret:
+    service_account['imagePullSecrets'] = [
+        {
+            'name': image_pull_secret,
+        }
+    ]
+
+  manifests = [service_account]
   for i, rules in enumerate(prop.service_account.custom_role_rules()):
     role_name = '{}:{}-r{}'.format(app_name, prop.name, i)
     manifests.append({
