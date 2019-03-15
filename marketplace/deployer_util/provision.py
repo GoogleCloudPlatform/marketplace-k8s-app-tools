@@ -50,8 +50,8 @@ def main():
   print(yaml.safe_dump_all(manifests, default_flow_style=False, indent=2))
 
 
-def process(
-    schema, values, deployer_image, deployer_entrypoint, image_pull_secret):
+def process(schema, values, deployer_image, deployer_entrypoint,
+            image_pull_secret):
   props = {}
   manifests = []
   app_name = get_name(schema, values)
@@ -79,7 +79,10 @@ def process(
       continue
     if prop.service_account:
       value, sa_manifests = provision_service_account(
-          schema, prop, app_name=app_name, namespace=namespace,
+          schema,
+          prop,
+          app_name=app_name,
+          namespace=namespace,
           image_pull_secret=image_pull_secret)
       props[prop.name] = value
       manifests += sa_manifests
@@ -134,8 +137,7 @@ def provision_from_storage(key, value, app_name, namespace):
 
 
 def provision_deployer(schema, app_name, namespace, deployer_image,
-                       deployer_entrypoint, app_params,
-                       image_pull_secret):
+                       deployer_entrypoint, app_params, image_pull_secret):
   """Provisions resources to run the deployer."""
   sa_name = dns1123_name('{}-deployer-sa'.format(app_name))
   labels = {
@@ -184,11 +186,9 @@ def provision_deployer(schema, app_name, namespace, deployer_image,
       },
   }
   if image_pull_secret:
-    service_account['imagePullSecrets'] = [
-        {
-            'name': image_pull_secret,
-        }
-    ]
+    service_account['imagePullSecrets'] = [{
+        'name': image_pull_secret,
+    }]
 
   return [
       service_account,
@@ -243,8 +243,8 @@ def provision_deployer(schema, app_name, namespace, deployer_image,
   ]
 
 
-def provision_service_account(
-    schema, prop, app_name, namespace, image_pull_secret):
+def provision_service_account(schema, prop, app_name, namespace,
+                              image_pull_secret):
   sa_name = dns1123_name('{}-{}'.format(app_name, prop.name))
   subjects = [{
       'kind': 'ServiceAccount',
@@ -260,11 +260,9 @@ def provision_service_account(
       },
   }
   if image_pull_secret:
-    service_account['imagePullSecrets'] = [
-        {
-            'name': image_pull_secret,
-        }
-    ]
+    service_account['imagePullSecrets'] = [{
+        'name': image_pull_secret,
+    }]
 
   manifests = [service_account]
   for i, rules in enumerate(prop.service_account.custom_role_rules()):
