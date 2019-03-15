@@ -66,6 +66,10 @@ properties:
     type: boolean
     x-google-marketplace:
       type: ISTIO_ENABLED
+  ingressAvailable:
+    type: boolean
+    x-google-marketplace:
+      type: INGRESS_AVAILABLE
 required:
 - propertyString
 - propertyPassword
@@ -115,7 +119,7 @@ class ConfigHelperTest(unittest.TestCase):
         'propertyIntegerWithDefault', 'propertyNumber',
         'propertyNumberWithDefault', 'propertyBoolean',
         'propertyBooleanWithDefault', 'propertyImage', 'propertyDeployerImage',
-        'propertyPassword', 'applicationUid', 'istioEnabled'
+        'propertyPassword', 'applicationUid', 'istioEnabled', 'ingressAvailable'
     }, set(schema.properties))
     self.assertEqual(str, schema.properties['propertyString'].type)
     self.assertIsNone(schema.properties['propertyString'].default)
@@ -152,6 +156,11 @@ class ConfigHelperTest(unittest.TestCase):
                      schema.properties['propertyPassword'].xtype)
     self.assertEqual('My arbitrary <i>description</i>',
                      schema.form[0]['description'])
+    self.assertEqual(bool, schema.properties['istioEnabled'].type)
+    self.assertEqual('ISTIO_ENABLED', schema.properties['istioEnabled'].xtype)
+    self.assertEqual(bool, schema.properties['ingressAvailable'].type)
+    self.assertEqual('INGRESS_AVAILABLE',
+                     schema.properties['ingressAvailable'].xtype)
 
   def test_invalid_names(self):
     self.assertRaises(
@@ -167,6 +176,62 @@ class ConfigHelperTest(unittest.TestCase):
           a-good_name:
             type: string
         """)
+
+  def test_invalid_property_types(self):
+    self.assertRaisesRegexp(
+        config_helper.InvalidSchema,
+        r'.*must be of type string$', lambda: config_helper.Schema.load_yaml("""
+            properties:
+              u:
+                type: integer
+                x-google-marketplace:
+                  type: NAME
+            """))
+    self.assertRaisesRegexp(
+        config_helper.InvalidSchema,
+        r'.*must be of type string$', lambda: config_helper.Schema.load_yaml("""
+            properties:
+              u:
+                type: number
+                x-google-marketplace:
+                  type: NAMESPACE
+            """))
+    self.assertRaisesRegexp(
+        config_helper.InvalidSchema,
+        r'.*must be of type string$', lambda: config_helper.Schema.load_yaml("""
+            properties:
+              u:
+                type: int
+                x-google-marketplace:
+                  type: DEPLOYER_IMAGE
+            """))
+    self.assertRaisesRegexp(
+        config_helper.InvalidSchema,
+        r'.*must be of type string$', lambda: config_helper.Schema.load_yaml("""
+            properties:
+              u:
+                type: boolean
+                x-google-marketplace:
+                  type: APPLICATION_UID
+            """))
+    self.assertRaisesRegexp(
+        config_helper.InvalidSchema, r'.*must be of type boolean$', lambda:
+        config_helper.Schema.load_yaml("""
+            properties:
+              u:
+                type: string
+                x-google-marketplace:
+                  type: ISTIO_ENABLED
+            """))
+    self.assertRaisesRegexp(
+        config_helper.InvalidSchema, r'.*must be of type boolean$', lambda:
+        config_helper.Schema.load_yaml("""
+            properties:
+              u:
+                type: string
+                x-google-marketplace:
+                  type: INGRESS_AVAILABLE
+            """))
 
   def test_required(self):
     schema = config_helper.Schema.load_yaml(SCHEMA)

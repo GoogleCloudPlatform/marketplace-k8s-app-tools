@@ -20,6 +20,7 @@ from argparse import ArgumentParser
 
 import yaml
 
+import config_helper
 import schema_values_common
 from password import GeneratePassword
 
@@ -69,32 +70,31 @@ def expand(values_dict, schema, app_uid=''):
   for k, prop in schema.properties.iteritems():
     v = values_dict.get(k, None)
 
-    if v is None and prop.password:
-      if prop.type != str:
-        raise InvalidProperty(
-            'Property {} is expected to be of type string'.format(k))
-      result[k] = generate_password(prop.password)
-      continue
-
-    if v is None and prop.application_uid:
-      result[k] = app_uid or ''
-      generate_properties_for_appuid(prop, app_uid, generated)
-      continue
-
-    if v is None and prop.default is not None:
-      v = prop.default
-
-    if v is not None and prop.image:
-      if not isinstance(v, str):
-        raise InvalidProperty('Invalid value for IMAGE property {}: {}'.format(
-            k, v))
-      generate_properties_for_image(prop, v, generated)
-
-    if v is not None and prop.string:
-      if not isinstance(v, str):
-        raise InvalidProperty('Invalid value for STRING property {}: {}'.format(
-            k, v))
-      generate_properties_for_string(prop, v, generated)
+    if v is None:
+      if prop.password:
+        v = generate_password(prop.password)
+      elif prop.application_uid:
+        v = app_uid or ''
+        generate_properties_for_appuid(prop, app_uid, generated)
+      elif prop.xtype == config_helper.XTYPE_ISTIO_ENABLED:
+        # For backward compatibility.
+        v = False
+      elif prop.xtype == config_helper.XTYPE_INGRESS_AVAILABLE:
+        # For backward compatibility.
+        v = True
+      elif prop.default is not None:
+        v = prop.default
+    else:  # if v is None
+      if prop.image:
+        if not isinstance(v, str):
+          raise InvalidProperty(
+              'Invalid value for IMAGE property {}: {}'.format(k, v))
+        generate_properties_for_image(prop, v, generated)
+      if prop.string:
+        if not isinstance(v, str):
+          raise InvalidProperty(
+              'Invalid value for STRING property {}: {}'.format(k, v))
+        generate_properties_for_string(prop, v, generated)
 
     if v is not None:
       result[k] = v
