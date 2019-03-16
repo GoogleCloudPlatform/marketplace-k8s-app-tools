@@ -17,6 +17,7 @@
 import hashlib
 import re
 from argparse import ArgumentParser
+from bash_util import Command
 from dict_util import deep_get
 
 import yaml
@@ -130,17 +131,18 @@ def is_istio_injection_enabled(namespace):
     print("Unable to detect deploy/istio-sidecar-injector.")
     return False
 
-  # Check the webhook configuration. Detect which mode the webhook is operating in:
+  # Check the namespaceSelector configuration. Detect which mode the namespaceSelector is operating in:
   # - opt-in: only namespaces with istio-injection=enabled are injected.
   # - opt-out: namespaces will be injected unless they have istio-injection:disabled
   try:
     namespace_selector = Command(
         "kubectl get mutatingwebhookconfiguration/istio-sidecar-injector -o=json | jq '.webhooks[] | .namespaceSelector'",
         print_call=True).json()
-    if deep_get(webhook, 'matchLabels', 'istio-injection') == 'enabled':
+    if deep_get(namespace_selector, 'matchLabels',
+                'istio-injection') == 'enabled':
       namespace_selector_mode = 'opt-in'
     else:
-      match_expressions = deep_get(webhook, 'matchExpressions')
+      match_expressions = deep_get(namespace_selector, 'matchExpressions')
       if (match_expressions and len(match_expressions) > 0 and
           deep_get(match_expressions, 'key') == 'istio-injection' and
           deep_get(match_expressions, 'operator') == 'NotIn' and
