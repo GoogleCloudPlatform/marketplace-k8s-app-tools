@@ -17,6 +17,7 @@
 import hashlib
 import re
 from argparse import ArgumentParser
+from dict_util import deep_get
 
 import yaml
 
@@ -85,8 +86,7 @@ def process(schema, values, deployer_image, deployer_entrypoint):
       props[prop.name] = value
       manifests += sc_manifests
     elif prop.xtype == config_helper.XTYPE_ISTIO_ENABLED:
-      # TODO: Really populate this value.
-      props[prop.name] = False
+      props[prop.name] = is_istio_injection_enabled(namespace=namespace)
     elif prop.xtype == config_helper.XTYPE_INGRESS_AVAILABLE:
       # TODO: Really populate this value.
       props[prop.name] = True
@@ -102,6 +102,91 @@ def process(schema, values, deployer_image, deployer_entrypoint):
       deployer_entrypoint=deployer_entrypoint,
       app_params=app_params)
   return manifests
+
+
+def is_istio_injection_enabled(namespace):
+  """Checks the configurations in the cluster to detect whether the Istio sidecar will be 
+  injected (see https://istio.io/help/ops/setup/injection/).
+  Some applications use this information to deploy differently to work with Istio.
+  """
+
+  # Check the istio-system namespace
+  try:
+    Command("kubectl get namespace/istio-system", print_call=True)
+  except:
+    print("Unable to detect namespace/istio-system.")
+    return False
+
+  # Check the istio-sidecar-injector deployment.
+  try:
+    sidecar_injector = Command(
+        "kubectl get deploy/istio-sidecar-injector -n=istio-system -o=json | jq '.status.conditions[0]'",
+        print_call=True).json()
+    if (sidecar_injector['status'] != 'True' or
+        sidecar_injector['type'] != 'Available'):
+      print("deploy/istio-sidecar-injector is not available.")
+      return False
+  except:
+    print("Unable to detect deploy/istio-sidecar-injector.")
+    return False
+
+  # Check the webhook configuration. Detect which mode the webhook is operating in:
+  # - opt-in: only namespaces with istio-injection=enabled are injected.
+  # - opt-out: namespaces will be injected unless they have istio-injection:disabled
+  try:
+    namespace_selector = Command(
+        "kubectl get mutatingwebhookconfiguration/istio-sidecar-injector -o=json | jq '.webhooks[] | .namespaceSelector'",
+        print_call=True).json()
+    if deep_get(webhook, 'matchLabels', 'istio-injection') == 'enabled':
+      namespace_selector_mode = 'opt-in'
+    else:
+      match_expressions = deep_get(webhook, 'matchExpressions')
+      if (match_expressions and len(match_expressions) > 0 and
+          deep_get(match_expressions, 'key') == 'istio-injection' and
+          deep_get(match_expressions, 'operator') == 'NotIn' and
+          deep_get(match_expressions, 'values')[0] == 'disabled'):
+        namespace_selector_mode = 'opt-out'
+    if not namespace_selector_mode:
+      print("Unable to determine namespace selector mode.")
+      return False
+  except:
+    print(
+        "Unable to detect mutatingwebhookconfiguration/istio-sidecar-injector.")
+    return False
+
+  # Check the istio-injection label in the namespace
+  try:
+    namespace_inject_annotation = Command(
+        "kubectl get namespace {}} -o=json | jq '.metadata.labels.\"istio-injection\"'"
+        .format(namespace),
+        print_call=True).output
+  except:
+    print("Unable to determine the istio-injection label for namespace {}."
+          .format(namespace))
+    return False
+
+  # Check if the namespace matches the selector each mode
+  if (namespace_selector_mode == 'opt-in' and
+      namespace_inject_annotation == 'enabled'):
+    return True
+  if (namespace_selector_mode == 'opt-out' and
+      namespace_inject_annotation == 'disabled'):
+    return False
+
+  # Fallback to the default policy.
+  try:
+    policy = Command(
+        "kubectl -n istio-system get configmap istio-sidecar-injector -o jsonpath='{.data.config}' | head | grep policy:",
+        print_call=True).output
+    if policy == "policy: enabled":
+      return True
+    else:
+      return False
+  except:
+    print("istio-sidecar-injector policy.")
+    return False
+
+  return True
 
 
 def inject_deployer_image_properties(values, schema, deployer_image):
