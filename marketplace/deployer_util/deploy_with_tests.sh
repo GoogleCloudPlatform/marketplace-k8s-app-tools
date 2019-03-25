@@ -18,10 +18,34 @@ set -eox pipefail
 
 # This is the entry point for the test deployment
 
-overlay_test_schema.py \
-  --orig "/data-test/schema.yaml" \
-  --dest "/data/schema.yaml"
-rm -f /data-test/schema.yaml
+# If any command returns with non-zero exit code, set -e will cause the script
+# to exit. Prior to exit, set App assembly status to "Failed".
+handle_failure() {
+  code=$?
+  if [[ -z "$NAME" ]] || [[ -z "$NAMESPACE" ]]; then
+    # /bin/expand_config.py might have failed.
+    # We fall back to the unexpanded params to get the name and namespace.
+    NAME="$(/bin/print_config.py \
+            --xtype NAME \
+            --values_mode raw)"
+    NAMESPACE="$(/bin/print_config.py \
+            --xtype NAMESPACE \
+            --values_mode raw)"
+    export NAME
+    export NAMESPACE
+  fi
+  patch_assembly_phase.sh --status="Failed"
+  exit $code
+}
+trap "handle_failure" EXIT
+
+test_schema="/data-test/schema.yaml"
+if [[ -e "$test_schema" ]]; then
+  overlay_test_schema.py \
+    --orig "$test_schema" \
+    --dest "/data/schema.yaml"
+fi
+
 
 NAME="$(/bin/print_config.py \
     --xtype NAME \
@@ -82,3 +106,5 @@ if [[ -e "$tester_manifest" ]]; then
 fi
 
 clean_iam_resources.sh
+
+trap - EXIT
