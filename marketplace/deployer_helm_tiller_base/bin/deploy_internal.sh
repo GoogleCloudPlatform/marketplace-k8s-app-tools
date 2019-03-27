@@ -42,6 +42,7 @@ for chart in /data/chart/*; do
       --name="$NAME" \
       --namespace="$NAMESPACE" \
       --values=<(print_config.py --output=yaml) \
+      --set global.application.spec.addOwnerRef=true
       "$chart" \
     | yaml2json \
     | jq 'select( .kind == "Application" )' \
@@ -60,53 +61,4 @@ for chart in /data/chart/*; do
         --namespace="$NAMESPACE" \
         --values=<(print_config.py --output=yaml) \
         "$chart"
-
-  # Establish an ownerReference back to the Application resource, so that
-  # the helm release will be cleaned up when the Application is deleted.
-  # Note: This is fragile, as any time that tiller updates the release
-  # it will remove the ownerReference. Also, any future Secret resources
-  # created by tiller will not have this ownerReference established.
-  patch="$(echo '{}' \
-    | jq '{
-            "metadata": {
-              "ownerReferences": [
-                {
-                  "apiVersion": $app_api_version,
-                  "kind": "Application",
-                  "name": $name,
-                  "uid": $app_uid,
-                  "blockOwnerDeletion": true
-                }
-              ],
-              "labels": {
-                "app.kubernetes.io/name": $name,
-                "app.kubernetes.io/namespace": $namespace
-              }
-            }
-          }' \
-          --arg name "$NAME" \
-          --arg namespace "$NAMESPACE" \
-          --arg app_uid "$app_uid" \
-          --arg app_api_version "$app_api_version")"
-
-  kubectl get secrets \
-      --namespace="$NAMESPACE" \
-      --selector="OWNER=TILLER,NAME=$NAME" \
-      --output=json \
-    | jq '.items[]
-            | {
-                apiVersion: .apiVersion,
-                kind: .kind,
-                metadata: {
-                  namespace: .metadata.namespace,
-                  name: .metadata.name
-                }
-              }
-         ' \
-      --arg name "$NAME" \
-      --arg namespace "$NAMESPACE" \
-    | kubectl patch \
-        --namespace="$NAMESPACE" \
-        --patch="$patch" \
-        --filename -
 done
