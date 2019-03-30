@@ -15,7 +15,9 @@
 # limitations under the License.
 
 import base64
+import json
 import os
+import OpenSSL
 from argparse import ArgumentParser
 
 import yaml
@@ -70,12 +72,16 @@ def expand(values_dict, schema, app_uid=''):
   for k, prop in schema.properties.iteritems():
     v = values_dict.get(k, None)
 
+    # The value is not delivered to the framework, so it can be filled by the framework.
+    # For example, a password is generated.
     if v is None:
       if prop.password:
         v = generate_password(prop.password)
       elif prop.application_uid:
         v = app_uid or ''
         generate_properties_for_appuid(prop, app_uid, generated)
+      elif prop.certificate:
+        v = generate_certificate()
       elif prop.xtype == config_helper.XTYPE_ISTIO_ENABLED:
         # For backward compatibility.
         v = False
@@ -84,18 +90,28 @@ def expand(values_dict, schema, app_uid=''):
         v = True
       elif prop.default is not None:
         v = prop.default
-    else:  # if v is None
+
+    # The value is not empty, so it can be expanded to the special properties.
+    # For example, property IMAGE can be expanded from the raw string image,
+    # to the generatedProperties properties.
+    if v is not None:
       if prop.image:
         if not isinstance(v, str):
           raise InvalidProperty(
               'Invalid value for IMAGE property {}: {}'.format(k, v))
         generate_properties_for_image(prop, v, generated)
-      if prop.string:
+      elif prop.string:
         if not isinstance(v, str):
           raise InvalidProperty(
               'Invalid value for STRING property {}: {}'.format(k, v))
         generate_properties_for_string(prop, v, generated)
+      elif prop.certificate:
+        if not isinstance(v, str):
+          raise InvalidProperty(
+              'Invalid value for CERTIFICATE property {}: {}'.format(k, v))
+        generate_properties_for_certificate(prop, v, generated)
 
+    # At this point, the property is populated and expanded, so overwrite the returned value.
     if v is not None:
       result[k] = v
 
@@ -172,6 +188,32 @@ def generate_password(config):
   if config.base64:
     pw = base64.b64encode(pw)
   return pw
+
+
+def generate_certificate():
+  key = OpenSSL.crypto.PKey()
+  key.generate_key(OpenSSL.crypto.TYPE_RSA, 2048)
+
+  crt = OpenSSL.crypto.X509()
+  crt.set_pubkey(key)
+  crt.gmtime_adj_notBefore(0)
+  crt.gmtime_adj_notAfter(10 * 365 * 24 * 60 * 60)
+  crt.sign(key, 'sha1')
+
+  return json.dumps({
+      'key': OpenSSL.crypto.dump_privatekey(OpenSSL.crypto.FILETYPE_PEM, key),
+      'crt': OpenSSL.crypto.dump_certificate(OpenSSL.crypto.FILETYPE_PEM, crt)
+  })
+
+
+def generate_properties_for_certificate(prop, value, result):
+  certificate = json.loads(value)
+  if prop.certificate.base64_encoded_key:
+    result[prop.certificate.base64_encoded_key] = base64.b64encode(
+        certificate['key'])
+  if prop.certificate.base64_encoded_crt:
+    result[prop.certificate.base64_encoded_crt] = base64.b64encode(
+        certificate['crt'])
 
 
 def write_values(values, values_file):

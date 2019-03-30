@@ -262,6 +262,7 @@ It defines how this object will be handled. Each type has a different set of pro
 - `APPLICATION_UID`: The uuid of the created `Application` object.
 - `ISTIO_ENABLED`: Indicates whether Istio is enabled for the deployment.
 - `INGRESS_AVAILABLE`: Indicates whether the cluster is detected to have Ingress support.
+- `CERTIFICATE`: The name of a pre-provisioned k8s Secret specifying a `Certificate`. If it does not exist, one is created.
 
 ---
 
@@ -416,6 +417,24 @@ This boolean property receives a True value if the environment is detected to ha
 ### type: INGRESS_AVAILABLE
 
 This boolean property receives a True value if the cluster is detected to have Ingress controller. The deployer and template can take this signal to adapt the deployment accordingly.
+
+---
+
+### type: CERTIFICATE
+
+This is used to represent a certificate.
+
+ ```yaml
+properties:
+  certificate:
+    type: string
+    x-google-marketplace:
+      type: CERTIFICATE
+      certificate:
+        generatedProperties:
+          base64EncodedKey: keyEncoded
+          base64EncodedCrt: crtEncoded
+```
 
 ---
 

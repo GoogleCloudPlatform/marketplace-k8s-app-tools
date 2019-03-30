@@ -37,6 +37,7 @@ XTYPE_STRING = 'STRING'
 XTYPE_APPLICATION_UID = 'APPLICATION_UID'
 XTYPE_ISTIO_ENABLED = 'ISTIO_ENABLED'
 XTYPE_INGRESS_AVAILABLE = 'INGRESS_AVAILABLE'
+XTYPE_CERTIFICATE = 'CERTIFICATE'
 
 WIDGET_TYPES = ['help']
 
@@ -465,9 +466,11 @@ class SchemaProperty:
     self._service_account = None
     self._storage_class = None
     self._string = None
+    self._certificate = None
 
     if not NAME_RE.match(name):
       raise InvalidSchema('Invalid property name: {}'.format(name))
+
     self._type = _must_get_and_apply(
         dictionary, 'type', lambda v: {
             'int': int,
@@ -476,6 +479,7 @@ class SchemaProperty:
             'number': float,
             'boolean': bool,
         }.get(v, None), 'Property {} has no type'.format(name))
+
     if not self._type:
       raise InvalidSchema('Property {} has unsupported type: {}'.format(
           name, dictionary['type']))
@@ -488,6 +492,7 @@ class SchemaProperty:
     if self._x:
       xt = _must_get(self._x, 'type',
                      'Property {} has {} without a type'.format(name, XGOOGLE))
+
       if xt in (XTYPE_NAME, XTYPE_NAMESPACE, XTYPE_DEPLOYER_IMAGE):
         _property_must_have_type(self, str)
       elif xt in (XTYPE_ISTIO_ENABLED, XTYPE_INGRESS_AVAILABLE):
@@ -525,6 +530,10 @@ class SchemaProperty:
         _property_must_have_type(self, str)
         d = self._x.get('reportingSecret', {})
         self._reporting_secret = SchemaXReportingSecret(d)
+      elif xt == XTYPE_CERTIFICATE:
+        _property_must_have_type(self, str)
+        d = self._x.get('certificate', {})
+        self._certificate = SchemaXCertificate(d)
       else:
         raise InvalidSchema('Property {} has an unknown type: {}'.format(
             name, xt))
@@ -579,6 +588,10 @@ class SchemaProperty:
   @property
   def string(self):
     return self._string
+
+  @property
+  def certificate(self):
+    return self._certificate
 
   def str_to_type(self, str_val):
     if self._type == bool:
@@ -743,6 +756,26 @@ class SchemaXReportingSecret:
 
   def __init__(self, dictionary):
     pass
+
+
+class SchemaXCertificate:
+  """Accesses CERTIFICATE property."""
+
+  def __init__(self, dictionary):
+    generated_properties = dictionary.get('generatedProperties', {})
+
+    self._base64_encoded_key = generated_properties.get('base64EncodedKey',
+                                                        None)
+    self._base64_encoded_crt = generated_properties.get('base64EncodedCrt',
+                                                        None)
+
+  @property
+  def base64_encoded_key(self):
+    return self._base64_encoded_key
+
+  @property
+  def base64_encoded_crt(self):
+    return self._base64_encoded_crt
 
 
 def _must_get(dictionary, key, error_msg):
