@@ -422,6 +422,8 @@ This boolean property receives a True value if the cluster is detected to have I
 
 ### type: CERTIFICATE
 
+> TODO(wgrzelak): Add more information here.
+
 This is used to represent a certificate.
 
  ```yaml
