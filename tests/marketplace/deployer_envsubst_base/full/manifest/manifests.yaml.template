@@ -15,7 +15,7 @@ kind: Secret
 metadata:
   name: $name-tls-secret
   labels:
-    app.kubernetes.io/name: "$name"
+    app.kubernetes.io/name: $name
     app.kubernetes.io/component: tls-secret
 data:
   tls.key: $TLS_CERTIFICATE_KEY
