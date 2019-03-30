@@ -191,13 +191,19 @@ def generate_password(config):
 
 
 def generate_certificate():
+  cert_seconds_to_expiry = 60 * 60 * 24 * 365 # one year
+
   key = OpenSSL.crypto.PKey()
   key.generate_key(OpenSSL.crypto.TYPE_RSA, 2048)
 
   crt = OpenSSL.crypto.X509()
-  crt.set_pubkey(key)
+  crt.get_subject().C = 'US'
+  crt.get_subject().OU = 'Temporary Certificate'
+  crt.get_subject().CN = 'Temporary Certificate'
   crt.gmtime_adj_notBefore(0)
-  crt.gmtime_adj_notAfter(10 * 365 * 24 * 60 * 60)
+  crt.gmtime_adj_notAfter(cert_seconds_to_expiry)
+  crt.set_issuer(crt.get_subject())
+  crt.set_pubkey(key)
   crt.sign(key, 'sha1')
 
   return json.dumps({
