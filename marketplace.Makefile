@@ -7,6 +7,13 @@ include common.Makefile
 include var.Makefile
 
 
+marketplace/build: .build/marketplace/dev \
+                   .build/marketplace/deployer/envsubst \
+                   .build/marketplace/deployer/helm \
+                   .build/marketplace/deployer/helm_tiller \
+                   .build/marketplace/deployer/helm_tiller_onbuild
+
+
 .build/marketplace: | .build
 	mkdir -p "$@"
 
