@@ -61,13 +61,13 @@ spec:
       After accessing the WordPress main page, you will see the installation wizard.
       Follow the instructions presented on the screen to finish the process.
   info:
-  - name: WordPress Cert
+  - name: TLS Cert
     type: Reference
     valueFrom:
       secretKeyRef:
         key: tls.crt
         name: $name-tls-secret
-  - name: WordPress Key
+  - name: TLS Key
     type: Reference
     valueFrom:
       secretKeyRef:
