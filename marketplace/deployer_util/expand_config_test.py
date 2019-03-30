@@ -139,7 +139,8 @@ class ExpandConfigTest(unittest.TestCase):
                   base64EncodedKey: c1.Base64Key
                   base64EncodedCrt: c1.Base64Crt
         """)
-    result = expand_config.expand({'c1': '{"key": "key", "crt": "vrt"}'}, schema)
+    result = expand_config.expand({'c1': '{"key": "key", "crt": "vrt"}'},
+                                  schema)
     self.assertEqual({
         'c1': '{"key": "key", "crt": "vrt"}',
         'c1.Base64Key': 'a2V5',
