@@ -22,3 +22,17 @@ applications listed on Google Cloud Marketplace.
 ## Coding style
 
 We follow [Google's coding style guides](https://google.github.io/styleguide/).
+
+## Run tests locally
+
+1.  Run unit test:
+
+    ```shell
+    make tests/py
+    ```
+
+1.  Run integration test:
+
+    ```shell
+    make tests/integration
+    ```
