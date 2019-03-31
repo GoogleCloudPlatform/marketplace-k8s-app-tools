@@ -452,7 +452,7 @@ You can provide your custom certificate by overwrite the `certificate` property 
 }
 ```
 
-In your helm chart, based on the above example, you can handle a certificate:
+In your helm chart, based on the above example, you can handle the certificate:
 
 ```yaml
 apiVersion: v1
@@ -466,7 +466,7 @@ data:
 type: kubernetes.io/tls
 ```
 
-In your envsubst manifest, based on the above example, you can handle a certificate:
+In your envsubst manifest, based on the above example, you can handle the certificate:
 
 ```yaml
 apiVersion: v1
