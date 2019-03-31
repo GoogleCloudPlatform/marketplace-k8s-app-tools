@@ -447,8 +447,8 @@ You can provide your custom certificate by overwrite the `certificate` property 
 
 ```json
 {
-  "key": "[CERTIFICATE-KEY]",
-  "crt": "[CERTIFICATE-CRT]"
+  "key": "[CERTIFICATE_KEY]",
+  "crt": "[CERTIFICATE_CRT]"
 }
 ```
 
