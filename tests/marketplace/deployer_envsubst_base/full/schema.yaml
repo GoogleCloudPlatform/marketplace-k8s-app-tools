@@ -68,7 +68,6 @@ properties:
     type: boolean
     x-google-marketplace:
       type: INGRESS_AVAILABLE
-  # TODO(wgrzelak): Add this property to helm chart as well.
   certificate:
     type: string
     x-google-marketplace:
