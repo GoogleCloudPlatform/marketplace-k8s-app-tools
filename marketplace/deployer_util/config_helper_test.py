@@ -17,8 +17,6 @@ import unittest
 
 import config_helper
 
-# TODO(wgrzelak): Add more tests here.
-
 SCHEMA = """
 properties:
   propertyString:

@@ -191,7 +191,7 @@ def generate_password(config):
 
 
 def generate_certificate():
-  cert_seconds_to_expiry = 60 * 60 * 24 * 365 # one year
+  cert_seconds_to_expiry = 60 * 60 * 24 * 365  # one year
 
   key = OpenSSL.crypto.PKey()
   key.generate_key(OpenSSL.crypto.TYPE_RSA, 2048)

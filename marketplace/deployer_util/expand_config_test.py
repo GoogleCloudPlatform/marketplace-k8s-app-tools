@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import base64
+import json
 import re
 import tempfile
 import unittest
@@ -114,17 +116,43 @@ class ExpandConfigTest(unittest.TestCase):
             type: string
             x-google-marketplace:
               type: CERTIFICATE
+        """)
+    result = expand_config.expand({}, schema)
+    cert = json.loads(result['c1'])
+    self.assertIsNotNone(cert['key'])
+    self.assertIsNotNone(cert['crt'])
+
+    schema = config_helper.Schema.load_yaml("""
+        applicationApiVersion: v1beta1
+        properties:
+          c1:
+            type: string
+            x-google-marketplace:
+              type: CERTIFICATE
               certificate:
                 generatedProperties:
                   base64EncodedKey: c1.Base64Key
                   base64EncodedCrt: c1.Base64Crt
         """)
     result = expand_config.expand({}, schema)
+    cert = json.loads(result['c1'])
     self.assertIsNotNone(result['c1'])
-    self.assertIsNotNone(result['c1.Base64Key'])
-    self.assertIsNotNone(result['c1.Base64Crt'])
+    self.assertEqual(result['c1.Base64Key'], base64.b64encode(cert['key']))
+    self.assertEqual(result['c1.Base64Crt'], base64.b64encode(cert['crt']))
 
   def test_generate_properties_for_certificate(self):
+    schema = config_helper.Schema.load_yaml("""
+        applicationApiVersion: v1beta1
+        properties:
+          c1:
+            type: string
+            x-google-marketplace:
+              type: CERTIFICATE
+        """)
+    result = expand_config.expand({'c1': '{"key": "key", "crt": "vrt"}'},
+                                  schema)
+    self.assertEqual({'c1': '{"key": "key", "crt": "vrt"}'}, result)
+
     schema = config_helper.Schema.load_yaml("""
         applicationApiVersion: v1beta1
         properties:
