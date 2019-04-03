@@ -36,6 +36,9 @@ Decide how to craft your application k8s manifests.
   k8s. The downside is that templating capabilities are very limited.
   Follow instructions [here](building-deployer-envsubst.md).
 
+Include `schema.yaml`, a declaration of parameters required for provisioning the
+application. Follow instructions [here](schema.md) to craft this file.
+
 ## Publishing a new version
 
 A new application version is submitted by pushing the corresponding deployer image
