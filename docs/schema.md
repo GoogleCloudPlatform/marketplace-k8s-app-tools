@@ -384,6 +384,8 @@ properties:
         type: SSD
 ```
 
+The created `StorageClass` will have the name as `<namespace>-<app_name>-<property_name>`.
+
 ---
 
 ### type: STRING
