@@ -210,7 +210,7 @@ Represents the type of the input in the form for that property.
 
 ### title
 
-Displayed text in the UI.
+Displayed text in the ui.
 
 ### description
 
