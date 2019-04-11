@@ -212,8 +212,6 @@ Represents the type of the input in the form for that property.
 
 Displayed text in the UI.
 
-![Custom property UI](images/custom-property-ui.png)
-
 ### description
 
 Explanation of what the property is or what is used for. Be mindful of good explanation as a way to improve user experience.
