@@ -50,6 +50,7 @@ class ExpandConfigTest(unittest.TestCase):
         properties:
           i1:
             type: string
+            default: gcr.io/google/busybox:1.0
             x-google-marketplace:
               type: IMAGE
               image:
@@ -71,6 +72,7 @@ class ExpandConfigTest(unittest.TestCase):
         properties:
           i1:
             type: string
+            default: gcr.io/google/busybox:1.0
             x-google-marketplace:
               type: IMAGE
               image:
