@@ -18,6 +18,7 @@ import base64
 import json
 import os
 import OpenSSL
+import random
 from argparse import ArgumentParser
 
 import yaml
@@ -197,14 +198,14 @@ def generate_certificate():
   key.generate_key(OpenSSL.crypto.TYPE_RSA, 2048)
 
   crt = OpenSSL.crypto.X509()
-  crt.get_subject().C = 'US'
-  crt.get_subject().OU = 'Temporary Certificate'
+  crt.get_subject().OU = 'Marketplace K8s App Tools'
   crt.get_subject().CN = 'Temporary Certificate'
   crt.gmtime_adj_notBefore(0)
   crt.gmtime_adj_notAfter(cert_seconds_to_expiry)
+  crt.set_serial_number(random.getrandbits(64))
   crt.set_issuer(crt.get_subject())
   crt.set_pubkey(key)
-  crt.sign(key, 'sha1')
+  crt.sign(key, 'sha256')
 
   return json.dumps({
       'key': OpenSSL.crypto.dump_privatekey(OpenSSL.crypto.FILETYPE_PEM, key),

@@ -15,6 +15,7 @@
 import base64
 import json
 import re
+import OpenSSL
 import tempfile
 import unittest
 
@@ -139,6 +140,34 @@ class ExpandConfigTest(unittest.TestCase):
     self.assertIsNotNone(result['c1'])
     self.assertEqual(result['c1.Base64Key'], base64.b64encode(cert['key']))
     self.assertEqual(result['c1.Base64Crt'], base64.b64encode(cert['crt']))
+
+  def test_generate_certificate_verify(self):
+    schema = config_helper.Schema.load_yaml("""
+        applicationApiVersion: v1beta1
+        properties:
+          c1:
+            type: string
+            x-google-marketplace:
+              type: CERTIFICATE
+              certificate:
+                generatedProperties:
+                  base64EncodedKey: c1.Base64Key
+                  base64EncodedCrt: c1.Base64Crt
+        """)
+    result = expand_config.expand({}, schema)
+
+    key = OpenSSL.crypto.load_privatekey(
+        OpenSSL.crypto.FILETYPE_PEM, base64.b64decode(result['c1.Base64Key']))
+    self.assertEqual(key.bits(), 2048)
+    self.assertEqual(key.type(), OpenSSL.crypto.TYPE_RSA)
+
+    cert = OpenSSL.crypto.load_certificate(
+        OpenSSL.crypto.FILETYPE_PEM, base64.b64decode(result['c1.Base64Crt']))
+    self.assertEqual(cert.get_subject(), cert.get_issuer())
+    self.assertEqual(cert.get_subject().OU, 'Marketplace K8s App Tools')
+    self.assertEqual(cert.get_subject().CN, 'Temporary Certificate')
+    self.assertEqual(cert.get_signature_algorithm(), 'sha256WithRSAEncryption')
+    self.assertFalse(cert.has_expired())
 
   def test_generate_properties_for_certificate(self):
     schema = config_helper.Schema.load_yaml("""
