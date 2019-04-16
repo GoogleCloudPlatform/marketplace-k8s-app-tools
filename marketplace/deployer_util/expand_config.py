@@ -197,21 +197,21 @@ def generate_certificate():
   key = OpenSSL.crypto.PKey()
   key.generate_key(OpenSSL.crypto.TYPE_RSA, 2048)
 
-  crt = OpenSSL.crypto.X509()
-  crt.get_subject().OU = 'GCP Marketplace K8s App Tools'
-  crt.get_subject().CN = 'Temporary Certificate'
-  crt.gmtime_adj_notBefore(0)
-  crt.gmtime_adj_notAfter(cert_seconds_to_expiry)
-  crt.set_serial_number(random.getrandbits(64))
-  crt.set_issuer(crt.get_subject())
-  crt.set_pubkey(key)
-  crt.sign(key, 'sha256')
+  cert = OpenSSL.crypto.X509()
+  cert.get_subject().OU = 'GCP Marketplace K8s App Tools'
+  cert.get_subject().CN = 'Temporary Certificate'
+  cert.gmtime_adj_notBefore(0)
+  cert.gmtime_adj_notAfter(cert_seconds_to_expiry)
+  cert.set_serial_number(random.getrandbits(64))
+  cert.set_issuer(cert.get_subject())
+  cert.set_pubkey(key)
+  cert.sign(key, 'sha256')
 
   return json.dumps({
       'private_key':
           OpenSSL.crypto.dump_privatekey(OpenSSL.crypto.FILETYPE_PEM, key),
       'certificate':
-          OpenSSL.crypto.dump_certificate(OpenSSL.crypto.FILETYPE_PEM, crt)
+          OpenSSL.crypto.dump_certificate(OpenSSL.crypto.FILETYPE_PEM, cert)
   })
 
 
