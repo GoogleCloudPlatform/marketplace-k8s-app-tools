@@ -109,7 +109,7 @@ def expand(values_dict, schema, app_uid=''):
       elif prop.certificate:
         if not isinstance(v, str):
           raise InvalidProperty(
-              'Invalid value for CERTIFICATE property {}: {}'.format(k, v))
+              'Invalid value for TLS_CERTIFICATE property {}: {}'.format(k, v))
         generate_properties_for_certificate(prop, v, generated)
 
     # At this point, the property is populated and expanded, so overwrite the returned value.

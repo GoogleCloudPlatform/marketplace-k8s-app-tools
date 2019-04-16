@@ -73,7 +73,7 @@ properties:
   certificate:
     type: string
     x-google-marketplace:
-      type: CERTIFICATE
+      type: TLS_CERTIFICATE
       certificate:
         generatedProperties:
           base64EncodedPrivateKey: keyEncoded
@@ -171,7 +171,7 @@ class ConfigHelperTest(unittest.TestCase):
     self.assertEqual('INGRESS_AVAILABLE',
                      schema.properties['ingressAvailable'].xtype)
     self.assertEqual(str, schema.properties['certificate'].type)
-    self.assertEqual('CERTIFICATE', schema.properties['certificate'].xtype)
+    self.assertEqual('TLS_CERTIFICATE', schema.properties['certificate'].xtype)
 
   def test_invalid_names(self):
     self.assertRaises(
@@ -402,7 +402,7 @@ class ConfigHelperTest(unittest.TestCase):
           c1:
             type: string
             x-google-marketplace:
-              type: CERTIFICATE
+              type: TLS_CERTIFICATE
         """)
 
     self.assertIsNotNone(schema.properties['c1'].certificate)
@@ -416,7 +416,7 @@ class ConfigHelperTest(unittest.TestCase):
           c1:
             type: string
             x-google-marketplace:
-              type: CERTIFICATE
+              type: TLS_CERTIFICATE
               certificate:
                 generatedProperties:
                   base64EncodedPrivateKey: c1.Base64Key

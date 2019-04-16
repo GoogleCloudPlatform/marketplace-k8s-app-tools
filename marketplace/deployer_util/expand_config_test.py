@@ -116,7 +116,7 @@ class ExpandConfigTest(unittest.TestCase):
           c1:
             type: string
             x-google-marketplace:
-              type: CERTIFICATE
+              type: TLS_CERTIFICATE
         """)
     result = expand_config.expand({}, schema)
     cert = json.loads(result['c1'])
@@ -129,7 +129,7 @@ class ExpandConfigTest(unittest.TestCase):
           c1:
             type: string
             x-google-marketplace:
-              type: CERTIFICATE
+              type: TLS_CERTIFICATE
               certificate:
                 generatedProperties:
                   base64EncodedPrivateKey: c1.Base64Key
@@ -150,7 +150,7 @@ class ExpandConfigTest(unittest.TestCase):
           c1:
             type: string
             x-google-marketplace:
-              type: CERTIFICATE
+              type: TLS_CERTIFICATE
               certificate:
                 generatedProperties:
                   base64EncodedPrivateKey: c1.Base64Key
@@ -178,7 +178,7 @@ class ExpandConfigTest(unittest.TestCase):
           c1:
             type: string
             x-google-marketplace:
-              type: CERTIFICATE
+              type: TLS_CERTIFICATE
         """)
     result = expand_config.expand(
         {'c1': '{"private_key": "key", "certificate": "vrt"}'}, schema)
@@ -191,7 +191,7 @@ class ExpandConfigTest(unittest.TestCase):
           c1:
             type: string
             x-google-marketplace:
-              type: CERTIFICATE
+              type: TLS_CERTIFICATE
               certificate:
                 generatedProperties:
                   base64EncodedPrivateKey: c1.Base64Key

@@ -37,7 +37,7 @@ XTYPE_STRING = 'STRING'
 XTYPE_APPLICATION_UID = 'APPLICATION_UID'
 XTYPE_ISTIO_ENABLED = 'ISTIO_ENABLED'
 XTYPE_INGRESS_AVAILABLE = 'INGRESS_AVAILABLE'
-XTYPE_CERTIFICATE = 'CERTIFICATE'
+XTYPE_TLS_CERTIFICATE = 'TLS_CERTIFICATE'
 
 WIDGET_TYPES = ['help']
 
@@ -530,7 +530,7 @@ class SchemaProperty:
         _property_must_have_type(self, str)
         d = self._x.get('reportingSecret', {})
         self._reporting_secret = SchemaXReportingSecret(d)
-      elif xt == XTYPE_CERTIFICATE:
+      elif xt == XTYPE_TLS_CERTIFICATE:
         _property_must_have_type(self, str)
         d = self._x.get('certificate', {})
         self._certificate = SchemaXCertificate(d)
@@ -759,7 +759,7 @@ class SchemaXReportingSecret:
 
 
 class SchemaXCertificate:
-  """Accesses CERTIFICATE property."""
+  """Accesses TLS_CERTIFICATE property."""
 
   def __init__(self, dictionary):
     generated_properties = dictionary.get('generatedProperties', {})

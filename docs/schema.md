@@ -264,7 +264,7 @@ It defines how this object will be handled. Each type has a different set of pro
 - `APPLICATION_UID`: The uuid of the created `Application` object.
 - `ISTIO_ENABLED`: Indicates whether Istio is enabled for the deployment.
 - `INGRESS_AVAILABLE`: Indicates whether the cluster is detected to have Ingress support.
-- `CERTIFICATE`: To be used to support a custom certificate or generate a self-signed certificate.
+- `TLS_CERTIFICATE`: To be used to support a custom certificate or generate a self-signed certificate.
 
 ---
 
@@ -422,7 +422,7 @@ This boolean property receives a True value if the cluster is detected to have I
 
 ---
 
-### type: CERTIFICATE
+### type: TLS_CERTIFICATE
 
 This property provides an SSL/TLS certificate for the Kubernetes manifest. By default, a self-signed certificate is generated.
 
@@ -433,7 +433,7 @@ properties:
   certificate:
     type: string
     x-google-marketplace:
-      type: CERTIFICATE
+      type: TLS_CERTIFICATE
       certificate:
         generatedProperties:
           base64EncodedPrivateKey: TLS_CERTIFICATE_KEY
