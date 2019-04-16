@@ -466,7 +466,7 @@ class SchemaProperty:
     self._service_account = None
     self._storage_class = None
     self._string = None
-    self._certificate = None
+    self._tls_certificate = None
 
     if not NAME_RE.match(name):
       raise InvalidSchema('Invalid property name: {}'.format(name))
@@ -533,7 +533,7 @@ class SchemaProperty:
       elif xt == XTYPE_TLS_CERTIFICATE:
         _property_must_have_type(self, str)
         d = self._x.get('certificate', {})
-        self._certificate = SchemaXCertificate(d)
+        self._tls_certificate = SchemaXTlsCertificate(d)
       else:
         raise InvalidSchema('Property {} has an unknown type: {}'.format(
             name, xt))
@@ -591,7 +591,7 @@ class SchemaProperty:
 
   @property
   def certificate(self):
-    return self._certificate
+    return self._tls_certificate
 
   def str_to_type(self, str_val):
     if self._type == bool:
@@ -758,7 +758,7 @@ class SchemaXReportingSecret:
     pass
 
 
-class SchemaXCertificate:
+class SchemaXTlsCertificate:
   """Accesses TLS_CERTIFICATE property."""
 
   def __init__(self, dictionary):
