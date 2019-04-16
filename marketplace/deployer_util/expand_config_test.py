@@ -120,8 +120,8 @@ class ExpandConfigTest(unittest.TestCase):
         """)
     result = expand_config.expand({}, schema)
     cert = json.loads(result['c1'])
-    self.assertIsNotNone(cert['key'])
-    self.assertIsNotNone(cert['crt'])
+    self.assertIsNotNone(cert['private_key'])
+    self.assertIsNotNone(cert['certificate'])
 
     schema = config_helper.Schema.load_yaml("""
         applicationApiVersion: v1beta1
@@ -132,14 +132,16 @@ class ExpandConfigTest(unittest.TestCase):
               type: CERTIFICATE
               certificate:
                 generatedProperties:
-                  base64EncodedKey: c1.Base64Key
-                  base64EncodedCrt: c1.Base64Crt
+                  base64EncodedPrivateKey: c1.Base64Key
+                  base64EncodedCertificate: c1.Base64Crt
         """)
     result = expand_config.expand({}, schema)
     cert = json.loads(result['c1'])
     self.assertIsNotNone(result['c1'])
-    self.assertEqual(result['c1.Base64Key'], base64.b64encode(cert['key']))
-    self.assertEqual(result['c1.Base64Crt'], base64.b64encode(cert['crt']))
+    self.assertEqual(result['c1.Base64Key'],
+                     base64.b64encode(cert['private_key']))
+    self.assertEqual(result['c1.Base64Crt'],
+                     base64.b64encode(cert['certificate']))
 
   def test_generate_certificate_verify(self):
     schema = config_helper.Schema.load_yaml("""
@@ -151,8 +153,8 @@ class ExpandConfigTest(unittest.TestCase):
               type: CERTIFICATE
               certificate:
                 generatedProperties:
-                  base64EncodedKey: c1.Base64Key
-                  base64EncodedCrt: c1.Base64Crt
+                  base64EncodedPrivateKey: c1.Base64Key
+                  base64EncodedCertificate: c1.Base64Crt
         """)
     result = expand_config.expand({}, schema)
 
@@ -164,7 +166,7 @@ class ExpandConfigTest(unittest.TestCase):
     cert = OpenSSL.crypto.load_certificate(
         OpenSSL.crypto.FILETYPE_PEM, base64.b64decode(result['c1.Base64Crt']))
     self.assertEqual(cert.get_subject(), cert.get_issuer())
-    self.assertEqual(cert.get_subject().OU, 'Marketplace K8s App Tools')
+    self.assertEqual(cert.get_subject().OU, 'GCP Marketplace K8s App Tools')
     self.assertEqual(cert.get_subject().CN, 'Temporary Certificate')
     self.assertEqual(cert.get_signature_algorithm(), 'sha256WithRSAEncryption')
     self.assertFalse(cert.has_expired())
@@ -178,9 +180,10 @@ class ExpandConfigTest(unittest.TestCase):
             x-google-marketplace:
               type: CERTIFICATE
         """)
-    result = expand_config.expand({'c1': '{"key": "key", "crt": "vrt"}'},
-                                  schema)
-    self.assertEqual({'c1': '{"key": "key", "crt": "vrt"}'}, result)
+    result = expand_config.expand(
+        {'c1': '{"private_key": "key", "certificate": "vrt"}'}, schema)
+    self.assertEqual({'c1': '{"private_key": "key", "certificate": "vrt"}'},
+                     result)
 
     schema = config_helper.Schema.load_yaml("""
         applicationApiVersion: v1beta1
@@ -191,13 +194,13 @@ class ExpandConfigTest(unittest.TestCase):
               type: CERTIFICATE
               certificate:
                 generatedProperties:
-                  base64EncodedKey: c1.Base64Key
-                  base64EncodedCrt: c1.Base64Crt
+                  base64EncodedPrivateKey: c1.Base64Key
+                  base64EncodedCertificate: c1.Base64Crt
         """)
-    result = expand_config.expand({'c1': '{"key": "key", "crt": "vrt"}'},
-                                  schema)
+    result = expand_config.expand(
+        {'c1': '{"private_key": "key", "certificate": "vrt"}'}, schema)
     self.assertEqual({
-        'c1': '{"key": "key", "crt": "vrt"}',
+        'c1': '{"private_key": "key", "certificate": "vrt"}',
         'c1.Base64Key': 'a2V5',
         'c1.Base64Crt': 'dnJ0',
     }, result)

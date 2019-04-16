@@ -74,8 +74,8 @@ properties:
       type: CERTIFICATE
       certificate:
         generatedProperties:
-          base64EncodedKey: TLS_CERTIFICATE_KEY
-          base64EncodedCrt: TLS_CERTIFICATE_CRT
+          base64EncodedPrivateKey: TLS_CERTIFICATE_KEY
+          base64EncodedCertificate: TLS_CERTIFICATE_CRT
 required:
 - name
 - namespace

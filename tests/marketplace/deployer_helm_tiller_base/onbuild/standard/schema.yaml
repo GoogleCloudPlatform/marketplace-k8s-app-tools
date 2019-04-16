@@ -34,8 +34,8 @@ properties:
       type: CERTIFICATE
       certificate:
         generatedProperties:
-          base64EncodedKey: cert.base64EncodedKey
-          base64EncodedCrt: cert.base64EncodedCrt
+          base64EncodedPrivateKey: cert.base64EncodedPrivateKey
+          base64EncodedCertificate: cert.base64EncodedCertificate
 required:
 - name
 - namespace

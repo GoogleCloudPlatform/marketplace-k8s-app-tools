@@ -19,6 +19,6 @@ metadata:
     app.kubernetes.io/name: {{ .Release.Name }}
     app.kubernetes.io/component: tls-secret
 data:
-  tls.key: {{ .Values.cert.base64EncodedKey }}
-  tls.crt: {{ .Values.cert.base64EncodedCrt }}
+  tls.key: {{ .Values.cert.base64EncodedPrivateKey }}
+  tls.crt: {{ .Values.cert.base64EncodedCertificate }}
 type: kubernetes.io/tls

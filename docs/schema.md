@@ -436,19 +436,19 @@ properties:
       type: CERTIFICATE
       certificate:
         generatedProperties:
-          base64EncodedKey: TLS_CERTIFICATE_KEY
-          base64EncodedCrt: TLS_CERTIFICATE_CRT
+          base64EncodedPrivateKey: TLS_CERTIFICATE_KEY
+          base64EncodedCertificate: TLS_CERTIFICATE_CRT
 ```
 
-* `base64EncodedKey`: Denotes the name of a property receive a certificate key.
-* `base64EncodedCrt`: Denotes the name of a property receive a certificate cert.
+* `base64EncodedPrivateKey`: Denotes the name of a property receive a private key.
+* `base64EncodedCertificate`: Denotes the name of a property receive a certificate.
 
 You can provide your custom certificate by overwrite the `certificate` property in the JSON format as following:
 
 ```json
 {
-  "key": "[CERTIFICATE_KEY]",
-  "crt": "[CERTIFICATE_CRT]"
+  "private_key": "-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----",
+  "certificate": "-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----"
 }
 ```
 

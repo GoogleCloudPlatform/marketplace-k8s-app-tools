@@ -76,8 +76,8 @@ properties:
       type: CERTIFICATE
       certificate:
         generatedProperties:
-          base64EncodedKey: keyEncoded
-          base64EncodedCrt: crtEncoded
+          base64EncodedPrivateKey: keyEncoded
+          base64EncodedCertificate: crtEncoded
 required:
 - propertyString
 - propertyPassword
@@ -406,8 +406,10 @@ class ConfigHelperTest(unittest.TestCase):
         """)
 
     self.assertIsNotNone(schema.properties['c1'].certificate)
-    self.assertIsNone(schema.properties['c1'].certificate.base64_encoded_key)
-    self.assertIsNone(schema.properties['c1'].certificate.base64_encoded_crt)
+    self.assertIsNone(
+        schema.properties['c1'].certificate.base64_encoded_private_key)
+    self.assertIsNone(
+        schema.properties['c1'].certificate.base64_encoded_certificate)
 
     schema = config_helper.Schema.load_yaml("""
         properties:
@@ -417,14 +419,16 @@ class ConfigHelperTest(unittest.TestCase):
               type: CERTIFICATE
               certificate:
                 generatedProperties:
-                  base64EncodedKey: c1.Base64Key
-                  base64EncodedCrt: c1.Base64Crt
+                  base64EncodedPrivateKey: c1.Base64Key
+                  base64EncodedCertificate: c1.Base64Crt
         """)
     self.assertIsNotNone(schema.properties['c1'].certificate)
-    self.assertEqual('c1.Base64Key',
-                     schema.properties['c1'].certificate.base64_encoded_key)
-    self.assertEqual('c1.Base64Crt',
-                     schema.properties['c1'].certificate.base64_encoded_crt)
+    self.assertEqual(
+        'c1.Base64Key',
+        schema.properties['c1'].certificate.base64_encoded_private_key)
+    self.assertEqual(
+        'c1.Base64Crt',
+        schema.properties['c1'].certificate.base64_encoded_certificate)
 
   def test_int_type(self):
     schema = config_helper.Schema.load_yaml("""

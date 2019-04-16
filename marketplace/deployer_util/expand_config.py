@@ -198,7 +198,7 @@ def generate_certificate():
   key.generate_key(OpenSSL.crypto.TYPE_RSA, 2048)
 
   crt = OpenSSL.crypto.X509()
-  crt.get_subject().OU = 'Marketplace K8s App Tools'
+  crt.get_subject().OU = 'GCP Marketplace K8s App Tools'
   crt.get_subject().CN = 'Temporary Certificate'
   crt.gmtime_adj_notBefore(0)
   crt.gmtime_adj_notAfter(cert_seconds_to_expiry)
@@ -208,19 +208,21 @@ def generate_certificate():
   crt.sign(key, 'sha256')
 
   return json.dumps({
-      'key': OpenSSL.crypto.dump_privatekey(OpenSSL.crypto.FILETYPE_PEM, key),
-      'crt': OpenSSL.crypto.dump_certificate(OpenSSL.crypto.FILETYPE_PEM, crt)
+      'private_key':
+          OpenSSL.crypto.dump_privatekey(OpenSSL.crypto.FILETYPE_PEM, key),
+      'certificate':
+          OpenSSL.crypto.dump_certificate(OpenSSL.crypto.FILETYPE_PEM, crt)
   })
 
 
 def generate_properties_for_certificate(prop, value, result):
   certificate = json.loads(value)
-  if prop.certificate.base64_encoded_key:
-    result[prop.certificate.base64_encoded_key] = base64.b64encode(
-        certificate['key'])
-  if prop.certificate.base64_encoded_crt:
-    result[prop.certificate.base64_encoded_crt] = base64.b64encode(
-        certificate['crt'])
+  if prop.certificate.base64_encoded_private_key:
+    result[prop.certificate.base64_encoded_private_key] = base64.b64encode(
+        certificate['private_key'])
+  if prop.certificate.base64_encoded_certificate:
+    result[prop.certificate.base64_encoded_certificate] = base64.b64encode(
+        certificate['certificate'])
 
 
 def write_values(values, values_file):

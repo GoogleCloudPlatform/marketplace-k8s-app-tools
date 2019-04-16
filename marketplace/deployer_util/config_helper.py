@@ -764,18 +764,18 @@ class SchemaXCertificate:
   def __init__(self, dictionary):
     generated_properties = dictionary.get('generatedProperties', {})
 
-    self._base64_encoded_key = generated_properties.get('base64EncodedKey',
-                                                        None)
-    self._base64_encoded_crt = generated_properties.get('base64EncodedCrt',
-                                                        None)
+    self._base64_encoded_private_key = generated_properties.get(
+        'base64EncodedPrivateKey', None)
+    self._base64_encoded_certificate = generated_properties.get(
+        'base64EncodedCertificate', None)
 
   @property
-  def base64_encoded_key(self):
-    return self._base64_encoded_key
+  def base64_encoded_private_key(self):
+    return self._base64_encoded_private_key
 
   @property
-  def base64_encoded_crt(self):
-    return self._base64_encoded_crt
+  def base64_encoded_certificate(self):
+    return self._base64_encoded_certificate
 
 
 def _must_get(dictionary, key, error_msg):
