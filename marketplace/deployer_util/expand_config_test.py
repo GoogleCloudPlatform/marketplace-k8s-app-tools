@@ -62,11 +62,12 @@ class ExpandConfigTest(unittest.TestCase):
                     after: i1.after
         """)
     result = expand_config.expand({'i1': 'gcr.io/foo:bar'}, schema)
-    self.assertEqual({
-        'i1': 'gcr.io/foo:bar',
-        'i1.before': 'gcr.io/foo',
-        'i1.after': 'bar',
-    }, result)
+    self.assertEqual(
+        {
+            'i1': 'gcr.io/foo:bar',
+            'i1.before': 'gcr.io/foo',
+            'i1.after': 'bar',
+        }, result)
 
   def test_generate_properties_for_image_split_to_registry_repo_tag(self):
     schema = config_helper.Schema.load_yaml("""
@@ -84,12 +85,13 @@ class ExpandConfigTest(unittest.TestCase):
                     tag: i1.tag
         """)
     result = expand_config.expand({'i1': 'gcr.io/foo/bar:baz'}, schema)
-    self.assertEqual({
-        'i1': 'gcr.io/foo/bar:baz',
-        'i1.registry': 'gcr.io',
-        'i1.repo': 'foo/bar',
-        'i1.tag': 'baz',
-    }, result)
+    self.assertEqual(
+        {
+            'i1': 'gcr.io/foo/bar:baz',
+            'i1.registry': 'gcr.io',
+            'i1.repo': 'foo/bar',
+            'i1.tag': 'baz',
+        }, result)
 
   def test_generate_properties_for_string_base64_encoded(self):
     schema = config_helper.Schema.load_yaml("""
@@ -199,11 +201,12 @@ class ExpandConfigTest(unittest.TestCase):
         """)
     result = expand_config.expand(
         {'c1': '{"private_key": "key", "certificate": "vrt"}'}, schema)
-    self.assertEqual({
-        'c1': '{"private_key": "key", "certificate": "vrt"}',
-        'c1.Base64Key': 'a2V5',
-        'c1.Base64Crt': 'dnJ0',
-    }, result)
+    self.assertEqual(
+        {
+            'c1': '{"private_key": "key", "certificate": "vrt"}',
+            'c1.Base64Key': 'a2V5',
+            'c1.Base64Crt': 'dnJ0',
+        }, result)
 
   def test_generate_password(self):
     schema = config_helper.Schema.load_yaml("""
@@ -235,10 +238,11 @@ class ExpandConfigTest(unittest.TestCase):
                   createApplicationBoolean: application.create
         """)
     result = expand_config.expand({}, schema, app_uid='1234-abcd')
-    self.assertEqual({
-        'application_uid': '1234-abcd',
-        'application.create': False
-    }, result)
+    self.assertEqual(
+        {
+            'application_uid': '1234-abcd',
+            'application.create': False
+        }, result)
     result = expand_config.expand({}, schema, app_uid='')
     self.assertEqual({
         'application_uid': '',
