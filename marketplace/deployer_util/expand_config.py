@@ -81,8 +81,8 @@ def expand(values_dict, schema, app_uid=''):
       elif prop.application_uid:
         v = app_uid or ''
         generate_properties_for_appuid(prop, app_uid, generated)
-      elif prop.certificate:
-        v = generate_certificate()
+      elif prop.tls_certificate:
+        v = generate_tls_certificate()
       elif prop.xtype == config_helper.XTYPE_ISTIO_ENABLED:
         # For backward compatibility.
         v = False
@@ -106,11 +106,11 @@ def expand(values_dict, schema, app_uid=''):
           raise InvalidProperty(
               'Invalid value for STRING property {}: {}'.format(k, v))
         generate_properties_for_string(prop, v, generated)
-      elif prop.certificate:
+      elif prop.tls_certificate:
         if not isinstance(v, str):
           raise InvalidProperty(
               'Invalid value for TLS_CERTIFICATE property {}: {}'.format(k, v))
-        generate_properties_for_certificate(prop, v, generated)
+        generate_properties_for_tls_certificate(prop, v, generated)
 
     # At this point, the property is populated and expanded, so overwrite the returned value.
     if v is not None:
@@ -191,7 +191,7 @@ def generate_password(config):
   return pw
 
 
-def generate_certificate():
+def generate_tls_certificate():
   cert_seconds_to_expiry = 60 * 60 * 24 * 365  # one year
 
   key = OpenSSL.crypto.PKey()
@@ -215,13 +215,13 @@ def generate_certificate():
   })
 
 
-def generate_properties_for_certificate(prop, value, result):
+def generate_properties_for_tls_certificate(prop, value, result):
   certificate = json.loads(value)
-  if prop.certificate.base64_encoded_private_key:
-    result[prop.certificate.base64_encoded_private_key] = base64.b64encode(
+  if prop.tls_certificate.base64_encoded_private_key:
+    result[prop.tls_certificate.base64_encoded_private_key] = base64.b64encode(
         certificate['private_key'])
-  if prop.certificate.base64_encoded_certificate:
-    result[prop.certificate.base64_encoded_certificate] = base64.b64encode(
+  if prop.tls_certificate.base64_encoded_certificate:
+    result[prop.tls_certificate.base64_encoded_certificate] = base64.b64encode(
         certificate['certificate'])
 
 

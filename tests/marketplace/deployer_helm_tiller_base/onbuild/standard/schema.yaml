@@ -32,7 +32,7 @@ properties:
     type: string
     x-google-marketplace:
       type: TLS_CERTIFICATE
-      certificate:
+      tlsCertificate:
         generatedProperties:
           base64EncodedPrivateKey: cert.base64EncodedPrivateKey
           base64EncodedCertificate: cert.base64EncodedCertificate

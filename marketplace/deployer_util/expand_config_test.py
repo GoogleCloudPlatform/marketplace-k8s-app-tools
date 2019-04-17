@@ -132,7 +132,7 @@ class ExpandConfigTest(unittest.TestCase):
             type: string
             x-google-marketplace:
               type: TLS_CERTIFICATE
-              certificate:
+              tlsCertificate:
                 generatedProperties:
                   base64EncodedPrivateKey: c1.Base64Key
                   base64EncodedCertificate: c1.Base64Crt
@@ -153,7 +153,7 @@ class ExpandConfigTest(unittest.TestCase):
             type: string
             x-google-marketplace:
               type: TLS_CERTIFICATE
-              certificate:
+              tlsCertificate:
                 generatedProperties:
                   base64EncodedPrivateKey: c1.Base64Key
                   base64EncodedCertificate: c1.Base64Crt
@@ -194,7 +194,7 @@ class ExpandConfigTest(unittest.TestCase):
             type: string
             x-google-marketplace:
               type: TLS_CERTIFICATE
-              certificate:
+              tlsCertificate:
                 generatedProperties:
                   base64EncodedPrivateKey: c1.Base64Key
                   base64EncodedCertificate: c1.Base64Crt
