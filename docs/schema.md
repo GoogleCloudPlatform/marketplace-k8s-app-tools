@@ -428,7 +428,7 @@ This property provides an SSL/TLS certificate for the Kubernetes manifest. By de
 
 Example:
 
- ```yaml
+```yaml
 properties:
   certificate:
     type: string
