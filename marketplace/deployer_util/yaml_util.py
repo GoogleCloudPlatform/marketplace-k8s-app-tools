@@ -19,6 +19,8 @@ import sys
 
 import yaml
 
+from log_util import log
+
 
 def load_yaml(filename):
   """ Helper function for loading a single yaml entry from file """
@@ -80,8 +82,3 @@ def parse_resources_yaml(content):
     if doc_yaml and 'kind' in doc_yaml:
       docs_yaml.append(doc_yaml)
   return docs_yaml
-
-
-def log(msg):
-  sys.stderr.write("{}\n".format(msg))
-  sys.stderr.flush()

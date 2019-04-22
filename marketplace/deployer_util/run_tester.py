@@ -20,7 +20,9 @@ import time
 from argparse import ArgumentParser
 from bash_util import Command
 from bash_util import CommandException
+from constants import LOG_SMOKE_TEST
 from dict_util import deep_get
+from log_util import log
 from yaml_util import load_resources_yaml
 
 _PROG_HELP = "Deploy and run tester pods and wait for them to finish execution"
@@ -33,13 +35,17 @@ def main():
   parser.add_argument('--timeout', type=int, default=300)
   args = parser.parse_args()
 
-  Command(
-      '''
-      kubectl apply
-      --namespace="{}"
-      --filename="{}"
-      '''.format(args.namespace, args.manifest),
-      print_call=True)
+  try:
+    Command(
+        '''
+        kubectl apply
+        --namespace="{}"
+        --filename="{}"
+        '''.format(args.namespace, args.manifest),
+        print_call=True)
+  except CommandException as ex:
+    log("{} ERROR Failed to apply tester job. Reason: {}", LOG_SMOKE_TEST, ex.message)
+    return
 
   resources = load_resources_yaml(args.manifest)
 
@@ -48,7 +54,7 @@ def main():
                                deep_get(resource_def, 'metadata', 'name'))
 
     if resource_def['kind'] != 'Pod':
-      log("INFO Skip '{}'".format(full_name))
+      log("INFO Skip '{}'", full_name)
       continue
 
     start_time = time.time()
@@ -74,16 +80,17 @@ def main():
 
       if result == "Failed":
         print_logs(full_name, args.namespace)
-        raise Exception("ERROR Tester '{}' failed".format(full_name))
+        log("{} ERROR Tester '{}' failed.", LOG_SMOKE_TEST, full_name)
+        break
 
       if result == "Succeeded":
         print_logs(full_name, args.namespace)
-        log("INFO Tester '{}' succeeded".format(full_name))
+        log("{} INFO Tester '{}' succeeded.", LOG_SMOKE_TEST, full_name)
         break
 
       if time.time() - start_time > tester_timeout:
         print_logs(full_name, args.namespace)
-        raise Exception("ERROR Tester '{}' timeout".format(full_name))
+        log("{} ERROR Tester '{}' timeout.", LOG_SMOKE_TEST, full_name)
 
       time.sleep(poll_interval)
 
@@ -92,11 +99,6 @@ def print_logs(full_name, namespace):
   log(
       Command('''kubectl logs {} --namespace="{}"'''.format(
           full_name, namespace)).output)
-
-
-def log(msg):
-  sys.stdout.write(msg + "\n")
-  sys.stdout.flush()
 
 
 if __name__ == "__main__":
