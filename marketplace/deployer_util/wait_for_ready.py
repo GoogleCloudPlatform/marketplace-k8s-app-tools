@@ -19,6 +19,7 @@ import time
 
 from argparse import ArgumentParser
 from bash_util import Command
+from log_util import log
 
 _PROG_HELP = "Wait for the application to get ready into a ready state"
 
@@ -65,7 +66,7 @@ def main():
     if len(top_level_resources) == 0:
       raise Exception("ERROR no top level resources found")
 
-    log("INFO top level resources: {}".format(len(top_level_resources)))
+    log("INFO top level resources: {}", len(top_level_resources))
     healthy = True
     for resource in top_level_resources:
       healthy = is_healthy(resource)
@@ -94,11 +95,6 @@ def main():
     time.sleep(poll_interval)
 
 
-def log(msg):
-  sys.stdout.write(msg + "\n")
-  sys.stdout.flush()
-
-
 def is_healthy(resource):
   if resource['kind'] == "Deployment":
     return is_deployment_ready(resource)
@@ -123,8 +119,8 @@ def is_deployment_ready(resource):
   if total_replicas(resource) == ready_replicas(resource):
     return True
 
-  log("INFO Deployment '{}' replicas are not ready: {}/{}".format(
-      name(resource), ready_replicas(resource), total_replicas(resource)))
+  log("INFO Deployment '{}' replicas are not ready: {}/{}", name(resource),
+      ready_replicas(resource), total_replicas(resource))
   return False
 
 
@@ -132,8 +128,8 @@ def is_sts_ready(resource):
   if total_replicas(resource) == ready_replicas(resource):
     return True
 
-  log("INFO StatefulSet '{}' replicas are not ready: {}/{}".format(
-      name(resource), ready_replicas(resource), total_replicas(resource)))
+  log("INFO StatefulSet '{}' replicas are not ready: {}/{}", name(resource),
+      ready_replicas(resource), total_replicas(resource))
   return False
 
 
@@ -141,7 +137,7 @@ def is_pod_ready(resource):
   if status_condition_is_true('Ready', resource):
     return True
 
-  log("INFO Pod/{} is not ready.".format(name(resource)))
+  log("INFO Pod/{} is not ready.", name(resource))
   return False
 
 
@@ -153,7 +149,7 @@ def is_job_ready(resource):
   if status_condition_is_true('Complete', resource):
     return True
 
-  log("INFO Job/{} is not ready.".format(name(resource)))
+  log("INFO Job/{} is not ready.", name(resource))
   return False
 
 
@@ -161,8 +157,8 @@ def is_pvc_ready(resource):
   if phase(resource) == "Bound":
     return True
 
-  log("INFO pvc/{} phase is '{}'. Expected: 'Bound'".format(
-      name(resource), phase(resource)))
+  log("INFO pvc/{} phase is '{}'. Expected: 'Bound'", name(resource),
+      phase(resource))
   return False
 
 
@@ -173,7 +169,7 @@ def is_service_ready(resource):
   if service_ip(resource):
     return True
 
-  log("INFO service/{} service ip is not ready.".format(name(resource)))
+  log("INFO service/{} service ip is not ready.", name(resource))
   return False
 
 
@@ -181,7 +177,7 @@ def is_ingress_ready(resource):
   if 'ingress' in resource['status']['loadBalancer']:
     return True
 
-  log("INFO Ingress/{} is not ready.".format(name(resource)))
+  log("INFO Ingress/{} is not ready.", name(resource))
   return False
 
 

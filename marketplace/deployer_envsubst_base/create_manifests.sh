@@ -45,6 +45,8 @@ mkdir "$manifest_dir"
 if [[ "$mode" = "test" ]]; then
   if [[ -e "/data-test" ]]; then
     cp -RT "/data-test" "/data"
+  else
+    echo "$LOG_SMOKE_TEST ERROR Missing /data-test."
   fi
 fi
 
