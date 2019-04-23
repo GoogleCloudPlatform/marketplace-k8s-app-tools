@@ -58,5 +58,6 @@ class ProvisionTest(unittest.TestCase):
     values = {}
     deployer_image = 'gcr.io/cloud-marketplace/partner/solution/deployer:latest'
     self.assertEquals(
-        provision.inject_deployer_image_properties(
-            values, schema, deployer_image), {"deployer_image": deployer_image})
+        provision.inject_deployer_image_properties(values, schema,
+                                                   deployer_image),
+        {"deployer_image": deployer_image})

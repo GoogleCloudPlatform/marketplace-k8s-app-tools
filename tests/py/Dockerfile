@@ -2,8 +2,9 @@ FROM python
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
+        python-openssl \
         python-pip \
-	python-setuptools \
+        python-setuptools \
         python-yaml \
     && rm -rf /var/lib/apt/lists/*
 

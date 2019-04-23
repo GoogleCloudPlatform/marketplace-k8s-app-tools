@@ -10,3 +10,15 @@ spec:
   - name: {{ .Release.Name }}
     image: busybox
     command: ['sleep', '3600']
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ .Release.Name }}-tls-secret
+  labels:
+    app.kubernetes.io/name: {{ .Release.Name }}
+    app.kubernetes.io/component: tls-secret
+data:
+  tls.key: {{ .Values.tls.base64EncodedPrivateKey }}
+  tls.crt: {{ .Values.tls.base64EncodedCertificate }}
+type: kubernetes.io/tls
