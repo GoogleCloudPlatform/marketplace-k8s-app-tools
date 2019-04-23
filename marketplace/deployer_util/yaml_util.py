@@ -15,8 +15,6 @@
 # limitations under the License.
 
 import copy
-import sys
-
 import yaml
 
 from log_util import log
