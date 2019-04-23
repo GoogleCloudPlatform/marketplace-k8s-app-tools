@@ -6,6 +6,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     gettext \
     jq \
     python \
+    python-openssl \
     python-pip \
     python-setuptools \
     python-yaml \
