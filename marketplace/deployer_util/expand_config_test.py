@@ -12,7 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import base64
+import json
 import re
+import OpenSSL
 import tempfile
 import unittest
 
@@ -107,6 +110,89 @@ class ExpandConfigTest(unittest.TestCase):
         's1': 'test',
         's1.encoded': 'dGVzdA==',
     }, result)
+
+  def test_generate_certificate(self):
+    schema = config_helper.Schema.load_yaml("""
+        applicationApiVersion: v1beta1
+        properties:
+          c1:
+            type: string
+            x-google-marketplace:
+              type: TLS_CERTIFICATE
+        """)
+    result = expand_config.expand({}, schema)
+    cert_json = json.loads(result['c1'])
+    self.assertIsNotNone(cert_json['private_key'])
+    self.assertIsNotNone(cert_json['certificate'])
+
+    schema = config_helper.Schema.load_yaml("""
+        applicationApiVersion: v1beta1
+        properties:
+          c1:
+            type: string
+            x-google-marketplace:
+              type: TLS_CERTIFICATE
+              tlsCertificate:
+                generatedProperties:
+                  base64EncodedPrivateKey: c1.Base64Key
+                  base64EncodedCertificate: c1.Base64Crt
+        """)
+    result = expand_config.expand({}, schema)
+
+    cert_json = json.loads(result['c1'])
+    self.assertIsNotNone(result['c1'])
+    self.assertEqual(result['c1.Base64Key'],
+                     base64.b64encode(cert_json['private_key']))
+    self.assertEqual(result['c1.Base64Crt'],
+                     base64.b64encode(cert_json['certificate']))
+
+    key = OpenSSL.crypto.load_privatekey(
+        OpenSSL.crypto.FILETYPE_PEM, base64.b64decode(result['c1.Base64Key']))
+    self.assertEqual(key.bits(), 2048)
+    self.assertEqual(key.type(), OpenSSL.crypto.TYPE_RSA)
+
+    cert = OpenSSL.crypto.load_certificate(
+        OpenSSL.crypto.FILETYPE_PEM, base64.b64decode(result['c1.Base64Crt']))
+    self.assertEqual(cert.get_subject(), cert.get_issuer())
+    self.assertEqual(cert.get_subject().OU, 'GCP Marketplace K8s App Tools')
+    self.assertEqual(cert.get_subject().CN, 'Temporary Certificate')
+    self.assertEqual(cert.get_signature_algorithm(), 'sha256WithRSAEncryption')
+    self.assertFalse(cert.has_expired())
+
+  def test_generate_properties_for_certificate(self):
+    schema = config_helper.Schema.load_yaml("""
+        applicationApiVersion: v1beta1
+        properties:
+          c1:
+            type: string
+            x-google-marketplace:
+              type: TLS_CERTIFICATE
+        """)
+    result = expand_config.expand(
+        {'c1': '{"private_key": "key", "certificate": "vrt"}'}, schema)
+    self.assertEqual({'c1': '{"private_key": "key", "certificate": "vrt"}'},
+                     result)
+
+    schema = config_helper.Schema.load_yaml("""
+        applicationApiVersion: v1beta1
+        properties:
+          c1:
+            type: string
+            x-google-marketplace:
+              type: TLS_CERTIFICATE
+              tlsCertificate:
+                generatedProperties:
+                  base64EncodedPrivateKey: c1.Base64Key
+                  base64EncodedCertificate: c1.Base64Crt
+        """)
+    result = expand_config.expand(
+        {'c1': '{"private_key": "key", "certificate": "vrt"}'}, schema)
+    self.assertEqual(
+        {
+            'c1': '{"private_key": "key", "certificate": "vrt"}',
+            'c1.Base64Key': 'a2V5',
+            'c1.Base64Crt': 'dnJ0',
+        }, result)
 
   def test_generate_password(self):
     schema = config_helper.Schema.load_yaml("""

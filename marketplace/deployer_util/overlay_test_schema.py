@@ -46,8 +46,10 @@ def main():
     for prop in orig['properties']:
       if (deep_get(orig, 'properties', prop, 'x-google-marketplace', 'type') !=
           deep_get(dest, 'properties', prop, 'x-google-marketplace', 'type')):
-        log("{} WARNING Changing x-google-marketplace type is not allowed. Property: {}", LOG_SMOKE_TEST, prop)
-        continue;
+        log(
+            "{} WARNING Changing x-google-marketplace type is not allowed. Property: {}",
+            LOG_SMOKE_TEST, prop)
+        continue
       dest['properties'][prop] = orig['properties'][prop]
   else:
     dest['properties'] = orig['properties']

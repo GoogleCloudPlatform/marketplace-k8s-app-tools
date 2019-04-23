@@ -70,6 +70,14 @@ properties:
     type: boolean
     x-google-marketplace:
       type: INGRESS_AVAILABLE
+  certificate:
+    type: string
+    x-google-marketplace:
+      type: TLS_CERTIFICATE
+      tlsCertificate:
+        generatedProperties:
+          base64EncodedPrivateKey: keyEncoded
+          base64EncodedCertificate: crtEncoded
 required:
 - propertyString
 - propertyPassword
@@ -121,7 +129,7 @@ class ConfigHelperTest(unittest.TestCase):
             'propertyNumberWithDefault', 'propertyBoolean',
             'propertyBooleanWithDefault', 'propertyImage',
             'propertyDeployerImage', 'propertyPassword', 'applicationUid',
-            'istioEnabled', 'ingressAvailable'
+            'istioEnabled', 'ingressAvailable', 'certificate'
         }, set(schema.properties))
     self.assertEqual(str, schema.properties['propertyString'].type)
     self.assertIsNone(schema.properties['propertyString'].default)
@@ -163,6 +171,8 @@ class ConfigHelperTest(unittest.TestCase):
     self.assertEqual(bool, schema.properties['ingressAvailable'].type)
     self.assertEqual('INGRESS_AVAILABLE',
                      schema.properties['ingressAvailable'].xtype)
+    self.assertEqual(str, schema.properties['certificate'].type)
+    self.assertEqual('TLS_CERTIFICATE', schema.properties['certificate'].xtype)
 
   def test_invalid_names(self):
     self.assertRaises(
@@ -386,6 +396,40 @@ class ConfigHelperTest(unittest.TestCase):
     self.assertEqual(5, schema.properties['pw'].password.length)
     self.assertEqual(True, schema.properties['pw'].password.include_symbols)
     self.assertEqual(False, schema.properties['pw'].password.base64)
+
+  def test_certificate(self):
+    schema = config_helper.Schema.load_yaml("""
+        properties:
+          c1:
+            type: string
+            x-google-marketplace:
+              type: TLS_CERTIFICATE
+        """)
+
+    self.assertIsNotNone(schema.properties['c1'].tls_certificate)
+    self.assertIsNone(
+        schema.properties['c1'].tls_certificate.base64_encoded_private_key)
+    self.assertIsNone(
+        schema.properties['c1'].tls_certificate.base64_encoded_certificate)
+
+    schema = config_helper.Schema.load_yaml("""
+        properties:
+          c1:
+            type: string
+            x-google-marketplace:
+              type: TLS_CERTIFICATE
+              tlsCertificate:
+                generatedProperties:
+                  base64EncodedPrivateKey: c1.Base64Key
+                  base64EncodedCertificate: c1.Base64Crt
+        """)
+    self.assertIsNotNone(schema.properties['c1'].tls_certificate)
+    self.assertEqual(
+        'c1.Base64Key',
+        schema.properties['c1'].tls_certificate.base64_encoded_private_key)
+    self.assertEqual(
+        'c1.Base64Crt',
+        schema.properties['c1'].tls_certificate.base64_encoded_certificate)
 
   def test_int_type(self):
     schema = config_helper.Schema.load_yaml("""
