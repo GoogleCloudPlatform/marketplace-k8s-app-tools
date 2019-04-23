@@ -68,13 +68,21 @@ def expand(values_dict, schema, app_uid=''):
     if k not in schema.properties:
       raise InvalidProperty('No such property defined in schema: {}'.format(k))
 
+  # Captures the final property name-value mappings.
+  # This has both properties directly specified under schema's `properties` and
+  # generated properties. See below for details about generated properties.
   result = {}
+  # Captures only the generated properties. These are not directly specified in the schema
+  # under `properties`. Rather, their name are specified in special `generatedProperties` fields
+  # under individual property `x-google-marketplace`.
+  # Note that properties with generated values are NOT generated properties.
   generated = {}
+
+  # Copy explicitly specified values and generate values into result.
   for k, prop in schema.properties.iteritems():
     v = values_dict.get(k, None)
 
-    # The value is not delivered to the framework, so it can be filled by the framework.
-    # For example, a password is generated.
+    # The value is not explicitly specified and thus is eligible for auto-generation.
     if v is None:
       if prop.password:
         v = generate_password(prop.password)
@@ -92,9 +100,7 @@ def expand(values_dict, schema, app_uid=''):
       elif prop.default is not None:
         v = prop.default
 
-    # The value is not empty, so it can be expanded to the special properties.
-    # For example, property IMAGE can be expanded from the raw string image,
-    # to the generatedProperties properties.
+    # Generate additional properties from this property.
     if v is not None:
       if prop.image:
         if not isinstance(v, str):
@@ -112,7 +118,7 @@ def expand(values_dict, schema, app_uid=''):
               'Invalid value for TLS_CERTIFICATE property {}: {}'.format(k, v))
         generate_properties_for_tls_certificate(prop, v, generated)
 
-    # At this point, the property is populated and expanded, so overwrite the returned value.
+    # Copy generated properties into result, validating that there are no collisions.
     if v is not None:
       result[k] = v
 

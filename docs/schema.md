@@ -466,7 +466,7 @@ data:
 type: kubernetes.io/tls
 ```
 
-In your envsubst manifest, based on the above example, you can handle the certificate:
+In your `envsubst` manifest, based on the above example, you can handle the certificate:
 
 ```yaml
 apiVersion: v1

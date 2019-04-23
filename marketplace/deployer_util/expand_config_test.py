@@ -121,9 +121,9 @@ class ExpandConfigTest(unittest.TestCase):
               type: TLS_CERTIFICATE
         """)
     result = expand_config.expand({}, schema)
-    cert = json.loads(result['c1'])
-    self.assertIsNotNone(cert['private_key'])
-    self.assertIsNotNone(cert['certificate'])
+    cert_json = json.loads(result['c1'])
+    self.assertIsNotNone(cert_json['private_key'])
+    self.assertIsNotNone(cert_json['certificate'])
 
     schema = config_helper.Schema.load_yaml("""
         applicationApiVersion: v1beta1
@@ -138,27 +138,13 @@ class ExpandConfigTest(unittest.TestCase):
                   base64EncodedCertificate: c1.Base64Crt
         """)
     result = expand_config.expand({}, schema)
-    cert = json.loads(result['c1'])
+
+    cert_json = json.loads(result['c1'])
     self.assertIsNotNone(result['c1'])
     self.assertEqual(result['c1.Base64Key'],
-                     base64.b64encode(cert['private_key']))
+                     base64.b64encode(cert_json['private_key']))
     self.assertEqual(result['c1.Base64Crt'],
-                     base64.b64encode(cert['certificate']))
-
-  def test_generate_certificate_verify(self):
-    schema = config_helper.Schema.load_yaml("""
-        applicationApiVersion: v1beta1
-        properties:
-          c1:
-            type: string
-            x-google-marketplace:
-              type: TLS_CERTIFICATE
-              tlsCertificate:
-                generatedProperties:
-                  base64EncodedPrivateKey: c1.Base64Key
-                  base64EncodedCertificate: c1.Base64Crt
-        """)
-    result = expand_config.expand({}, schema)
+                     base64.b64encode(cert_json['certificate']))
 
     key = OpenSSL.crypto.load_privatekey(
         OpenSSL.crypto.FILETYPE_PEM, base64.b64decode(result['c1.Base64Key']))
