@@ -16,6 +16,7 @@
 
 import sys
 
+
 def log(msg, *args):
   sys.stderr.write(msg.format(*args))
   sys.stderr.write('\n')
