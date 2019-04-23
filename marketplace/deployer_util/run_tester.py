@@ -79,26 +79,29 @@ def main():
       result = deep_get(resource, 'status', 'phase')
 
       if result == "Failed":
-        print_logs(full_name, args.namespace)
+        print_tester_logs(full_name, args.namespace)
         log("{} ERROR Tester '{}' failed.", LOG_SMOKE_TEST, full_name)
         break
 
       if result == "Succeeded":
-        print_logs(full_name, args.namespace)
+        print_tester_logs(full_name, args.namespace)
         log("{} INFO Tester '{}' succeeded.", LOG_SMOKE_TEST, full_name)
         break
 
       if time.time() - start_time > tester_timeout:
-        print_logs(full_name, args.namespace)
+        print_tester_logs(full_name, args.namespace)
         log("{} ERROR Tester '{}' timeout.", LOG_SMOKE_TEST, full_name)
 
       time.sleep(poll_interval)
 
 
-def print_logs(full_name, namespace):
-  log(
-      Command('''kubectl logs {} --namespace="{}"'''.format(
-          full_name, namespace)).output)
+def print_tester_logs(full_name, namespace):
+  try:
+    Command('''kubectl logs {} --namespace="{}"'''.format(
+      full_name, namespace), print_call=True, print_result=True)
+  except CommandEception as ex:
+    log(str(ex))
+    log("{} ERROR failed to get the tester logs.", LOG_SMOKE_TEST)
 
 
 if __name__ == "__main__":
