@@ -129,7 +129,6 @@ class ConfigHelperTest(unittest.TestCase):
             'propertyNumberWithDefault', 'propertyBoolean',
             'propertyBooleanWithDefault', 'propertyImage',
             'propertyDeployerImage', 'propertyPassword', 'applicationUid',
-            'istioEnabled', 'ingressAvailable'
             'istioEnabled', 'ingressAvailable', 'certificate'
         }, set(schema.properties))
     self.assertEqual(str, schema.properties['propertyString'].type)
