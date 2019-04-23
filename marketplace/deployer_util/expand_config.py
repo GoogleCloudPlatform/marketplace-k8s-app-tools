@@ -15,7 +15,10 @@
 # limitations under the License.
 
 import base64
+import json
 import os
+import OpenSSL
+import random
 from argparse import ArgumentParser
 
 import yaml
@@ -65,17 +68,29 @@ def expand(values_dict, schema, app_uid=''):
     if k not in schema.properties:
       raise InvalidProperty('No such property defined in schema: {}'.format(k))
 
+  # Captures the final property name-value mappings.
+  # This has both properties directly specified under schema's `properties` and
+  # generated properties. See below for details about generated properties.
   result = {}
+  # Captures only the generated properties. These are not directly specified in the schema
+  # under `properties`. Rather, their name are specified in special `generatedProperties` fields
+  # under individual property `x-google-marketplace`.
+  # Note that properties with generated values are NOT generated properties.
   generated = {}
+
+  # Copy explicitly specified values and generate values into result.
   for k, prop in schema.properties.iteritems():
     v = values_dict.get(k, None)
 
+    # The value is not explicitly specified and thus is eligible for auto-generation.
     if v is None:
       if prop.password:
         v = generate_password(prop.password)
       elif prop.application_uid:
         v = app_uid or ''
         generate_properties_for_appuid(prop, app_uid, generated)
+      elif prop.tls_certificate:
+        v = generate_tls_certificate()
       elif prop.xtype == config_helper.XTYPE_ISTIO_ENABLED:
         # For backward compatibility.
         v = False
@@ -84,18 +99,26 @@ def expand(values_dict, schema, app_uid=''):
         v = True
       elif prop.default is not None:
         v = prop.default
-    else:  # if v is None
+
+    # Generate additional properties from this property.
+    if v is not None:
       if prop.image:
         if not isinstance(v, str):
           raise InvalidProperty(
               'Invalid value for IMAGE property {}: {}'.format(k, v))
         generate_properties_for_image(prop, v, generated)
-      if prop.string:
+      elif prop.string:
         if not isinstance(v, str):
           raise InvalidProperty(
               'Invalid value for STRING property {}: {}'.format(k, v))
         generate_properties_for_string(prop, v, generated)
+      elif prop.tls_certificate:
+        if not isinstance(v, str):
+          raise InvalidProperty(
+              'Invalid value for TLS_CERTIFICATE property {}: {}'.format(k, v))
+        generate_properties_for_tls_certificate(prop, v, generated)
 
+    # Copy generated properties into result, validating that there are no collisions.
     if v is not None:
       result[k] = v
 
@@ -172,6 +195,40 @@ def generate_password(config):
   if config.base64:
     pw = base64.b64encode(pw)
   return pw
+
+
+def generate_tls_certificate():
+  cert_seconds_to_expiry = 60 * 60 * 24 * 365  # one year
+
+  key = OpenSSL.crypto.PKey()
+  key.generate_key(OpenSSL.crypto.TYPE_RSA, 2048)
+
+  cert = OpenSSL.crypto.X509()
+  cert.get_subject().OU = 'GCP Marketplace K8s App Tools'
+  cert.get_subject().CN = 'Temporary Certificate'
+  cert.gmtime_adj_notBefore(0)
+  cert.gmtime_adj_notAfter(cert_seconds_to_expiry)
+  cert.set_serial_number(random.getrandbits(64))
+  cert.set_issuer(cert.get_subject())
+  cert.set_pubkey(key)
+  cert.sign(key, 'sha256')
+
+  return json.dumps({
+      'private_key':
+          OpenSSL.crypto.dump_privatekey(OpenSSL.crypto.FILETYPE_PEM, key),
+      'certificate':
+          OpenSSL.crypto.dump_certificate(OpenSSL.crypto.FILETYPE_PEM, cert)
+  })
+
+
+def generate_properties_for_tls_certificate(prop, value, result):
+  certificate = json.loads(value)
+  if prop.tls_certificate.base64_encoded_private_key:
+    result[prop.tls_certificate.base64_encoded_private_key] = base64.b64encode(
+        certificate['private_key'])
+  if prop.tls_certificate.base64_encoded_certificate:
+    result[prop.tls_certificate.base64_encoded_certificate] = base64.b64encode(
+        certificate['certificate'])
 
 
 def write_values(values, values_file):
