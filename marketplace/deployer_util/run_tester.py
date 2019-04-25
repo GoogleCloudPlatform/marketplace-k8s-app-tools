@@ -97,9 +97,11 @@ def main():
 
 def print_tester_logs(full_name, namespace):
   try:
-    Command('''kubectl logs {} --namespace="{}"'''.format(
-      full_name, namespace), print_call=True, print_result=True)
-  except CommandEception as ex:
+    Command(
+        '''kubectl logs {} --namespace="{}"'''.format(full_name, namespace),
+        print_call=True,
+        print_result=True)
+  except CommandException as ex:
     log(str(ex))
     log("{} ERROR failed to get the tester logs.", LOG_SMOKE_TEST)
 

@@ -35,6 +35,10 @@ case $i in
     istio="${i#*=}"
     shift
     ;;
+  --role=*)
+    role="${i#*=}"
+    shift
+    ;;
   *)
     echo "Unrecognized flag: $i"
     exit 1
@@ -126,6 +130,12 @@ function clean_and_exit() {
   delete_namespace
   exit 1
 }
+
+# TODO(#344) Remove
+# Add additional role if deployer need more privileges.
+if [[ ! -z "$role" ]]; then
+  kubectl create clusterrolebinding "$NAMESPACE-deployer-sa-cluster-admin" --clusterrole "$role" --user "$NAMESPACE-deployer-sa"
+fi
 
 echo "INFO Initializes the deployer container which will deploy all the application components"
 /scripts/install \
