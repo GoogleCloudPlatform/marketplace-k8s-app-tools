@@ -128,13 +128,17 @@ function clean_and_exit() {
   [[ -z "$message" ]] || echo "$message"
 
   delete_namespace
+  if [[ ! -z "$deployer_role_name" ]]; then
+    kubectl delete clusterrolebinding "$deployer_role_name"
+  fi
   exit 1
 }
 
 # TODO(#344) Remove
 # Add additional role if deployer need more privileges.
 if [[ ! -z "$role" ]]; then
-  kubectl create clusterrolebinding "$NAMESPACE-deployer-sa-cluster-admin" --clusterrole "$role" --user "$NAMESPACE-deployer-sa"
+  deployer_role_name="$NAMESPACE-deployer-sa-$role"
+  kubectl create clusterrolebinding "$deployer_role_name" --clusterrole "$role" --user "system:serviceaccount:$NAMESPACE:$NAMESPACE-deployer-sa"
 fi
 
 echo "INFO Initializes the deployer container which will deploy all the application components"
