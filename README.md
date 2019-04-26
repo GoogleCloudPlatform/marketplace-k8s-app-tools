@@ -6,19 +6,49 @@ applications deployable via
 
 # Getting Started
 
-See [how to build your application deployer](docs/building-deployer.md) doc.
+See the [how to build your application deployer](docs/building-deployer.md) documentation.
 
 # References
 
 ## Examples
 
-[marketplace-k8s-app-example](https://github.com/GoogleCloudPlatform/marketplace-k8s-app-example)
-repo contains example applications.
+*   The [marketplace-k8s-app-example](https://github.com/GoogleCloudPlatform/marketplace-k8s-app-example)
+    repository contains example applications.
 
-[click-to-deploy](https://github.com/GoogleCloudPlatform/click-to-deploy/tree/master/k8s)
-repo contains more examples. This is the source code backing Google Click to Deploy k8s
-applications listed on Google Cloud Marketplace.
+*   The [click-to-deploy](https://github.com/GoogleCloudPlatform/click-to-deploy/tree/master/k8s)
+    repository contains more examples. This is the source code backing Google Click to Deploy Kubernetes
+    applications listed on Google Cloud Marketplace.
 
 ## Coding style
 
 We follow [Google's coding style guides](https://google.github.io/styleguide/).
+
+# Development
+
+## Run tests locally
+
+Run unit tests:
+
+```shell
+make tests/py
+```
+
+Run integration tests:
+
+```shell
+make tests/integration
+```
+
+## Build deployers locally
+
+Set deployers container tag:
+
+```shell
+export MARKETPLACE_TOOLS_TAG=local
+```
+
+Build container images:
+
+```shell
+make marketplace/build
+```
