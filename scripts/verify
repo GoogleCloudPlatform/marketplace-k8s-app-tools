@@ -135,7 +135,7 @@ function clean_and_exit() {
 }
 
 # TODO(#344) Remove
-# Add additional role if deployer need more privileges.
+# Add additional role if deployer needs more privileges.
 if [[ ! -z "$role" ]]; then
   deployer_role_name="$NAMESPACE-deployer-sa-$role"
   kubectl create clusterrolebinding "$deployer_role_name" --clusterrole "$role" --user "system:serviceaccount:$NAMESPACE:$NAMESPACE-deployer-sa"
