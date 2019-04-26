@@ -79,7 +79,7 @@ def main():
           .format(args.name, healthy))
       previous_healthy = healthy
       if healthy:
-        log("INFO Wait {} seconds to make sure app stays in healthy state."
+        log.info("Wait {} seconds to make sure app stays in healthy state."
             .format(min_time_before_healthy))
         healthy_start_time = time.time()
 
@@ -120,7 +120,7 @@ def is_deployment_ready(resource):
   if total_replicas(resource) == ready_replicas(resource):
     return True
 
-  log("INFO Deployment '{}' replicas are not ready: {}/{}", name(resource),
+  log.info("Deployment '{}' replicas are not ready: {}/{}", name(resource),
       ready_replicas(resource), total_replicas(resource))
   return False
 
@@ -129,7 +129,7 @@ def is_sts_ready(resource):
   if total_replicas(resource) == ready_replicas(resource):
     return True
 
-  log("INFO StatefulSet '{}' replicas are not ready: {}/{}", name(resource),
+  log.info("StatefulSet '{}' replicas are not ready: {}/{}", name(resource),
       ready_replicas(resource), total_replicas(resource))
   return False
 
@@ -138,7 +138,7 @@ def is_pod_ready(resource):
   if status_condition_is_true('Ready', resource):
     return True
 
-  log("INFO Pod/{} is not ready.", name(resource))
+  log.info("Pod/{} is not ready.", name(resource))
   return False
 
 
@@ -150,7 +150,7 @@ def is_job_ready(resource):
   if status_condition_is_true('Complete', resource):
     return True
 
-  log("INFO Job/{} is not ready.", name(resource))
+  log.info("Job/{} is not ready.", name(resource))
   return False
 
 
@@ -158,7 +158,7 @@ def is_pvc_ready(resource):
   if phase(resource) == "Bound":
     return True
 
-  log("INFO pvc/{} phase is '{}'. Expected: 'Bound'", name(resource),
+  log.info("pvc/{} phase is '{}'. Expected: 'Bound'", name(resource),
       phase(resource))
   return False
 
@@ -170,7 +170,7 @@ def is_service_ready(resource):
   if service_ip(resource):
     return True
 
-  log("INFO service/{} service ip is not ready.", name(resource))
+  log.info("service/{} service ip is not ready.", name(resource))
   return False
 
 
@@ -178,7 +178,7 @@ def is_ingress_ready(resource):
   if 'ingress' in resource['status']['loadBalancer']:
     return True
 
-  log("INFO Ingress/{} is not ready.", name(resource))
+  log.info("Ingress/{} is not ready.", name(resource))
   return False
 
 
