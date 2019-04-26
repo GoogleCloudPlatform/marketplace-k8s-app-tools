@@ -16,8 +16,7 @@
 
 import copy
 import yaml
-
-from log_util import log
+import log_util as log
 
 
 def load_yaml(filename):
@@ -60,7 +59,7 @@ def load_resources_yaml(filename):
   Returns:
     A list of structured kubernetes resources"""
 
-  log("Reading " + filename)
+  log.info("Reading " + filename)
   with open(filename, "r") as stream:
     content = stream.read()
     return parse_resources_yaml(content)

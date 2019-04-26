@@ -17,6 +17,18 @@
 import sys
 
 
+def info(msg, *args):
+  log("INFO " + msg, *args)
+
+
+def warn(msg, *args):
+  log("WARNING " + msg, *args)
+
+
+def error(msg, *args):
+  log("ERROR " + msg, *args)
+
+
 def log(msg, *args):
   sys.stderr.write(msg.format(*args))
   sys.stderr.write('\n')

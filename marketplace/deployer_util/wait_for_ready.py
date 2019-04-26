@@ -15,10 +15,10 @@
 # limitations under the License.
 
 import time
+import log_util as log
 
 from argparse import ArgumentParser
 from bash_util import Command
-from log_util import log
 
 _PROG_HELP = "Wait for the application to get ready into a ready state"
 
@@ -30,8 +30,9 @@ def main():
   parser.add_argument('--timeout')
   args = parser.parse_args()
 
-  log("INFO Wait {} seconds for the application '{}' to get into ready state"
-      .format(args.timeout, args.name))
+  log.info(
+      "Wait {} seconds for the application '{}' to get into ready state".format(
+          args.timeout, args.name))
   previous_healthy = False
 
   min_time_before_healthy = 30
@@ -65,7 +66,7 @@ def main():
     if len(top_level_resources) == 0:
       raise Exception("ERROR no top level resources found")
 
-    log("INFO top level resources: {}", len(top_level_resources))
+    log.info("Top level resources: {}", len(top_level_resources))
     healthy = True
     for resource in top_level_resources:
       healthy = is_healthy(resource)
@@ -73,7 +74,8 @@ def main():
         break
 
     if previous_healthy != healthy:
-      log("INFO Initialization: Found applications.app.k8s.io/{} ready status to be {}."
+      log.info(
+          "Initialization: Found applications.app.k8s.io/{} ready status to be {}."
           .format(args.name, healthy))
       previous_healthy = healthy
       if healthy:
