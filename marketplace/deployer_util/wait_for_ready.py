@@ -79,8 +79,9 @@ def main():
           .format(args.name, healthy))
       previous_healthy = healthy
       if healthy:
-        log.info("Wait {} seconds to make sure app stays in healthy state."
-            .format(min_time_before_healthy))
+        log.info(
+            "Wait {} seconds to make sure app stays in healthy state.".format(
+                min_time_before_healthy))
         healthy_start_time = time.time()
 
     if healthy:
@@ -121,7 +122,7 @@ def is_deployment_ready(resource):
     return True
 
   log.info("Deployment '{}' replicas are not ready: {}/{}", name(resource),
-      ready_replicas(resource), total_replicas(resource))
+           ready_replicas(resource), total_replicas(resource))
   return False
 
 
@@ -130,7 +131,7 @@ def is_sts_ready(resource):
     return True
 
   log.info("StatefulSet '{}' replicas are not ready: {}/{}", name(resource),
-      ready_replicas(resource), total_replicas(resource))
+           ready_replicas(resource), total_replicas(resource))
   return False
 
 
@@ -159,7 +160,7 @@ def is_pvc_ready(resource):
     return True
 
   log.info("pvc/{} phase is '{}'. Expected: 'Bound'", name(resource),
-      phase(resource))
+           phase(resource))
   return False
 
 
