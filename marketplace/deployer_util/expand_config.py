@@ -32,12 +32,18 @@ Modifies the configuration parameter files in a directory
 according to their schema.
 """
 
+_IMAGE_REPO_PREFIX_PROPERTY_NAME = '__image_repo_prefix__'
+
 
 class InvalidProperty(Exception):
   pass
 
 
 class MissingRequiredProperty(Exception):
+  pass
+
+
+class MissingRequiredValue(Exception):
   pass
 
 
@@ -64,25 +70,32 @@ def expand(values_dict, schema, app_uid=''):
   """Returns the expanded values according to schema."""
   schema.validate()
 
+  valid_property_names = set(schema.properties.keys() +
+                             [_IMAGE_REPO_PREFIX_PROPERTY_NAME])
   for k in values_dict:
-    if k not in schema.properties:
+    if k not in valid_property_names:
       raise InvalidProperty('No such property defined in schema: {}'.format(k))
 
   # Captures the final property name-value mappings.
   # This has both properties directly specified under schema's `properties` and
   # generated properties. See below for details about generated properties.
   result = {}
-  # Captures only the generated properties. These are not directly specified in the schema
-  # under `properties`. Rather, their name are specified in special `generatedProperties` fields
-  # under individual property `x-google-marketplace`.
+  # Captures only the generated properties. These are not directly specified in
+  # the schema under `properties`. Rather, their name are specified in special
+  # `generatedProperties` fields under each property's `x-google-marketplace`.
   # Note that properties with generated values are NOT generated properties.
   generated = {}
+
+  if schema.is_v2():
+    # Handles the images section of the schema.
+    generate_v2_image_properties(schema, values_dict, generated)
 
   # Copy explicitly specified values and generate values into result.
   for k, prop in schema.properties.iteritems():
     v = values_dict.get(k, None)
 
-    # The value is not explicitly specified and thus is eligible for auto-generation.
+    # The value is not explicitly specified and
+    # thus is eligible for auto-generation.
     if v is None:
       if prop.password:
         v = generate_password(prop.password)
@@ -106,7 +119,7 @@ def expand(values_dict, schema, app_uid=''):
         if not isinstance(v, str):
           raise InvalidProperty(
               'Invalid value for IMAGE property {}: {}'.format(k, v))
-        generate_properties_for_image(prop, v, generated)
+        generate_v1_properties_for_image(prop, v, generated)
       elif prop.string:
         if not isinstance(v, str):
           raise InvalidProperty(
@@ -118,13 +131,13 @@ def expand(values_dict, schema, app_uid=''):
               'Invalid value for TLS_CERTIFICATE property {}: {}'.format(k, v))
         generate_properties_for_tls_certificate(prop, v, generated)
 
-    # Copy generated properties into result, validating that there are no collisions.
     if v is not None:
       result[k] = v
 
   validate_value_types(result, schema)
   validate_required_props(result, schema)
 
+  # Copy generated properties into result, validating no collisions.
   for k, v in generated.iteritems():
     if k in result:
       raise InvalidProperty(
@@ -155,7 +168,7 @@ def generate_properties_for_appuid(prop, value, result):
     result[prop.application_uid.application_create] = False if value else True
 
 
-def generate_properties_for_image(prop, value, result):
+def generate_v1_properties_for_image(prop, value, result):
   if prop.image.split_by_colon:
     before_name, after_name = prop.image.split_by_colon
     parts = value.split(':', 1)
@@ -183,6 +196,33 @@ def generate_properties_for_image(prop, value, result):
     result[reg_name] = reg_value
     result[repo_name] = repo_value
     result[tag_name] = tag_value
+
+
+def generate_v2_image_properties(schema, values_dict, result):
+  repo_prefix = values_dict.get(_IMAGE_REPO_PREFIX_PROPERTY_NAME, None)
+  if not repo_prefix:
+    raise MissingRequiredValue('A valid value for __image_repo_prefix__ '
+                               'must be specified in values.yaml')
+  tag = schema.x_google_marketplace.published_version
+  for img in schema.x_google_marketplace.images.values():
+    registry_repo = '{}/{}'.format(repo_prefix, img.name)
+    registry, repo = registry_repo.split('/', 1)
+    full = '{}:{}'.format(registry_repo, tag)
+    for prop in img.properties.values():
+      if prop.part_type == config_helper.IMAGE_PROJECTION_TYPE_FULL:
+        result[prop.name] = full
+      elif prop.part_type == config_helper.IMAGE_PROJECTION_TYPE_REGISTRY:
+        result[prop.name] = registry
+      elif prop.part_type == config_helper.IMAGE_PROJECTION_TYPE_REGISTRY_REPO:
+        result[prop.name] = registry_repo
+      elif prop.part_type == config_helper.IMAGE_PROJECTION_TYPE_REPO:
+        result[prop.name] = repo
+      elif prop.part_type == config_helper.IMAGE_PROJECTION_TYPE_TAG:
+        result[prop.name] = tag
+      else:
+        raise InvalidProperty(
+            'Invalid type for images.properties.type: {}'.format(
+                prop.part_type))
 
 
 def generate_properties_for_string(prop, value, result):
