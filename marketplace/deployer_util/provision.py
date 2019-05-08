@@ -100,7 +100,6 @@ def process(schema, values, deployer_image, deployer_entrypoint,
 
   # Merge input and provisioned properties.
   app_params = dict(list(values.iteritems()) + list(props.iteritems()))
-  app_params = {k: str(v) for k, v in app_params.iteritems()}
   manifests += provision_deployer(
       schema,
       app_name=app_name,
@@ -149,30 +148,62 @@ def provision_deployer(schema, app_name, namespace, deployer_image,
       'marketplace.cloud.google.com/deployer': 'Main',
   }
 
-  pod_spec = {
-      'serviceAccountName':
-          sa_name,
-      'containers': [{
-          'name':
-              'deployer',
-          'image':
-              deployer_image,
-          'imagePullPolicy':
-              'Always',
-          'volumeMounts': [{
-              'name': 'config-volume',
-              'mountPath': '/data/values',
-          },],
-      },],
-      'restartPolicy':
-          'Never',
-      'volumes': [{
-          'name': 'config-volume',
-          'configMap': {
-              'name': "{}-deployer-config".format(app_name),
-          },
-      },],
-  }
+  if schema.is_v2():
+    config = make_v2_secret(schema, deployer_image, namespace, app_name, labels,
+                            app_params)
+    pod_spec = {
+        'serviceAccountName':
+            sa_name,
+        'containers': [{
+            'name':
+                'deployer',
+            'image':
+                deployer_image,
+            'imagePullPolicy':
+                'Always',
+            'volumeMounts': [{
+                'name': 'config-volume',
+                'mountPath': '/data/values.yaml',
+                'subPath': 'values.yaml',
+                'readOnly': True,
+            },],
+        },],
+        'restartPolicy':
+            'Never',
+        'volumes': [{
+            'name': 'config-volume',
+            'secret': {
+                'secretName': config['metadata']['name'],
+            },
+        },]
+    }
+  else:
+    config = make_v1_config_map(schema, namespace, app_name, labels, app_params)
+    pod_spec = {
+        'serviceAccountName':
+            sa_name,
+        'containers': [{
+            'name':
+                'deployer',
+            'image':
+                deployer_image,
+            'imagePullPolicy':
+                'Always',
+            'volumeMounts': [{
+                'name': 'config-volume',
+                'mountPath': '/data/values',
+            },],
+        },],
+        'restartPolicy':
+            'Never',
+        'volumes': [{
+            'name': 'config-volume',
+            'configMap': {
+                'name': config['metadata']['name'],
+            },
+        },]
+    }
+
   if deployer_entrypoint:
     pod_spec['containers'][0]['command'] = [deployer_entrypoint]
 
@@ -210,16 +241,7 @@ def provision_deployer(schema, app_name, namespace, deployer_image,
               'name': sa_name,
           },]
       },
-      {
-          'apiVersion': 'v1',
-          'kind': 'ConfigMap',
-          'metadata': {
-              'name': '{}-deployer-config'.format(app_name),
-              'namespace': namespace,
-              'labels': labels,
-          },
-          'data': app_params,
-      },
+      config,
       {
           'apiVersion': 'batch/v1',
           'kind': 'Job',
@@ -241,6 +263,41 @@ def provision_deployer(schema, app_name, namespace, deployer_image,
           },
       },
   ]
+
+
+def make_v1_config_map(schema, namespace, app_name, labels, app_params):
+  return {
+      'apiVersion': 'v1',
+      'kind': 'ConfigMap',
+      'metadata': {
+          'name': '{}-deployer-config'.format(app_name),
+          'namespace': namespace,
+          'labels': labels,
+      },
+      'data': {k: str(v) for k, v in app_params.iteritems()},
+  }
+
+
+def make_v2_secret(schema, deployer_image, namespace, app_name, labels,
+                   app_params):
+  final_app_params = {k: v for k, v in app_params.iteritems()}
+  final_app_params['__image_repo_prefix__'] = deployer_image_to_repo_prefix(
+      deployer_image)
+  params_yaml = yaml.safe_dump(
+      final_app_params, default_flow_style=False, indent=2)
+  return {
+      'apiVersion': 'v1',
+      'kind': 'Secret',
+      'metadata': {
+          'name': '{}-deployer-config'.format(app_name),
+          'namespace': namespace,
+          'labels': labels,
+      },
+      'type': 'Opaque',
+      'stringData': {
+          'values.yaml': params_yaml,
+      },
+  }
 
 
 def provision_service_account(schema, prop, app_name, namespace,
@@ -432,6 +489,20 @@ def add_preprovisioned_labels(manifests, prop_name):
         prop_name)
     r['metadata']['labels'] = labels
   return manifests
+
+
+def deployer_image_to_repo_prefix(deployer_image):
+  # This strips off the digest or tag at the end of the image name.
+  # All following examples should result in "gcr.io/test/deployer":
+  # - gcr.io/test/deployer
+  # - gcr.io/test/deployer@sha256:abcdef1234567890
+  # - gcr.io/test/deployer:0.0.0
+  image_without_tag = deployer_image.split('@')[0].split(':')[0]
+  if not image_without_tag.endswith('/deployer'):
+    raise Exception(
+        'Deployer image must have "/deployer" as the suffix. Got {}'.format(
+            deployer_image))
+  return image_without_tag[:-len('/deployer')]
 
 
 if __name__ == '__main__':
