@@ -1,11 +1,6 @@
-# Used for building tagged releases.
-# It updates the "latest" tag in the corresponding GCR repos
-# if the current SemVer is the most recent.
-#
-# This does not actually build images; it copies candidates
-# built in the staging project instead. These images should have
-# been built by cloudbuild.yaml, which should be triggered on
-# every new commit.
+# Used for building tags that are intended as pre-releases.
+# This is different from cloudbuilt-tag.yaml in that it does not
+# update the "latest" tag in the GCR repos.
 
 steps:
 
@@ -34,40 +29,6 @@ steps:
 
     docker pull gcr.io/$_STAGING_PROJECT_ID/k8s/deployer_envsubst:sha_$COMMIT_SHA
     docker tag gcr.io/$_STAGING_PROJECT_ID/k8s/deployer_envsubst:sha_$COMMIT_SHA gcr.io/$PROJECT_ID/k8s/deployer_envsubst:$TAG_NAME
-
-- id: &DetermineShouldTagLatest Determine if images should be tagged latest
-  name: gcr.io/cloud-builders/gcloud
-  waitFor:
-  - *PublishImages
-  entrypoint: /bin/bash
-  args:
-  - -ceux
-  - echo "$(.cloudbuild/should_tag_latest.sh gcr.io/$PROJECT_ID/k8s/dev $TAG_NAME)" > should_tag_latest
-
-- id: Maybe tag images latest
-  name: gcr.io/cloud-builders/docker
-  waitFor:
-  - *DetermineShouldTagLatest
-  entrypoint: /bin/bash
-  args:
-  - -ceux
-  - |
-    if [[ "$(cat should_tag_latest)" == "true" ]]; then
-      docker tag gcr.io/$PROJECT_ID/k8s/dev:$TAG_NAME gcr.io/$PROJECT_ID/k8s/dev:latest
-      docker push gcr.io/$PROJECT_ID/k8s/dev:latest
-      docker tag gcr.io/$PROJECT_ID/k8s/deployer_helm:$TAG_NAME gcr.io/$PROJECT_ID/k8s/deployer_helm:latest
-      docker push gcr.io/$PROJECT_ID/k8s/deployer_helm:latest
-      docker tag gcr.io/$PROJECT_ID/k8s/deployer_helm/onbuild:$TAG_NAME gcr.io/$PROJECT_ID/k8s/deployer_helm/onbuild:latest
-      docker push gcr.io/$PROJECT_ID/k8s/deployer_helm/onbuild:latest
-      docker tag gcr.io/$PROJECT_ID/k8s/deployer_helm_tiller:$TAG_NAME gcr.io/$PROJECT_ID/k8s/deployer_helm_tiller:latest
-      docker push gcr.io/$PROJECT_ID/k8s/deployer_helm_tiller:latest
-      docker tag gcr.io/$PROJECT_ID/k8s/deployer_helm_tiller/onbuild:$TAG_NAME gcr.io/$PROJECT_ID/k8s/deployer_helm_tiller/onbuild:latest
-      docker push gcr.io/$PROJECT_ID/k8s/deployer_helm_tiller/onbuild:latest
-      docker tag gcr.io/$PROJECT_ID/k8s/deployer_envsubst:$TAG_NAME gcr.io/$PROJECT_ID/k8s/deployer_envsubst:latest
-      docker push gcr.io/$PROJECT_ID/k8s/deployer_envsubst:latest
-    else
-      echo "Not tagging latest"
-    fi
 
 - id: Publish Charts
   name: gcr.io/$PROJECT_ID/k8s/dev:$TAG_NAME
