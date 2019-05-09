@@ -30,9 +30,8 @@ def main():
   parser.add_argument('--timeout')
   args = parser.parse_args()
 
-  log.info(
-      "Wait {} seconds for the application '{}' to get into ready state".format(
-          args.timeout, args.name))
+  log.info("Wait {} seconds for the application '{}' to get into ready state",
+           args.timeout, args.name)
   previous_healthy = False
 
   min_time_before_healthy = 30
@@ -75,13 +74,12 @@ def main():
 
     if previous_healthy != healthy:
       log.info(
-          "Initialization: Found applications.app.k8s.io/{} ready status to be {}."
-          .format(args.name, healthy))
+          "Initialization: Found applications.app.k8s.io/{} ready status to be {}.",
+          args.name, healthy)
       previous_healthy = healthy
       if healthy:
-        log.info(
-            "Wait {} seconds to make sure app stays in healthy state.".format(
-                min_time_before_healthy))
+        log.info("Wait {} seconds to make sure app stays in healthy state.",
+                 min_time_before_healthy)
         healthy_start_time = time.time()
 
     if healthy:
