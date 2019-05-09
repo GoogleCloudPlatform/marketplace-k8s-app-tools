@@ -648,6 +648,9 @@ class ConfigHelperTest(unittest.TestCase):
             - BUG_FIX
             recommended: true
 
+          managedUpdates:
+            kalmSupported: true
+
           images:
             main:
               properties:
@@ -689,6 +692,9 @@ class ConfigHelperTest(unittest.TestCase):
     self.assertEqual(images['db'].properties['db.image.tag'].name,
                      'db.image.tag')
     self.assertEqual(images['db'].properties['db.image.tag'].part_type, 'TAG')
+
+    self.assertEqual(schema.x_google_marketplace.managed_updates.kalm_supported,
+                     True)
 
   def test_k8s_version_constraint(self):
     schema = config_helper.Schema.load_yaml("""
