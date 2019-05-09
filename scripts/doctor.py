@@ -53,6 +53,8 @@ def main():
       crd=(check_crd, ['kubectl_nodes']))
   if all_good:
     print('\nEverything looks good to go!!')
+  else:
+    sys.exit(1)
 
 
 def check_docker(args):
@@ -286,22 +288,25 @@ def do_run(tasks, run_fn):
   while True:
     if len(dones) >= len(tasks):
       break
+    if failed and len(dones) >= len(starteds):
+      break
 
-    # Identify tasks that have become eligible (0 prerequisites)
-    # and execute them. Note that identified eligible tasks might be
-    # already running and need to be filtered out. This is because we
-    # handle one task event at a time.
-    prereq_counts = [(task.name, len(task.prerequisites.difference(dones)))
-                     for task in tasks.values()
-                     if task.name not in dones]
-    prereq_counts.sort(key=lambda name_count: name_count[1], reverse=True)
-    candidate_names = [name for (name, count) in prereq_counts if count == 0]
-    if not candidate_names:
-      raise BadPrerequisitesException('Found a cycle in {}'.format(
-          [name for (name, _) in prereq_counts]))
-    for name in [c for c in candidate_names if c not in starteds]:
-      starteds.add(name)
-      run_fn(tasks[name], event_queue)
+    if not failed:
+      # Identify tasks that have become eligible (0 prerequisites)
+      # and execute them. Note that identified eligible tasks might be
+      # already running and need to be filtered out. This is because we
+      # handle one task event at a time.
+      prereq_counts = [(task.name, len(task.prerequisites.difference(dones)))
+                       for task in tasks.values()
+                       if task.name not in dones]
+      prereq_counts.sort(key=lambda name_count: name_count[1], reverse=True)
+      candidate_names = [name for (name, count) in prereq_counts if count == 0]
+      if not candidate_names:
+        raise BadPrerequisitesException('Found a cycle in {}'.format(
+            [name for (name, _) in prereq_counts]))
+      for name in [c for c in candidate_names if c not in starteds]:
+        starteds.add(name)
+        run_fn(tasks[name], event_queue)
 
     # Wait for and process the next task event.
     task_event = event_queue.get()
