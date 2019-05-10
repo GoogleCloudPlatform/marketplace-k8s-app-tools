@@ -15,6 +15,7 @@
 # limitations under the License.
 
 import time
+import log_util as log
 
 from argparse import ArgumentParser
 from bash_util import Command
@@ -43,8 +44,8 @@ def main():
         '''.format(args.namespace, args.manifest),
         print_call=True)
   except CommandException as ex:
-    log("{} ERROR Failed to apply tester job. Reason: {}", LOG_SMOKE_TEST,
-        ex.message)
+    log.error("{} Failed to apply tester job. Reason: {}", LOG_SMOKE_TEST,
+              ex.message)
     return
 
   resources = load_resources_yaml(args.manifest)
@@ -54,7 +55,7 @@ def main():
                                deep_get(resource_def, 'metadata', 'name'))
 
     if resource_def['kind'] != 'Pod':
-      log("INFO Skip '{}'", full_name)
+      log.info("Skip '{}'", full_name)
       continue
 
     start_time = time.time()
@@ -71,8 +72,8 @@ def main():
           '''.format(full_name, args.namespace),
             print_call=True).json()
       except CommandException as ex:
-        log(str(ex))
-        log("INFO retrying")
+        log.info(str(ex))
+        log.info("retrying")
         time.sleep(poll_interval)
         continue
 
@@ -80,17 +81,17 @@ def main():
 
       if result == "Failed":
         print_tester_logs(full_name, args.namespace)
-        log("{} ERROR Tester '{}' failed.", LOG_SMOKE_TEST, full_name)
+        log.error("{} Tester '{}' failed.", LOG_SMOKE_TEST, full_name)
         break
 
       if result == "Succeeded":
         print_tester_logs(full_name, args.namespace)
-        log("{} INFO Tester '{}' succeeded.", LOG_SMOKE_TEST, full_name)
+        log.info("{} Tester '{}' succeeded.", LOG_SMOKE_TEST, full_name)
         break
 
       if time.time() - start_time > tester_timeout:
         print_tester_logs(full_name, args.namespace)
-        log("{} ERROR Tester '{}' timeout.", LOG_SMOKE_TEST, full_name)
+        log.error("{} Tester '{}' timeout.", LOG_SMOKE_TEST, full_name)
 
       time.sleep(poll_interval)
 
@@ -98,12 +99,12 @@ def main():
 def print_tester_logs(full_name, namespace):
   try:
     Command(
-        '''kubectl logs {} --namespace="{}"'''.format(full_name, namespace),
+        'kubectl logs {} --namespace="{}"'.format(full_name, namespace),
         print_call=True,
         print_result=True)
   except CommandException as ex:
-    log(str(ex))
-    log("{} ERROR failed to get the tester logs.", LOG_SMOKE_TEST)
+    log.error(str(ex))
+    log.error("{} failed to get the tester logs.", LOG_SMOKE_TEST)
 
 
 if __name__ == "__main__":

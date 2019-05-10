@@ -16,6 +16,7 @@
 
 import yaml
 import os.path
+import log_util as log
 
 from argparse import ArgumentParser
 from constants import LOG_SMOKE_TEST
@@ -46,8 +47,8 @@ def main():
     for prop in orig['properties']:
       if (deep_get(orig, 'properties', prop, 'x-google-marketplace', 'type') !=
           deep_get(dest, 'properties', prop, 'x-google-marketplace', 'type')):
-        log(
-            "{} WARNING Changing x-google-marketplace type is not allowed. Property: {}",
+        log.warn(
+            "{} Changing x-google-marketplace type is not allowed. Property: {}",
             LOG_SMOKE_TEST, prop)
         continue
       dest['properties'][prop] = orig['properties'][prop]

@@ -35,8 +35,9 @@ case $i in
     istio="${i#*=}"
     shift
     ;;
-  --role=*)
-    role="${i#*=}"
+  # TODO(#344) Remove this flag once we have better support
+  --additional_deployer_role=*)
+    additional_deployer_role="${i#*=}"
     shift
     ;;
   *)
@@ -134,11 +135,10 @@ function clean_and_exit() {
   exit 1
 }
 
-# TODO(#344) Remove
-# Add additional role if deployer need more privileges.
-if [[ ! -z "$role" ]]; then
-  deployer_role_name="$NAMESPACE-deployer-sa-$role"
-  kubectl create clusterrolebinding "$deployer_role_name" --clusterrole "$role" --user "system:serviceaccount:$NAMESPACE:$NAMESPACE-deployer-sa"
+# Add additional role if deployer needs more privileges.
+if [[ ! -z "$additional_deployer_role" ]]; then
+  deployer_role_name="$NAMESPACE-deployer-sa-$additional_deployer_role"
+  kubectl create clusterrolebinding "$deployer_role_name" --clusterrole "$additional_deployer_role" --user "system:serviceaccount:$NAMESPACE:$NAMESPACE-deployer-sa"
 fi
 
 echo "INFO Initializes the deployer container which will deploy all the application components"
