@@ -19,7 +19,6 @@ import log_util as log
 
 from argparse import ArgumentParser
 from bash_util import Command
-from log_util import log
 
 _PROG_HELP = "Wait for the application to get ready into a ready state"
 

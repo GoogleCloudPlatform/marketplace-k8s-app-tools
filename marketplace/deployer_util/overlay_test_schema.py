@@ -21,7 +21,6 @@ import log_util as log
 from argparse import ArgumentParser
 from constants import LOG_SMOKE_TEST
 from dict_util import deep_get
-from log_util import log
 from yaml_util import load_yaml
 
 

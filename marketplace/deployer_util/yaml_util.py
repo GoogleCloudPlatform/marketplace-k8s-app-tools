@@ -18,8 +18,6 @@ import copy
 import yaml
 import log_util as log
 
-from log_util import log
-
 
 def load_yaml(filename):
   """ Helper function for loading a single yaml entry from file """
