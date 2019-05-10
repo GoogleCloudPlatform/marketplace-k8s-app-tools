@@ -127,6 +127,7 @@ def is_deployment_ready(resource):
 def is_sts_ready(resource):
   if total_replicas(resource) == ready_replicas(resource):
     return True
+
   log.info("StatefulSet '{}' replicas are not ready: {}/{}", name(resource),
            ready_replicas(resource), total_replicas(resource))
   return False
