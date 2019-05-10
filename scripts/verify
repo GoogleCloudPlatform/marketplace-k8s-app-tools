@@ -35,6 +35,11 @@ case $i in
     istio="${i#*=}"
     shift
     ;;
+  # TODO(#344) Remove this flag once we have better support
+  --additional_deployer_role=*)
+    additional_deployer_role="${i#*=}"
+    shift
+    ;;
   *)
     echo "Unrecognized flag: $i"
     exit 1
@@ -124,8 +129,17 @@ function clean_and_exit() {
   [[ -z "$message" ]] || echo "$message"
 
   delete_namespace
+  if [[ ! -z "$deployer_role_name" ]]; then
+    kubectl delete clusterrolebinding "$deployer_role_name"
+  fi
   exit 1
 }
+
+# Add additional role if deployer needs more privileges.
+if [[ ! -z "$additional_deployer_role" ]]; then
+  deployer_role_name="$NAMESPACE-deployer-sa-$additional_deployer_role"
+  kubectl create clusterrolebinding "$deployer_role_name" --clusterrole "$additional_deployer_role" --user "system:serviceaccount:$NAMESPACE:$NAMESPACE-deployer-sa"
+fi
 
 echo "INFO Initializes the deployer container which will deploy all the application components"
 /scripts/install \

@@ -17,10 +17,10 @@
 import copy
 import os
 import sys
-from argparse import ArgumentParser
-
 import yaml
+import log_util as log
 
+from argparse import ArgumentParser
 from resources import set_resource_ownership
 from yaml_util import load_resources_yaml
 from yaml_util import parse_resources_yaml
@@ -111,8 +111,8 @@ def dump(outfile, resources, included_kinds, app_name, app_uid,
   to_be_dumped = []
   for resource in resources:
     if included_kinds is None or resource["kind"] in included_kinds:
-      log("Application '{:s}' owns '{:s}/{:s}'".format(
-          app_name, resource["kind"], resource["metadata"]["name"]))
+      log.info("Application '{:s}' owns '{:s}/{:s}'", app_name,
+               resource["kind"], resource["metadata"]["name"])
       resource = copy.deepcopy(resource)
       set_resource_ownership(
           app_uid=app_uid,
@@ -121,11 +121,6 @@ def dump(outfile, resources, included_kinds, app_name, app_uid,
           resource=resource)
     to_be_dumped.append(resource)
   yaml.safe_dump_all(to_be_dumped, outfile, default_flow_style=False, indent=2)
-
-
-def log(msg):
-  sys.stderr.write("{}\n".format(msg))
-  sys.stderr.flush()
 
 
 if __name__ == "__main__":

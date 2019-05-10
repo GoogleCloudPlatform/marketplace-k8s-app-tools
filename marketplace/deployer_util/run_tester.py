@@ -14,12 +14,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import sys
 import time
+import log_util as log
 
 from argparse import ArgumentParser
 from bash_util import Command
 from bash_util import CommandException
+from constants import LOG_SMOKE_TEST
 from dict_util import deep_get
 from yaml_util import load_resources_yaml
 
@@ -33,13 +34,18 @@ def main():
   parser.add_argument('--timeout', type=int, default=300)
   args = parser.parse_args()
 
-  Command(
-      '''
-      kubectl apply
-      --namespace="{}"
-      --filename="{}"
-      '''.format(args.namespace, args.manifest),
-      print_call=True)
+  try:
+    Command(
+        '''
+        kubectl apply
+        --namespace="{}"
+        --filename="{}"
+        '''.format(args.namespace, args.manifest),
+        print_call=True)
+  except CommandException as ex:
+    log.error("{} Failed to apply tester job. Reason: {}", LOG_SMOKE_TEST,
+              ex.message)
+    return
 
   resources = load_resources_yaml(args.manifest)
 
@@ -48,7 +54,7 @@ def main():
                                deep_get(resource_def, 'metadata', 'name'))
 
     if resource_def['kind'] != 'Pod':
-      log("INFO Skip '{}'".format(full_name))
+      log.info("Skip '{}'", full_name)
       continue
 
     start_time = time.time()
@@ -65,38 +71,39 @@ def main():
           '''.format(full_name, args.namespace),
             print_call=True).json()
       except CommandException as ex:
-        log(str(ex))
-        log("INFO retrying")
+        log.info(str(ex))
+        log.info("retrying")
         time.sleep(poll_interval)
         continue
 
       result = deep_get(resource, 'status', 'phase')
 
       if result == "Failed":
-        print_logs(full_name, args.namespace)
-        raise Exception("ERROR Tester '{}' failed".format(full_name))
+        print_tester_logs(full_name, args.namespace)
+        log.error("{} Tester '{}' failed.", LOG_SMOKE_TEST, full_name)
+        break
 
       if result == "Succeeded":
-        print_logs(full_name, args.namespace)
-        log("INFO Tester '{}' succeeded".format(full_name))
+        print_tester_logs(full_name, args.namespace)
+        log.info("{} Tester '{}' succeeded.", LOG_SMOKE_TEST, full_name)
         break
 
       if time.time() - start_time > tester_timeout:
-        print_logs(full_name, args.namespace)
-        raise Exception("ERROR Tester '{}' timeout".format(full_name))
+        print_tester_logs(full_name, args.namespace)
+        log.error("{} Tester '{}' timeout.", LOG_SMOKE_TEST, full_name)
 
       time.sleep(poll_interval)
 
 
-def print_logs(full_name, namespace):
-  log(
-      Command('''kubectl logs {} --namespace="{}"'''.format(
-          full_name, namespace)).output)
-
-
-def log(msg):
-  sys.stdout.write(msg + "\n")
-  sys.stdout.flush()
+def print_tester_logs(full_name, namespace):
+  try:
+    Command(
+        'kubectl logs {} --namespace="{}"'.format(full_name, namespace),
+        print_call=True,
+        print_result=True)
+  except CommandException as ex:
+    log.error(str(ex))
+    log.error("{} failed to get the tester logs.", LOG_SMOKE_TEST)
 
 
 if __name__ == "__main__":
