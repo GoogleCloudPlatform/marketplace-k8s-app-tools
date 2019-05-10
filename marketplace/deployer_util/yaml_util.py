@@ -15,9 +15,8 @@
 # limitations under the License.
 
 import copy
-import sys
-
 import yaml
+import log_util as log
 
 
 def load_yaml(filename):
@@ -60,7 +59,7 @@ def load_resources_yaml(filename):
   Returns:
     A list of structured kubernetes resources"""
 
-  log("Reading " + filename)
+  log.info("Reading " + filename)
   with open(filename, "r") as stream:
     content = stream.read()
     return parse_resources_yaml(content)
@@ -80,8 +79,3 @@ def parse_resources_yaml(content):
     if doc_yaml and 'kind' in doc_yaml:
       docs_yaml.append(doc_yaml)
   return docs_yaml
-
-
-def log(msg):
-  sys.stderr.write("{}\n".format(msg))
-  sys.stderr.flush()

@@ -67,6 +67,11 @@ extract_manifest "$data_dir"
 if [[ "$mode" = "test" ]]; then
   extract_manifest "$test_data_dir"
 
+  if [[ ! -e "$data_dir/extracted" ]]; then
+    echo "$LOG_SMOKE_TEST No test charts declared."
+    continue
+  fi
+
   overlay_test_files.py \
     --manifest "$data_dir/extracted" \
     --test_manifest "$test_data_dir/extracted"
