@@ -102,6 +102,13 @@ class ExpandConfigTest(unittest.TestCase):
           publishedVersionMetadata:
             releaseNote: Release note for 0.1.1
           images:
+            "":
+              properties:
+                image.full: {type: FULL}
+                image.registry: {type: REGISTRY}
+                image.registry_repo: {type: REPO_WITH_REGISTRY}
+                image.repo: {type: REPO_WITHOUT_REGISTRY}
+                image.tag: {type: TAG}
             i1:
               properties:
                 image.i1.full: {type: FULL}
@@ -121,6 +128,11 @@ class ExpandConfigTest(unittest.TestCase):
                                   schema)
     self.assertEqual(
         {
+            'image.full': 'gcr.io/app:0.1.1',
+            'image.tag': '0.1.1',
+            'image.registry': 'gcr.io',
+            'image.registry_repo': 'gcr.io/app',
+            'image.repo': 'app',
             'image.i1.full': 'gcr.io/app/i1:0.1.1',
             'image.i1.tag': '0.1.1',
             'image.i1.registry': 'gcr.io',

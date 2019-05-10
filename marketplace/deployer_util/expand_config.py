@@ -205,7 +205,11 @@ def generate_v2_image_properties(schema, values_dict, result):
                                'must be specified in values.yaml')
   tag = schema.x_google_marketplace.published_version
   for img in schema.x_google_marketplace.images.values():
-    registry_repo = '{}/{}'.format(repo_prefix, img.name)
+    if img.name:
+      # Allows an empty image name for legacy reason.
+      registry_repo = '{}/{}'.format(repo_prefix, img.name)
+    else:
+      registry_repo = repo_prefix
     registry, repo = registry_repo.split('/', 1)
     full = '{}:{}'.format(registry_repo, tag)
     for prop in img.properties.values():
