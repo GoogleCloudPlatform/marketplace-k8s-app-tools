@@ -14,4 +14,4 @@
 
 GOOGLE_CLOUD_TEST = 'marketplace.cloud.google.com/verification'
 
-LOG_SMOKE_TEST = 'LOG_SMOKE_TEST'
+LOG_SMOKE_TEST = 'SMOKE_TEST'
