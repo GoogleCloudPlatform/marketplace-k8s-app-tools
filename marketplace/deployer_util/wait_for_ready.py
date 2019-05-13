@@ -14,8 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import sys
 import time
+import log_util as log
 
 from argparse import ArgumentParser
 from bash_util import Command
@@ -30,8 +30,8 @@ def main():
   parser.add_argument('--timeout')
   args = parser.parse_args()
 
-  log("INFO Wait {} seconds for the application '{}' to get into ready state"
-      .format(args.timeout, args.name))
+  log.info("Wait {} seconds for the application '{}' to get into ready state",
+           args.timeout, args.name)
   previous_healthy = False
 
   min_time_before_healthy = 30
@@ -65,7 +65,7 @@ def main():
     if len(top_level_resources) == 0:
       raise Exception("ERROR no top level resources found")
 
-    log("INFO top level resources: {}".format(len(top_level_resources)))
+    log.info("Top level resources: {}", len(top_level_resources))
     healthy = True
     for resource in top_level_resources:
       healthy = is_healthy(resource)
@@ -73,12 +73,13 @@ def main():
         break
 
     if previous_healthy != healthy:
-      log("INFO Initialization: Found applications.app.k8s.io/{} ready status to be {}."
-          .format(args.name, healthy))
+      log.info(
+          "Initialization: Found applications.app.k8s.io/{} ready status to be {}.",
+          args.name, healthy)
       previous_healthy = healthy
       if healthy:
-        log("INFO Wait {} seconds to make sure app stays in healthy state."
-            .format(min_time_before_healthy))
+        log.info("Wait {} seconds to make sure app stays in healthy state.",
+                 min_time_before_healthy)
         healthy_start_time = time.time()
 
     if healthy:
@@ -92,11 +93,6 @@ def main():
           .format(args.timeout))
 
     time.sleep(poll_interval)
-
-
-def log(msg):
-  sys.stdout.write(msg + "\n")
-  sys.stdout.flush()
 
 
 def is_healthy(resource):
@@ -123,8 +119,8 @@ def is_deployment_ready(resource):
   if total_replicas(resource) == ready_replicas(resource):
     return True
 
-  log("INFO Deployment '{}' replicas are not ready: {}/{}".format(
-      name(resource), ready_replicas(resource), total_replicas(resource)))
+  log.info("Deployment '{}' replicas are not ready: {}/{}", name(resource),
+           ready_replicas(resource), total_replicas(resource))
   return False
 
 
@@ -132,8 +128,8 @@ def is_sts_ready(resource):
   if total_replicas(resource) == ready_replicas(resource):
     return True
 
-  log("INFO StatefulSet '{}' replicas are not ready: {}/{}".format(
-      name(resource), ready_replicas(resource), total_replicas(resource)))
+  log.info("StatefulSet '{}' replicas are not ready: {}/{}", name(resource),
+           ready_replicas(resource), total_replicas(resource))
   return False
 
 
@@ -141,7 +137,7 @@ def is_pod_ready(resource):
   if status_condition_is_true('Ready', resource):
     return True
 
-  log("INFO Pod/{} is not ready.".format(name(resource)))
+  log.info("Pod/{} is not ready.", name(resource))
   return False
 
 
@@ -153,7 +149,7 @@ def is_job_ready(resource):
   if status_condition_is_true('Complete', resource):
     return True
 
-  log("INFO Job/{} is not ready.".format(name(resource)))
+  log.info("Job/{} is not ready.", name(resource))
   return False
 
 
@@ -161,8 +157,8 @@ def is_pvc_ready(resource):
   if phase(resource) == "Bound":
     return True
 
-  log("INFO pvc/{} phase is '{}'. Expected: 'Bound'".format(
-      name(resource), phase(resource)))
+  log.info("pvc/{} phase is '{}'. Expected: 'Bound'", name(resource),
+           phase(resource))
   return False
 
 
@@ -173,7 +169,7 @@ def is_service_ready(resource):
   if service_ip(resource):
     return True
 
-  log("INFO service/{} service ip is not ready.".format(name(resource)))
+  log.info("service/{} service ip is not ready.", name(resource))
   return False
 
 
@@ -181,7 +177,7 @@ def is_ingress_ready(resource):
   if 'ingress' in resource['status']['loadBalancer']:
     return True
 
-  log("INFO Ingress/{} is not ready.".format(name(resource)))
+  log.info("Ingress/{} is not ready.", name(resource))
   return False
 
 

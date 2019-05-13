@@ -14,12 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from __future__ import absolute_import
-
-import google.cloud.storage
-
-# TODO(trironkk): Test.
-# TODO(trironkk): Cache clients for subsequent invocations.
+from bash_util import Command
 
 
 class InvalidPath(Exception):
@@ -37,17 +32,7 @@ def load(path):
 
 def _gcs_load(path):
   """Returns a gcs object's contents as a string."""
-  _, _, bucket_name, blob_name = path.split('/', 3)
-
-  client = _gcs_client()
-  bucket = client.get_bucket(bucket_name)
-  blob = bucket.blob(blob_name)
-  return blob.download_as_string()
-
-
-def _gcs_client():
-  """Returns a google cloud storage client."""
-  return google.cloud.storage.client.Client()
+  return Command("gsutil cat {}".format(path)).output
 
 
 def _file_load(path):

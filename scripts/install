@@ -31,6 +31,10 @@ case $i in
     entrypoint="${i#*=}"
     shift
     ;;
+  --image_pull_secret=*)
+    image_pull_secret="${i#*=}"
+    shift
+    ;;
   *)
     >&2 echo "Unrecognized flag: $i"
     exit 1
@@ -62,6 +66,13 @@ namespace="$(print_config.py \
     --xtype NAMESPACE)"
 app_version="$(print_app_api_version.py)"
 
+if [[ -z "$image_pull_secret" ]]; then
+  # Check the namespace annotation.
+  image_pull_secret="$(kubectl get namespace ${namespace} --ignore-not-found -o json \
+    | jq '.metadata.annotations["marketplace.cloud.google.com/imagePullSecret"]' \
+    | jq --raw-output 'select(. != null)')"
+fi
+
 # Create Application instance.
 kubectl apply --namespace="$namespace" --filename=- <<EOF
 apiVersion: "app.k8s.io/${app_version}"
@@ -87,6 +98,7 @@ echo "${parameters}" \
     --values_mode=stdin \
     --deployer_image="${deployer}" \
     --deployer_entrypoint="${entrypoint}" \
+    --image_pull_secret="${image_pull_secret}" \
   | set_app_labels.py \
     --manifests=- \
     --dest=- \

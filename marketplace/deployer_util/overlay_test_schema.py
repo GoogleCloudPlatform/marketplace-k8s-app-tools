@@ -16,8 +16,11 @@
 
 import yaml
 import os.path
+import log_util as log
 
 from argparse import ArgumentParser
+from constants import LOG_SMOKE_TEST
+from dict_util import deep_get
 from yaml_util import load_yaml
 
 
@@ -41,6 +44,12 @@ def main():
   dest = load_yaml(args.dest)
   if 'properties' in dest:
     for prop in orig['properties']:
+      if (deep_get(orig, 'properties', prop, 'x-google-marketplace', 'type') !=
+          deep_get(dest, 'properties', prop, 'x-google-marketplace', 'type')):
+        log.warn(
+            "{} Changing x-google-marketplace type is not allowed. Property: {}",
+            LOG_SMOKE_TEST, prop)
+        continue
       dest['properties'][prop] = orig['properties'][prop]
   else:
     dest['properties'] = orig['properties']

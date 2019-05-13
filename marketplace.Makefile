@@ -7,16 +7,22 @@ include common.Makefile
 include var.Makefile
 
 
+marketplace/build: .build/marketplace/dev \
+                   .build/marketplace/deployer/envsubst \
+                   .build/marketplace/deployer/helm \
+                   .build/marketplace/deployer/helm_tiller \
+                   .build/marketplace/deployer/helm_tiller_onbuild
+
+
 .build/marketplace: | .build
 	mkdir -p "$@"
 
 
 .build/marketplace/dev: \
 		.build/var/MARKETPLACE_TOOLS_TAG \
-		marketplace/deployer_util/* \
-		marketplace/dev/* \
-		marketplace.Makefile \
-		scripts/* \
+		$(shell find marketplace/deployer_util -type f) \
+		$(shell find marketplace/dev -type f) \
+		$(shell find scripts -type f) \
 		| .build/marketplace
 	$(call print_target)
 	docker build \
@@ -32,8 +38,8 @@ include var.Makefile
 
 .build/marketplace/deployer/envsubst: \
 		.build/var/MARKETPLACE_TOOLS_TAG \
-		marketplace/deployer_envsubst_base/* \
-		marketplace/deployer_util/* \
+		$(shell find marketplace/deployer_util -type f) \
+		$(shell find marketplace/deployer_envsubst_base -type f) \
 		| .build/marketplace/deployer
 	$(call print_target)
 	docker build \
@@ -44,9 +50,9 @@ include var.Makefile
 
 
 .build/marketplace/deployer/helm: \
-		marketplace/deployer_util/* \
-		marketplace/deployer_helm_base/* \
 		.build/var/MARKETPLACE_TOOLS_TAG \
+		$(shell find marketplace/deployer_util -type f) \
+		$(shell find marketplace/deployer_helm_base -type f) \
 		| .build/marketplace/deployer
 	$(call print_target)
 	docker build \
@@ -58,8 +64,8 @@ include var.Makefile
 
 .build/marketplace/deployer/helm_tiller: \
 		.build/var/MARKETPLACE_TOOLS_TAG \
-		marketplace/deployer_helm_tiller_base/* \
-		marketplace/deployer_util/* \
+		$(shell find marketplace/deployer_util -type f) \
+		$(shell find marketplace/deployer_helm_tiller_base -type f) \
 		| .build/marketplace/deployer
 	$(call print_target)
 	docker build \
@@ -72,8 +78,8 @@ include var.Makefile
 .build/marketplace/deployer/helm_tiller_onbuild: \
 		.build/marketplace/deployer/helm_tiller \
 		.build/var/MARKETPLACE_TOOLS_TAG \
-		marketplace/deployer_helm_tiller_base/onbuild/* \
-		marketplace/deployer_util/* \
+		$(shell find marketplace/deployer_util -type f) \
+		$(shell find marketplace/deployer_helm_tiller_base/onbuild -type f) \
 		| .build/marketplace/deployer
 	$(call print_target)
 	docker build \
