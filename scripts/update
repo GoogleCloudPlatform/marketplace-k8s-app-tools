@@ -14,6 +14,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+################################################################################
+# Usage:
+#   update --name NAME --namespace NAMESPACE [--version VERSION]
+#
+# Update an existing KALM enabled application to a new version.
+# If no --version is specified, it uses the latest available version
+# on the Release object.
+################################################################################
+
 set -eo pipefail
 
 for i in "$@"
@@ -52,6 +61,11 @@ if [[ -z "$version" ]]; then
       | jq -r '.status.availableVersions[0].version')"
   if [[ "$current_version" == "$version" ]]; then
     >&2 echo "No new version found. Current version: $current_version"
+    exit
+  fi
+else
+  if [[ "$current_version" == "$version" ]]; then
+    >&2 echo "Already at version $current_version"
     exit
   fi
 fi
