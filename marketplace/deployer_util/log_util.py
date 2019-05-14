@@ -1,3 +1,5 @@
+#!/usr/bin/env python2
+#
 # Copyright 2018 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,6 +14,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-GOOGLE_CLOUD_TEST = 'marketplace.cloud.google.com/verification'
+import sys
 
-LOG_SMOKE_TEST = 'LOG_SMOKE_TEST'
+
+def info(msg, *args):
+  log("INFO " + msg, *args)
+
+
+def warn(msg, *args):
+  log("WARNING " + msg, *args)
+
+
+def error(msg, *args):
+  log("ERROR " + msg, *args)
+
+
+def log(msg, *args):
+  sys.stderr.write(msg.format(*args))
+  sys.stderr.write('\n')
+  sys.stderr.flush()

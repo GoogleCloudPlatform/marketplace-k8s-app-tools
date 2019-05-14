@@ -39,6 +39,7 @@ handle_failure() {
 }
 trap "handle_failure" EXIT
 
+LOG_SMOKE_TEST="LOG_SMOKE_TEST"
 test_schema="/data-test/schema.yaml"
 if [[ -e "$test_schema" ]]; then
   overlay_test_schema.py \
@@ -103,6 +104,8 @@ if [[ -e "$tester_manifest" ]]; then
     --namespace $NAMESPACE \
     --manifest $tester_manifest \
     --timeout ${TESTER_TIMEOUT:-300}
+else
+  echo "$LOG_SMOKE_TEST No tester manifest found at $tester_manifest."
 fi
 
 clean_iam_resources.sh
