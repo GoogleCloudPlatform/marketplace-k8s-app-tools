@@ -25,6 +25,5 @@ set -eox pipefail
 # app.kubernetes.io/component=kalm.marketplace.cloud.google.com label.
 kubectl delete --namespace="$NAMESPACE" \
   ServiceAccount,RoleBinding \
-  -l 'app.kubernetes.io/component'='deployer.marketplace.cloud.google.com' \
-  -l 'app.kubernetes.io/name'="$NAME" \
+  -l 'app.kubernetes.io/component'='deployer.marketplace.cloud.google.com','app.kubernetes.io/name'="$NAME" \
   --ignore-not-found
