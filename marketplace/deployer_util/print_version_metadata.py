@@ -65,12 +65,14 @@ def main():
 
 
 def _ordered_dump(data, stream=None, dumper=yaml.Dumper, **kwds):
+
   class OrderedDumper(dumper):
     pass
+
   def _dict_representer(dumper, data):
     return dumper.represent_mapping(
-        yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG,
-        data.items())
+        yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, data.items())
+
   OrderedDumper.add_representer(collections.OrderedDict, _dict_representer)
   return yaml.dump(data, stream, OrderedDumper, **kwds)
 
