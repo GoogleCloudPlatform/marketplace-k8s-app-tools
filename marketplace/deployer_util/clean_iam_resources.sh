@@ -19,17 +19,11 @@ set -eox pipefail
 [[ -z "$NAME" ]] && echo "NAME must be set" && exit 1
 [[ -z "$NAMESPACE" ]] && echo "NAMESPACE must be set" && exit 1
 
-# Clean up IAM resources.
-kubectl delete --namespace="$NAMESPACE" --filename=- <<EOF
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: "${NAME}-deployer-sa"
-  namespace: "${NAMESPACE}"
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name: "${NAME}-deployer-rb"
-  namespace: "${NAMESPACE}"
-EOF
+# Delete the service account and RBAC objects by labels.
+# Note that only resources of a one-shot deployer have this label.
+# Resources of a KALM-managed deployer have
+# app.kubernetes.io/component=kalm.marketplace.cloud.google.com label.
+kubectl delete --namespace="$NAMESPACE" \
+  ServiceAccount,RoleBinding \
+  -l 'app.kubernetes.io/component'='deployer.marketplace.cloud.google.com','app.kubernetes.io/name'="$NAME" \
+  --ignore-not-found

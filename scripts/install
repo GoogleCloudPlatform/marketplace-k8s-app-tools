@@ -31,6 +31,10 @@ case $i in
     entrypoint="${i#*=}"
     shift
     ;;
+  --gcs_repo=*)
+    gcs_repo="${i#*=}"
+    shift
+    ;;
   --image_pull_secret=*)
     image_pull_secret="${i#*=}"
     shift
@@ -98,6 +102,7 @@ echo "${parameters}" \
     --values_mode=stdin \
     --deployer_image="${deployer}" \
     --deployer_entrypoint="${entrypoint}" \
+    --gcs_repo="${gcs_repo}" \
     --image_pull_secret="${image_pull_secret}" \
   | set_app_labels.py \
     --manifests=- \
