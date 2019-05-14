@@ -61,3 +61,22 @@ class ProvisionTest(unittest.TestCase):
         provision.inject_deployer_image_properties(values, schema,
                                                    deployer_image),
         {"deployer_image": deployer_image})
+
+  def test_deployer_image_to_repo_prefix(self):
+    self.assertEqual(
+        'gcr.io/test',
+        provision.deployer_image_to_repo_prefix('gcr.io/test/deployer'))
+    self.assertEqual(
+        'gcr.io/test',
+        provision.deployer_image_to_repo_prefix('gcr.io/test/deployer:0.1.1'))
+    self.assertEqual(
+        'gcr.io/test',
+        provision.deployer_image_to_repo_prefix(
+            'gcr.io/test/deployer@sha256:0123456789abcdef'))
+    with self.assertRaises(Exception):
+      provision.deployer_image_to_repo_prefix('gcr.io/test/test')
+    with self.assertRaises(Exception):
+      provision.deployer_image_to_repo_prefix(
+          'gcr.io/test/test@sha256:0123456789abcdef')
+    with self.assertRaises(Exception):
+      provision.deployer_image_to_repo_prefix('gcr.io/test/test:0.1.1')

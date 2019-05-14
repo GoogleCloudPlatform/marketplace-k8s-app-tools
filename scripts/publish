@@ -41,17 +41,25 @@ done
 # Remove trailing slash.
 gcs_repo=${gcs_repo%/}
 
-# Extract schema and values files.
+# Extract the schema file.
 docker run \
-    -i \
-    --entrypoint /bin/bash \
-    --rm "${deployer_image}" \
-    -c 'cat /data/schema.yaml' \
-> /data/schema.yaml
+  -i \
+  --entrypoint /bin/bash \
+  --rm "${deployer_image}" \
+  -c 'cat /data/schema.yaml' \
+  > /data/schema.yaml
+
+# Resolve the digest of the image
+deployer_image_digest="$( \
+  docker inspect --format='{{index .RepoDigests 0}}' "${deployer_image}" \
+  | cut -d : -f 2)"
 
 mkdir -p /tmp/versions
 published_version="$(print_published_version.py)"
-print_version_metadata.py --deployer_image "${deployer_image}" > "/tmp/versions/${published_version}.yaml"
+print_version_metadata.py \
+  --deployer_image "${deployer_image}" \
+  --deployer_image_digest "${deployer_image_digest}" \
+  > "/tmp/versions/${published_version}.yaml"
 
 gsutil cp "/tmp/versions/${published_version}.yaml" "${gcs_repo}/"
 echo "Version is available at ${gcs_repo}/${published_version}.yaml"
