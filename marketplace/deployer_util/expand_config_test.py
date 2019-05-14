@@ -47,7 +47,7 @@ class ExpandConfigTest(unittest.TestCase):
     self.assertRaises(expand_config.InvalidProperty, lambda: expand_config.
                       expand({'p1': 3}, schema))
 
-  def test_generate_properties_for_image_split_by_colon(self):
+  def test_generate_properties_for_v1_image_split_by_colon(self):
     schema = config_helper.Schema.load_yaml("""
         applicationApiVersion: v1beta1
         properties:
@@ -69,7 +69,7 @@ class ExpandConfigTest(unittest.TestCase):
             'i1.after': 'bar',
         }, result)
 
-  def test_generate_properties_for_image_split_to_registry_repo_tag(self):
+  def test_generate_properties_for_v1_image_split_to_registry_repo_tag(self):
     schema = config_helper.Schema.load_yaml("""
         applicationApiVersion: v1beta1
         properties:
@@ -91,6 +91,58 @@ class ExpandConfigTest(unittest.TestCase):
             'i1.registry': 'gcr.io',
             'i1.repo': 'foo/bar',
             'i1.tag': 'baz',
+        }, result)
+
+  def test_generate_properties_for_v2_images(self):
+    schema = config_helper.Schema.load_yaml("""
+        x-google-marketplace:
+          schemaVersion: v2
+          applicationApiVersion: v1beta1
+          publishedVersion: '0.1.1'
+          publishedVersionMetadata:
+            releaseNote: Release note for 0.1.1
+          images:
+            "":
+              properties:
+                image.full: {type: FULL}
+                image.registry: {type: REGISTRY}
+                image.registry_repo: {type: REPO_WITH_REGISTRY}
+                image.repo: {type: REPO_WITHOUT_REGISTRY}
+                image.tag: {type: TAG}
+            i1:
+              properties:
+                image.i1.full: {type: FULL}
+                image.i1.registry: {type: REGISTRY}
+                image.i1.registry_repo: {type: REPO_WITH_REGISTRY}
+                image.i1.repo: {type: REPO_WITHOUT_REGISTRY}
+                image.i1.tag: {type: TAG}
+            i2:
+              properties:
+                image.i2.full: {type: FULL}
+                image.i2.registry: {type: REGISTRY}
+                image.i2.registry_repo: {type: REPO_WITH_REGISTRY}
+                image.i2.repo: {type: REPO_WITHOUT_REGISTRY}
+                image.i2.tag: {type: TAG}
+        """)
+    result = expand_config.expand({'__image_repo_prefix__': 'gcr.io/app'},
+                                  schema)
+    self.assertEqual(
+        {
+            'image.full': 'gcr.io/app:0.1.1',
+            'image.tag': '0.1.1',
+            'image.registry': 'gcr.io',
+            'image.registry_repo': 'gcr.io/app',
+            'image.repo': 'app',
+            'image.i1.full': 'gcr.io/app/i1:0.1.1',
+            'image.i1.tag': '0.1.1',
+            'image.i1.registry': 'gcr.io',
+            'image.i1.registry_repo': 'gcr.io/app/i1',
+            'image.i1.repo': 'app/i1',
+            'image.i2.full': 'gcr.io/app/i2:0.1.1',
+            'image.i2.tag': '0.1.1',
+            'image.i2.registry': 'gcr.io',
+            'image.i2.registry_repo': 'gcr.io/app/i2',
+            'image.i2.repo': 'app/i2',
         }, result)
 
   def test_generate_properties_for_string_base64_encoded(self):

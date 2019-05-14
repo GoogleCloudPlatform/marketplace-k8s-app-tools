@@ -14,6 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import collections
 import datetime
 import sys
 import yaml
@@ -35,6 +36,10 @@ def main():
       '--deployer_image',
       required=True,
       help='The full deployer image, required')
+  parser.add_argument(
+      '--deployer_image_digest',
+      required=True,
+      help='The digest of the deployer image, required')
   args = parser.parse_args()
 
   schema = schema_values_common.load_schema(args)
@@ -44,18 +49,32 @@ def main():
     raise Exception('schema.yaml must be in v2 version')
 
   x = schema.x_google_marketplace
-  meta = {
-      'releaseNote': x.published_version_meta.release_note,
-      'releaseDate': _utcnow_timestamp(),
-      'url': args.deployer_image,
-  }
+  meta = collections.OrderedDict([
+      ('releaseDate', _utcnow_timestamp()),
+      ('url', args.deployer_image),
+      ('digest', args.deployer_image_digest),
+      ('releaseNote', x.published_version_meta.release_note),
+  ])
   if x.published_version_meta.release_types:
     meta['releaseTypes'] = x.published_version_meta.release_types
   if x.published_version_meta.recommended is not None:
     meta['recommended'] = x.published_version_meta.recommended
 
-  sys.stdout.write(yaml.safe_dump(meta, default_flow_style=False, indent=2))
+  sys.stdout.write(_ordered_dump(meta, default_flow_style=False, indent=2))
   sys.stdout.flush()
+
+
+def _ordered_dump(data, stream=None, dumper=yaml.Dumper, **kwds):
+
+  class OrderedDumper(dumper):
+    pass
+
+  def _dict_representer(dumper, data):
+    return dumper.represent_mapping(
+        yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, data.items())
+
+  OrderedDumper.add_representer(collections.OrderedDict, _dict_representer)
+  return yaml.dump(data, stream, OrderedDumper, **kwds)
 
 
 def _utcnow_timestamp():
