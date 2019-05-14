@@ -162,7 +162,7 @@ def provision_kalm(schema, gcs_repo, app_name, namespace, deployer_image,
       'app.kubernetes.io/component': 'kalm.marketplace.cloud.google.com',
   }
 
-  secret = make_v2_secret(schema, deployer_image, namespace, app_name, labels,
+  secret = make_v2_config(schema, deployer_image, namespace, app_name, labels,
                           app_params)
 
   repo = {
@@ -259,7 +259,7 @@ def provision_deployer(schema, app_name, namespace, deployer_image,
   }
 
   if schema.is_v2():
-    config = make_v2_secret(schema, deployer_image, namespace, app_name, labels,
+    config = make_v2_config(schema, deployer_image, namespace, app_name, labels,
                             app_params)
     pod_spec = {
         'serviceAccountName':
@@ -288,7 +288,7 @@ def provision_deployer(schema, app_name, namespace, deployer_image,
         },]
     }
   else:
-    config = make_v1_config_map(schema, namespace, app_name, labels, app_params)
+    config = make_v1_config(schema, namespace, app_name, labels, app_params)
     pod_spec = {
         'serviceAccountName':
             sa_name,
@@ -375,7 +375,7 @@ def provision_deployer(schema, app_name, namespace, deployer_image,
   ]
 
 
-def make_v1_config_map(schema, namespace, app_name, labels, app_params):
+def make_v1_config(schema, namespace, app_name, labels, app_params):
   return {
       'apiVersion': 'v1',
       'kind': 'ConfigMap',
@@ -388,7 +388,7 @@ def make_v1_config_map(schema, namespace, app_name, labels, app_params):
   }
 
 
-def make_v2_secret(schema, deployer_image, namespace, app_name, labels,
+def make_v2_config(schema, deployer_image, namespace, app_name, labels,
                    app_params):
   return {
       'apiVersion': 'v1',
