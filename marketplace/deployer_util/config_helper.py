@@ -217,6 +217,9 @@ class SchemaXGoogleMarketplace:
         dictionary, 'publishedVersionMetadata', lambda v: SchemaVersionMeta(v),
         'x-google-marketplace.publishedVersionMetadata is required')
 
+    self._managed_updates = SchemaManagedUpdates(
+        dictionary.get('managedUpdates', {}))
+
     images = _must_get(dictionary, 'images',
                        'x-google-marketplace.images is required')
     self._images = {k: SchemaImage(k, v) for k, v in images.iteritems()}
@@ -244,8 +247,23 @@ class SchemaXGoogleMarketplace:
   def images(self):
     return self._images
 
+  @property
+  def managed_updates(self):
+    return self._managed_updates
+
   def is_v2(self):
     return self._schema_version == _SCHEMA_VERSION_2
+
+
+class SchemaManagedUpdates:
+  """Accesses managedUpdates."""
+
+  def __init__(self, dictionary):
+    self._kalm_supported = dictionary.get('kalmSupported', False)
+
+  @property
+  def kalm_supported(self):
+    return self._kalm_supported
 
 
 class SchemaClusterConstraints:
