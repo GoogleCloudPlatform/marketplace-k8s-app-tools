@@ -7,6 +7,9 @@
 # been built by cloudbuild.yaml, which should be triggered on
 # every new commit.
 
+substitutions:
+  _STAGING_PROJECT_ID: null
+
 steps:
 
 - id: &PublishImages Publish Images
