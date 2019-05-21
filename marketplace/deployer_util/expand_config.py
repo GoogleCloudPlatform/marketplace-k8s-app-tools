@@ -110,6 +110,8 @@ def expand(values_dict, schema, app_uid=''):
       elif prop.xtype == config_helper.XTYPE_INGRESS_AVAILABLE:
         # For backward compatibility.
         v = True
+      elif prop.xtype == config_helper.XTYPE_DEPLOYER_IMAGE:
+        v = maybe_derive_deployer_image(schema, values_dict)
       elif prop.default is not None:
         v = prop.default
 
@@ -161,6 +163,17 @@ def validate_value_types(values, schema):
       raise InvalidProperty(
           'Property {} is expected to be of type {}, but has value: {}'.format(
               k, prop.type, v))
+
+
+def maybe_derive_deployer_image(schema, values_dict):
+  if not schema.is_v2():
+    return None
+  repo_prefix = values_dict.get(_IMAGE_REPO_PREFIX_PROPERTY_NAME, None)
+  if not repo_prefix:
+    raise MissingRequiredValue('A valid value for __image_repo_prefix__ '
+                               'must be specified in values.yaml')
+  tag = schema.x_google_marketplace.published_version
+  return '{}/{}:{}'.format(repo_prefix, 'deployer', tag)
 
 
 def generate_properties_for_appuid(prop, value, result):
