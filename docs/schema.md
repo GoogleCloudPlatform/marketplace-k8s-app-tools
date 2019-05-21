@@ -223,6 +223,23 @@ Explanation of what the property is or what is used for. Be mindful of good expl
 
 If user does not provide a value, `default` will be used.
 
+### enum
+
+Array property, that will create combo box with a list of provided values, instead of free form input field.
+
+```yaml
+  some.property:
+    type: string
+    title: Test property
+    description: My Test Property
+    enum:
+    - 'Value 1'
+    - 'Value 2'
+    - 'Value 3'
+```
+
+![Enum property UI](images/enum-property-ui.png)
+
 ### minimum
 
 The value has to be greater or equal than `minimum`.
