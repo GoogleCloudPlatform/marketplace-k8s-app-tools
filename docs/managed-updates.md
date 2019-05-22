@@ -31,10 +31,16 @@ Create a GCS bucket to house the published version metadata. This SHOULD
 be a bucket in the same project you're publishing images and SHOULD be
 dedicated to this process.
 
-The bucket MUST be set to be publicly _readable and listable_. See the
-[doc](https://cloud.google.com/storage/docs/access-control/making-data-public).
-Specifically, the following permissions should be set for `allUsers`
-on the bucket:
+```shell
+gsutil mb gs://your-bucket
+```
+
+The bucket MUST allow public access. This can be done using the following
+command:
+
+```shell
+gsutil iam ch allUsers:objectViewer gs://your-bucket
+```
 
 ### Install KALM controller and CRDs
 
@@ -82,7 +88,7 @@ Note that end users consuming your application via the public Marketplace
 will pull the version metadata from the Marketplace's public GCS bucket instead
 of the one you use during development, i.e. `your-bucket`.
 
-p## Image organization
+## Image organization
 
 Requirements about images remain the same. One addition is that images belonging
 to the same release MUST be tagged with that release version, in addition to the
@@ -222,7 +228,7 @@ mpdev publish \
 ```
 
 This should print out the URL of the published metadata file. Its location
-can be determined deterministically from the GCS repo and the version.
+is deterministically derived from the GCS repo and the version.
 You can now install the application at this version:
 
 ```shell
