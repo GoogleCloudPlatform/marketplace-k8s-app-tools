@@ -145,6 +145,32 @@ class ExpandConfigTest(unittest.TestCase):
             'image.i2.repo': 'app/i2',
         }, result)
 
+  def test_deployer_image_in_v2(self):
+    schema = config_helper.Schema.load_yaml("""
+        x-google-marketplace:
+          schemaVersion: v2
+          applicationApiVersion: v1beta1
+          publishedVersion: '0.1.1'
+          publishedVersionMetadata:
+            releaseNote: Release note for 0.1.1
+          images:
+            "":
+              properties:
+                image.full: {type: FULL}
+        properties:
+          deployerImage:
+            type: string
+            x-google-marketplace:
+              type: DEPLOYER_IMAGE
+        """)
+    result = expand_config.expand({'__image_repo_prefix__': 'gcr.io/app'},
+                                  schema)
+    self.assertEqual(
+        {
+            'image.full': 'gcr.io/app:0.1.1',
+            'deployerImage': 'gcr.io/app/deployer:0.1.1',
+        }, result)
+
   def test_generate_properties_for_string_base64_encoded(self):
     schema = config_helper.Schema.load_yaml("""
         applicationApiVersion: v1beta1

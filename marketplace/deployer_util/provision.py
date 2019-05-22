@@ -36,7 +36,7 @@ def main():
   schema_values_common.add_to_argument_parser(parser)
   parser.add_argument('--deployer_image', required=True)
   parser.add_argument('--deployer_entrypoint', default=None)
-  parser.add_argument('--gcs_repo', default=None)
+  parser.add_argument('--version_repo', default=None)
   parser.add_argument('--image_pull_secret', default=None)
   args = parser.parse_args()
 
@@ -47,12 +47,12 @@ def main():
       values,
       deployer_image=args.deployer_image,
       deployer_entrypoint=args.deployer_entrypoint,
-      gcs_repo=args.gcs_repo,
+      version_repo=args.version_repo,
       image_pull_secret=args.image_pull_secret)
   print(yaml.safe_dump_all(manifests, default_flow_style=False, indent=2))
 
 
-def process(schema, values, deployer_image, deployer_entrypoint, gcs_repo,
+def process(schema, values, deployer_image, deployer_entrypoint, version_repo,
             image_pull_secret):
   props = {}
   manifests = []
@@ -107,7 +107,7 @@ def process(schema, values, deployer_image, deployer_entrypoint, gcs_repo,
       schema.x_google_marketplace.managed_updates.kalm_supported):
     manifests += provision_kalm(
         schema,
-        gcs_repo=gcs_repo,
+        version_repo=version_repo,
         app_name=app_name,
         namespace=namespace,
         deployer_image=deployer_image,
@@ -150,11 +150,11 @@ def provision_from_storage(key, value, app_name, namespace):
   return resource_name, add_preprovisioned_labels([manifest], key)
 
 
-def provision_kalm(schema, gcs_repo, app_name, namespace, deployer_image,
+def provision_kalm(schema, version_repo, app_name, namespace, deployer_image,
                    deployer_entrypoint, app_params, image_pull_secret):
   """Provisions KALM resource for installing the application."""
-  if not gcs_repo:
-    raise Exception('A valid --gcs_repo must be specified')
+  if not version_repo:
+    raise Exception('A valid --version_repo must be specified')
 
   sa_name = dns1123_name('{}-deployer-sa'.format(app_name))
 
@@ -175,7 +175,7 @@ def provision_kalm(schema, gcs_repo, app_name, namespace, deployer_image,
       },
       'spec': {
           'type': 'Deployer',
-          'url': gcs_repo,
+          'url': version_repo,
       },
   }
 
