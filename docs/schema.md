@@ -225,7 +225,7 @@ If user does not provide a value, `default` will be used.
 
 ### enum
 
-Array property, that will create combo box with a list of provided values, instead of free form input field.
+Specifies a list of values, which will be rendered as a dropdown list in the UI form, for the user to select from. Only values in this list are considered valid for this property.
 
 ```yaml
   some.property:
