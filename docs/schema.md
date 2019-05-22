@@ -223,6 +223,23 @@ Explanation of what the property is or what is used for. Be mindful of good expl
 
 If user does not provide a value, `default` will be used.
 
+### enum
+
+Specifies a list of values, which will be rendered as a dropdown list in the UI form, for the user to select from. Only values in this list are considered valid for this property.
+
+```yaml
+  some.property:
+    type: string
+    title: Test property
+    description: My Test Property
+    enum:
+    - 'Value 1'
+    - 'Value 2'
+    - 'Value 3'
+```
+
+![Enum property UI](images/enum-property-ui.png)
+
 ### minimum
 
 The value has to be greater or equal than `minimum`.
