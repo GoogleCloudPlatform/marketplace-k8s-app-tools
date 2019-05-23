@@ -39,7 +39,7 @@ handle_failure() {
 }
 trap "handle_failure" EXIT
 
-LOG_SMOKE_TEST="LOG_SMOKE_TEST"
+LOG_SMOKE_TEST="SMOKE_TEST"
 test_schema="/data-test/schema.yaml"
 if [[ -e "$test_schema" ]]; then
   overlay_test_schema.py \
