@@ -1,10 +1,5 @@
 # Managed Updates (Alpha)
 
-The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL
-NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED",  "MAY", and
-"OPTIONAL" in this document are to be interpreted as described in
-RFC 2119.
-
 ## Overview
 
 This is a guide to enable managed updates for your Kubernetes application on
@@ -31,7 +26,7 @@ For steps to install the tools, see [the `mpdev` prerequisites](tool-prerequisit
 
 Create a Google Cloud Storage (GCS) bucket, where you store the metadata for your
 software version. The bucket should be in the same project that you're publishing
-your container images to, and and should be dedicated to this process.
+your container images to, and should be dedicated to this process.
 
 Use this command to create the bucket:
 
