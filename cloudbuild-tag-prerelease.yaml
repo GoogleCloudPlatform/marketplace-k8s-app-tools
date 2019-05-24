@@ -2,6 +2,9 @@
 # This is different from cloudbuilt-tag.yaml in that it does not
 # update the "latest" tag in the GCR repos.
 
+substitutions:
+  _STAGING_PROJECT_ID: null
+
 steps:
 
 - id: &PublishImages Publish Images
