@@ -36,6 +36,10 @@ timeout: 1200s # 20m
 options:
   machineType: 'N1_HIGHCPU_8'
 
+substitutions:
+  _CLUSTER_NAME: null
+  _CLUSTER_LOCATION: null
+
 steps:
 
 - id: &BuildDev Build dev
