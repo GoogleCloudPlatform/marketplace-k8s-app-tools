@@ -17,15 +17,13 @@
 import base64
 import json
 import os
-import OpenSSL
-import random
 from argparse import ArgumentParser
 
 import yaml
 
 import config_helper
+import property_generator
 import schema_values_common
-from password import GeneratePassword
 
 _PROG_HELP = """
 Modifies the configuration parameter files in a directory
@@ -98,12 +96,11 @@ def expand(values_dict, schema, app_uid=''):
     # thus is eligible for auto-generation.
     if v is None:
       if prop.password:
-        v = generate_password(prop.password)
+        v = property_generator.generate_password(prop.password)
       elif prop.application_uid:
         v = app_uid or ''
-        generate_properties_for_appuid(prop, app_uid, generated)
       elif prop.tls_certificate:
-        v = generate_tls_certificate()
+        v = property_generator.generate_tls_certificate()
       elif prop.xtype == config_helper.XTYPE_ISTIO_ENABLED:
         # For backward compatibility.
         v = False
@@ -132,6 +129,8 @@ def expand(values_dict, schema, app_uid=''):
           raise InvalidProperty(
               'Invalid value for TLS_CERTIFICATE property {}: {}'.format(k, v))
         generate_properties_for_tls_certificate(prop, v, generated)
+      elif prop.application_uid:
+        generate_properties_for_appuid(prop, v, generated)
 
     if v is not None:
       result[k] = v
@@ -245,37 +244,6 @@ def generate_v2_image_properties(schema, values_dict, result):
 def generate_properties_for_string(prop, value, result):
   if prop.string.base64_encoded:
     result[prop.string.base64_encoded] = base64.b64encode(value)
-
-
-def generate_password(config):
-  pw = GeneratePassword(config.length, config.include_symbols)
-  if config.base64:
-    pw = base64.b64encode(pw)
-  return pw
-
-
-def generate_tls_certificate():
-  cert_seconds_to_expiry = 60 * 60 * 24 * 365  # one year
-
-  key = OpenSSL.crypto.PKey()
-  key.generate_key(OpenSSL.crypto.TYPE_RSA, 2048)
-
-  cert = OpenSSL.crypto.X509()
-  cert.get_subject().OU = 'GCP Marketplace K8s App Tools'
-  cert.get_subject().CN = 'Temporary Certificate'
-  cert.gmtime_adj_notBefore(0)
-  cert.gmtime_adj_notAfter(cert_seconds_to_expiry)
-  cert.set_serial_number(random.getrandbits(64))
-  cert.set_issuer(cert.get_subject())
-  cert.set_pubkey(key)
-  cert.sign(key, 'sha256')
-
-  return json.dumps({
-      'private_key':
-          OpenSSL.crypto.dump_privatekey(OpenSSL.crypto.FILETYPE_PEM, key),
-      'certificate':
-          OpenSSL.crypto.dump_certificate(OpenSSL.crypto.FILETYPE_PEM, cert)
-  })
 
 
 def generate_properties_for_tls_certificate(prop, value, result):
