@@ -21,6 +21,7 @@ from argparse import ArgumentParser
 import yaml
 
 import config_helper
+import property_generator
 import schema_values_common
 import storage
 
@@ -97,8 +98,12 @@ def process(schema, values, deployer_image, deployer_entrypoint, version_repo,
       # TODO: Really populate this value.
       props[prop.name] = False
     elif prop.xtype == config_helper.XTYPE_INGRESS_AVAILABLE:
-      # TODO: Really populate this value.
+      # TODO(#360): Really populate this value.
       props[prop.name] = True
+    elif prop.password:
+      props[prop.name] = property_generator.generate_password(prop.password)
+    elif prop.tls_certificate:
+      props[prop.name] = property_generator.generate_tls_certificate()
 
   # Merge input and provisioned properties.
   app_params = dict(list(values.iteritems()) + list(props.iteritems()))
