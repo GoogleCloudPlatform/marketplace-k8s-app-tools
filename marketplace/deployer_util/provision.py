@@ -98,7 +98,7 @@ def process(schema, values, deployer_image, deployer_entrypoint, version_repo,
       # TODO: Really populate this value.
       props[prop.name] = False
     elif prop.xtype == config_helper.XTYPE_INGRESS_AVAILABLE:
-      # TODO: Really populate this value.
+      # TODO(#360): Really populate this value.
       props[prop.name] = True
     elif prop.password:
       props[prop.name] = property_generator.generate_password(prop.password)
