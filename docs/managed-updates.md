@@ -1,48 +1,47 @@
 # Managed Updates (Alpha)
 
-The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL
-NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED",  "MAY", and
-"OPTIONAL" in this document are to be interpreted as described in
-RFC 2119.
-
 ## Overview
 
-This is a guide to integrate with Managed Updates.
-
-Managed updates uses Kubernetes Application Lifecycle Management (KALM)
-framework.
+This is a guide to enable managed updates for your Kubernetes application on
+GCP Marketplace.
 
 ## Prerequisites
 
-We're using a pre-release of the toolchain. Setup the following environment
-variable for your shell:
+* You must have a deployer image for your application.
 
-```shell
-export MARKETPLACE_TOOLS_TAG=0.8.0-alpha02
-```
+    [Learn about building a deployer image](https://github.com/GoogleCloudPlatform/marketplace-k8s-app-tools/blob/master/docs/building-deployer.md).
 
-### Install mpdev
+* This guide uses a pre-release version of the toolchain. Setup the following environment
+  variable for your shell:
 
-See [this doc](tool-prerequisites.md).
+    ```shell
+    export MARKETPLACE_TOOLS_TAG=0.8.0-alpha02
+    ```
 
-### GCS bucket
+### Install the `mpdev` development tools
 
-Create a GCS bucket to house the published version metadata. This SHOULD
-be a bucket in the same project you're publishing images and SHOULD be
-dedicated to this process.
+For steps to install the tools, see [the `mpdev` prerequisites](tool-prerequisites.md).
+
+### Set up a GCS bucket
+
+Create a Google Cloud Storage (GCS) bucket, where you store the metadata for your
+software version. The bucket should be in the same project that you're publishing
+your container images to, and should be dedicated to this process.
+
+Use this command to create the bucket:
 
 ```shell
 gsutil mb gs://your-bucket
 ```
 
-The bucket MUST allow public access. This can be done using the following
+The bucket must allow public read access. Set up access with the following
 command:
 
 ```shell
 gsutil iam ch allUsers:objectViewer gs://your-bucket
 ```
 
-### Install KALM controller and CRDs
+### Install the Kubernetes app lifecycle management (KALM) controller and CRDs
 
 ```shell
 kubectl apply -f crd/kalm.yaml
@@ -50,66 +49,70 @@ kubectl apply -f crd/kalm.yaml
 
 ### Verify your environment
 
-Run the following to make sure everything is working.
+Run the following command to verify that the development tools are installed and
+configured:
 
 ```shell
 mpdev doctor
 ```
 
-### Join the whitelist
+### Join the alpha
 
-Your GCP account (i.e. emails) must be added to `managed-updates@googlegroups.com`.
-Please ask our team to whitelist you.
+To join the alpha, [fill out the sign-up form](https://docs.google.com/forms/d/e/1FAIpQLSf4F7G1MpB49uQrrboIdv4y_AREiLzU3oywRplVulf_C3LWmg/viewform).
 
-## Releases, Tracks, Metadata
+## Set up Releases, Tracks, and Metadata
 
 Each release of your application MUST use
 [Semantic Versioning](https://semver.org).
-Each release MUST have unique version.
+Each release must have unique version.
 For example: `1.0.1`, `1.0.2`, `1.3.1`, `1.3.2`.
 
-Releases are organized into tracks. Users are expected to update to newer
+Releases are organized in tracks. Users are expected to update to newer
 releases in the same track. For example, the releases above are organized into
 two separate tracks, `1.0` and `1.3`.
 
-KALM watches for new releases in a track and make recommendations to the user.
+Managed Updates watches for new releases in a track and makes recommendations to
+the user.
 
-Concretely, release version metadata YAMLs are stored in GCS. All releases under
-the same track reside in the same directory. For example:
+Your version metadata YAMLs are stored in your GCS bucket. All releases under
+the same track must be in the same directory. For example:
+
 - Track directory: `gs://your-bucket/your-company/your-app/1.0`
 - Release metadata YAMLs:
   - `gs://your-bucket/your-company/your-app/1.0/1.0.1.yaml`
   - `gs://your-bucket/your-company/your-app/1.0/1.0.2.yaml`
 
-You do not have to craft these files directly. `mpdev publish` takes care of
-this. See below.
+You can generate these files using `mpdev publish`, described in the sections below. 
 
-Note that end users consuming your application via the public Marketplace
-will pull the version metadata from the Marketplace's public GCS bucket instead
-of the one you use during development, i.e. `your-bucket`.
+Note that users deploying your application from GCP Marketplace
+pull the version metadata from GCP Marketplace's public GCS bucket instead
+of the bucket you use during development.
 
-## Image organization
+## Organizing the images
 
-Requirements about images remain the same. One addition is that images belonging
-to the same release MUST be tagged with that release version, in addition to the
+[Review the requirements for your application images](https://cloud.google.com/marketplace/docs/partners/kubernetes-solutions/create-app-package).
+
+In addition to the previous requirements, images belonging
+to the same release must be tagged with that release version, in addition to the
 track.
 
-To recap:
-- Each of the image below has both `1.0` (track) and `1.0.1` (release) tags.
-- There MUST be a primary application image:
+A summary of the requirements is:
+
+- Each of your images has both `1.0` (track) and `1.0.1` (release) tags.
+- There must be a primary application image:
   `gcr.io/your-project/your-company/your-app`. Note that the name of the primary
   image is the prefix for all other images.
-- There MUST be a deployer image:
+- There must be a deployer image:
   `gcr.io/your-project/your-company/your-app/deployer`
-- There MAY be other images that the application needs:
+- You can add other images that the application needs:
   `gcr.io/your-project/your-company/your-app/proxy`,
   `gcr.io/your-project/your-company/your-app/init`.
 
 ## Update your schema
 
-### Top level x-google-marketplace
+### Top level `x-google-marketplace` section
 
-`schema.yaml` MUST include a top-level `x-google-marketplace` section with
+`schema.yaml` must include a top-level `x-google-marketplace` section with
 the following new fields:
 
 ```yaml
@@ -136,7 +139,7 @@ x-google-marketplace:
     # fixes a critical issue.
     recommended: true
 
-  # This MUST be specified to indicate that the deployer supports KALM.
+  # This MUST be specified to indicate that the deployer supports managed updates.
   # Note that this could be left out or kalmSupported set to false, in
   # which case the deployer uses schema v2 but does not support update.
   managedUpdates:
@@ -149,6 +152,8 @@ x-google-marketplace:
 
 # properties and required sections remain the same.
 ```
+
+The requirements for `schema.yaml` are described in [Deployer schema](https://github.com/GoogleCloudPlatform/marketplace-k8s-app-tools/blob/master/docs/schema.md).
 
 #### Images
 
@@ -196,18 +201,20 @@ The primary image above is passed under 2 different parameters/values:
 - `imageRepo`=`gcr.io/your-project/your-company/your-app`
 - `imageTag`=`1.0.1`
 
-Note that when end users consume your app in the public Marketplace, the final
-image names will be different although they will follow the same release tag
+Note that when users deploy your app from GCP Marketplace, the final
+image names are different, but follow the same release tag
 and name prefix rule. For example, the published images could be under:
+
 - `marketplace.gcr.io/your-company/your-app:1.0.1`
 - `marketplace.gcr.io/your-company/your-app/deployer:1.0.1`
 - `marketplace.gcr.io/your-company/your-app/init:1.0.1`
 
 ### Properties and Required
 
-Properties and required sections remain largely the same.
+The `properties` and `required` sections are described in the
+[deployer schema](https://github.com/GoogleCloudPlatform/marketplace-k8s-app-tools/blob/master/docs/schema.md).
 Note that because images are now declared in the top level `x-google-marketplace`
-section, there MUSTN'T be any properties with `.x-google-marketplace.type=IMAGE`.
+section, there must not be any properties with `.x-google-marketplace.type=IMAGE`.
 
 ## application.yaml
 
@@ -227,8 +234,9 @@ mpdev publish \
   --gcs_repo=gs://your-bucket/your-company/your-app/1.0
 ```
 
-This should print out the URL of the published metadata file. Its location
-is deterministically derived from the GCS repo and the version.
+This command prints the URL of the published metadata file. Its location
+is derived from the GCS repo and the version.
+
 You can now install the application at this version:
 
 ```shell
@@ -242,30 +250,31 @@ the property values.
 
 ### How the installation works
 
-The main resources that get created by the install command:
+The main resources that get created by the install command are:
+
 - `Application` placholder resource. This will eventually be _updated_ by the
   deployer. Note that the resource uid would never change throughout the life
   of the installation.
-- KALM `Repository` resource, which points back to the GCS bucket containing
-  the version metadata files. KALM controller lists files in this bucket to
+- A KALM `Repository` resource, which points to the GCS bucket that contains
+  the version metadata files. The KALM controller lists files in this bucket to
   determine which versions of the app are available.
-- KALM `Release` resource, which has a reference to the actual deployer image
+- A KALM `Release` resource, which has a reference to the actual deployer image
   that will be used to install the application. Its spec captures the version
   to be installed.
-- A `Secret` which records the installation parameters.
+- A `Secret`, which records the installation parameters.
 - A `ServiceAccount` with proper permissions for running the deployer.
 
 ## Update your application
 
-Publish a new version of your application to the same GCS directory. Let's say
-the new release is `1.0.2`.
+Publish a new version of your application to the same GCS directory. For example,
+consider that the new release is `1.0.2`.
 
-KALM controller should soon detect the availability of the new version.
-In GKE UI, you should see the "new version available" notification in the
+The KALM controller should detect the availability of the new version.
+In the GKE UI, you should see a "new version available" notification in the
 application and application list pages. You can use the UI to go through the
 update process.
 
-Alternatively, you can also update the app using CLI:
+Alternatively, you can update the app using CLI:
 
 ```shell
 # To update to the latest available version detected by KALM.
