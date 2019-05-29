@@ -15,7 +15,7 @@ GCP Marketplace.
   variable for your shell:
 
     ```shell
-    export MARKETPLACE_TOOLS_TAG=0.8.0-alpha02
+    export MARKETPLACE_TOOLS_TAG=0.8.0-alpha03
     ```
 
 ### Install the `mpdev` development tools
@@ -82,7 +82,7 @@ the same track must be in the same directory. For example:
   - `gs://your-bucket/your-company/your-app/1.0/1.0.1.yaml`
   - `gs://your-bucket/your-company/your-app/1.0/1.0.2.yaml`
 
-You can generate these files using `mpdev publish`, described in the sections below. 
+You can generate these files using `mpdev publish`, described in the sections below.
 
 Note that users deploying your application from GCP Marketplace
 pull the version metadata from GCP Marketplace's public GCS bucket instead
