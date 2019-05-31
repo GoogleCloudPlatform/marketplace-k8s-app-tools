@@ -15,7 +15,7 @@ GCP Marketplace.
   variable for your shell:
 
     ```shell
-    export MARKETPLACE_TOOLS_TAG=0.8.0-alpha03
+    export MARKETPLACE_TOOLS_TAG=0.8.0-alpha04
     ```
 
 ### Install the `mpdev` development tools
@@ -62,17 +62,18 @@ To join the alpha, [fill out the sign-up form](https://docs.google.com/forms/d/e
 
 ## Set up Releases, Tracks, and Metadata
 
-Each release of your application MUST use
+Each **release** of your application MUST use
 [Semantic Versioning](https://semver.org).
 Each release must have unique version.
 For example: `1.0.1`, `1.0.2`, `1.3.1`, `1.3.2`.
 
-Releases are organized in tracks. Users are expected to update to newer
+Releases are organized in **tracks**. Users are expected to update to newer
 releases in the same track. For example, the releases above are organized into
 two separate tracks, `1.0` and `1.3`.
 
 Managed Updates watches for new releases in a track and makes recommendations to
-the user.
+the user. Updating across tracks is not currently supported, as such operations
+might involve additional migration steps.
 
 Your version metadata YAMLs are stored in your GCS bucket. All releases under
 the same track must be in the same directory. For example:
@@ -93,12 +94,12 @@ of the bucket you use during development.
 [Review the requirements for your application images](https://cloud.google.com/marketplace/docs/partners/kubernetes-solutions/create-app-package).
 
 In addition to the previous requirements, images belonging
-to the same release must be tagged with that release version, in addition to the
-track.
+to the same **release** must be tagged with that release version, in addition to the
+**track**.
 
-A summary of the requirements is:
+A summary of the requirements is below.
 
-- Each of your images has both `1.0` (track) and `1.0.1` (release) tags.
+- (_NEW_) Each of your images has both `1.0` (track) and `1.0.1` (release) tags.
 - There must be a primary application image:
   `gcr.io/your-project/your-company/your-app`. Note that the name of the primary
   image is the prefix for all other images.
@@ -131,9 +132,12 @@ x-google-marketplace:
     releaseNote: >-
       Initial release.
     # releaseTypes list is optional.
+    # "Security" should only be used if this is an important update to patch
+    # an existing vulnerability, as such update will be very prominent to the user.
     releaseTypes:
     - Feature
     - BugFix
+    - Security
     # If recommend is true, users using older releases are encouraged
     # to update as soon as possible. Useful if, for example, this release
     # fixes a critical issue.
@@ -153,7 +157,8 @@ x-google-marketplace:
 # properties and required sections remain the same.
 ```
 
-The requirements for `schema.yaml` are described in [Deployer schema](https://github.com/GoogleCloudPlatform/marketplace-k8s-app-tools/blob/master/docs/schema.md).
+The requirements for `schema.yaml` are described in
+[Deployer schema](https://github.com/GoogleCloudPlatform/marketplace-k8s-app-tools/blob/master/docs/schema.md).
 
 #### Images
 
@@ -279,12 +284,12 @@ Alternatively, you can update the app using CLI:
 ```shell
 # To update to the latest available version detected by KALM.
 mpdev update \
-  --namespace test \
-  --name installation-1
+  --namespace=test \
+  --name=installation-1
 
 # Or to force update to a specific version
 mpdev update \
-  --namespace test \
-  --name installation-1 \
-  --version 1.0.2
+  --namespace=test \
+  --name=installation-1 \
+  --version=1.0.2
 ```
