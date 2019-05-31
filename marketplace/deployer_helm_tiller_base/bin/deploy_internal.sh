@@ -54,12 +54,20 @@ for chart in /data/chart/*; do
   # Note: The local tiller process is configured with --storage=secret,
   # which is recommended but not default behavior.
   /bin/expand_config.py --values_mode=raw --app_uid="$app_uid"
-  helm tiller run "$NAMESPACE" -- \
-    helm install \
-        --name="$NAME" \
-        --namespace="$NAMESPACE" \
-        --values=<(print_config.py --output=yaml) \
-        "$chart"
+  command="$(helm tiller run "$NAMESPACE" -- helm get "$NAME" &>2 && echo "upgrade" || echo "install")"
+  if [[ "$command" == "install" ]]; then
+    helm tiller run "$NAMESPACE" -- \
+      helm install \
+          --name="$NAME" \
+          --namespace="$NAMESPACE" \
+          --values=<(print_config.py --output=yaml) \
+          "$chart"
+  else
+    helm tiller run "$NAMESPACE" -- \
+      helm upgrade "$NAME" \
+          --values=<(print_config.py --output=yaml) \
+          "$chart"
+  fi
 
   # Establish an ownerReference back to the Application resource, so that
   # the helm release will be cleaned up when the Application is deleted.
