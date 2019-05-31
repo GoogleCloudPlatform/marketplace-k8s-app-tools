@@ -21,6 +21,7 @@ from argparse import ArgumentParser
 import yaml
 
 import config_helper
+import log_util as log
 import property_generator
 import schema_values_common
 import storage
@@ -108,15 +109,22 @@ def process(schema, values, deployer_image, deployer_entrypoint, version_repo,
   # Merge input and provisioned properties.
   app_params = dict(list(values.iteritems()) + list(props.iteritems()))
 
+  use_kalm = False
   if (schema.is_v2() and
       schema.x_google_marketplace.managed_updates.kalm_supported):
+    if version_repo:
+      use_kalm = True
+    else:
+      log.warn('The deployer supports KALM but no --version-repo specified. '
+               'Falling back to provisioning the deployer job only.')
+
+  if use_kalm:
     manifests += provision_kalm(
         schema,
         version_repo=version_repo,
         app_name=app_name,
         namespace=namespace,
         deployer_image=deployer_image,
-        deployer_entrypoint=deployer_entrypoint,
         image_pull_secret=image_pull_secret,
         app_params=app_params)
   else:
@@ -156,7 +164,7 @@ def provision_from_storage(key, value, app_name, namespace):
 
 
 def provision_kalm(schema, version_repo, app_name, namespace, deployer_image,
-                   deployer_entrypoint, app_params, image_pull_secret):
+                   app_params, image_pull_secret):
   """Provisions KALM resource for installing the application."""
   if not version_repo:
     raise Exception('A valid --version_repo must be specified')
