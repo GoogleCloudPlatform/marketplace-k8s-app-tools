@@ -43,6 +43,21 @@ fi
 
 echo "Marking deployment of application \"$NAME\" as \"$status\"."
 
+if [[ "$status" == "Success" ]]; then
+  published_version="$(print_published_version.py --empty_if_not_supported)"
+  if ! [[ -z "$published_version" ]]; then
+    # Ensure that the application resource has a version
+    # matching the declared published version.
+    app_version="$(kubectl get "applications.app.k8s.io/$NAME" --output=json \
+      | jq -r .spec.descriptor.version)"
+    if [[ "$app_version" != "$published_version" ]]; then
+      echo "Application's version '$app_version' does not match the declared" \
+        "publishedVersion '$published_version' in schema.yaml."
+      exit 1
+    fi
+  fi
+fi
+
 # --output=json is used to force kubectl to succeed even if the patch command
 # makes not change to the resource. Otherwise, this command exits 1.
 kubectl patch "applications.app.k8s.io/$NAME" \

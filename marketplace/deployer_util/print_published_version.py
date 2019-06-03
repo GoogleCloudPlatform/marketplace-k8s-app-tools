@@ -29,12 +29,20 @@ Requires schema.yaml version v2.
 def main():
   parser = ArgumentParser(description=_PROG_HELP)
   schema_values_common.add_to_argument_parser(parser)
+  parser.add_argument(
+      '--empty_if_not_supported',
+      action='store_true',
+      help='For a v1 schema, do not fail but output empty string instead')
   args = parser.parse_args()
 
   schema = schema_values_common.load_schema(args)
   schema.validate()
   if (schema.x_google_marketplace is None or
       not schema.x_google_marketplace.is_v2()):
+    if args.empty_if_not_supported:
+      sys.stderr.write('schema.yaml is not in v2 version. Skipping')
+      sys.stderr.flush()
+      return
     raise Exception('schema.yaml must be in v2 version')
 
   sys.stdout.write(schema.x_google_marketplace.published_version)
