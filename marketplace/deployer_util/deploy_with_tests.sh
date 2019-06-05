@@ -42,9 +42,13 @@ trap "handle_failure" EXIT
 LOG_SMOKE_TEST="SMOKE_TEST"
 test_schema="/data-test/schema.yaml"
 if [[ -e "$test_schema" ]]; then
+  # Outputs to both schema files since /data-test contents
+  # will be copied into /data.
   overlay_test_schema.py \
-    --orig "$test_schema" \
-    --dest "/data/schema.yaml"
+    --test_schema "$test_schema" \
+    --original_schema "/data/schema.yaml" \
+    --output "$test_schema" \
+    --output "/data/schema.yaml"
 fi
 
 

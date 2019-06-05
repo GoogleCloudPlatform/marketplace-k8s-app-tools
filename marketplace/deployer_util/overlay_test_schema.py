@@ -16,46 +16,56 @@
 
 import yaml
 import os.path
-import log_util as log
-
+import sys
 from argparse import ArgumentParser
+
+import log_util as log
 from constants import LOG_SMOKE_TEST
 from dict_util import deep_get
 from yaml_util import load_yaml
 
+_PROG_HELP = """
+Overlay properties declared in the test schema over the original
+schema, dumping the content into a specified target.
+"""
+
 
 def main():
-  parser = ArgumentParser()
-  parser.add_argument('--orig', help='Original schema file')
-  parser.add_argument('--dest', help='Destination schema file')
+  parser = ArgumentParser(description=_PROG_HELP)
+  parser.add_argument('--test_schema', help='Test schema file', required=True)
+  parser.add_argument(
+      '--original_schema', help='Original schema file', required=True)
+  parser.add_argument(
+      '--output',
+      action='append',
+      default=[],
+      help='Location(s) of the file(s) to output the overlayed schema')
   args = parser.parse_args()
 
-  if not os.path.isfile(args.orig):
-    print("No test schema.yaml defined")
-    return
-
-  orig = load_yaml(args.orig)
-
-  if 'properties' not in orig:
-    print("No properties found in {}. Ignoring test schema merge.".format(
-        args.orig))
-    return
-
-  dest = load_yaml(args.dest)
-  if 'properties' in dest:
-    for prop in orig['properties']:
-      if (deep_get(orig, 'properties', prop, 'x-google-marketplace', 'type') !=
-          deep_get(dest, 'properties', prop, 'x-google-marketplace', 'type')):
-        log.warn(
-            "{} Changing x-google-marketplace type is not allowed. Property: {}",
-            LOG_SMOKE_TEST, prop)
-        continue
-      dest['properties'][prop] = orig['properties'][prop]
+  if os.path.isfile(args.test_schema):
+    test_schema = load_yaml(args.test_schema)
   else:
-    dest['properties'] = orig['properties']
+    log.info(
+        '{} Test schema file {} does not exist. '
+        'Using the original schema.', LOG_SMOKE_TEST, args.test_schema)
+    test_schema = {}
 
-  with open(args.dest, 'w') as f:
-    yaml.dump(dest, f)
+  output_schema = load_yaml(args.original_schema)
+  output_schema['properties'] = output_schema.get('properties', {})
+  for prop in test_schema.get('properties', {}):
+    test_type = deep_get(test_schema, 'properties', prop,
+                         'x-google-marketplace', 'type')
+    output_type = deep_get(output_schema, 'properties', prop,
+                           'x-google-marketplace', 'type')
+    if (test_type != output_type):
+      raise Exception(
+          'Changing x-google-marketplace type is not allowed. Property: {}',
+          prop)
+    output_schema['properties'][prop] = test_schema['properties'][prop]
+
+  for output in args.output:
+    with open(output, 'w') as f:
+      yaml.dump(output_schema, f)
 
 
 if __name__ == "__main__":
