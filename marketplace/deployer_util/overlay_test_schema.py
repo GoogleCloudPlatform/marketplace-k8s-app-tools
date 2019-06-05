@@ -16,7 +16,6 @@
 
 import yaml
 import os.path
-import sys
 from argparse import ArgumentParser
 
 import log_util as log
