@@ -121,9 +121,10 @@ spec:
                     type: string
                   releaseType:
                     description: '`releaseType` is the type of release. This can be
-                      either BugFix or Security.'
+                      either Feature, BugFix or Security.'
                     items:
                       enum:
+                      - Feature
                       - BugFix
                       - Security
                       type: string
