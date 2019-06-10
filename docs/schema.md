@@ -593,7 +593,7 @@ x-google-marketplace:
     - type: ClusterRole        # This is a cluster-wide ClusterRole
       rulesType: PREDEFINED
       rulesFromRoleName: edit  # Use predefined role named "edit"
-    - type: Role               # This is a namespaced Role. If omitted, "cluster-admin" is applied automatically
+    - type: Role               # This is a namespaced Role.
       rulesType: CUSTOM        # We specify our own custom RBAC rules
       rules:
       - apiGroups: ['apps.kubernetes.io/v1alpha1']
