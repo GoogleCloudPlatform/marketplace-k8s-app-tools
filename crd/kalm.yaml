@@ -6,6 +6,22 @@ metadata:
     controller-tools.k8s.io: "1.0"
   name: releases.kalm.google.com
 spec:
+  additionalPrinterColumns:
+  - JSONPath: .spec.name
+    description: The name of the application managed by the Release
+    name: App
+    type: string
+  - JSONPath: .spec.version
+    description: The desired version of the application managed by the Release
+    name: Desired
+    type: string
+  - JSONPath: .status.currentVersion
+    description: The current version of the application managed by the Release
+    name: Current
+    type: string
+  - JSONPath: .metadata.creationTimestamp
+    name: Age
+    type: date
   group: kalm.google.com
   names:
     kind: Release
@@ -256,6 +272,18 @@ metadata:
     controller-tools.k8s.io: "1.0"
   name: repositories.kalm.google.com
 spec:
+  additionalPrinterColumns:
+  - JSONPath: .spec.type
+    description: The type of the Repository
+    name: Type
+    type: string
+  - JSONPath: .spec.url
+    description: The URL of the Repository
+    name: URL
+    type: string
+  - JSONPath: .metadata.creationTimestamp
+    name: Age
+    type: date
   group: kalm.google.com
   names:
     kind: Repository
