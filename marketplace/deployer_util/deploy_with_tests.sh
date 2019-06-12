@@ -41,11 +41,10 @@ trap "handle_failure" EXIT
 
 LOG_SMOKE_TEST="SMOKE_TEST"
 test_schema="/data-test/schema.yaml"
-if [[ -e "$test_schema" ]]; then
-  overlay_test_schema.py \
-    --orig "$test_schema" \
-    --dest "/data/schema.yaml"
-fi
+overlay_test_schema.py \
+  --test_schema "$test_schema" \
+  --original_schema "/data/schema.yaml" \
+  --output "/data/schema.yaml"
 
 
 NAME="$(/bin/print_config.py \
