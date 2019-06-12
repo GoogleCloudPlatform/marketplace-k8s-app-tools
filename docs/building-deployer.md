@@ -1,40 +1,51 @@
-# Building Application Deployer
+# Building an application deployer image
 
-The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL
-NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED",  "MAY", and
-"OPTIONAL" in this document are to be interpreted as described in
-RFC 2119.
+This guide covers the steps to build a deployer container image for the Kubernetes
+applications that you distribute on Google Cloud Platform (GCP) Marketplace.
+The deployer image packages your application's configuration and runs
+when users deploy your application to their clusters.
 
-## Overview
+[Read the overview of distributing Kubernetes applications on GCP Marketplace](https://cloud.google.com/marketplace/docs/partners/kubernetes-solutions/).
 
-Each application version is defined by one and only one **deployer image**. It
-carries references to other container images the application uses at runtime.
-Other than that, it does not need any other auxiliary data and, thus is
-_fully encapsulated_.
+## About the deployer image
 
-A deployer image is a docker container image that serves the following purposes:
+Each version of your application must contain a single **deployer image**. The
+deployer image includes references to other container images that your
+application uses at runtime.
 
-- Its file system contains well known metadata files that define various aspects
-  of deploying the application. One important aspect is to drive the deployment
-  configuration UI form.
-- It can be executed as a standalone `Job`. Taking in user-supplied input
-  parameters, the job's pod will install all components of the application
-  and exits.
+The deployer image is a Docker container image that has these characteristics:
 
-In order to install the application components, the deployer image carries the
-full manifests of all k8s resources that need to be installed.
+- The file system contains metadata files that define various aspects
+  of deploying the application. One important purpose of the metadata is to
+  is to define the UI for users who are deploying the application from the
+  GCP Console.
+
+- It can be executed as a standalone
+  [`Job`](https://kubernetes.io/docs/concepts/workloads/controllers/jobs-run-to-completion/).
+  After users enter the input parameters, the Job's Pod installs all the
+  components of the application, then exists.
+
+To install the application components, the deployer image includes the
+full manifests of all Kubernetes resources that need to be installed.
 
 ## Building your deployer
 
-Decide how to craft your application k8s manifests.
+First, decide how you want to create your Kubernetes application manifests:
 
-- [Helm](https://helm.sh): Ideal if you have existing charts and want to import
-  them. Helm also offers a powerful templating framework; the downside is a
-  higher learning curve. Follow instructions [here](building-deployer-helm.md).
-- Simple templating using `envsubst` (env var substitutions): Ideal if you are
-  starting from scratch and want a low learning curve to get your app running on
-  k8s. The downside is that templating capabilities are very limited.
-  Follow instructions [here](building-deployer-envsubst.md).
+- [Helm](https://helm.sh): Use Helm if you have existing charts that you want
+  to import. Helm also offers a powerful templating framework, but might be
+  difficult to learn.
+
+    Learn about [building your deployer with Helm](building-deployer-helm.md).
+
+- Simple templates with environment variables, using `envsubst`: Use this
+  option if you are starting from scratch and want to get your app running
+  quickly. However, the templating options with this approach are limited.
+
+    Learn about [building your deployer with `envsubst`](building-deployer-envsubst.md).
+
+Regardless of the method you choose, your deployer needs a `schema.yaml` file,
+which declares the parameters for provisioning the application. 
 
 Note that whichever deployer guide you choose to follow, a `schema.yaml` file is
 required. It declares parameters required for provisioning the application. See
