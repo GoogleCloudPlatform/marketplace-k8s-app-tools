@@ -40,6 +40,10 @@ case $i in
     additional_deployer_role="${i#*=}"
     shift
     ;;
+  --image_pull_secret=*)
+    image_pull_secret="${i#*=}"
+    shift
+    ;;
   *)
     echo "Unrecognized flag: $i"
     exit 1
@@ -91,6 +95,13 @@ echo "INFO Parameters: $parameters"
 
 echo "INFO Creates namespace \"$NAMESPACE\""
 kubectl create namespace "$NAMESPACE"
+
+if [[ -n "$image_pull_secret" ]]; then
+  echo "Copying secret/$image_pull_secret from namespace/$default to namespace/$NAMESPACE."
+  kubectl get secret "$image_pull_secret" --namespace=default --export -o=yaml | kubectl apply --namespace="$NAMESPACE" -f -
+  kubectl get secret "$image_pull_secret" --namespace="$NAMESPACE"
+  kubectl patch namespace "$NAMESPACE" -p "{\"metadata\": {\"annotations\": {\"marketplace.cloud.google.com/imagePullSecret\": \"$image_pull_secret\"}}}"
+fi
 
 if [[ "$istio" = "enabled" ]]; then
   echo "INFO Enabling istio in \"$NAMESPACE\" (istio-injection=enabled)."
@@ -146,6 +157,7 @@ echo "INFO Initializes the deployer container which will deploy all the applicat
   --deployer="$deployer" \
   --parameters="$parameters" \
   --entrypoint='/bin/deploy_with_tests.sh' \
+  --image_pull_secret="$image_pull_secret" \
   || clean_and_exit "ERROR Failed to start deployer"
 
 echo "INFO wait for the deployer to succeed"
