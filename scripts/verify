@@ -157,7 +157,6 @@ echo "INFO Initializes the deployer container which will deploy all the applicat
   --deployer="$deployer" \
   --parameters="$parameters" \
   --entrypoint='/bin/deploy_with_tests.sh' \
-  --image_pull_secret="$image_pull_secret" \
   || clean_and_exit "ERROR Failed to start deployer"
 
 echo "INFO wait for the deployer to succeed"
