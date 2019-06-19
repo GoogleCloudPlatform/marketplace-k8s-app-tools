@@ -50,7 +50,8 @@ def main():
       gcloud_project=(check_gcloud_default_project, ['gcloud_login']),
       kubectl=check_kubectl,
       kubectl_nodes=(check_kubectl_nodes, ['kubectl']),
-      crd=(check_crd, ['kubectl_nodes']))
+      crd=(check_crd, ['kubectl_nodes']),
+      gsutil=check_gsutil)
   if all_good:
     print('\nEverything looks good to go!!')
   else:
@@ -224,6 +225,18 @@ https://github.com/kubernetes-sigs/application
 # - Check GCR is enabled for the project
 # - If on GCE VM and using the default Compute service account
 #   make sure it has k8s engine admin role.
+
+
+def check_gsutil(args):
+  p = subprocess.run(['gsutil', 'ls'],
+                     stdout=subprocess.DEVNULL,
+                     stderr=subprocess.DEVNULL)
+  if p.returncode != 0:
+    return TaskEvent(
+        success=False,
+        message='Unable to list the GCS buckets. Makes sure you are authenticated via gsutil.'
+    )
+  return TaskEvent(success=True)
 
 
 def make_run_event(p, success, message):
