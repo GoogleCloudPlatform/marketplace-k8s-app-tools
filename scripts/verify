@@ -103,7 +103,7 @@ function print_summary() {
   fi
 
   if [[ -n "$deployer_errors" ]]; then
-    error_summary="${error_summary}Errors traces found in deployer\n"
+    error_summary="${error_summary}Error traces found in deployer\n"
     error_summary="$error_summary$deployer_errors\n"
   fi
 
