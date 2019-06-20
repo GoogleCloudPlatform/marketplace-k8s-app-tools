@@ -43,8 +43,10 @@ mkdir "$manifest_dir"
 
 # Overwrite the templates using the test templates
 if [[ "$mode" = "test" ]]; then
-  if [[ -e "/data-test" ]]; then
-    cp -RT "/data-test" "/data"
+  if [[ -e "/data-test/manifest" ]]; then
+    cp -RT "/data-test/manifest" "/data/manifest"
+  else
+    echo "$LOG_SMOKE_TEST INFO No overriding manifests found at /data-test/manifest."
   fi
 fi
 

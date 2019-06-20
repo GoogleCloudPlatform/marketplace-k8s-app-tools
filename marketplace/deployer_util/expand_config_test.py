@@ -12,7 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import base64
+import json
 import re
+import OpenSSL
 import tempfile
 import unittest
 
@@ -44,7 +47,7 @@ class ExpandConfigTest(unittest.TestCase):
     self.assertRaises(expand_config.InvalidProperty, lambda: expand_config.
                       expand({'p1': 3}, schema))
 
-  def test_generate_properties_for_image_split_by_colon(self):
+  def test_generate_properties_for_v1_image_split_by_colon(self):
     schema = config_helper.Schema.load_yaml("""
         applicationApiVersion: v1beta1
         properties:
@@ -67,7 +70,7 @@ class ExpandConfigTest(unittest.TestCase):
             'i1.after': 'bar',
         }, result)
 
-  def test_generate_properties_for_image_split_to_registry_repo_tag(self):
+  def test_generate_properties_for_v1_image_split_to_registry_repo_tag(self):
     schema = config_helper.Schema.load_yaml("""
         applicationApiVersion: v1beta1
         properties:
@@ -92,6 +95,84 @@ class ExpandConfigTest(unittest.TestCase):
             'i1.tag': 'baz',
         }, result)
 
+  def test_generate_properties_for_v2_images(self):
+    schema = config_helper.Schema.load_yaml("""
+        x-google-marketplace:
+          schemaVersion: v2
+          applicationApiVersion: v1beta1
+          publishedVersion: '0.1.1'
+          publishedVersionMetadata:
+            releaseNote: Release note for 0.1.1
+          images:
+            "":
+              properties:
+                image.full: {type: FULL}
+                image.registry: {type: REGISTRY}
+                image.registry_repo: {type: REPO_WITH_REGISTRY}
+                image.repo: {type: REPO_WITHOUT_REGISTRY}
+                image.tag: {type: TAG}
+            i1:
+              properties:
+                image.i1.full: {type: FULL}
+                image.i1.registry: {type: REGISTRY}
+                image.i1.registry_repo: {type: REPO_WITH_REGISTRY}
+                image.i1.repo: {type: REPO_WITHOUT_REGISTRY}
+                image.i1.tag: {type: TAG}
+            i2:
+              properties:
+                image.i2.full: {type: FULL}
+                image.i2.registry: {type: REGISTRY}
+                image.i2.registry_repo: {type: REPO_WITH_REGISTRY}
+                image.i2.repo: {type: REPO_WITHOUT_REGISTRY}
+                image.i2.tag: {type: TAG}
+        """)
+    result = expand_config.expand({'__image_repo_prefix__': 'gcr.io/app'},
+                                  schema)
+    self.assertEqual(
+        {
+            'image.full': 'gcr.io/app:0.1.1',
+            'image.tag': '0.1.1',
+            'image.registry': 'gcr.io',
+            'image.registry_repo': 'gcr.io/app',
+            'image.repo': 'app',
+            'image.i1.full': 'gcr.io/app/i1:0.1.1',
+            'image.i1.tag': '0.1.1',
+            'image.i1.registry': 'gcr.io',
+            'image.i1.registry_repo': 'gcr.io/app/i1',
+            'image.i1.repo': 'app/i1',
+            'image.i2.full': 'gcr.io/app/i2:0.1.1',
+            'image.i2.tag': '0.1.1',
+            'image.i2.registry': 'gcr.io',
+            'image.i2.registry_repo': 'gcr.io/app/i2',
+            'image.i2.repo': 'app/i2',
+        }, result)
+
+  def test_deployer_image_in_v2(self):
+    schema = config_helper.Schema.load_yaml("""
+        x-google-marketplace:
+          schemaVersion: v2
+          applicationApiVersion: v1beta1
+          publishedVersion: '0.1.1'
+          publishedVersionMetadata:
+            releaseNote: Release note for 0.1.1
+          images:
+            "":
+              properties:
+                image.full: {type: FULL}
+        properties:
+          deployerImage:
+            type: string
+            x-google-marketplace:
+              type: DEPLOYER_IMAGE
+        """)
+    result = expand_config.expand({'__image_repo_prefix__': 'gcr.io/app'},
+                                  schema)
+    self.assertEqual(
+        {
+            'image.full': 'gcr.io/app:0.1.1',
+            'deployerImage': 'gcr.io/app/deployer:0.1.1',
+        }, result)
+
   def test_generate_properties_for_string_base64_encoded(self):
     schema = config_helper.Schema.load_yaml("""
         applicationApiVersion: v1beta1
@@ -109,6 +190,89 @@ class ExpandConfigTest(unittest.TestCase):
         's1': 'test',
         's1.encoded': 'dGVzdA==',
     }, result)
+
+  def test_generate_certificate(self):
+    schema = config_helper.Schema.load_yaml("""
+        applicationApiVersion: v1beta1
+        properties:
+          c1:
+            type: string
+            x-google-marketplace:
+              type: TLS_CERTIFICATE
+        """)
+    result = expand_config.expand({}, schema)
+    cert_json = json.loads(result['c1'])
+    self.assertIsNotNone(cert_json['private_key'])
+    self.assertIsNotNone(cert_json['certificate'])
+
+    schema = config_helper.Schema.load_yaml("""
+        applicationApiVersion: v1beta1
+        properties:
+          c1:
+            type: string
+            x-google-marketplace:
+              type: TLS_CERTIFICATE
+              tlsCertificate:
+                generatedProperties:
+                  base64EncodedPrivateKey: c1.Base64Key
+                  base64EncodedCertificate: c1.Base64Crt
+        """)
+    result = expand_config.expand({}, schema)
+
+    cert_json = json.loads(result['c1'])
+    self.assertIsNotNone(result['c1'])
+    self.assertEqual(result['c1.Base64Key'],
+                     base64.b64encode(cert_json['private_key']))
+    self.assertEqual(result['c1.Base64Crt'],
+                     base64.b64encode(cert_json['certificate']))
+
+    key = OpenSSL.crypto.load_privatekey(
+        OpenSSL.crypto.FILETYPE_PEM, base64.b64decode(result['c1.Base64Key']))
+    self.assertEqual(key.bits(), 2048)
+    self.assertEqual(key.type(), OpenSSL.crypto.TYPE_RSA)
+
+    cert = OpenSSL.crypto.load_certificate(
+        OpenSSL.crypto.FILETYPE_PEM, base64.b64decode(result['c1.Base64Crt']))
+    self.assertEqual(cert.get_subject(), cert.get_issuer())
+    self.assertEqual(cert.get_subject().OU, 'GCP Marketplace K8s App Tools')
+    self.assertEqual(cert.get_subject().CN, 'Temporary Certificate')
+    self.assertEqual(cert.get_signature_algorithm(), 'sha256WithRSAEncryption')
+    self.assertFalse(cert.has_expired())
+
+  def test_generate_properties_for_certificate(self):
+    schema = config_helper.Schema.load_yaml("""
+        applicationApiVersion: v1beta1
+        properties:
+          c1:
+            type: string
+            x-google-marketplace:
+              type: TLS_CERTIFICATE
+        """)
+    result = expand_config.expand(
+        {'c1': '{"private_key": "key", "certificate": "vrt"}'}, schema)
+    self.assertEqual({'c1': '{"private_key": "key", "certificate": "vrt"}'},
+                     result)
+
+    schema = config_helper.Schema.load_yaml("""
+        applicationApiVersion: v1beta1
+        properties:
+          c1:
+            type: string
+            x-google-marketplace:
+              type: TLS_CERTIFICATE
+              tlsCertificate:
+                generatedProperties:
+                  base64EncodedPrivateKey: c1.Base64Key
+                  base64EncodedCertificate: c1.Base64Crt
+        """)
+    result = expand_config.expand(
+        {'c1': '{"private_key": "key", "certificate": "vrt"}'}, schema)
+    self.assertEqual(
+        {
+            'c1': '{"private_key": "key", "certificate": "vrt"}',
+            'c1.Base64Key': 'a2V5',
+            'c1.Base64Crt': 'dnJ0',
+        }, result)
 
   def test_generate_password(self):
     schema = config_helper.Schema.load_yaml("""

@@ -21,6 +21,8 @@ from argparse import ArgumentParser
 import yaml
 
 import config_helper
+import log_util as log
+import property_generator
 import schema_values_common
 import storage
 
@@ -36,6 +38,8 @@ def main():
   schema_values_common.add_to_argument_parser(parser)
   parser.add_argument('--deployer_image', required=True)
   parser.add_argument('--deployer_entrypoint', default=None)
+  parser.add_argument('--version_repo', default=None)
+  parser.add_argument('--image_pull_secret', default=None)
   args = parser.parse_args()
 
   schema = schema_values_common.load_schema(args)
@@ -44,11 +48,14 @@ def main():
       schema,
       values,
       deployer_image=args.deployer_image,
-      deployer_entrypoint=args.deployer_entrypoint)
+      deployer_entrypoint=args.deployer_entrypoint,
+      version_repo=args.version_repo,
+      image_pull_secret=args.image_pull_secret)
   print(yaml.safe_dump_all(manifests, default_flow_style=False, indent=2))
 
 
-def process(schema, values, deployer_image, deployer_entrypoint):
+def process(schema, values, deployer_image, deployer_entrypoint, version_repo,
+            image_pull_secret):
   props = {}
   manifests = []
   app_name = get_name(schema, values)
@@ -76,7 +83,11 @@ def process(schema, values, deployer_image, deployer_entrypoint):
       continue
     if prop.service_account:
       value, sa_manifests = provision_service_account(
-          schema, prop, app_name=app_name, namespace=namespace)
+          schema,
+          prop,
+          app_name=app_name,
+          namespace=namespace,
+          image_pull_secret=image_pull_secret)
       props[prop.name] = value
       manifests += sa_manifests
     elif prop.storage_class:
@@ -88,19 +99,43 @@ def process(schema, values, deployer_image, deployer_entrypoint):
       # TODO: Really populate this value.
       props[prop.name] = False
     elif prop.xtype == config_helper.XTYPE_INGRESS_AVAILABLE:
-      # TODO: Really populate this value.
+      # TODO(#360): Really populate this value.
       props[prop.name] = True
+    elif prop.password:
+      props[prop.name] = property_generator.generate_password(prop.password)
+    elif prop.tls_certificate:
+      props[prop.name] = property_generator.generate_tls_certificate()
 
   # Merge input and provisioned properties.
   app_params = dict(list(values.iteritems()) + list(props.iteritems()))
-  app_params = {k: str(v) for k, v in app_params.iteritems()}
-  manifests += provision_deployer(
-      schema,
-      app_name=app_name,
-      namespace=namespace,
-      deployer_image=deployer_image,
-      deployer_entrypoint=deployer_entrypoint,
-      app_params=app_params)
+
+  use_kalm = False
+  if (schema.is_v2() and
+      schema.x_google_marketplace.managed_updates.kalm_supported):
+    if version_repo:
+      use_kalm = True
+    else:
+      log.warn('The deployer supports KALM but no --version-repo specified. '
+               'Falling back to provisioning the deployer job only.')
+
+  if use_kalm:
+    manifests += provision_kalm(
+        schema,
+        version_repo=version_repo,
+        app_name=app_name,
+        namespace=namespace,
+        deployer_image=deployer_image,
+        image_pull_secret=image_pull_secret,
+        app_params=app_params)
+  else:
+    manifests += provision_deployer(
+        schema,
+        app_name=app_name,
+        namespace=namespace,
+        deployer_image=deployer_image,
+        deployer_entrypoint=deployer_entrypoint,
+        image_pull_secret=image_pull_secret,
+        app_params=app_params)
   return manifests
 
 
@@ -128,36 +163,105 @@ def provision_from_storage(key, value, app_name, namespace):
   return resource_name, add_preprovisioned_labels([manifest], key)
 
 
+def provision_kalm(schema, version_repo, app_name, namespace, deployer_image,
+                   app_params, image_pull_secret):
+  """Provisions KALM resource for installing the application."""
+  if not version_repo:
+    raise Exception('A valid --version_repo must be specified')
+
+  sa_name = dns1123_name('{}-deployer-sa'.format(app_name))
+
+  labels = {
+      'app.kubernetes.io/component': 'kalm.marketplace.cloud.google.com',
+  }
+
+  secret = make_v2_config(schema, deployer_image, namespace, app_name, labels,
+                          app_params)
+
+  repo = {
+      'apiVersion': 'kalm.google.com/v1alpha1',
+      'kind': 'Repository',
+      'metadata': {
+          'name': app_name,
+          'namespace': namespace,
+          'labels': labels,
+      },
+      'spec': {
+          'type': 'Deployer',
+          'url': version_repo,
+      },
+  }
+
+  release = {
+      'apiVersion': 'kalm.google.com/v1alpha1',
+      'kind': 'Release',
+      'metadata': {
+          'name': app_name,
+          'namespace': namespace,
+          'labels': labels,
+      },
+      'spec': {
+          'repositoryRef': {
+              'name': app_name,
+              'namespace': namespace,
+          },
+          'version': schema.x_google_marketplace.published_version,
+          'applicationRef': {
+              'name': app_name,
+          },
+          'serviceAccountName': sa_name,
+          'valuesSecretRef': {
+              'name': secret['metadata']['name']
+          }
+      },
+  }
+
+  service_account = {
+      'apiVersion': 'v1',
+      'kind': 'ServiceAccount',
+      'metadata': {
+          'name': sa_name,
+          'namespace': namespace,
+          'labels': labels,
+      },
+  }
+  if image_pull_secret:
+    service_account['imagePullSecrets'] = [{
+        'name': image_pull_secret,
+    }]
+
+  role_binding = {
+      'apiVersion': 'rbac.authorization.k8s.io/v1',
+      'kind': 'RoleBinding',
+      'metadata': {
+          'name': '{}-deployer-rb'.format(app_name),
+          'namespace': namespace,
+          'labels': labels,
+      },
+      'roleRef': {
+          'apiGroup': 'rbac.authorization.k8s.io',
+          'kind': 'ClusterRole',
+          'name': 'cluster-admin',
+      },
+      'subjects': [{
+          'kind': 'ServiceAccount',
+          'name': sa_name,
+      },]
+  }
+
+  return [
+      repo,
+      release,
+      role_binding,
+      secret,
+      service_account,
+  ]
+
+
 def provision_deployer(schema, app_name, namespace, deployer_image,
-                       deployer_entrypoint, app_params):
+                       deployer_entrypoint, app_params, image_pull_secret):
   """Provisions resources to run the deployer."""
   sa_name = dns1123_name('{}-deployer-sa'.format(app_name))
-  pod_spec = {
-      'serviceAccountName':
-          sa_name,
-      'containers': [{
-          'name':
-              'deployer',
-          'image':
-              deployer_image,
-          'imagePullPolicy':
-              'Always',
-          'volumeMounts': [{
-              'name': 'config-volume',
-              'mountPath': '/data/values',
-          },],
-      },],
-      'restartPolicy':
-          'Never',
-      'volumes': [{
-          'name': 'config-volume',
-          'configMap': {
-              'name': "{}-deployer-config".format(app_name),
-          },
-      },],
-  }
-  if deployer_entrypoint:
-    pod_spec['containers'][0]['command'] = [deployer_entrypoint]
   labels = {
       'app.kubernetes.io/component': 'deployer.marketplace.cloud.google.com',
       'marketplace.cloud.google.com/deployer': 'Dependent',
@@ -167,16 +271,81 @@ def provision_deployer(schema, app_name, namespace, deployer_image,
       'marketplace.cloud.google.com/deployer': 'Main',
   }
 
-  return [
-      {
-          'apiVersion': 'v1',
-          'kind': 'ServiceAccount',
-          'metadata': {
-              'name': sa_name,
-              'namespace': namespace,
-              'labels': labels,
-          },
+  if schema.is_v2():
+    config = make_v2_config(schema, deployer_image, namespace, app_name, labels,
+                            app_params)
+    pod_spec = {
+        'serviceAccountName':
+            sa_name,
+        'containers': [{
+            'name':
+                'deployer',
+            'image':
+                deployer_image,
+            'imagePullPolicy':
+                'Always',
+            'volumeMounts': [{
+                'name': 'config-volume',
+                'mountPath': '/data/values.yaml',
+                'subPath': 'values.yaml',
+                'readOnly': True,
+            },],
+        },],
+        'restartPolicy':
+            'Never',
+        'volumes': [{
+            'name': 'config-volume',
+            'secret': {
+                'secretName': config['metadata']['name'],
+            },
+        },]
+    }
+  else:
+    config = make_v1_config(schema, namespace, app_name, labels, app_params)
+    pod_spec = {
+        'serviceAccountName':
+            sa_name,
+        'containers': [{
+            'name':
+                'deployer',
+            'image':
+                deployer_image,
+            'imagePullPolicy':
+                'Always',
+            'volumeMounts': [{
+                'name': 'config-volume',
+                'mountPath': '/data/values',
+            },],
+        },],
+        'restartPolicy':
+            'Never',
+        'volumes': [{
+            'name': 'config-volume',
+            'configMap': {
+                'name': config['metadata']['name'],
+            },
+        },]
+    }
+
+  if deployer_entrypoint:
+    pod_spec['containers'][0]['command'] = [deployer_entrypoint]
+
+  service_account = {
+      'apiVersion': 'v1',
+      'kind': 'ServiceAccount',
+      'metadata': {
+          'name': sa_name,
+          'namespace': namespace,
+          'labels': labels,
       },
+  }
+  if image_pull_secret:
+    service_account['imagePullSecrets'] = [{
+        'name': image_pull_secret,
+    }]
+
+  return [
+      service_account,
       {
           'apiVersion': 'rbac.authorization.k8s.io/v1',
           'kind': 'RoleBinding',
@@ -195,16 +364,7 @@ def provision_deployer(schema, app_name, namespace, deployer_image,
               'name': sa_name,
           },]
       },
-      {
-          'apiVersion': 'v1',
-          'kind': 'ConfigMap',
-          'metadata': {
-              'name': '{}-deployer-config'.format(app_name),
-              'namespace': namespace,
-              'labels': labels,
-          },
-          'data': app_params,
-      },
+      config,
       {
           'apiVersion': 'batch/v1',
           'kind': 'Job',
@@ -228,21 +388,65 @@ def provision_deployer(schema, app_name, namespace, deployer_image,
   ]
 
 
-def provision_service_account(schema, prop, app_name, namespace):
+def make_v1_config(schema, namespace, app_name, labels, app_params):
+  return {
+      'apiVersion': 'v1',
+      'kind': 'ConfigMap',
+      'metadata': {
+          'name': '{}-deployer-config'.format(app_name),
+          'namespace': namespace,
+          'labels': labels,
+      },
+      'data': {k: str(v) for k, v in app_params.iteritems()},
+  }
+
+
+def make_v2_config(schema, deployer_image, namespace, app_name, labels,
+                   app_params):
+  return {
+      'apiVersion': 'v1',
+      'kind': 'Secret',
+      'metadata': {
+          'name': '{}-deployer-config'.format(app_name),
+          'namespace': namespace,
+          'labels': labels,
+      },
+      'type': 'Opaque',
+      'stringData': {
+          'values.yaml': make_app_params_yaml(app_params, deployer_image),
+      },
+  }
+
+
+def make_app_params_yaml(app_params, deployer_image):
+  final_app_params = {k: v for k, v in app_params.iteritems()}
+  final_app_params['__image_repo_prefix__'] = deployer_image_to_repo_prefix(
+      deployer_image)
+  return yaml.safe_dump(final_app_params, default_flow_style=False, indent=2)
+
+
+def provision_service_account(schema, prop, app_name, namespace,
+                              image_pull_secret):
   sa_name = dns1123_name('{}-{}'.format(app_name, prop.name))
   subjects = [{
       'kind': 'ServiceAccount',
       'name': sa_name,
       'namespace': namespace,
   }]
-  manifests = [{
+  service_account = {
       'apiVersion': 'v1',
       'kind': 'ServiceAccount',
       'metadata': {
           'name': sa_name,
           'namespace': namespace,
       },
-  }]
+  }
+  if image_pull_secret:
+    service_account['imagePullSecrets'] = [{
+        'name': image_pull_secret,
+    }]
+
+  manifests = [service_account]
   for i, rules in enumerate(prop.service_account.custom_role_rules()):
     role_name = '{}:{}-r{}'.format(app_name, prop.name, i)
     manifests.append({
@@ -410,6 +614,20 @@ def add_preprovisioned_labels(manifests, prop_name):
         prop_name)
     r['metadata']['labels'] = labels
   return manifests
+
+
+def deployer_image_to_repo_prefix(deployer_image):
+  # This strips off the digest or tag at the end of the image name.
+  # All following examples should result in "gcr.io/test/deployer":
+  # - gcr.io/test/deployer
+  # - gcr.io/test/deployer@sha256:abcdef1234567890
+  # - gcr.io/test/deployer:0.0.0
+  image_without_tag = deployer_image.split('@')[0].split(':')[0]
+  if not image_without_tag.endswith('/deployer'):
+    raise Exception(
+        'Deployer image must have "/deployer" as the suffix. Got {}'.format(
+            deployer_image))
+  return image_without_tag[:-len('/deployer')]
 
 
 if __name__ == '__main__':

@@ -28,9 +28,18 @@ properties:
         - type: Role
           rulesType: PREDEFINED
           rulesFromRoleName: cluster-admin
+  certificate:
+    type: string
+    x-google-marketplace:
+      type: TLS_CERTIFICATE
+      tlsCertificate:
+        generatedProperties:
+          base64EncodedPrivateKey: tls.base64EncodedPrivateKey
+          base64EncodedCertificate: tls.base64EncodedCertificate
 required:
 - name
 - namespace
 - application_uid
 - marketplace-integration.image
 - marketplace-integration.service_account
+- certificate

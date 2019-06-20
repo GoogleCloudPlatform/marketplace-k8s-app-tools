@@ -1,0 +1,491 @@
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  creationTimestamp: null
+  labels:
+    controller-tools.k8s.io: "1.0"
+  name: releases.kalm.google.com
+spec:
+  group: kalm.google.com
+  names:
+    kind: Release
+    plural: releases
+  scope: Namespaced
+  validation:
+    openAPIV3Schema:
+      properties:
+        apiVersion:
+          description: 'APIVersion defines the versioned schema of this representation
+            of an object. Servers should convert recognized schemas to the latest
+            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources'
+          type: string
+        kind:
+          description: 'Kind is a string value representing the REST resource this
+            object represents. Servers may infer this from the endpoint the client
+            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds'
+          type: string
+        metadata:
+          type: object
+        spec:
+          properties:
+            applicationRef:
+              description: '`applicationRef` is a reference to an Application object
+                in the same namespace that will include the information about the
+                application and will be used as the root/owner object referenced by
+                all resources related to the application, including this Release object.'
+              type: object
+            deadlineSeconds:
+              description: The duration in seconds relative to the time when the controller
+                starts the actuation of the desired application state (via an installation
+                or upgrade), before the controller gives up and actively terminates
+                it. By default, no deadline is set.
+              format: int64
+              minimum: 0
+              type: integer
+            digest:
+              description: '`digest` is the digest of the application manifest. Digest
+                is a content-addressable identifier and can be used in addition to
+                `version` to validate the application manifest to download.'
+              type: string
+            name:
+              description: '`name` is the uniquely identifiable name of the application
+                manifest to retrieve from the repository. This field will be ignored
+                for "Deployer" format repository.'
+              type: string
+            repositoryRef:
+              description: '`repositoryRef` references a Repository that houses application
+                manifests.'
+              type: object
+            revisionHistoryLimit:
+              description: The number of revision history objects (i.e. ControllerRevisions)
+                to retain to allow rollback. If not specified, 10 most recent ControllerRevision
+                objects will be kept.
+              format: int32
+              type: integer
+            serviceAccountName:
+              description: '`serviceAccountName` is the service account used for launching
+                the application.'
+              type: string
+            values:
+              description: '`values` is a string containing (unparsed) JSON data for
+                declaring parameter values to customize the application. The value
+                must be able to be serialized to JSON format. This is only used when
+                referencing a "Helm" format Repository.'
+              type: string
+            valuesSecretRef:
+              description: '`valuesSecretRef` is an optional reference to a Secret
+                in the same namespace containing data for declaring parameter values
+                to customize the application. This is only used when referencing a
+                "Deployer" format Repository.'
+              type: object
+            version:
+              description: '`version` is the version of the application manifest.
+                The version needs to follow SemVer 2 guidelines (in MAJOR.MINOR.PATCH
+                format).'
+              minLength: 1
+              type: string
+          required:
+          - repositoryRef
+          - version
+          - applicationRef
+          type: object
+        status:
+          properties:
+            availableVersions:
+              description: '`availableVersions` lists all available versions of this
+                application manifest discovered from the repository.'
+              items:
+                properties:
+                  deprecated:
+                    description: '`deprecated` is a flag that tells whether this release
+                      has been deprecated.'
+                    type: boolean
+                  digest:
+                    description: '`digest` is the checksum of the artifact, either
+                      a helm chart or a deployer'
+                    type: string
+                  name:
+                    description: '`name` is the name of the application.'
+                    type: string
+                  recommended:
+                    description: '`recommended` is a flag that tells whether this
+                      is a recommended update'
+                    type: boolean
+                  releaseDate:
+                    description: '`releaseDate` is the date on which this release
+                      became available.'
+                    format: date-time
+                    type: string
+                  releaseNote:
+                    description: '`releaseNote` is information about this release.'
+                    type: string
+                  releaseType:
+                    description: '`releaseType` is the type of release. This can be
+                      either Feature, BugFix or Security.'
+                    items:
+                      enum:
+                      - Feature
+                      - BugFix
+                      - Security
+                      type: string
+                    type: array
+                  version:
+                    description: '`version` is the version of this release the application.'
+                    type: string
+                required:
+                - name
+                - version
+                type: object
+              type: array
+            conditions:
+              description: '`conditions` represents the latest observations of a Release''s
+                current state.'
+              items:
+                properties:
+                  lastTransitionTime:
+                    description: Last time this condition was updated.
+                    format: date-time
+                    type: string
+                  message:
+                    description: A human readable message indicating details about
+                      the transition.
+                    type: string
+                  reason:
+                    description: "The reason for the condition's last transition."
+                    type: string
+                  status:
+                    description: Status of the condition, one of True, False, Unknown.
+                    type: string
+                  type:
+                    description: Type of Release condition.
+                    type: string
+                required:
+                - type
+                - status
+                type: object
+              type: array
+            currentReleaseRevision:
+              description: '`currentReleaseRevision` is the current revision number
+                of the Release spec.'
+              format: int64
+              type: integer
+            currentVersion:
+              description: '`currentVersion` is the current version of the application
+                manifest that has been launched.'
+              type: string
+          type: object
+  version: v1alpha1
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  creationTimestamp: null
+  labels:
+    controller-tools.k8s.io: "1.0"
+  name: releaserollbacks.kalm.google.com
+spec:
+  group: kalm.google.com
+  names:
+    kind: ReleaseRollback
+    plural: releaserollbacks
+  scope: Namespaced
+  validation:
+    openAPIV3Schema:
+      properties:
+        apiVersion:
+          description: 'APIVersion defines the versioned schema of this representation
+            of an object. Servers should convert recognized schemas to the latest
+            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources'
+          type: string
+        kind:
+          description: 'Kind is a string value representing the REST resource this
+            object represents. Servers may infer this from the endpoint the client
+            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds'
+          type: string
+        metadata:
+          type: object
+        spec:
+          properties:
+            releaseName:
+              description: '`releaseName` is the name of the Release object to auto-rollback
+                on failure.'
+              minLength: 1
+              type: string
+            rollbackPolicy:
+              description: '`rollbackPolicy` specifies the criteria when a Release
+                should be auto-rolled back. Can be "OnceOnFailure".'
+              enum:
+              - OnceOnFailure
+              type: string
+          required:
+          - releaseName
+          - rollbackPolicy
+          type: object
+        status:
+          properties:
+            lastRollbackTime:
+              description: '`lastRollbackTime` is the RFC 3339 time when the Release
+                that this ReleaseRollback refers to is last rolled back.'
+              format: date-time
+              type: string
+            lastRollbackTo:
+              description: '`lastRollbackTo` is the name of the ControllerRevision
+                that''s last used to roll back the Release that this ReleaseRollback
+                refers to.'
+              type: string
+          type: object
+  version: v1alpha1
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  creationTimestamp: null
+  labels:
+    controller-tools.k8s.io: "1.0"
+  name: repositories.kalm.google.com
+spec:
+  group: kalm.google.com
+  names:
+    kind: Repository
+    plural: repositories
+  scope: Namespaced
+  validation:
+    openAPIV3Schema:
+      properties:
+        apiVersion:
+          description: 'APIVersion defines the versioned schema of this representation
+            of an object. Servers should convert recognized schemas to the latest
+            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources'
+          type: string
+        kind:
+          description: 'Kind is a string value representing the REST resource this
+            object represents. Servers may infer this from the endpoint the client
+            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds'
+          type: string
+        metadata:
+          type: object
+        spec:
+          properties:
+            secretRef:
+              description: '`secretRef` is an optional reference to a secret in the
+                same namespace to be used for connecting to the repository.'
+              type: object
+            type:
+              description: '`type` indicates the type of the repository. Currently,
+                this can be "Helm" or "Deployer"'
+              enum:
+              - Helm
+              - Deployer
+              type: string
+            url:
+              description: '`url` resolves to a repository that houses application
+                manifests.'
+              minLength: 1
+              type: string
+          required:
+          - type
+          - url
+          type: object
+  version: v1alpha1
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    controller-tools.k8s.io: "1.0"
+  name: kalm-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  creationTimestamp: null
+  name: kalm-manager-role
+rules:
+- apiGroups:
+  - kalm.google.com
+  resources:
+  - releases
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - kalm.google.com
+  resources:
+  - repositories
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - batch
+  resources:
+  - jobs
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - app.k8s.io
+  resources:
+  - applications
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - apps
+  resources:
+  - controllerrevisions
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - update
+  - patch
+- apiGroups:
+  - kalm.google.com
+  resources:
+  - releaserollbacks
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - kalm.google.com
+  resources:
+  - releaserollbacks/status
+  verbs:
+  - get
+  - update
+  - patch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  creationTimestamp: null
+  name: kalm-manager-rolebinding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: kalm-manager-role
+subjects:
+- kind: ServiceAccount
+  name: default
+  namespace: kalm-system
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    control-plane: controller-manager
+    controller-tools.k8s.io: "1.0"
+  name: kalm-controller-manager-service
+  namespace: kalm-system
+spec:
+  ports:
+  - port: 443
+  selector:
+    control-plane: controller-manager
+    controller-tools.k8s.io: "1.0"
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    control-plane: controller-manager
+    controller-tools.k8s.io: "1.0"
+  name: kalm-controller-manager
+  namespace: kalm-system
+spec:
+  podManagementPolicy: Parallel
+  selector:
+    matchLabels:
+      control-plane: controller-manager
+      controller-tools.k8s.io: "1.0"
+  serviceName: kalm-controller-manager-service
+  template:
+    metadata:
+      labels:
+        control-plane: controller-manager
+        controller-tools.k8s.io: "1.0"
+    spec:
+      containers:
+      - command:
+        - /monitor
+        - --source=kalm:http://localhost:8080?whitelisted=controller_runtime_reconcile_queue_length,controller_runtime_reconcile_total,controller_runtime_reconcile_errors_total,controller_runtime_reconcile_time_seconds
+        - --stackdriver-prefix=container.googleapis.com/internal/addons
+        - --pod-id=$(POD_NAME)
+        - --namespace-id=$(POD_NAMESPACE)
+        env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        image: k8s.gcr.io/prometheus-to-sd:v0.5.1
+        name: prom-to-sd
+      - args:
+        - -features=install-upgrade
+        - -features=auto-rollback
+        command:
+        - /root/manager
+        env:
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        image: marketplace.gcr.io/google/kalm-controller:0.1-alpha
+        imagePullPolicy: Always
+        name: kalm  # manager
+        resources:
+          limits:
+            cpu: 100m
+            memory: 200Mi
+          requests:
+            cpu: 100m
+            memory: 200Mi
+      terminationGracePeriodSeconds: 10

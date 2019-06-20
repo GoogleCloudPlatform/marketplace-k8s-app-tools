@@ -204,13 +204,16 @@ Supports versions starting from `v1beta1`.
 Represents the type of the input in the form for that property.
 
 #### Supported types
+
 - `string`
 - `integer`
 - `boolean`
 
 ### title
 
-Displayed text in the ui.
+Displayed text in the UI.
+
+![Custom property UI](images/custom-property-ui.png)
 
 ### description
 
@@ -219,6 +222,23 @@ Explanation of what the property is or what is used for. Be mindful of good expl
 ### default
 
 If user does not provide a value, `default` will be used.
+
+### enum
+
+Specifies a list of values, which will be rendered as a dropdown list in the UI form, for the user to select from. Only values in this list are considered valid for this property.
+
+```yaml
+  some.property:
+    type: string
+    title: Test property
+    description: My Test Property
+    enum:
+    - 'Value 1'
+    - 'Value 2'
+    - 'Value 3'
+```
+
+![Enum property UI](images/enum-property-ui.png)
 
 ### minimum
 
@@ -238,7 +258,7 @@ A regex pattern. The value needs to match `pattern`.
 
 ### x-google-marketplace
 
-This serves as an annotation to tell gcp to handle that property in a special way, depending on `type`.
+This serves as an annotation to tell GCP to handle that property in a special way, depending on `type`.
 It has several usages and more will be added based on demand.
 
 ### [Examples](https://github.com/GoogleCloudPlatform/marketplace-k8s-app-example/blob/master/wordpress/schema.yaml).
@@ -251,6 +271,7 @@ It has several usages and more will be added based on demand.
 It defines how this object will be handled. Each type has a different set of properties.
 
 #### Supported types
+
 - `NAME`: To be used as the name of the app.
 - `NAMESPACE`: To be used as the kubernetes namespace where the app will installed.
 - `IMAGE`: Link to a docker image.
@@ -262,6 +283,7 @@ It defines how this object will be handled. Each type has a different set of pro
 - `APPLICATION_UID`: The uuid of the created `Application` object.
 - `ISTIO_ENABLED`: Indicates whether Istio is enabled for the deployment.
 - `INGRESS_AVAILABLE`: Indicates whether the cluster is detected to have Ingress support.
+- `TLS_CERTIFICATE`: To be used to support a custom certificate or generate a self-signed certificate.
 
 ---
 
@@ -384,6 +406,8 @@ properties:
         type: SSD
 ```
 
+The created `StorageClass` will have the name as `<namespace>-<app_name>-<property_name>`.
+
 ---
 
 ### type: STRING
@@ -416,6 +440,66 @@ This boolean property receives a True value if the environment is detected to ha
 ### type: INGRESS_AVAILABLE
 
 This boolean property receives a True value if the cluster is detected to have Ingress controller. The deployer and template can take this signal to adapt the deployment accordingly.
+
+---
+
+### type: TLS_CERTIFICATE
+
+This property provides an SSL/TLS certificate for the Kubernetes manifest. By default, a self-signed certificate is generated.
+
+Example:
+
+```yaml
+properties:
+  certificate:
+    type: string
+    x-google-marketplace:
+      type: TLS_CERTIFICATE
+      tlsCertificate:
+        generatedProperties:
+          base64EncodedPrivateKey: TLS_CERTIFICATE_KEY
+          base64EncodedCertificate: TLS_CERTIFICATE_CRT
+```
+
+* `base64EncodedPrivateKey`: Denotes the name of a property receive a private key.
+* `base64EncodedCertificate`: Denotes the name of a property receive a certificate.
+
+You can provide your custom certificate by overwrite the `certificate` property in the JSON format as following:
+
+```json
+{
+  "private_key": "-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----",
+  "certificate": "-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----"
+}
+```
+
+In your helm chart, based on the above example, you can handle the certificate:
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: tls-secret
+  namespace: demo
+data:
+  tls.key: {{ .Values.TLS_CERTIFICATE_KEY }}
+  tls.crt: {{ .Values.TLS_CERTIFICATE_CRT }}
+type: kubernetes.io/tls
+```
+
+In your `envsubst` manifest, based on the above example, you can handle the certificate:
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: tls-secret
+  namespace: demo
+data:
+  tls.key: $TLS_CERTIFICATE_KEY
+  tls.crt: $TLS_CERTIFICATE_CRT
+type: kubernetes.io/tls
+```
 
 ---
 

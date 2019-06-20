@@ -35,6 +35,15 @@ case $i in
     istio="${i#*=}"
     shift
     ;;
+  # TODO(#344) Remove this flag once we have better support
+  --additional_deployer_role=*)
+    additional_deployer_role="${i#*=}"
+    shift
+    ;;
+  --image_pull_secret=*)
+    image_pull_secret="${i#*=}"
+    shift
+    ;;
   *)
     echo "Unrecognized flag: $i"
     exit 1
@@ -87,6 +96,13 @@ echo "INFO Parameters: $parameters"
 echo "INFO Creates namespace \"$NAMESPACE\""
 kubectl create namespace "$NAMESPACE"
 
+if [[ -n "$image_pull_secret" ]]; then
+  echo "Copying secret/$image_pull_secret from namespace/$default to namespace/$NAMESPACE."
+  kubectl get secret "$image_pull_secret" --namespace=default --export -o=yaml | kubectl create --namespace="$NAMESPACE" -f -
+  kubectl get secret "$image_pull_secret" --namespace="$NAMESPACE"
+  kubectl patch namespace "$NAMESPACE" -p "{\"metadata\": {\"annotations\": {\"marketplace.cloud.google.com/imagePullSecret\": \"$image_pull_secret\"}}}"
+fi
+
 if [[ "$istio" = "enabled" ]]; then
   echo "INFO Enabling istio in \"$NAMESPACE\" (istio-injection=enabled)."
   kubectl label namespace "$NAMESPACE" istio-injection=enabled
@@ -124,8 +140,17 @@ function clean_and_exit() {
   [[ -z "$message" ]] || echo "$message"
 
   delete_namespace
+  if [[ ! -z "$deployer_role_name" ]]; then
+    kubectl delete clusterrolebinding "$deployer_role_name"
+  fi
   exit 1
 }
+
+# Add additional role if deployer needs more privileges.
+if [[ ! -z "$additional_deployer_role" ]]; then
+  deployer_role_name="$NAMESPACE-deployer-sa-$additional_deployer_role"
+  kubectl create clusterrolebinding "$deployer_role_name" --clusterrole "$additional_deployer_role" --user "system:serviceaccount:$NAMESPACE:$NAMESPACE-deployer-sa"
+fi
 
 echo "INFO Initializes the deployer container which will deploy all the application components"
 /scripts/install \

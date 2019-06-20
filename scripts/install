@@ -19,16 +19,24 @@ set -eo pipefail
 for i in "$@"
 do
 case $i in
-  --deployer=*)
-    deployer="${i#*=}"
-    shift
-    ;;
   --parameters=*)
     parameters="${i#*=}"
     shift
     ;;
+  --deployer=*)
+    deployer="${i#*=}"
+    shift
+    ;;
   --entrypoint=*)
     entrypoint="${i#*=}"
+    shift
+    ;;
+  --version_meta_file=*)
+    version_meta_file="${i#*=}"
+    shift
+    ;;
+  --image_pull_secret=*)
+    image_pull_secret="${i#*=}"
     shift
     ;;
   *)
@@ -38,9 +46,26 @@ case $i in
 esac
 done
 
-[[ -z "$deployer" ]] && >&2 echo "--deployer required" && exit 1
 [[ -z "$parameters" ]] && >&2 echo "--parameters required" && exit 1
+
+[[ -z "$deployer" && -z "$version_meta_file" ]] && >&2 echo "One of --deployer or --version_meta_file is required" && exit 1
+[[ -n "$deployer" && -n "$version_meta_file" ]] && >&2 echo "Only one of --deployer or --version_meta_file should be specified" && exit 1
+
 [[ -z "$entrypoint" ]] && entrypoint="/bin/deploy.sh"
+
+if [[ -n "$version_meta_file" ]]; then
+  if [[ "$version_meta_file" == gs://* ]]; then
+    deployer="$(gsutil cat "$version_meta_file" | yaml2json | jq -r '.url')"
+  elif [[ "$version_meta_file" == http://* || "$version_meta_file" == http://* ]]; then
+    deployer="$(wget -O- -q "$version_meta_file" | yaml2json | jq -r '.url')"
+  else
+    >&2 echo "Unsupported --version_meta_file value: $version_meta_file" && exit 1
+  fi
+  [[ -z "$deployer" ]] && >&2 echo "Unable to retrieve deployer from $version_meta_file." && exit 1
+  version_repo="$(dirname "$version_meta_file")"
+else
+  version_repo=""
+fi
 
 # Extract schema and values files.
 docker run \
@@ -61,6 +86,13 @@ namespace="$(print_config.py \
     --values_mode raw \
     --xtype NAMESPACE)"
 app_version="$(print_app_api_version.py)"
+
+if [[ -z "$image_pull_secret" ]]; then
+  # Check the namespace annotation.
+  image_pull_secret="$(kubectl get namespace ${namespace} --ignore-not-found -o json \
+    | jq '.metadata.annotations["marketplace.cloud.google.com/imagePullSecret"]' \
+    | jq --raw-output 'select(. != null)')"
+fi
 
 # Create Application instance.
 kubectl apply --namespace="$namespace" --filename=- <<EOF
@@ -87,6 +119,8 @@ echo "${parameters}" \
     --values_mode=stdin \
     --deployer_image="${deployer}" \
     --deployer_entrypoint="${entrypoint}" \
+    --version_repo="${version_repo}" \
+    --image_pull_secret="${image_pull_secret}" \
   | set_app_labels.py \
     --manifests=- \
     --dest=- \

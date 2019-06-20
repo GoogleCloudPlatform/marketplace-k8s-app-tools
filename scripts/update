@@ -1,0 +1,77 @@
+#!/bin/bash
+#
+# Copyright 2018 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+################################################################################
+# Usage:
+#   update --name NAME --namespace NAMESPACE [--version VERSION]
+#
+# Update an existing KALM enabled application to a new version.
+# If no --version is specified, it uses the latest available version
+# on the Release object.
+################################################################################
+
+set -eo pipefail
+
+for i in "$@"
+do
+case $i in
+  --name=*)
+    name="${i#*=}"
+    shift
+    ;;
+  --namespace=*)
+    namespace="${i#*=}"
+    shift
+    ;;
+  --version=*)
+    version="${i#*=}"
+    shift
+    ;;
+  *)
+    >&2 echo "Unrecognized flag: $i"
+    exit 1
+    ;;
+esac
+done
+
+[[ -z "$name" ]] && >&2 echo "--name required" && exit 1
+[[ -z "$namespace" ]] && >&2 echo "--namespace required" && exit 1
+
+current_version="$( \
+    kubectl --namespace="$namespace" get "Release.kalm.google.com/$name" -ojson \
+    | jq -r '.spec.version')"
+
+# If no version is explicitly specified, get the latest available versions.
+if [[ -z "$version" ]]; then
+  version="$( \
+      kubectl --namespace="$namespace" get "Release.kalm.google.com/$name" -ojson \
+      | jq -r '.status.availableVersions[0].version')"
+  if [[ "$current_version" == "$version" ]]; then
+    >&2 echo "No new version found. Current version: $current_version"
+    exit
+  fi
+else
+  if [[ "$current_version" == "$version" ]]; then
+    >&2 echo "Already at version $current_version"
+    exit
+  fi
+fi
+
+>&2 echo "Updating from current version $current_version to latest version $version"
+
+kubectl --namespace="$namespace" patch "Release.kalm.google.com" "$name" \
+    --type=merge \
+    -p "$(printf '{"spec":{"version":"%s"}}' "$version")"
