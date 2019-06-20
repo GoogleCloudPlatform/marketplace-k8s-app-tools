@@ -63,7 +63,7 @@ function delete_namespace() {
 
     if [[ ! -z $deployer_name ]]; then
       echo "INFO Collecting logs for deployer"
-      deployer_logs="$(kubectl logs "jobs/$deployer_name" --namespace="$NAMESPACE" || echo "ERROR Failed to get logs for deployer $deployer_name")"
+      deployer_logs="$(kubectl logs "jobs/$deployer_name" --namespace="$NAMESPACE" --tail 9999 || echo "ERROR Failed to get logs for deployer $deployer_name")"
       echo "$deployer_logs"
 
       deployer_errors="$(echo "$deployer_logs" | /scripts/filter_deployer_logs.py)"
@@ -89,7 +89,7 @@ function clean_resources() {
 
 function clean_and_exit() {
   if [[ -n "$1" ]]; then
-    echo -e "$1"
+    echo "$1"
     error_summary="$error_summary$1\n"
   fi
   clean_resources
@@ -98,18 +98,16 @@ function clean_and_exit() {
 
 function print_summary() {
   if [[ -n "$error_events" ]]; then
-    error_summary="${error_summary}Error events found in namespace \"$NAMESPACE\"\n"
-    error_summary="$error_summary$error_events\n"
+    error_summary="$(printf ${error_summary}Error events found in namespace \"$NAMESPACE\"\\n${error_events}\\n)"
   fi
 
   if [[ -n "$deployer_errors" ]]; then
-    error_summary="${error_summary}Error traces found in deployer\n"
-    error_summary="$error_summary$deployer_errors\n"
+    error_summary="$(printf ${error_summary}Error traces found in deployer\\n${deployer_errors}\\n)"
   fi
 
   if [[ -n "$error_summary" ]];then
     echo "=== ERROR SUMMARY ==="
-    echo -e "$error_summary"
+    echo "$error_summary"
     echo "====================="
   fi
 }
