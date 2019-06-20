@@ -645,9 +645,11 @@ class SchemaXImage:
     if not default:
       raise InvalidSchema('default image value must be specified')
     if not default.startswith('gcr.io'):
-      raise InvalidSchema('default image value must state registry: {}'.format(default))
+      raise InvalidSchema(
+          'default image value must state registry: {}'.format(default))
     if ':' not in default:
-      raise InvalidSchema('default image value is missing a tag or digest: {}'.format(default))
+      raise InvalidSchema(
+          'default image value is missing a tag or digest: {}'.format(default))
 
     generated_properties = dictionary.get('generatedProperties', {})
     if 'splitByColon' in generated_properties:

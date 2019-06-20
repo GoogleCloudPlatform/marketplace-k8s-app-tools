@@ -113,14 +113,16 @@ class ConfigHelperTest(unittest.TestCase):
 
   def test_types_and_defaults(self):
     schema = config_helper.Schema.load_yaml(SCHEMA)
-    self.assertEqual({
-        'propertyString', 'propertyStringWithDefault', 'propertyInt',
-        'propertyIntWithDefault', 'propertyInteger',
-        'propertyIntegerWithDefault', 'propertyNumber',
-        'propertyNumberWithDefault', 'propertyBoolean',
-        'propertyBooleanWithDefault', 'propertyImage', 'propertyDeployerImage',
-        'propertyPassword', 'applicationUid', 'istioEnabled', 'ingressAvailable'
-    }, set(schema.properties))
+    self.assertEqual(
+        {
+            'propertyString', 'propertyStringWithDefault', 'propertyInt',
+            'propertyIntWithDefault', 'propertyInteger',
+            'propertyIntegerWithDefault', 'propertyNumber',
+            'propertyNumberWithDefault', 'propertyBoolean',
+            'propertyBooleanWithDefault', 'propertyImage',
+            'propertyDeployerImage', 'propertyPassword', 'applicationUid',
+            'istioEnabled', 'ingressAvailable'
+        }, set(schema.properties))
     self.assertEqual(str, schema.properties['propertyString'].type)
     self.assertIsNone(schema.properties['propertyString'].default)
     self.assertEqual(str, schema.properties['propertyStringWithDefault'].type)
@@ -303,8 +305,8 @@ class ConfigHelperTest(unittest.TestCase):
 
   def test_image_default_missing(self):
     self.assertRaisesRegexp(
-        config_helper.InvalidSchema, r'.*default image value must be specified', lambda:
-        config_helper.Schema.load_yaml("""
+        config_helper.InvalidSchema, r'.*default image value must be specified',
+        lambda: config_helper.Schema.load_yaml("""
         properties:
           i:
             type: string
@@ -314,8 +316,9 @@ class ConfigHelperTest(unittest.TestCase):
 
   def test_image_default_missing_repo(self):
     self.assertRaisesRegexp(
-        config_helper.InvalidSchema, r'.*default image value must state registry', lambda:
-        config_helper.Schema.load_yaml("""
+        config_helper.InvalidSchema,
+        r'.*default image value must state registry', lambda: config_helper.
+        Schema.load_yaml("""
         properties:
           i:
             type: string
@@ -326,7 +329,8 @@ class ConfigHelperTest(unittest.TestCase):
 
   def test_image_default_missing_tag_or_digest(self):
     self.assertRaisesRegexp(
-        config_helper.InvalidSchema, r'.*default image value is missing a tag or digest', lambda:
+        config_helper.InvalidSchema,
+        r'.*default image value is missing a tag or digest', lambda:
         config_helper.Schema.load_yaml("""
         properties:
           i:
