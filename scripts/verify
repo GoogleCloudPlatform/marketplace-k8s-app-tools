@@ -55,6 +55,73 @@ done
 [[ -z "$parameters" ]] && parameters="{}"
 [[ -z "$wait_timeout" ]] && wait_timeout=600
 
+function delete_namespace() {
+  if [[ -z "$namespace_deleted" ]]; then
+    echo "INFO Collecting events for namespace \"$NAMESPACE\""
+    kubectl get events --namespace="$NAMESPACE" || echo "ERROR Failed to get events for namespace \"$NAMESPACE\""
+    error_events="$(kubectl get events --namespace="$NAMESPACE" --field-selector="type!=Normal" || echo "ERROR Failed to get events for namespace \"$NAMESPACE\"")"
+
+    if [[ ! -z $deployer_name ]]; then
+      echo "INFO Collecting logs for deployer"
+      deployer_logs="$(kubectl logs "jobs/$deployer_name" --namespace="$NAMESPACE" --tail 9999 || echo "ERROR Failed to get logs for deployer $deployer_name")"
+      echo "$deployer_logs"
+
+      deployer_errors="$(echo "$deployer_logs" | /scripts/filter_deployer_logs.py)"
+    fi
+
+    echo "INFO Deleting namespace \"$NAMESPACE\""
+    kubectl get all --namespace "$NAMESPACE" --output=yaml
+    kubectl delete namespace "$NAMESPACE"
+    namespace_deleted="true"
+  fi
+}
+
+function clean_resources() {
+  if [[ -z "$resources_cleaned" ]]; then
+    echo "INFO cleaning all resources."
+    delete_namespace
+    if [[ ! -z "$deployer_role_name" ]]; then
+      kubectl delete clusterrolebinding "$deployer_role_name"
+    fi
+    resources_cleaned="true"
+  fi
+}
+
+function clean_and_exit() {
+  if [[ -n "$1" ]]; then
+    echo "$1"
+    error_summary="$error_summary$1\n"
+  fi
+  clean_resources
+  exit 1
+}
+
+function print_summary() {
+  if [[ -n "$error_events" ]]; then
+    error_summary="$(printf ${error_summary}Error events found in namespace \"$NAMESPACE\"\\n${error_events}\\n)"
+  fi
+
+  if [[ -n "$deployer_errors" ]]; then
+    error_summary="$(printf ${error_summary}Error traces found in deployer\\n${deployer_errors}\\n)"
+  fi
+
+  if [[ -n "$error_summary" ]];then
+    echo "=== ERROR SUMMARY ==="
+    echo "$error_summary"
+    echo "====================="
+  fi
+}
+
+# If any command returns with non-zero exit code, set -e will cause the script
+# to exit. Printing the summary prior to exit
+handle_failure() {
+  code=$?
+  clean_resources
+  print_summary
+  exit $code
+}
+trap "handle_failure" EXIT
+
 # Extract schema and values files.
 docker run \
     --entrypoint=/bin/bash \
@@ -120,31 +187,6 @@ if [[ "$istio" = "enabled" ]]; then
         '.[$istio_enabled_key] = true')
   fi
 fi
-
-function delete_namespace() {
-  echo "INFO Collecting events for namespace \"$NAMESPACE\""
-  kubectl get events --namespace="$NAMESPACE" || echo "ERROR Failed to get events for namespace \"$NAMESPACE\""
-
-  if [[ ! -z $deployer_name ]]; then
-    echo "INFO Collecting logs for deployer"
-    kubectl logs "jobs/$deployer_name" --namespace="$NAMESPACE" || echo "ERROR Failed to get logs for deployer $deployer_name"
-  fi
-
-  echo "INFO Deleting namespace \"$NAMESPACE\""
-  kubectl get all --namespace "$NAMESPACE" --output=yaml
-  kubectl delete namespace "$NAMESPACE"
-}
-
-function clean_and_exit() {
-  message=$1
-  [[ -z "$message" ]] || echo "$message"
-
-  delete_namespace
-  if [[ ! -z "$deployer_role_name" ]]; then
-    kubectl delete clusterrolebinding "$deployer_role_name"
-  fi
-  exit 1
-}
 
 # Add additional role if deployer needs more privileges.
 if [[ ! -z "$additional_deployer_role" ]]; then
@@ -217,4 +259,7 @@ echo "INFO Wait for service accounts to be deleted."
   --timeout="$deletion_timeout" \
   || clean_and_exit "ERROR Some service accounts or roles where not deleted"
 
-delete_namespace
+trap - EXIT
+
+clean_resources
+print_summary
