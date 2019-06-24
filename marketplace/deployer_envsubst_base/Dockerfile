@@ -13,9 +13,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     wget \
     && rm -rf /var/lib/apt/lists/*
 
-RUN pip install wheel \
-    && pip install google-cloud-storage
-
 RUN wget -q -O /bin/kubectl \
         https://storage.googleapis.com/kubernetes-release/release/v1.13.2/bin/linux/amd64/kubectl \
     && chmod 755 /bin/kubectl
