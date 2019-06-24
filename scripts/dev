@@ -18,9 +18,15 @@ elif [[ -d "${KUBE_CONFIG}" ]]; then
   # Mount as a directory.
   kube_mount=(--mount "type=bind,source=${KUBE_CONFIG},target=/mount/config/.kube,readonly")
 fi
+
 gcloud_mount=""
+# gcloud_original_path is used for determining the prefix to filenames referenced
+# by certain config files. Such prefix must be replaced by the corresponding
+# mount path in the container.
+gcloud_original_path=""
 if [[ -e "${GCLOUD_CONFIG}" ]]; then
   gcloud_mount=(--mount "type=bind,source=${GCLOUD_CONFIG},target=/mount/config/.config/gcloud,readonly")
+  gcloud_original_path=(--env "GCLOUD_ORIGINAL_PATH=$(readlink -f ${GCLOUD_CONFIG})")
 fi
 
 docker run \
@@ -28,6 +34,7 @@ docker run \
   --net=host \
   ${kube_mount[*]} \
   ${gcloud_mount[*]} \
+  ${gcloud_original_path[*]} \
   ${EXTRA_DOCKER_PARAMS[*]} \
   --rm \
   "${MARKETPLACE_TOOLS_IMAGE}:${MARKETPLACE_TOOLS_TAG}" \
