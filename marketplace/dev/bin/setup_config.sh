@@ -49,6 +49,6 @@ if [[ "${GCLOUD_ORIGINAL_PATH}" != "" ]]; then
   # Replace gcloud path prefixes with the one mounted in this container.
   # .boto files are the configuration files for gsutil.
   find "$HOME/.config" -name ".boto" \
-    | xargs -n 1 sed -i "s|gs_service_key_file = ${GCLOUD_ORIGINAL_PATH}/|gs_service_key_file = $HOME/.config/gcloud/|"
+    | xargs -r -n 1 sed -i "s|^gs_service_key_file = ${GCLOUD_ORIGINAL_PATH}/|gs_service_key_file = $HOME/.config/gcloud/|"
 fi
 
