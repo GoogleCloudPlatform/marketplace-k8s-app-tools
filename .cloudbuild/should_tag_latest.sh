@@ -18,11 +18,20 @@ set -eu
 readonly repo="$1"
 readonly local_tag="$2"
 
+# Verify that the local tag is a non-prerelease SemVer.
+# Note that we should never tag a prerelease version as latest.
+# A prerelease version looks like 1.3.5-beta.
+if [[ -z "$(echo "$local_tag" | egrep '^[0-9]+\.[0-9]+\.[0-9]+$')" ]]; then
+  echo "Local tag $local_tag is not a valid non-prerelease SemVer" >&2
+  echo "false"
+  exit
+fi
+
 latest_remote_version=$( \
   gcloud container images list-tags "$repo" \
     --format "value(tags)" --filter 'tags~\d+\.\d+\.\d+'\
     | tr ',' '\n' \
-    | egrep '[0-9]+\.[0-9]+\.[0-9]+' \
+    | egrep '^[0-9]+\.[0-9]+\.[0-9]+$' \
     | sort -t '.' -k 1,1 -k 2,2 -k 3,3 -g \
     | tail -n 1)
 echo "Latest remote version: $latest_remote_version" >&2
