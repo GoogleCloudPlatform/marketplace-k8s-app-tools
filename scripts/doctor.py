@@ -48,10 +48,10 @@ def main():
       gcloud=check_gcloud,
       gcloud_login=(check_gcloud_login, ['gcloud']),
       gcloud_project=(check_gcloud_default_project, ['gcloud_login']),
+      gsutil=check_gsutil,
       kubectl=check_kubectl,
       kubectl_nodes=(check_kubectl_nodes, ['kubectl']),
-      crd=(check_crd, ['kubectl_nodes']),
-      gsutil=check_gsutil)
+      crd=(check_crd, ['kubectl_nodes']))
   if all_good:
     print('\nEverything looks good to go!!')
   else:
