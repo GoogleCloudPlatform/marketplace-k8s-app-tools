@@ -98,16 +98,16 @@ function clean_and_exit() {
 
 function print_summary() {
   if [[ -n "$error_events" ]]; then
-    error_summary="$(printf ${error_summary}Error events found in namespace \"$NAMESPACE\"\\n${error_events}\\n)"
+    error_summary="${error_summary}\nError events found in namespace \"$NAMESPACE\"\n${error_events}\n"
   fi
 
   if [[ -n "$deployer_errors" ]]; then
-    error_summary="$(printf ${error_summary}Error traces found in deployer\\n${deployer_errors}\\n)"
+    error_summary="${error_summary}\nError traces found in deployer\n${deployer_errors}\n"
   fi
 
   if [[ -n "$error_summary" ]];then
     echo "=== ERROR SUMMARY ==="
-    echo "$error_summary"
+    printf "$error_summary"
     echo "====================="
   fi
 }
