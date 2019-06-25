@@ -106,9 +106,9 @@ function print_summary() {
   fi
 
   if [[ -n "$error_summary" ]];then
-    echo "=== ERROR SUMMARY ==="
+    printf "=== ERROR SUMMARY ==="
     printf "$error_summary"
-    echo "====================="
+    printf "====================="
   fi
 }
 
