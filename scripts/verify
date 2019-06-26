@@ -55,6 +55,8 @@ done
 [[ -z "$parameters" ]] && parameters="{}"
 [[ -z "$wait_timeout" ]] && wait_timeout=600
 
+error_summary_path="error_summary.txt"
+
 function delete_namespace() {
   if [[ -z "$namespace_deleted" ]]; then
     echo "INFO Collecting events for namespace \"$NAMESPACE\""
@@ -90,7 +92,7 @@ function clean_resources() {
 function clean_and_exit() {
   if [[ -n "$1" ]]; then
     echo "$1"
-    error_summary="$error_summary$1\n"
+    echo "$1" >> "$error_summary_path"
   fi
   clean_resources
   exit 1
@@ -98,17 +100,21 @@ function clean_and_exit() {
 
 function print_summary() {
   if [[ -n "$error_events" ]]; then
-    error_summary="${error_summary}\nError events found in namespace \"$NAMESPACE\"\n${error_events}\n"
+    echo >> "$error_summary_path"
+    echo "Error events found in namespace \"$NAMESPACE\"" >> "$error_summary_path"
+    echo "$error_events" >> "$error_summary_path"
   fi
 
   if [[ -n "$deployer_errors" ]]; then
-    error_summary="${error_summary}\nError traces found in deployer\n${deployer_errors}\n"
+    echo >> "$error_summary_path"
+    echo "Error traces found in deployer" >> "$error_summary_path"
+    echo "$deployer_errors" >> "$error_summary_path"
   fi
 
-  if [[ -n "$error_summary" ]];then
-    printf "=== ERROR SUMMARY ===\n"
-    printf "$error_summary"
-    printf "=====================\n"
+  if [[ -f "$error_summary_path" ]]; then
+    echo "=== ERROR SUMMARY ==="
+    cat "$error_summary_path"
+    echo "====================="
   fi
 }
 
