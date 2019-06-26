@@ -55,7 +55,7 @@ done
 [[ -z "$parameters" ]] && parameters="{}"
 [[ -z "$wait_timeout" ]] && wait_timeout=600
 
-error_summary_path="error_summary.txt"
+error_summary_path="$(mktemp)"
 
 function delete_namespace() {
   if [[ -z "$namespace_deleted" ]]; then
@@ -111,7 +111,7 @@ function print_summary() {
     echo "$deployer_errors" >> "$error_summary_path"
   fi
 
-  if [[ -f "$error_summary_path" ]]; then
+  if [[ -s "$error_summary_path" ]]; then
     echo "=== ERROR SUMMARY ==="
     cat "$error_summary_path"
     echo "====================="
@@ -170,7 +170,7 @@ echo "INFO Creates namespace \"$NAMESPACE\""
 kubectl create namespace "$NAMESPACE"
 
 if [[ -n "$image_pull_secret" ]]; then
-  echo "Copying secret/$image_pull_secret from namespace/$default to namespace/$NAMESPACE."
+  echo "Copying secret/$image_pull_secret from namespace/default to namespace/$NAMESPACE."
   kubectl get secret "$image_pull_secret" --namespace=default --export -o=yaml | kubectl create --namespace="$NAMESPACE" -f -
   kubectl get secret "$image_pull_secret" --namespace="$NAMESPACE"
   kubectl patch namespace "$NAMESPACE" -p "{\"metadata\": {\"annotations\": {\"marketplace.cloud.google.com/imagePullSecret\": \"$image_pull_secret\"}}}"
