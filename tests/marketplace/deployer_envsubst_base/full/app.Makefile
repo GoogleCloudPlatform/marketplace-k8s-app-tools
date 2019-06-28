@@ -132,7 +132,7 @@ app/verify_istio: app/build \
 # Runs diagnostic tool to make sure your environment is properly setup.
 app/doctor: | .build/app/dev
 	$(call print_target)
-	.build/app/dev /scripts/doctor.py
+	.build/app/dev /scripts/doctor
 
 
 endif
