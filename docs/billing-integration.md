@@ -26,7 +26,6 @@ During the deployment of a Kubernetes app, GCP Marketplace will create a `secret
 
 For example, the following `schema.yaml` snippet results in a property named `$myReportingSecret` being populated with the name of the generated secret resource.
 ```yaml
-applicationApiVersion: v1beta1
 properties:
   myReportingSecret:
     type: string
@@ -35,14 +34,14 @@ properties:
   ...
 ```
 
-**Note:** A reporting secret will generally look like `{deployment-name}-reporting-secret`, where `{deployment-name}` is the name given to the application deployment by the customer.
+**Note:** When deployed from the UI, the reporting secret will generally look like `{deployment-name}-reporting-secret`, where `{deployment-name}` is the name given to the application deployment by the customer.
 
 The reporting secret contains the following three fields (see an [example](https://storage.cloud.google.com/cloud-marketplace-tools/reporting_secrets/fake_reporting_secret.yaml)):
 * **consumer-id** - an identifier that represents the customer being billed for usage. To be passed verbatim to Google Service Control.
 * **entitlement-id** - another identifier representing the customer, but generally unused.
 * **reporting-key** - a base64-encoded GCP JSON service account key to use when reporting usage.
 
-**Note:** when viewing the YAML representation of this secret, every field is base64-encoded and will be automatically decoded by Kubernetes when reading values. The **reporting-key** field is encoded an additional time, so your application will need to decode it (after it is automatically decoded by Kubernetes once) if it needs to read the actual JSON key data.
+**Note:** when viewing the YAML representation of this secret (for example, via `kubectl get`), every field is base64-encoded and will be automatically decoded by Kubernetes when reading values. The **reporting-key** field is encoded an additional time, so your application will need to decode it (after it is automatically decoded by Kubernetes once) if it needs to read the actual JSON key data.
 
 ## Using the Metering Agent
 
@@ -57,6 +56,8 @@ If your application is priced by usage time (how long a deployment runs), you ca
 ### Agent Deployment and Configuration
 
 The following excerpts include the metering agent as a sidecar along with some application container. The agent's configuration is included as a ConfigMap value. When deployed as a sidecar, the agent's configuration can be parameterized through the use of environment variables, which is the mechanism used for passing values from the reporting secret.
+
+**Note:** the following example also uses `$`-prefixed variables for schema-sourced parameters, such as `$name`, similar to the [Wordpress example](https://github.com/GoogleCloudPlatform/marketplace-k8s-app-example/blob/master/wordpress/manifest/manifests.yaml.template). Variables not specified in the schema are not replaced, which includes the variables referenced in the agent config. If using Helm, `$name` would instead look something like `{{ .name }}`, but `$AGENT_ENCODED_KEY` would remain the same.
 
 Kubernetes manifest excerpt:
 ```yaml
@@ -126,7 +127,7 @@ data:
         # provided during onboarding.
         serviceName: my-application.mp-my-company.appspot.com
         consumerId: $AGENT_CONSUMER_ID  # From the reporting secret.
-      
+
 
     # The sources section lists metric data sources run by the agent
     # itself. The currently-supported source is 'heartbeat', which
@@ -188,7 +189,6 @@ spec:
 
 `schema.yaml` excerpt:
 ```yaml
-application_api_version: v1beta1
 properties:
   name:
     type: string
@@ -196,12 +196,12 @@ properties:
       type: NAME
   imageMyApp:
     type: string
-    default: $REGISTRY:$TAG
+    default: gcr.io/mycompany/myapp:latest
     x-google-marketplace:
       type: IMAGE
   imageUbbagent:
     type: string
-    default: $REGISTRY/ubbagent:$TAG
+    default: gcr.io/cloud-marketplace-tools/metering/ubbagent:latest
     x-google-marketplace:
       type: IMAGE
   reportingSecret:
@@ -214,7 +214,7 @@ The important aspects of the above examples include:
 * The metering agent's config is included as a value named `config.yaml` within a config-map.
 * This config-map is mounted as a volume at `/etc/ubbagent` in the ubbagent container, making the config file available to the agent at `/etc/ubbagent/config.yaml`. This value is passed to the agent sidecar using the special `$AGENT_CONFIG_FILE` environment variable.
 * The agent is instructed to listen on port `4567` using the special `$AGENT_LOCAL_PORT` environment variable. Note that this value must be quoted since environment variable values must be strings.
-* The name of the reported secret created at deployment time is stored in the `$reportingSecret` parameter.
+* The name of the reported secret created at deployment time is stored in the `reportingSecret` parameter.
 * The `config.yaml` file references two additional environment variables, `$AGENT_ENCODED_KEY` and `$AGENT_CONSUMER_ID`. The values for these variables are piped through from the above reporting secret using `secretKeyRef` sections. Note that the `AGENT_ENCODED_KEY` and `AGENT_CONSUMER_ID` names aren't special; any valid environment variable names can be used as long as they're consistent in the agent configuration and `env` sections.
 
 With this configuration in place, the application can send usage reports to the agent at `http://localhost:4567`.
