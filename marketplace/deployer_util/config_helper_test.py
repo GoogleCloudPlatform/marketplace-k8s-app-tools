@@ -790,6 +790,11 @@ class ConfigHelperTest(unittest.TestCase):
             releaseNote: Bug fixes
             releaseTypes:
             - BUG_FIX
+          images:
+            main:
+              properties:
+                main.image:
+                  type: FULL
 
           deployerServiceAccount:
             roles:
