@@ -44,8 +44,8 @@ class ExpandConfigTest(unittest.TestCase):
           p1:
             type: string
         """)
-    self.assertRaises(expand_config.InvalidProperty,
-                      lambda: expand_config.expand({'p1': 3}, schema))
+    self.assertRaises(expand_config.InvalidProperty, lambda: expand_config.
+                      expand({'p1': 3}, schema))
 
   def test_generate_properties_for_v1_image_split_by_colon(self):
     schema = config_helper.Schema.load_yaml("""
