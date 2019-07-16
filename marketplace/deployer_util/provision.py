@@ -346,24 +346,6 @@ def provision_deployer(schema, app_name, namespace, deployer_image,
 
   return [
       service_account,
-      {
-          'apiVersion': 'rbac.authorization.k8s.io/v1',
-          'kind': 'RoleBinding',
-          'metadata': {
-              'name': '{}-deployer-rb'.format(app_name),
-              'namespace': namespace,
-              'labels': labels,
-          },
-          'roleRef': {
-              'apiGroup': 'rbac.authorization.k8s.io',
-              'kind': 'ClusterRole',
-              'name': 'cluster-admin',
-          },
-          'subjects': [{
-              'kind': 'ServiceAccount',
-              'name': sa_name,
-          },]
-      },
       config,
       {
           'apiVersion': 'batch/v1',
@@ -385,7 +367,138 @@ def provision_deployer(schema, app_name, namespace, deployer_image,
               'backoffLimit': 0,
           },
       },
-  ]
+  ].extend(
+      make_deployer_rolebindings(schema, namespace, app_name, labels, sa_name))
+
+
+def make_deployer_rolebindings(schema, namespace, app_name, labels, sa_name):
+  subjects = [{
+      'kind': 'ServiceAccount',
+      'name': sa_name,
+      'namespace': namespace,
+  }]
+  default_rolebinding = {
+      'apiVersion': 'rbac.authorization.k8s.io/v1',
+      'kind': 'RoleBinding',
+      'metadata': {
+          'name': '{}:deployer-rb'.format(app_name),
+          'namespace': namespace,
+          'labels': labels,
+      },
+      'roleRef': {
+          'apiGroup': 'rbac.authorization.k8s.io',
+          'kind': 'ClusterRole',
+          'name': 'cluster-admin',
+      },
+      'subjects': subjects,
+  }
+
+  if not schema.is_v2(
+  ) or not schema.x_google_marketplace.deployer_service_account:
+    return [default_rolebinding]
+
+  roles_and_rolebindings = []
+  deployer_service_account = schema.x_google_marketplace.deployer_service_account
+
+  # Set the default rolebinding if no namespace roles are defined
+  if not deployer_service_account.custom_role_rules(
+  ) and not deployer_service_account.predefined_roles():
+    roles_and_rolebindings.append(default_rolebinding)
+
+  for i, rules in enumerate(deployer_service_account.custom_role_rules()):
+    role_name = '{}:deployer-r{}'.format(app_name, i)
+    roles_and_rolebindings.append({
+        'apiVersion': 'rbac.authorization.k8s.io/v1',
+        'kind': 'Role',
+        'metadata': {
+            'name': role_name,
+            'namespace': namespace,
+            'labels': labels,
+        },
+        'rules': rules,
+    })
+    roles_and_rolebindings.append({
+        'apiVersion': 'rbac.authorization.k8s.io/v1',
+        'kind': 'RoleBinding',
+        'metadata': {
+            'name': '{}:deployer-rb{}'.format(app_name, i),
+            'namespace': namespace,
+            'labels': labels,
+        },
+        'roleRef': {
+            'apiGroup': 'rbac.authorization.k8s.io',
+            'kind': 'Role',
+            'name': role_name,
+        },
+        'subjects': subjects,
+    })
+  for i, rules in enumerate(
+      deployer_service_account.custom_cluster_role_rules()):
+    role_name = '{}:{}:deployer-r{}'.format(namespace, app_name, i)
+    roles_and_rolebindings.append({
+        'apiVersion': 'rbac.authorization.k8s.io/v1',
+        'kind': 'ClusterRole',
+        'metadata': {
+            'name': role_name,
+            'labels': labels,
+        },
+        'rules': rules,
+    })
+    roles_and_rolebindings.append({
+        'apiVersion': 'rbac.authorization.k8s.io/v1',
+        'kind': 'ClusterRoleBinding',
+        'metadata': {
+            'name': '{}:{}:deployer-rb{}'.format(namespace, app_name, i),
+            'namespace': namespace,
+            'labels': labels,
+        },
+        'roleRef': {
+            'apiGroup': 'rbac.authorization.k8s.io',
+            'kind': 'ClusterRole',
+            'name': role_name,
+        },
+        'subjects': subjects,
+    })
+  for role in deployer_service_account.predefined_roles():
+    roles_and_rolebindings.append({
+        'apiVersion': 'rbac.authorization.k8s.io/v1',
+        'kind': 'RoleBinding',
+        'metadata': {
+            'name': limit_name('{}:{}:deployer-rb'.format(app_name, role), 64),
+            'namespace': namespace,
+            'labels': labels,
+        },
+        'roleRef': {
+            'apiGroup': 'rbac.authorization.k8s.io',
+            # Note: predefined ones are actually cluster roles.
+            'kind': 'ClusterRole',
+            'name': role,
+        },
+        'subjects': subjects,
+    })
+  for role in deployer_service_account.predefined_cluster_roles():
+    roles_and_rolebindings.append({
+        'apiVersion': 'rbac.authorization.k8s.io/v1',
+        'kind': 'ClusterRoleBinding',
+        'metadata': {
+            'name':
+                limit_name(
+                    '{}:{}:{}:deployer-crb'.format(namespace, app_name, role),
+                    64),
+            'namespace':
+                namespace,
+            'labels':
+                labels,
+        },
+        'roleRef': {
+            'apiGroup': 'rbac.authorization.k8s.io',
+            'kind': 'ClusterRole',
+            'name': role,
+        },
+        'subjects': subjects,
+    })
+
+  return roles_and_rolebindings
 
 
 def make_v1_config(schema, namespace, app_name, labels, app_params):

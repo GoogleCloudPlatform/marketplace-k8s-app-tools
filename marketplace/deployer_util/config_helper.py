@@ -226,7 +226,8 @@ class SchemaXGoogleMarketplace:
     self._images = {k: SchemaImage(k, v) for k, v in images.iteritems()}
 
     if 'deployerServiceAccount' in dictionary:
-      self._deployer_service_account = SchemaXServiceAccount(dictionary['deployerServiceAccount'])
+      self._deployer_service_account = SchemaXServiceAccount(
+          dictionary['deployerServiceAccount'])
 
   def validate(self):
     pass
