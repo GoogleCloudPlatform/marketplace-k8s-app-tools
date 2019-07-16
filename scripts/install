@@ -39,6 +39,10 @@ case $i in
     image_pull_secret="${i#*=}"
     shift
     ;;
+  --canonical_image_pull_secret=*)
+    canonical_image_pull_secret="${i#*=}"
+    shift
+    ;;
   *)
     >&2 echo "Unrecognized flag: $i"
     exit 1
@@ -121,6 +125,7 @@ echo "${parameters}" \
     --deployer_entrypoint="${entrypoint}" \
     --version_repo="${version_repo}" \
     --image_pull_secret="${image_pull_secret}" \
+    --canonical_image_pull_secret="${canonical_image_pull_secret}" \
   | set_app_labels.py \
     --manifests=- \
     --dest=- \
