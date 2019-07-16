@@ -17,9 +17,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         wget \
      && rm -rf /var/lib/apt/lists/*
 
-RUN pip install wheel \
-    && pip install google-cloud-storage
-
 RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add - && \
     apt-key fingerprint 0EBFCD88 && \
     add-apt-repository \
