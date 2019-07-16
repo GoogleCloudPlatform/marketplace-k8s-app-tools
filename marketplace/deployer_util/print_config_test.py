@@ -119,5 +119,5 @@ class PrintConfigTest(unittest.TestCase):
               type: IMAGE
         """)
     self.assertRaises(
-        print_config.InvalidParameter, lambda: print_config.output_xtype(
-            values, schema, 'IMAGE', True))
+        print_config.InvalidParameter,
+        lambda: print_config.output_xtype(values, schema, 'IMAGE', True))

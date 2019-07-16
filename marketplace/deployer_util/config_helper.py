@@ -101,8 +101,8 @@ class Schema:
 
   def __init__(self, dictionary):
     self._x_google_marketplace = _maybe_get_and_apply(
-        dictionary,
-        'x-google-marketplace', lambda v: SchemaXGoogleMarketplace(v))
+        dictionary, 'x-google-marketplace',
+        lambda v: SchemaXGoogleMarketplace(v))
 
     self._required = dictionary.get('required', [])
     self._properties = {
