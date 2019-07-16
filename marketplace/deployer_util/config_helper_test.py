@@ -191,8 +191,8 @@ class ConfigHelperTest(unittest.TestCase):
 
   def test_invalid_property_types(self):
     self.assertRaisesRegexp(
-        config_helper.InvalidSchema,
-        r'.*must be of type string$', lambda: config_helper.Schema.load_yaml("""
+        config_helper.InvalidSchema, r'.*must be of type string$',
+        lambda: config_helper.Schema.load_yaml("""
             properties:
               u:
                 type: integer
@@ -200,8 +200,8 @@ class ConfigHelperTest(unittest.TestCase):
                   type: NAME
             """))
     self.assertRaisesRegexp(
-        config_helper.InvalidSchema,
-        r'.*must be of type string$', lambda: config_helper.Schema.load_yaml("""
+        config_helper.InvalidSchema, r'.*must be of type string$',
+        lambda: config_helper.Schema.load_yaml("""
             properties:
               u:
                 type: number
@@ -209,8 +209,8 @@ class ConfigHelperTest(unittest.TestCase):
                   type: NAMESPACE
             """))
     self.assertRaisesRegexp(
-        config_helper.InvalidSchema,
-        r'.*must be of type string$', lambda: config_helper.Schema.load_yaml("""
+        config_helper.InvalidSchema, r'.*must be of type string$',
+        lambda: config_helper.Schema.load_yaml("""
             properties:
               u:
                 type: int
@@ -218,8 +218,8 @@ class ConfigHelperTest(unittest.TestCase):
                   type: DEPLOYER_IMAGE
             """))
     self.assertRaisesRegexp(
-        config_helper.InvalidSchema,
-        r'.*must be of type string$', lambda: config_helper.Schema.load_yaml("""
+        config_helper.InvalidSchema, r'.*must be of type string$',
+        lambda: config_helper.Schema.load_yaml("""
             properties:
               u:
                 type: boolean
@@ -227,8 +227,8 @@ class ConfigHelperTest(unittest.TestCase):
                   type: APPLICATION_UID
             """))
     self.assertRaisesRegexp(
-        config_helper.InvalidSchema, r'.*must be of type boolean$', lambda:
-        config_helper.Schema.load_yaml("""
+        config_helper.InvalidSchema, r'.*must be of type boolean$',
+        lambda: config_helper.Schema.load_yaml("""
             properties:
               u:
                 type: string
@@ -236,8 +236,8 @@ class ConfigHelperTest(unittest.TestCase):
                   type: ISTIO_ENABLED
             """))
     self.assertRaisesRegexp(
-        config_helper.InvalidSchema, r'.*must be of type boolean$', lambda:
-        config_helper.Schema.load_yaml("""
+        config_helper.InvalidSchema, r'.*must be of type boolean$',
+        lambda: config_helper.Schema.load_yaml("""
             properties:
               u:
                 type: string
@@ -461,8 +461,8 @@ class ConfigHelperTest(unittest.TestCase):
     self.assertEqual(False, schema.properties['pb'].str_to_type('False'))
     self.assertEqual(False, schema.properties['pb'].str_to_type('no'))
     self.assertEqual(False, schema.properties['pb'].str_to_type('No'))
-    self.assertRaises(config_helper.InvalidValue, lambda: schema.properties[
-        'pb'].str_to_type('bad'))
+    self.assertRaises(config_helper.InvalidValue,
+                      lambda: schema.properties['pb'].str_to_type('bad'))
 
   def test_invalid_default_type(self):
     self.assertRaises(
@@ -809,8 +809,8 @@ class ConfigHelperTest(unittest.TestCase):
 
   def test_validate_missing_app_api_version(self):
     self.assertRaisesRegexp(
-        config_helper.InvalidSchema,
-        'applicationApiVersion', lambda: config_helper.Schema.load_yaml("""
+        config_helper.InvalidSchema, 'applicationApiVersion',
+        lambda: config_helper.Schema.load_yaml("""
             properties:
               simple:
                 type: string
@@ -818,8 +818,8 @@ class ConfigHelperTest(unittest.TestCase):
 
   def test_validate_bad_form_too_many_items(self):
     self.assertRaisesRegexp(
-        config_helper.InvalidSchema,
-        'form', lambda: config_helper.Schema.load_yaml("""
+        config_helper.InvalidSchema, 'form',
+        lambda: config_helper.Schema.load_yaml("""
             applicationApiVersion: v1beta1
             form:
             - widget: help
@@ -830,8 +830,8 @@ class ConfigHelperTest(unittest.TestCase):
 
   def test_validate_bad_form_missing_type(self):
     self.assertRaisesRegexp(
-        config_helper.InvalidSchema,
-        'form', lambda: config_helper.Schema.load_yaml("""
+        config_helper.InvalidSchema, 'form',
+        lambda: config_helper.Schema.load_yaml("""
             applicationApiVersion: v1beta1
             form:
             - description: My arbitrary <i>description</i>
@@ -839,8 +839,8 @@ class ConfigHelperTest(unittest.TestCase):
 
   def test_validate_bad_form_unrecognized_type(self):
     self.assertRaisesRegexp(
-        config_helper.InvalidSchema,
-        'form', lambda: config_helper.Schema.load_yaml("""
+        config_helper.InvalidSchema, 'form',
+        lambda: config_helper.Schema.load_yaml("""
             applicationApiVersion: v1beta1
             form:
             - widget: magical
@@ -849,8 +849,8 @@ class ConfigHelperTest(unittest.TestCase):
 
   def test_validate_bad_form_missing_description(self):
     self.assertRaisesRegexp(
-        config_helper.InvalidSchema,
-        'form', lambda: config_helper.Schema.load_yaml("""
+        config_helper.InvalidSchema, 'form',
+        lambda: config_helper.Schema.load_yaml("""
             applicationApiVersion: v1beta1
             form:
             - widget: help
