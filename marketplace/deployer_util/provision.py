@@ -17,6 +17,7 @@
 import hashlib
 import re
 from argparse import ArgumentParser
+from bash_util import Command
 
 import yaml
 
@@ -31,6 +32,7 @@ Reads the schemas and writes k8s manifests for objects
 that need provisioning outside of the deployer to stdout.
 The manifests include the deployer-related resources.
 """
+_CANONICAL_IMAGE_PULL_SECRET_NAMESPACE = 'default'
 
 
 def main():
@@ -40,6 +42,7 @@ def main():
   parser.add_argument('--deployer_entrypoint', default=None)
   parser.add_argument('--version_repo', default=None)
   parser.add_argument('--image_pull_secret', default=None)
+  parser.add_argument('--canonical_image_pull_secret', default=None)
   args = parser.parse_args()
 
   schema = schema_values_common.load_schema(args)
@@ -50,12 +53,13 @@ def main():
       deployer_image=args.deployer_image,
       deployer_entrypoint=args.deployer_entrypoint,
       version_repo=args.version_repo,
-      image_pull_secret=args.image_pull_secret)
+      annotated_image_pull_secret=args.image_pull_secret,
+      canonical_image_pull_secret=args.canonical_image_pull_secret)
   print(yaml.safe_dump_all(manifests, default_flow_style=False, indent=2))
 
 
 def process(schema, values, deployer_image, deployer_entrypoint, version_repo,
-            image_pull_secret):
+            annotated_image_pull_secret, canonical_image_pull_secret):
   props = {}
   manifests = []
   app_name = get_name(schema, values)
@@ -87,7 +91,8 @@ def process(schema, values, deployer_image, deployer_entrypoint, version_repo,
           prop,
           app_name=app_name,
           namespace=namespace,
-          image_pull_secret=image_pull_secret)
+          image_pull_secret=annotated_image_pull_secret,
+          canonical_image_pull_secret=canonical_image_pull_secret)
       props[prop.name] = value
       manifests += sa_manifests
     elif prop.storage_class:
@@ -125,7 +130,8 @@ def process(schema, values, deployer_image, deployer_entrypoint, version_repo,
         app_name=app_name,
         namespace=namespace,
         deployer_image=deployer_image,
-        image_pull_secret=image_pull_secret,
+        annotated_image_pull_secret=annotated_image_pull_secret,
+        canonical_image_pull_secret=canonical_image_pull_secret,
         app_params=app_params)
   else:
     manifests += provision_deployer(
@@ -134,7 +140,8 @@ def process(schema, values, deployer_image, deployer_entrypoint, version_repo,
         namespace=namespace,
         deployer_image=deployer_image,
         deployer_entrypoint=deployer_entrypoint,
-        image_pull_secret=image_pull_secret,
+        annotated_image_pull_secret=annotated_image_pull_secret,
+        canonical_image_pull_secret=canonical_image_pull_secret,
         app_params=app_params)
   return manifests
 
@@ -164,7 +171,8 @@ def provision_from_storage(key, value, app_name, namespace):
 
 
 def provision_kalm(schema, version_repo, app_name, namespace, deployer_image,
-                   app_params, image_pull_secret):
+                   app_params, annotated_image_pull_secret,
+                   canonical_image_pull_secret):
   """Provisions KALM resource for installing the application."""
   if not version_repo:
     raise Exception('A valid --version_repo must be specified')
@@ -259,7 +267,9 @@ def provision_kalm(schema, version_repo, app_name, namespace, deployer_image,
 
 
 def provision_deployer(schema, app_name, namespace, deployer_image,
-                       deployer_entrypoint, app_params, image_pull_secret):
+                       deployer_entrypoint, app_params,
+                       annotated_image_pull_secret,
+                       canonical_image_pull_secret):
   """Provisions resources to run the deployer."""
   sa_name = dns1123_name('{}-deployer-sa'.format(app_name))
   labels = {
@@ -339,10 +349,16 @@ def provision_deployer(schema, app_name, namespace, deployer_image,
           'labels': labels,
       },
   }
-  if image_pull_secret:
-    service_account['imagePullSecrets'] = [{
-        'name': image_pull_secret,
-    }]
+  image_pull_secrets = filter(
+      None, [annotated_image_pull_secret, canonical_image_pull_secret])
+  if image_pull_secrets:
+    service_account['imagePullSecrets'] = list(
+        map(lambda secret: {'name': secret}, image_pull_secrets))
+  if canonical_image_pull_secret:
+    # Ensure the canonical image pull secret exists in this namespace
+    manifests.append(
+        get_canonical_image_pull_secret_manifest(canonical_image_pull_secret,
+                                                 namespace))
 
   return [
       service_account,
@@ -425,8 +441,28 @@ def make_app_params_yaml(app_params, deployer_image):
   return yaml.safe_dump(final_app_params, default_flow_style=False, indent=2)
 
 
+def get_canonical_image_pull_secret_manifest(canonical_image_pull_secret_name,
+                                             target_namespace):
+  secret_data = Command('''
+    kubectl get secret "{}""
+    --namespace="{}"
+    --output=json
+    '''.format(canonical_image_pull_secret_name,
+               _CANONICAL_IMAGE_PULL_SECRET_NAMESPACE)).json()
+  return {
+      'apiVersion': 'v1',
+      'kind': 'Secret',
+      'metadata': {
+          'name': canonical_image_pull_secret_name,
+          'namespace': target_namespace,
+      },
+      'data': secret_data,
+  }
+
+
 def provision_service_account(schema, prop, app_name, namespace,
-                              image_pull_secret):
+                              annotated_image_pull_secret,
+                              canonical_image_pull_secret):
   sa_name = dns1123_name('{}-{}'.format(app_name, prop.name))
   subjects = [{
       'kind': 'ServiceAccount',
@@ -441,10 +477,17 @@ def provision_service_account(schema, prop, app_name, namespace,
           'namespace': namespace,
       },
   }
-  if image_pull_secret:
-    service_account['imagePullSecrets'] = [{
-        'name': image_pull_secret,
-    }]
+
+  image_pull_secrets = filter(
+      None, [annotated_image_pull_secret, canonical_image_pull_secret])
+  if image_pull_secrets:
+    service_account['imagePullSecrets'] = list(
+        map(lambda secret: {'name': secret}, image_pull_secrets))
+  if canonical_image_pull_secret:
+    # Ensure the canonical image pull secret exists in this namespace
+    manifests.append(
+        get_canonical_image_pull_secret_manifest(canonical_image_pull_secret,
+                                                 namespace))
 
   manifests = [service_account]
   for i, rules in enumerate(prop.service_account.custom_role_rules()):
