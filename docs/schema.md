@@ -287,6 +287,15 @@ It defines how this object will be handled. Each type has a different set of pro
 
 ---
 
+### type: IMAGE
+
+Define an `IMAGE` type property for each image used by the application (besides the deployer image
+itself). Set the default property value to the image in your staging GCR repository. This property
+indicates which images should be published as a part of your application, and ensures that the
+proper published images are used during UI deployment.
+
+---
+
 ### type: APPLICATION_UID
 
 When the deployer runs, a placeholder `Application` object has already been created.
