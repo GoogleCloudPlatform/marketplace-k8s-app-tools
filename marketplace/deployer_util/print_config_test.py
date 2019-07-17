@@ -109,10 +109,12 @@ class PrintConfigTest(unittest.TestCase):
         properties:
           image1:
             type: string
+            default: gcr.io/google/busybox:1.0
             x-google-marketplace:
               type: IMAGE
           image2:
             type: string
+            default: gcr.io/google/busybox:1.0
             x-google-marketplace:
               type: IMAGE
         """)
