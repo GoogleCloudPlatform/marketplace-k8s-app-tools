@@ -522,7 +522,7 @@ class SchemaProperty:
       elif xt == XTYPE_IMAGE:
         _property_must_have_type(self, str)
         d = self._x.get('image', {})
-        self._image = SchemaXImage(d)
+        self._image = SchemaXImage(d, self._default)
       elif xt == XTYPE_PASSWORD:
         _property_must_have_type(self, str)
         d = self._x.get('generatedPassword', {})
@@ -669,9 +669,18 @@ class SchemaXApplicationUid:
 class SchemaXImage:
   """Accesses IMAGE and DEPLOYER_IMAGE properties."""
 
-  def __init__(self, dictionary):
+  def __init__(self, dictionary, default):
     self._split_by_colon = None
     self._split_to_registry_repo_tag = None
+
+    if not default:
+      raise InvalidSchema('default image value must be specified')
+    if not default.startswith('gcr.io'):
+      raise InvalidSchema(
+          'default image value must state registry: {}'.format(default))
+    if ':' not in default:
+      raise InvalidSchema(
+          'default image value is missing a tag or digest: {}'.format(default))
 
     generated_properties = dictionary.get('generatedProperties', {})
     if 'splitByColon' in generated_properties:
