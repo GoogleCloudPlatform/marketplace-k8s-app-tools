@@ -46,7 +46,7 @@ properties:
     default: false
   propertyImage:
     type: string
-    default: gcr.io/google/busybox
+    default: gcr.io/google/busybox:1.0
     x-google-marketplace:
       type: IMAGE
   propertyDeployerImage:
@@ -155,7 +155,7 @@ class ConfigHelperTest(unittest.TestCase):
     self.assertEqual(False,
                      schema.properties['propertyBooleanWithDefault'].default)
     self.assertEqual(str, schema.properties['propertyImage'].type)
-    self.assertEqual('gcr.io/google/busybox',
+    self.assertEqual('gcr.io/google/busybox:1.0',
                      schema.properties['propertyImage'].default)
     self.assertEqual('IMAGE', schema.properties['propertyImage'].xtype)
     self.assertEqual('DEPLOYER_IMAGE',
@@ -313,11 +313,49 @@ class ConfigHelperTest(unittest.TestCase):
     self.assertEqual('application.create',
                      schema.properties['u'].application_uid.application_create)
 
+  def test_image_default_missing(self):
+    self.assertRaisesRegexp(
+        config_helper.InvalidSchema, r'.*default image value must be specified',
+        lambda: config_helper.Schema.load_yaml("""
+        properties:
+          i:
+            type: string
+            x-google-marketplace:
+              type: IMAGE
+        """))
+
+  def test_image_default_missing_repo(self):
+    self.assertRaisesRegexp(
+        config_helper.InvalidSchema,
+        r'.*default image value must state registry',
+        lambda: config_helper.Schema.load_yaml("""
+        properties:
+          i:
+            type: string
+            default: $REGISTRY/some-repo:some-tag
+            x-google-marketplace:
+              type: IMAGE
+        """))
+
+  def test_image_default_missing_tag_or_digest(self):
+    self.assertRaisesRegexp(
+        config_helper.InvalidSchema,
+        r'.*default image value is missing a tag or digest',
+        lambda: config_helper.Schema.load_yaml("""
+        properties:
+          i:
+            type: string
+            default: gcr.io/some-repo
+            x-google-marketplace:
+              type: IMAGE
+        """))
+
   def test_image_type(self):
     schema = config_helper.Schema.load_yaml("""
         properties:
           i:
             type: string
+            default: gcr.io/some-repo:some-tag
             x-google-marketplace:
               type: IMAGE
         """)
@@ -330,6 +368,7 @@ class ConfigHelperTest(unittest.TestCase):
         properties:
           i:
             type: string
+            default: gcr.io/some-repo:some-tag
             x-google-marketplace:
               type: IMAGE
               image:
@@ -347,6 +386,7 @@ class ConfigHelperTest(unittest.TestCase):
         properties:
           i:
             type: string
+            default: gcr.io/some-repo:some-tag
             x-google-marketplace:
               type: IMAGE
               image:
@@ -365,6 +405,7 @@ class ConfigHelperTest(unittest.TestCase):
         properties:
           di:
             type: string
+            default: gcr.io/some-repo:some-tag
             x-google-marketplace:
               type: DEPLOYER_IMAGE
         """)
