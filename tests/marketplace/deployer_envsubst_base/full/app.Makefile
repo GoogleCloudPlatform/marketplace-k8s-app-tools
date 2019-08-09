@@ -70,7 +70,6 @@ app/install:: app/build \
 app/install-test:: app/build \
                    .build/var/APP_DEPLOYER_IMAGE \
                    .build/var/APP_PARAMETERS \
-                   .build/var/APP_TEST_PARAMETERS \
                    .build/var/MARKETPLACE_TOOLS_TAG \
 	           | .build/app/dev
 	$(call print_target)
@@ -95,7 +94,6 @@ app/uninstall: .build/var/APP_DEPLOYER_IMAGE \
 app/verify: app/build \
             .build/var/APP_DEPLOYER_IMAGE \
             .build/var/APP_PARAMETERS \
-            .build/var/APP_TEST_PARAMETERS \
             .build/var/MARKETPLACE_TOOLS_TAG \
             | .build/app/dev
 	$(call print_target)
@@ -109,7 +107,6 @@ app/verify: app/build \
 app/verify_istio: app/build \
             .build/var/APP_DEPLOYER_IMAGE \
             .build/var/APP_PARAMETERS \
-            .build/var/APP_TEST_PARAMETERS \
             .build/var/MARKETPLACE_TOOLS_TAG \
             | .build/app/dev
 	$(call print_target)
