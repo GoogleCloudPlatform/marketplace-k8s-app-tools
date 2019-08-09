@@ -2,3 +2,18 @@ properties:
   imageTester:
     type: string
     default: ${REGISTRY}/example/wordpress/tester:${TAG}
+  reportingSecret:
+    type: string
+    default: gs://cloud-marketplace-ops-test-kokoro/reporting_secrets/wordpress.yaml
+    x-google-marketplace:
+      type: REPORTING_SECRET
+  istioEnabled:
+    type: boolean
+    default: False
+    x-google-marketplace:
+      type: ISTIO_ENABLED
+  ingressAvailable:
+    type: boolean
+    default: False
+    x-google-marketplace:
+      type: INGRESS_AVAILABLE
