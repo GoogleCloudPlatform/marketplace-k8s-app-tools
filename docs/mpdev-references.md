@@ -70,12 +70,46 @@ kubectl delete application <APPLICATION DEPLOYMENT NAME>
 
 This script creates a new namespace, deploys the application, waits
 for it to turn green, run any smoke tests, and tears it down.
+Make sure it runs successfully before submitting the application to marketplace.
 
 ```shell
 mpdev verify \
   --deployer=<YOUR DEPLOYER IMAGE>
 ```
 
-If your app requires some additional parameters other than
-name and namespace, you can supply them via `--parameters`,
-similar to the install command.
+The `verify` command does not take parameters as in `install` command.
+Instead, it will use the default values declared in the schema file.
+
+If a property has no default value declared in `/data/schema.yaml`,
+it has to be declared in `/data-test/schema.yaml` (with exception of `NAME` and `NAMESPACE`, which are auto-generated during verification).
+
+For example, suppose `/data/schema.yaml` looks like the following:
+
+```yaml
+applicationApiVersion: v1beta1
+properties:
+  name:
+    type: string
+    x-google-marketplace:
+      type: NAME
+
+  namespace:
+    type: string
+    x-google-marketplace:
+      type: NAMESPACE
+
+  instances:
+    type: int
+    title: Number of instances
+```
+
+Since `instances` does not contain a default value, one needs to be declared in `/data-test/schema.yaml`, like so:
+
+```yaml
+properties:
+  instances:
+    type: int
+    default: 2
+```
+
+Properties in `/data-test/schema.yaml` will overlay properties in `/data/schema.yaml`. This can also be used overwrite existing default values for verification.
