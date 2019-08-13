@@ -23,6 +23,10 @@ case $i in
     deployer="${i#*=}"
     shift
     ;;
+  --parameters=*)
+    parameters="${i#*=}"
+    shift
+    ;;
   --wait_timeout=*)
     wait_timeout="${i#*=}"
     shift
@@ -48,6 +52,7 @@ esac
 done
 
 [[ -z "$deployer" ]] && deployer="$APP_DEPLOYER_IMAGE"
+[[ -z "$parameters" ]] && parameters="{}"
 [[ -z "$wait_timeout" ]] && wait_timeout=600
 
 parameters="{}"
@@ -130,6 +135,9 @@ docker run \
     --rm "${deployer}" \
     -c 'cat /data/schema.yaml' \
 > /data/schema.yaml
+echo "$parameters" \
+  | json2yaml \
+> /data/values.yaml
 
 # Compose test id.
 test_id="$(cat /dev/urandom \
