@@ -196,7 +196,7 @@ if [[ "$istio" = "enabled" ]]; then
 fi
 
 # This secret is solely used by verification.
-fake_reporting_secret="gs://marketplace-verification/secrets/fake-reporting-secret-manifest.yaml"
+fake_reporting_secret="gs://marketplace-verification-public/fake-reporting-secret-manifest.yaml"
 reporting_secret_key="$(extract_schema_key.py \
   --schema_file=/data/schema.yaml \
   --type=REPORTING_SECRET \
