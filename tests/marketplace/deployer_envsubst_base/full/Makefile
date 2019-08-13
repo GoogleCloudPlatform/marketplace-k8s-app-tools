@@ -20,7 +20,6 @@ APP_PARAMETERS ?= { \
   "imageUbbagent": "$(REGISTRY)/example/wordpress/ubbagent:$(TAG)", \
   "reportingSecret": "gs://cloud-marketplace-ops-test-kokoro/reporting_secrets/wordpress.yaml" \
 }
-
 TESTER_IMAGE ?= $(REGISTRY)/example/wordpress/tester:$(TAG)
 
 # Extend the target as defined in app.Makefile to

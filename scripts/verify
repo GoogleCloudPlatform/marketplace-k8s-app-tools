@@ -55,7 +55,6 @@ done
 [[ -z "$parameters" ]] && parameters="{}"
 [[ -z "$wait_timeout" ]] && wait_timeout=600
 
-parameters="{}"
 error_summary_path="$(mktemp)"
 
 function delete_namespace() {
@@ -202,7 +201,6 @@ reporting_secret_key="$(extract_schema_key.py \
   --schema_file=/data/schema.yaml \
   --type=REPORTING_SECRET \
   | head -n 1)"
-
 
 cat "/data/schema.yaml"
 echo "Reporting secret property: $reporting_secret_key "
