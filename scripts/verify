@@ -195,24 +195,19 @@ if [[ "$istio" = "enabled" ]]; then
   fi
 fi
 
-# This secret is solely used by verification.
-fake_reporting_secret="gs://marketplace-verification-public/fake-reporting-secret-manifest.yaml"
 reporting_secret_key="$(extract_schema_key.py \
   --schema_file=/data/schema.yaml \
   --type=REPORTING_SECRET \
   | head -n 1)"
 
-cat "/data/schema.yaml"
-echo "Reporting secret property: $reporting_secret_key "
-
 # Stitch in fake REPORTING_SECRET parameter if applicable.
 if [[ -n "$reporting_secret_key" ]]; then
   if [[ "$(echo "$parameters" | jq ".$reporting_secret_key")" == "null" ]]; then
+    kubectl apply -f "/data/fake-reporting-secret-manifest.yaml" --namespace="$NAMESPACE"
     parameters=$(echo "$parameters" \
       | jq \
         --arg reporting_secret_key "$reporting_secret_key" \
-        --arg fake_reporting_secret "$fake_reporting_secret" \
-        '.[$reporting_secret_key] = $fake_reporting_secret')
+        '.[$reporting_secret_key] = "fake-reporting-secret-manifest"')
   fi
 fi
 
