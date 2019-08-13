@@ -88,9 +88,10 @@ def main():
         log.info("{} Tester '{}' succeeded.", LOG_SMOKE_TEST, full_name)
         break
 
-      if time.time() - start_time > tester_timeout:
+      if time.time() > tester_timeout + start_time:
         print_tester_logs(full_name, args.namespace)
         log.error("{} Tester '{}' timeout.", LOG_SMOKE_TEST, full_name)
+        break
 
       time.sleep(poll_interval)
 

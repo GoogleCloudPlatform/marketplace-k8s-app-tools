@@ -74,6 +74,7 @@ docker run \
     --rm "${deployer}" \
     -c 'cat /data/schema.yaml' \
 > /data/schema.yaml
+
 echo "$parameters" \
   | json2yaml \
 > /data/values.yaml

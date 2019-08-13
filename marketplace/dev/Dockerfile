@@ -43,6 +43,7 @@ RUN mv /scripts/doctor.py /scripts/doctor
 ENV PATH="/scripts:${PATH}"
 
 RUN mkdir -p /data/
+RUN mkdir -p /data-test/
 
 ENTRYPOINT ["/bin/docker_entrypoint.sh"]
 CMD ["echo", "It works"]
