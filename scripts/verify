@@ -138,11 +138,15 @@ echo "$parameters" \
   | json2yaml \
 > /data/values.yaml
 
-# Compose test id.
-test_id="$(cat /dev/urandom \
+function random_string() {
+  cat /dev/urandom \
     | tr -dc 'a-z0-9' \
     | head -c 8 \
-|| true)"
+    || true
+}
+
+# Compose test id.
+test_id="$(random_string)"
 
 # Extract keys for name and namespace.
 name_key="$(extract_schema_key.py \
@@ -157,12 +161,7 @@ export NAMESPACE="apptest-$test_id"
 
 # Stitch in name and namespace parameters.
 parameters=$(echo "$parameters" \
-  | jq \
-    --arg name_key "$name_key" \
-    --arg name "$NAME" \
-    --arg namespace_key "$namespace_key" \
-    --arg namespace "$NAMESPACE" \
-    '.[$name_key] = $name | .[$namespace_key] = $namespace')
+  | jq ".$name_key = \"$NAME\" | .$namespace_key = \"$NAMESPACE\"")
 
 echo "INFO Parameters: $parameters"
 
@@ -189,9 +188,7 @@ if [[ "$istio" = "enabled" ]]; then
   # Stitch in ISTIO_ENABLED parameter if applicable.
   if [[ -n $istio_enabled_key ]]; then
     parameters=$(echo "$parameters" \
-      | jq \
-        --arg istio_enabled_key "$istio_enabled_key" \
-        '.[$istio_enabled_key] = true')
+      | jq ".$istio_enabled_key = true")
   fi
 fi
 
@@ -203,11 +200,13 @@ reporting_secret_key="$(extract_schema_key.py \
 # Stitch in fake REPORTING_SECRET parameter if applicable.
 if [[ -n "$reporting_secret_key" ]]; then
   if [[ "$(echo "$parameters" | jq ".$reporting_secret_key")" == "null" ]]; then
-    kubectl apply -f "/data/fake-reporting-secret-manifest.yaml" --namespace="$NAMESPACE"
+    reporting_secret_name="fake-reporting-secret-$(random_string)"
+    echo "Creating fake reporting secret $reporting_secret_name"
+    cat "/data/fake-reporting-secret-manifest.yaml" \
+      | env -i "SECRET_NAME=$reporting_secret_name" envsubst \
+      | kubectl apply -f - --namespace="$NAMESPACE"
     parameters=$(echo "$parameters" \
-      | jq \
-        --arg reporting_secret_key "$reporting_secret_key" \
-        '.[$reporting_secret_key] = "fake-reporting-secret-manifest"')
+      | jq ".$reporting_secret_key = \"$reporting_secret_name\"")
   fi
 fi
 

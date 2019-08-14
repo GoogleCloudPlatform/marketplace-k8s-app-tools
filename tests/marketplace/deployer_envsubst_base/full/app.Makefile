@@ -65,20 +65,6 @@ app/install:: app/build \
 	        --entrypoint="/bin/deploy.sh"
 
 
-# Installs the application into target namespace on the cluster.
-.PHONY: app/install-test
-app/install-test:: app/build \
-                   .build/var/APP_DEPLOYER_IMAGE \
-                   .build/var/APP_PARAMETERS \
-                   .build/var/MARKETPLACE_TOOLS_TAG \
-	           | .build/app/dev
-	$(call print_target)
-	.build/app/dev \
-	    /scripts/install \
-	        --deployer='$(APP_DEPLOYER_IMAGE)' \
-	        --entrypoint="/bin/deploy_with_tests.sh"
-
-
 # Uninstalls the application from the target namespace on the cluster.
 .PHONY: app/uninstall
 app/uninstall: .build/var/APP_DEPLOYER_IMAGE \
