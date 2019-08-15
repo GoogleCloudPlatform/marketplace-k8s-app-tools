@@ -20,7 +20,7 @@ endef
 
 # MARKETPLACE_TOOLS_TAG is the tag of the container images published
 # by marketplace-k8s-app-tools.
-tag_from_file := $(shell cat "$(dir $(realpath $(lastword $(MAKEFILE_LIST))))/MARKETPLACE_TOOLS_TAG")
+tag_from_file := $(shell cat "$(dir $(realpath $(lastword $(MAKEFILE_LIST))))MARKETPLACE_TOOLS_TAG")
 MARKETPLACE_TOOLS_TAG ?= $(tag_from_file)
 export MARKETPLACE_TOOLS_TAG
 
