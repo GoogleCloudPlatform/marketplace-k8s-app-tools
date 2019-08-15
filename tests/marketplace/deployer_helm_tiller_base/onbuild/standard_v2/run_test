@@ -28,5 +28,4 @@ chmod a+x dev
 app_parameters="{}"
 ./dev \
   /scripts/verify \
-      --deployer="$image" \
-      --parameters="$app_parameters"
+      --deployer="$image"

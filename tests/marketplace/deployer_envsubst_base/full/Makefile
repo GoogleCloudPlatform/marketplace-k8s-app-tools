@@ -21,9 +21,6 @@ APP_PARAMETERS ?= { \
   "reportingSecret": "gs://cloud-marketplace-ops-test-kokoro/reporting_secrets/wordpress.yaml" \
 }
 TESTER_IMAGE ?= $(REGISTRY)/example/wordpress/tester:$(TAG)
-APP_TEST_PARAMETERS ?= { \
-  "imageTester": "$(TESTER_IMAGE)" \
-}
 
 # Extend the target as defined in app.Makefile to
 # include real dependencies.

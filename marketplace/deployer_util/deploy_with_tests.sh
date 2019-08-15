@@ -46,7 +46,6 @@ overlay_test_schema.py \
   --original_schema "/data/schema.yaml" \
   --output "/data/schema.yaml"
 
-
 NAME="$(/bin/print_config.py \
     --xtype NAME \
     --values_mode raw)"
