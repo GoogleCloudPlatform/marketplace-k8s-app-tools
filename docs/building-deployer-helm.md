@@ -96,7 +96,7 @@ metadata:
 spec:
   descriptor:
     type: Wordpress
-    versions: '6'
+    version: '6'
   selector:
     matchLabels:
       app.kubernetes.io/name: "{{ .Release.Name }}"

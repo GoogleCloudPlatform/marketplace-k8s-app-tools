@@ -10,4 +10,7 @@ cd "$test_directory"
 export REGISTRY="$REGISTRY/$test_name"
 export TAG="$MARKETPLACE_TOOLS_TAG-$TEST_ID"
 
+# Runs diagnostic tool to make sure your environment is properly setup.
+make app/doctor
+
 make app/verify

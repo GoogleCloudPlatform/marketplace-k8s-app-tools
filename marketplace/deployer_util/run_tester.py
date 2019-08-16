@@ -91,6 +91,7 @@ def main():
       if time.time() - start_time > tester_timeout:
         print_tester_logs(full_name, args.namespace)
         log.error("{} Tester '{}' timeout.", LOG_SMOKE_TEST, full_name)
+        break
 
       time.sleep(poll_interval)
 
