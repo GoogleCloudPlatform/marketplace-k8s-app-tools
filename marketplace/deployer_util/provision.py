@@ -344,7 +344,7 @@ def provision_deployer(schema, app_name, namespace, deployer_image,
         'name': image_pull_secret,
     }]
 
-  return [
+  manifests = [
       service_account,
       config,
       {
@@ -367,8 +367,9 @@ def provision_deployer(schema, app_name, namespace, deployer_image,
               'backoffLimit': 0,
           },
       },
-  ].extend(
-      make_deployer_rolebindings(schema, namespace, app_name, labels, sa_name))
+  ]
+  manifests += make_deployer_rolebindings(schema, namespace, app_name, labels, sa_name)
+  return manifests
 
 
 def make_deployer_rolebindings(schema, namespace, app_name, labels, sa_name):
