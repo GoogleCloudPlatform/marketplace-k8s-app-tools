@@ -600,12 +600,12 @@ x-google-marketplace:
   deployerServiceAccount:
     roles:
     - type: ClusterRole        # This is a cluster-wide ClusterRole
-      rulesType: PREDEFINED
-      rulesFromRoleName: edit  # Use predefined role named "edit"
-    - type: Role               # This is a namespaced Role.
-      rulesType: CUSTOM        # We specify our own custom RBAC rules
+      rulesType: CUSTOM        # We specify our own custom RBAC roles
       rules:
-      - apiGroups: ['apps.kubernetes.io/v1alpha1']
-        resources: ['Application']
+      - apiGroups: ['apiextensions.k8s.io']
+        resources: ['CustomResourceDefinition']
         verbs: ['*']
+    - type: Role               # This is a namespaced Role
+      rulesType: PREDEFINED
+      rulesFromRoleName: edit  # Use the predefined role named "edit"
 ```
