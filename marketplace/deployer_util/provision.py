@@ -368,7 +368,8 @@ def provision_deployer(schema, app_name, namespace, deployer_image,
           },
       },
   ]
-  manifests += make_deployer_rolebindings(schema, namespace, app_name, labels, sa_name)
+  manifests += make_deployer_rolebindings(schema, namespace, app_name, labels,
+                                          sa_name)
   return manifests
 
 
