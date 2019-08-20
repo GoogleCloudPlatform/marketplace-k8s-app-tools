@@ -197,18 +197,4 @@ spec:
     app.kubernetes.io/name: "$name"
     app.kubernetes.io/component: wordpress-webserver
   type: ClusterIP
----
-apiVersion: apiextensions.k8s.io
-kind: CustomResourceDefinition
-metadata:
-  name: crontabs.stable.example.com
-spec:
-  group: stable.example.com
-  version: v1
-  scope: Namespaced
-  names:
-    plural: crontabs
-    singular: crontab
-    kind: CronTab
-    shortNames:
-    - ct
+

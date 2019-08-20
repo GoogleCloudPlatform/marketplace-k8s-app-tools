@@ -89,15 +89,6 @@ required:
 - customBoolean
 - reportingSecret
 - certificate
-x-google-marketplace:
-  deployerServiceAccount:
-    roles:
-    - type: ClusterRole
-      rulesType: CUSTOM
-      rules:
-      - apiGroups: ['apiextensions.k8s.io']
-        resources: ['CustomResourceDefinition']
-        verbs: ['*']
 form:
 - widget: help
   description: My arbitrary <i>description</i>
