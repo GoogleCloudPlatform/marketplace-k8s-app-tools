@@ -1,7 +1,7 @@
 x-google-marketplace:
   schemaVersion: v2
   applicationApiVersion: v1beta1
-  publishedVersion: 6.5.130
+  publishedVersion: 0.0.1
   publishedVersionMetadata:
     releaseNote: Initial release
     recommended: true
@@ -9,9 +9,10 @@ x-google-marketplace:
 
   deployerServiceAccount:
     roles:
+    - type: ClusterRole
       rulesType: CUSTOM
       rules:
-      - apiGroups: ['apiextensions.k8s.io/v1beta1']
+      - apiGroups: ['apiextensions.k8s.io']
         resources: ['CustomResourceDefinition']
         verbs: ['*']
 properties:

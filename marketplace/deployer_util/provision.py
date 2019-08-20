@@ -451,7 +451,6 @@ def make_deployer_rolebindings(schema, namespace, app_name, labels, sa_name):
         'kind': 'ClusterRoleBinding',
         'metadata': {
             'name': '{}:{}:deployer-rb{}'.format(namespace, app_name, i),
-            'namespace': namespace,
             'labels': labels,
         },
         'roleRef': {
