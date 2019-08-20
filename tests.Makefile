@@ -62,8 +62,8 @@ TEST_ID := $(shell cat /dev/urandom | tr -dc 'a-z0-9' | head -c 8)
 .PHONY: tests/marketplace/deployer/helm_tiller_onbuild
 tests/marketplace/deployer/helm_tiller_onbuild: \
 		.tests/marketplace/deployer/helm_tiller_onbuild/helm-dependency-build \
-		.tests/marketplace/deployer/helm_tiller_onbuild/standard
-
+		.tests/marketplace/deployer/helm_tiller_onbuild/standard \
+		.tests/marketplace/deployer/helm_tiller_onbuild/standard_v2
 
 .tests/marketplace/deployer/envsubst:
 	mkdir -p "$@"
