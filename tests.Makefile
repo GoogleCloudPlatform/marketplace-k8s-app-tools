@@ -55,7 +55,7 @@ TEST_ID := $(shell cat /dev/urandom | tr -dc 'a-z0-9' | head -c 8)
 	TEST_ID=$(TEST_ID) \
 	REGISTRY=$(REGISTRY) \
 	MARKETPLACE_TOOLS_TAG=$(MARKETPLACE_TOOLS_TAG) \
-	  ./tests/marketplace/deployer_helm_tiller_base/onbuild/standard_v2/run_test
+		./tests/marketplace/deployer_helm_tiller_base/onbuild/standard_v2/run_test
 	@touch "$@"
 
 
