@@ -820,6 +820,89 @@ class ConfigHelperTest(unittest.TestCase):
                 type: INVALID_TYPE
           """)
 
+  def test_deployer_service_account(self):
+    schema = config_helper.Schema.load_yaml("""
+        x-google-marketplace:
+          # v2 required fields
+          schemaVersion: v2
+          applicationApiVersion: v1beta1
+          publishedVersion: 6.5.130
+          publishedVersionMetadata:
+            releaseNote: Bug fixes
+            releaseTypes:
+            - BUG_FIX
+          images:
+            main:
+              properties:
+                main.image:
+                  type: FULL
+
+          deployerServiceAccount:
+            roles:
+            - type: ClusterRole
+              rulesType: PREDEFINED
+              rulesFromRoleName: cluster-admin
+            - type: ClusterRole
+              rulesType: PREDEFINED
+              rulesFromRoleName: admin
+            - type: Role
+              rulesType: PREDEFINED
+              rulesFromRoleName: edit
+            - type: Role
+              rulesType: PREDEFINED
+              rulesFromRoleName: view
+            - type: ClusterRole
+              rulesType: CUSTOM
+              rules:
+              - apiGroups: ['v1']
+                resources: ['Secret']
+                verbs: ['*']
+              - apiGroups: ['v1']
+                resources: ['ConfigMap']
+                verbs: ['*']
+            - type: Role
+              rulesType: CUSTOM
+              rules:
+              - apiGroups: ['apps/v1']
+                resources: ['Deployment']
+                verbs: ['*']
+              - apiGroups: ['apps/v1']
+                resources: ['StatefulSet']
+                verbs: ['*']
+        properties:
+          simple:
+            type: string
+      """)
+    dsa = schema.x_google_marketplace.deployer_service_account
+    self.assertIsNotNone(dsa)
+    self.assertListEqual(['cluster-admin', 'admin'],
+                         dsa.predefined_cluster_roles())
+    self.assertListEqual(['edit', 'view'], dsa.predefined_roles())
+    self.assertListEqual([[
+        {
+            'apiGroups': ['v1'],
+            'resources': ['Secret'],
+            'verbs': ['*']
+        },
+        {
+            'apiGroups': ['v1'],
+            'resources': ['ConfigMap'],
+            'verbs': ['*']
+        },
+    ]], dsa.custom_cluster_role_rules())
+    self.assertListEqual([[
+        {
+            'apiGroups': ['apps/v1'],
+            'resources': ['Deployment'],
+            'verbs': ['*']
+        },
+        {
+            'apiGroups': ['apps/v1'],
+            'resources': ['StatefulSet'],
+            'verbs': ['*']
+        },
+    ]], dsa.custom_role_rules())
+
   def test_validate_good(self):
     schema = config_helper.Schema.load_yaml("""
         applicationApiVersion: v1beta1

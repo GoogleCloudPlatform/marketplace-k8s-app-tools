@@ -582,3 +582,30 @@ Also see `ISTIO_ENABLED` property type.
 - `OPTIONAL`: The app works with Istio but does not require it.
 - `REQUIRED`: The app requires Istio to work properly.
 - `UNSUPPORTED`: The app does not support Istio.
+
+---
+
+## deployerServiceAccount
+
+Nested under `x-google-marketplace` in schema V2, this can be used for specifying custom roles for the deployer service account. The deployer is granted `cluster-admin` in the deployment namespace unless one or more roles with type `Role` are defined. This property follows the exact same interface as the `x-google-marketplace` `SERVICE_ACCOUNT` property type.
+
+Example:
+
+```yaml
+properties:
+  # Property definitions...
+required:
+  # Required properties...
+x-google-marketplace:
+  deployerServiceAccount:
+    roles:
+    - type: ClusterRole        # This is a cluster-wide ClusterRole
+      rulesType: CUSTOM        # We specify our own custom RBAC roles
+      rules:
+      - apiGroups: ['apiextensions.k8s.io']
+        resources: ['CustomResourceDefinition']
+        verbs: ['*']
+    - type: Role               # This is a namespaced Role
+      rulesType: PREDEFINED
+      rulesFromRoleName: edit  # Use the predefined role named "edit"
+```
