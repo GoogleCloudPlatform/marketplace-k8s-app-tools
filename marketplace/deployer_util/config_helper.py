@@ -194,6 +194,7 @@ class SchemaXGoogleMarketplace:
     self._published_version_meta = None
     self._images = None
     self._cluster_constraints = None
+    self._deployer_service_account = None
 
     self._schema_version = dictionary.get('schemaVersion', _SCHEMA_VERSION_1)
     if self._schema_version not in _SCHEMA_VERSIONS:
@@ -224,6 +225,10 @@ class SchemaXGoogleMarketplace:
                        'x-google-marketplace.images is required')
     self._images = {k: SchemaImage(k, v) for k, v in images.iteritems()}
 
+    if 'deployerServiceAccount' in dictionary:
+      self._deployer_service_account = SchemaXServiceAccount(
+          dictionary['deployerServiceAccount'])
+
   def validate(self):
     pass
 
@@ -250,6 +255,10 @@ class SchemaXGoogleMarketplace:
   @property
   def managed_updates(self):
     return self._managed_updates
+
+  @property
+  def deployer_service_account(self):
+    return self._deployer_service_account
 
   def is_v2(self):
     return self._schema_version == _SCHEMA_VERSION_2
