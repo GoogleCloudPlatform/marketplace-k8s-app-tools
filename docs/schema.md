@@ -387,13 +387,13 @@ properties:
           rulesType: CUSTOM        # We specify our own custom RBAC rules
           rules:
           - apiGroups: ['apps.kubernetes.io/v1alpha1']
-            resources: ['Application']
+            resources: ['applications']
             verbs: ['*']
         - type: ClusterRole
           rulesType: CUSTOM
           rules:
           - apiGroups: ['etcd.database.coreos.com/v1beta2']
-            resources: ['EtcdCluster']
+            resources: ['etcdclusters']
             verbs: ['*']
 ```
 
@@ -603,7 +603,7 @@ x-google-marketplace:
       rulesType: CUSTOM        # We specify our own custom RBAC roles
       rules:
       - apiGroups: ['apiextensions.k8s.io']
-        resources: ['CustomResourceDefinition']
+        resources: ['customresourcedefinitions']
         verbs: ['*']
     - type: Role               # This is a namespaced Role
       rulesType: PREDEFINED
