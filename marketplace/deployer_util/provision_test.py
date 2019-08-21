@@ -1,4 +1,3 @@
-# Copyright 2018 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -87,16 +86,12 @@ class ProvisionTest(unittest.TestCase):
           # v2 required fields
           schemaVersion: v2
           applicationApiVersion: v1beta1
-          publishedVersion: 6.5.130
+          publishedVersion: 0.0.1
           publishedVersionMetadata:
-            releaseNote: Bug fixes
-            releaseTypes:
-            - BUG_FIX
-          images:
-            main:
-              properties:
-                main.image:
-                  type: FULL
+            releaseNote: Initial release
+            recommended: True
+          images: {}
+
         properties:
           simple:
             type: string
@@ -137,16 +132,11 @@ class ProvisionTest(unittest.TestCase):
           # v2 required fields
           schemaVersion: v2
           applicationApiVersion: v1beta1
-          publishedVersion: 6.5.130
+          publishedVersion: 0.0.1
           publishedVersionMetadata:
-            releaseNote: Bug fixes
-            releaseTypes:
-            - BUG_FIX
-          images:
-            main:
-              properties:
-                main.image:
-                  type: FULL
+            releaseNote: Initial release
+            recommended: True
+          images: {}
 
           deployerServiceAccount:
             roles:
@@ -233,7 +223,6 @@ class ProvisionTest(unittest.TestCase):
                     'ClusterRoleBinding',
                 'metadata': {
                     'name': 'namespace-1:app-name-1:deployer-rb0',
-                    'namespace': 'namespace-1',
                     'labels': ['label-1'],
                 },
                 'roleRef': {
@@ -276,7 +265,6 @@ class ProvisionTest(unittest.TestCase):
                     'ClusterRoleBinding',
                 'metadata': {
                     'name': 'namespace-1:app-name-1:cluster-admin:deployer-crb',
-                    'namespace': 'namespace-1',
                     'labels': ['label-1'],
                 },
                 'roleRef': {
@@ -301,16 +289,11 @@ class ProvisionTest(unittest.TestCase):
           # v2 required fields
           schemaVersion: v2
           applicationApiVersion: v1beta1
-          publishedVersion: 6.5.130
+          publishedVersion: 0.0.1
           publishedVersionMetadata:
-            releaseNote: Bug fixes
-            releaseTypes:
-            - BUG_FIX
-          images:
-            main:
-              properties:
-                main.image:
-                  type: FULL
+            releaseNote: Initial release
+            recommended: True
+          images: {}
 
           deployerServiceAccount:
             roles:
@@ -353,7 +336,6 @@ class ProvisionTest(unittest.TestCase):
                     'ClusterRoleBinding',
                 'metadata': {
                     'name': 'namespace-1:app-name-1:cluster-admin:deployer-crb',
-                    'namespace': 'namespace-1',
                     'labels': ['label-1'],
                 },
                 'roleRef': {

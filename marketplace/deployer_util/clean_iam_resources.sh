@@ -24,6 +24,6 @@ set -eox pipefail
 # Resources of a KALM-managed deployer have
 # app.kubernetes.io/component=kalm.marketplace.cloud.google.com label.
 kubectl delete --namespace="$NAMESPACE" \
-  ServiceAccount,RoleBinding \
+  ServiceAccount,Role,RoleBinding \
   -l 'app.kubernetes.io/component'='deployer.marketplace.cloud.google.com','app.kubernetes.io/name'="$NAME" \
   --ignore-not-found

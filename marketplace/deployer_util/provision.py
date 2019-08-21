@@ -486,8 +486,6 @@ def make_deployer_rolebindings(schema, namespace, app_name, labels, sa_name):
                 limit_name(
                     '{}:{}:{}:deployer-crb'.format(namespace, app_name, role),
                     64),
-            'namespace':
-                namespace,
             'labels':
                 labels,
         },
