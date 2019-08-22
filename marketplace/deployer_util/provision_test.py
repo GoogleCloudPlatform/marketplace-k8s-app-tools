@@ -47,7 +47,7 @@ class ProvisionTest(unittest.TestCase):
     self.assertRegexpMatches(text[-5:], r'-[a-f0-9]{4}')
 
   def assertListElementsEqual(self, list1, list2):
-    return self.assertEqual(list1.sort(), list2.sort())
+    return self.assertEqual(list1.sorted(), list2.sorted())
 
   def test_deployer_image_inject(self):
     schema = config_helper.Schema.load_yaml('''
@@ -307,7 +307,7 @@ class ProvisionTest(unittest.TestCase):
           simple:
             type: string
       """)
-    self.assertEquals(
+    self.assertListElementsEqual(
         [
             # The default namespace rolebinding should also be created
             {
