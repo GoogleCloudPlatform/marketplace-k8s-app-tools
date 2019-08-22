@@ -46,6 +46,9 @@ class ProvisionTest(unittest.TestCase):
     self.assertEqual(text[:-5], expected)
     self.assertRegexpMatches(text[-5:], r'-[a-f0-9]{4}')
 
+  def assertListElementsEqual(self, list1, list2):
+    return self.assertEqual(list1.sort(), list2.sort())
+
   def test_deployer_image_inject(self):
     schema = config_helper.Schema.load_yaml('''
     properties:
@@ -162,7 +165,7 @@ class ProvisionTest(unittest.TestCase):
           simple:
             type: string
       """)
-    self.assertEquals(
+    self.assertListElementsEqual(
         [
             {
                 'apiVersion':
@@ -207,7 +210,7 @@ class ProvisionTest(unittest.TestCase):
                 'kind':
                     'ClusterRole',
                 'metadata': {
-                    'name': 'namespace-1:app-name-1:deployer-r0',
+                    'name': 'namespace-1:app-name-1:deployer-cr0',
                     'labels': ['label-1'],
                 },
                 'rules': [{
@@ -222,7 +225,7 @@ class ProvisionTest(unittest.TestCase):
                 'kind':
                     'ClusterRoleBinding',
                 'metadata': {
-                    'name': 'namespace-1:app-name-1:deployer-rb0',
+                    'name': 'namespace-1:app-name-1:deployer-crb0',
                     'labels': ['label-1'],
                 },
                 'roleRef': {
