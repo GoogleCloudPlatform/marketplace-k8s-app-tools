@@ -47,7 +47,7 @@ class ProvisionTest(unittest.TestCase):
     self.assertRegexpMatches(text[-5:], r'-[a-f0-9]{4}')
 
   def assertListElementsEqual(self, list1, list2):
-    return self.assertEqual(list1.sorted(), list2.sorted())
+    return self.assertEqual(sorted(list1), sorted(list2))
 
   def test_deployer_image_inject(self):
     schema = config_helper.Schema.load_yaml('''
@@ -231,7 +231,7 @@ class ProvisionTest(unittest.TestCase):
                 'roleRef': {
                     'apiGroup': 'rbac.authorization.k8s.io',
                     'kind': 'ClusterRole',
-                    'name': 'namespace-1:app-name-1:deployer-r0',
+                    'name': 'namespace-1:app-name-1:deployer-cr0',
                 },
                 'subjects': [{
                     'kind': 'ServiceAccount',
