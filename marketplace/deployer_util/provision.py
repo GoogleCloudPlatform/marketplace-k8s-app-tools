@@ -438,7 +438,7 @@ def make_deployer_rolebindings(schema, namespace, app_name, labels, sa_name):
     })
   for i, rules in enumerate(
       deployer_service_account.custom_cluster_role_rules()):
-    role_name = '{}:{}:deployer-r{}'.format(namespace, app_name, i)
+    role_name = '{}:{}:deployer-cr{}'.format(namespace, app_name, i)
     roles_and_rolebindings.append({
         'apiVersion': 'rbac.authorization.k8s.io/v1',
         'kind': 'ClusterRole',
@@ -452,7 +452,7 @@ def make_deployer_rolebindings(schema, namespace, app_name, labels, sa_name):
         'apiVersion': 'rbac.authorization.k8s.io/v1',
         'kind': 'ClusterRoleBinding',
         'metadata': {
-            'name': '{}:{}:deployer-rb{}'.format(namespace, app_name, i),
+            'name': '{}:{}:deployer-crb{}'.format(namespace, app_name, i),
             'labels': labels,
         },
         'roleRef': {
