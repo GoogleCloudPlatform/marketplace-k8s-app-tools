@@ -85,7 +85,6 @@ class ProvisionTest(unittest.TestCase):
       provision.deployer_image_to_repo_prefix('gcr.io/test/test:0.1.1')
 
   def test_make_deployer_rolebindings_no_roles(self):
-    self.maxDiff = None
     schema = config_helper.Schema.load_yaml("""
         x-google-marketplace:
           # v2 required fields
@@ -368,11 +367,6 @@ class ProvisionTest(unittest.TestCase):
                     'verbs': ['get', 'watch', 'list'],
                 }, {
                     'apiGroups': ['authorization.k8s.io'],
-                    'resources': ['roles'],
-                    'resourceNames': ['app-name-1:deployer-r0'],
-                    'verbs': ['*'],
-                }, {
-                    'apiGroups': ['authorization.k8s.io'],
                     'resources': ['rolebindings'],
                     'resourceNames': [
                         'app-name-1:deployer-rb0', 'app-name-1:edit:deployer-rb'
@@ -394,6 +388,11 @@ class ProvisionTest(unittest.TestCase):
                         'namespace-1:app-name-1:deployer-crb0',
                         'namespace-1:app-name-1:cluster-admin:deployer-crb'
                     ],
+                    'verbs': ['*'],
+                }, {
+                    'apiGroups': ['authorization.k8s.io'],
+                    'resources': ['roles'],
+                    'resourceNames': ['app-name-1:deployer-r0'],
                     'verbs': ['*'],
                 }],
             },
@@ -526,7 +525,7 @@ class ProvisionTest(unittest.TestCase):
                         'resources': ['clusterrolebindings'],
                         'resourceNames': [
                             'namespace-1:app-name-1:deployer-cleanup-crb',
-                            'namespace-1:app-name-1:deployer-crb0'
+                            'namespace-1:app-name-1:cluster-admin:deployer-crb',
                         ],
                         'verbs': ['*'],
                     }

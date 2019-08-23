@@ -588,7 +588,7 @@ def make_cleanup_rolebindings(namespace, app_name, labels, subjects, role_names,
     # the empty resources names will grant control over all Roles.
     cleanup_clusterrole['rules'].append({
         'apiGroups': ['authorization.k8s.io'],
-        'resources': ['rolebindings'],
+        'resources': ['roles'],
         'resourceNames': role_names,
         'verbs': ['*'],
     })
