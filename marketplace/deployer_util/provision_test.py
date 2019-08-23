@@ -232,7 +232,7 @@ class ProvisionTest(unittest.TestCase):
           simple:
             type: string
       """)
-    self.assertEqual(
+    self.assertListElementsEqual(
         [
             {
                 'apiVersion':
