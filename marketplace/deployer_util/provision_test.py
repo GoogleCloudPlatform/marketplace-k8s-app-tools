@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import unittest
+import logging
 
 import provision
 from provision import dns1123_name
@@ -84,6 +85,7 @@ class ProvisionTest(unittest.TestCase):
       provision.deployer_image_to_repo_prefix('gcr.io/test/test:0.1.1')
 
   def test_make_deployer_rolebindings_no_roles(self):
+    self.maxDiff = None
     schema = config_helper.Schema.load_yaml("""
         x-google-marketplace:
           # v2 required fields
@@ -99,7 +101,7 @@ class ProvisionTest(unittest.TestCase):
           simple:
             type: string
       """)
-    self.assertEquals(
+    self.assertListElementsEqual(
         [
             # The default namespace rolebinding should be created
             {
@@ -124,10 +126,76 @@ class ProvisionTest(unittest.TestCase):
                     'namespace': 'namespace-1',
                 }],
             },
+            # Include permission to read all IAM resources, and to modify the provisioned resources
+            {
+                'apiVersion':
+                    'rbac.authorization.k8s.io/v1',
+                'kind':
+                    'ClusterRole',
+                'metadata': {
+                    'name': 'namespace-1:app-name-1:deployer-cleanup-cr',
+                    'labels': ['label-1'],
+                },
+                'rules': [
+                    {
+                        'apiGroups': ['authorization.k8s.io'],
+                        'resources': [
+                            'roles', 'rolebindings', 'clusterroles',
+                            'clusterrolebindings'
+                        ],
+                        'verbs': ['get', 'watch', 'list'],
+                    },
+                    # There is no rule for roles since no roles were provisioned.
+                    {
+                        'apiGroups': ['authorization.k8s.io'],
+                        'resources': ['rolebindings'],
+                        'resourceNames': ['app-name-1:deployer-rb'],
+                        'verbs': ['*'],
+                    },
+                    {
+                        'apiGroups': ['authorization.k8s.io'],
+                        'resources': ['clusterroles'],
+                        'resourceNames':
+                            ['namespace-1:app-name-1:deployer-cleanup-cr'],
+                        'verbs': ['*'],
+                    },
+                    {
+                        'apiGroups': ['authorization.k8s.io'],
+                        'resources': ['clusterrolebindings'],
+                        'resourceNames':
+                            ['namespace-1:app-name-1:deployer-cleanup-crb'],
+                        'verbs': ['*'],
+                    }
+                ],
+            },
+            {
+                'apiVersion':
+                    'rbac.authorization.k8s.io/v1',
+                'kind':
+                    'ClusterRoleBinding',
+                'metadata': {
+                    'name': 'namespace-1:app-name-1:deployer-cleanup-crb',
+                    'labels': ['label-1'],
+                },
+                'roleRef': {
+                    'apiGroup': 'rbac.authorization.k8s.io',
+                    'kind': 'ClusterRole',
+                    'name': 'namespace-1:app-name-1:deployer-cleanup-cr',
+                },
+                'subjects': [{
+                    'kind': 'ServiceAccount',
+                    'name': 'app-name-deployer-sa',
+                    'namespace': 'namespace-1',
+                }],
+            },
         ],
         provision.make_deployer_rolebindings(schema, 'namespace-1',
                                              'app-name-1', ['label-1'],
                                              'app-name-deployer-sa'))
+    logging.warning('ACTUAL:\n{}'.format(
+        provision.make_deployer_rolebindings(schema, 'namespace-1',
+                                             'app-name-1', ['label-1'],
+                                             'app-name-deployer-sa')))
 
   def test_make_deployer_rolebindings_all_roles(self):
     schema = config_helper.Schema.load_yaml("""
@@ -422,39 +490,53 @@ class ProvisionTest(unittest.TestCase):
             },
             # Include permission to read all IAM resources, and to modify the provisioned resources
             {
-                'apiVersion': 'rbac.authorization.k8s.io/v1',
-                'kind': 'ClusterRole',
+                'apiVersion':
+                    'rbac.authorization.k8s.io/v1',
+                'kind':
+                    'ClusterRole',
                 'metadata': {
                     'name': 'namespace-1:app-name-1:deployer-cleanup-cr',
                     'labels': ['label-1'],
                 },
                 'rules': [
-                {
-                    'apiGroups': ['authorization.k8s.io'],
-                    'resources': ['roles', 'rolebindings', 'clusterroles', 'clusterrolebindings'],
-                    'verbs': ['get', 'watch', 'list'],
-                },
-                # There is no rule for roles since no roles were provisioned.
-                {
-                    'apiGroups': ['authorization.k8s.io'],
-                    'resources': ['rolebindings'],
-                    'resourceNames': ['app-name-1:deployer-rb'],
-                    'verbs': ['*'],
-                }, {
-                    'apiGroups': ['authorization.k8s.io'],
-                    'resources': ['clusterroles'],
-                    'resourceNames': ['namespace-1:app-name-1:deployer-cleanup-cr'],
-                    'verbs': ['*'],
-                }, {
-                    'apiGroups': ['authorization.k8s.io'],
-                    'resources': ['clusterrolebindings'],
-                    'resourceNames': ['namespace-1:app-name-1:deployer-cleanup-crb', 'namespace-1:app-name-1:deployer-crb0'],
-                    'verbs': ['*'],
-                }],
+                    {
+                        'apiGroups': ['authorization.k8s.io'],
+                        'resources': [
+                            'roles', 'rolebindings', 'clusterroles',
+                            'clusterrolebindings'
+                        ],
+                        'verbs': ['get', 'watch', 'list'],
+                    },
+                    # There is no rule for roles since no roles were provisioned.
+                    {
+                        'apiGroups': ['authorization.k8s.io'],
+                        'resources': ['rolebindings'],
+                        'resourceNames': ['app-name-1:deployer-rb'],
+                        'verbs': ['*'],
+                    },
+                    {
+                        'apiGroups': ['authorization.k8s.io'],
+                        'resources': ['clusterroles'],
+                        'resourceNames':
+                            ['namespace-1:app-name-1:deployer-cleanup-cr'],
+                        'verbs': ['*'],
+                    },
+                    {
+                        'apiGroups': ['authorization.k8s.io'],
+                        'resources': ['clusterrolebindings'],
+                        'resourceNames': [
+                            'namespace-1:app-name-1:deployer-cleanup-crb',
+                            'namespace-1:app-name-1:deployer-crb0'
+                        ],
+                        'verbs': ['*'],
+                    }
+                ],
             },
             {
-                'apiVersion': 'rbac.authorization.k8s.io/v1',
-                'kind': 'ClusterRoleBinding',
+                'apiVersion':
+                    'rbac.authorization.k8s.io/v1',
+                'kind':
+                    'ClusterRoleBinding',
                 'metadata': {
                     'name': 'namespace-1:app-name-1:deployer-cleanup-crb',
                     'labels': ['label-1'],
@@ -468,7 +550,7 @@ class ProvisionTest(unittest.TestCase):
                     'kind': 'ServiceAccount',
                     'name': 'app-name-deployer-sa',
                     'namespace': 'namespace-1',
-                }], 
+                }],
             },
         ],
         provision.make_deployer_rolebindings(schema, 'namespace-1',
