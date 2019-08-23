@@ -379,12 +379,11 @@ def make_deployer_rolebindings(schema, namespace, app_name, labels, sa_name):
       'name': sa_name,
       'namespace': namespace,
   }]
-  default_rolebinding_name = '{}:deployer-rb'.format(app_name)
   default_rolebinding = {
       'apiVersion': 'rbac.authorization.k8s.io/v1',
       'kind': 'RoleBinding',
       'metadata': {
-          'name': default_rolebinding_name,
+          'name': '{}:deployer-rb'.format(app_name),
           'namespace': namespace,
           'labels': labels,
       },
@@ -403,15 +402,8 @@ def make_deployer_rolebindings(schema, namespace, app_name, labels, sa_name):
   if not deployer_service_account:
     roles_and_rolebindings.append(default_rolebinding)
     roles_and_rolebindings.extend(
-        make_cleanup_rolebindings(
-            namespace=namespace,
-            app_name=app_name,
-            labels=labels,
-            subjects=subjects,
-            role_names=[],
-            rolebinding_names=[default_rolebinding_name],
-            clusterrole_names=[],
-            clusterrolebinding_names=[]))
+        make_cleanup_rolebindings(namespace, app_name, labels, subjects,
+                                  roles_and_rolebindings))
     return roles_and_rolebindings
 
   # Set the default rolebinding if no namespace roles are defined
@@ -510,12 +502,8 @@ def make_deployer_rolebindings(schema, namespace, app_name, labels, sa_name):
     })
 
   roles_and_rolebindings.extend(
-      make_cleanup_rolebindings(
-          namespace, app_name, labels, subjects,
-          get_name_list_by_kind('Role', roles_and_rolebindings),
-          get_name_list_by_kind('RoleBinding', roles_and_rolebindings),
-          get_name_list_by_kind('ClusterRole', roles_and_rolebindings),
-          get_name_list_by_kind('ClusterRoleBinding', roles_and_rolebindings)))
+      make_cleanup_rolebindings(namespace, app_name, labels, subjects,
+                                roles_and_rolebindings))
 
   return roles_and_rolebindings
 
@@ -525,20 +513,29 @@ def get_name_list_by_kind(kind, resource_list):
              filter(lambda r: r['kind'] == kind, resource_list))
 
 
-def make_cleanup_rolebindings(namespace, app_name, labels, subjects, role_names,
-                              rolebinding_names, clusterrole_names,
-                              clusterrolebinding_names):
+def make_cleanup_rolebindings(namespace, app_name, labels, subjects,
+                              roles_and_rolebindings):
+  role_names = get_name_list_by_kind('Role', roles_and_rolebindings)
+  rolebinding_names = get_name_list_by_kind('RoleBinding',
+                                            roles_and_rolebindings)
+  clusterrole_names = get_name_list_by_kind('ClusterRole',
+                                            roles_and_rolebindings)
+  clusterrolebinding_names = get_name_list_by_kind('ClusterRoleBinding',
+                                                   roles_and_rolebindings)
+
   cleanup_clusterrole_name = '{}:{}:deployer-cleanup-cr'.format(
       namespace, app_name)
   cleanup_clusterrolebinding_name = '{}:{}:deployer-cleanup-crb'.format(
       namespace, app_name)
+  clusterrole_names.append(cleanup_clusterrole_name)
+  clusterrolebinding_names.append(cleanup_clusterrolebinding_name)
 
   cleanup_clusterrolebinding = {
       'apiVersion': 'rbac.authorization.k8s.io/v1',
       'kind': 'ClusterRoleBinding',
       'metadata': {
           'name': cleanup_clusterrolebinding_name,
-          'labels': ['label-1'],
+          'labels': labels,
       },
       'roleRef': {
           'apiGroup': 'rbac.authorization.k8s.io',
@@ -548,10 +545,6 @@ def make_cleanup_rolebindings(namespace, app_name, labels, subjects, role_names,
       'subjects': subjects,
   }
 
-  all_clusterrole_names = [cleanup_clusterrole_name]
-  all_clusterrole_names.extend(clusterrole_names)
-  all_clusterrolebinding_names = [cleanup_clusterrolebinding_name]
-  all_clusterrolebinding_names.extend(clusterrolebinding_names)
   cleanup_clusterrole = {
       'apiVersion':
           'rbac.authorization.k8s.io/v1',
@@ -562,25 +555,25 @@ def make_cleanup_rolebindings(namespace, app_name, labels, subjects, role_names,
           'labels': labels,
       },
       'rules': [{
-          'apiGroups': ['authorization.k8s.io'],
+          'apiGroups': ['rbac.authorization.k8s.io'],
           'resources': [
               'roles', 'rolebindings', 'clusterroles', 'clusterrolebindings'
           ],
           'verbs': ['get', 'watch', 'list'],
       }, {
-          'apiGroups': ['authorization.k8s.io'],
+          'apiGroups': ['rbac.authorization.k8s.io'],
           'resources': ['rolebindings'],
           'resourceNames': rolebinding_names,
           'verbs': ['*'],
       }, {
-          'apiGroups': ['authorization.k8s.io'],
+          'apiGroups': ['rbac.authorization.k8s.io'],
           'resources': ['clusterroles'],
-          'resourceNames': all_clusterrole_names,
+          'resourceNames': clusterrole_names,
           'verbs': ['*'],
       }, {
-          'apiGroups': ['authorization.k8s.io'],
+          'apiGroups': ['rbac.authorization.k8s.io'],
           'resources': ['clusterrolebindings'],
-          'resourceNames': all_clusterrolebinding_names,
+          'resourceNames': clusterrolebinding_names,
           'verbs': ['*'],
       }],
   }
@@ -588,7 +581,7 @@ def make_cleanup_rolebindings(namespace, app_name, labels, subjects, role_names,
     # Only create this rule if there are any provisioned roles. Otherwise,
     # the empty resources names will grant control over all Roles.
     cleanup_clusterrole['rules'].append({
-        'apiGroups': ['authorization.k8s.io'],
+        'apiGroups': ['rbac.authorization.k8s.io'],
         'resources': ['roles'],
         'resourceNames': role_names,
         'verbs': ['*'],

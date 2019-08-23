@@ -137,7 +137,7 @@ class ProvisionTest(unittest.TestCase):
                 },
                 'rules': [
                     {
-                        'apiGroups': ['authorization.k8s.io'],
+                        'apiGroups': ['rbac.authorization.k8s.io'],
                         'resources': [
                             'roles', 'rolebindings', 'clusterroles',
                             'clusterrolebindings'
@@ -146,20 +146,20 @@ class ProvisionTest(unittest.TestCase):
                     },
                     # There is no rule for roles since no roles were provisioned.
                     {
-                        'apiGroups': ['authorization.k8s.io'],
+                        'apiGroups': ['rbac.authorization.k8s.io'],
                         'resources': ['rolebindings'],
                         'resourceNames': ['app-name-1:deployer-rb'],
                         'verbs': ['*'],
                     },
                     {
-                        'apiGroups': ['authorization.k8s.io'],
+                        'apiGroups': ['rbac.authorization.k8s.io'],
                         'resources': ['clusterroles'],
                         'resourceNames':
                             ['namespace-1:app-name-1:deployer-cleanup-cr'],
                         'verbs': ['*'],
                     },
                     {
-                        'apiGroups': ['authorization.k8s.io'],
+                        'apiGroups': ['rbac.authorization.k8s.io'],
                         'resources': ['clusterrolebindings'],
                         'resourceNames':
                             ['namespace-1:app-name-1:deployer-cleanup-crb'],
@@ -359,38 +359,38 @@ class ProvisionTest(unittest.TestCase):
                     'labels': ['label-1'],
                 },
                 'rules': [{
-                    'apiGroups': ['authorization.k8s.io'],
+                    'apiGroups': ['rbac.authorization.k8s.io'],
                     'resources': [
                         'roles', 'rolebindings', 'clusterroles',
                         'clusterrolebindings'
                     ],
                     'verbs': ['get', 'watch', 'list'],
                 }, {
-                    'apiGroups': ['authorization.k8s.io'],
+                    'apiGroups': ['rbac.authorization.k8s.io'],
                     'resources': ['rolebindings'],
                     'resourceNames': [
                         'app-name-1:deployer-rb0', 'app-name-1:edit:deployer-rb'
                     ],
                     'verbs': ['*'],
                 }, {
-                    'apiGroups': ['authorization.k8s.io'],
+                    'apiGroups': ['rbac.authorization.k8s.io'],
                     'resources': ['clusterroles'],
                     'resourceNames': [
+                        'namespace-1:app-name-1:deployer-cr0',
                         'namespace-1:app-name-1:deployer-cleanup-cr',
-                        'namespace-1:app-name-1:deployer-cr0'
                     ],
                     'verbs': ['*'],
                 }, {
-                    'apiGroups': ['authorization.k8s.io'],
+                    'apiGroups': ['rbac.authorization.k8s.io'],
                     'resources': ['clusterrolebindings'],
                     'resourceNames': [
-                        'namespace-1:app-name-1:deployer-cleanup-crb',
                         'namespace-1:app-name-1:deployer-crb0',
-                        'namespace-1:app-name-1:cluster-admin:deployer-crb'
+                        'namespace-1:app-name-1:cluster-admin:deployer-crb',
+                        'namespace-1:app-name-1:deployer-cleanup-crb',
                     ],
                     'verbs': ['*'],
                 }, {
-                    'apiGroups': ['authorization.k8s.io'],
+                    'apiGroups': ['rbac.authorization.k8s.io'],
                     'resources': ['roles'],
                     'resourceNames': ['app-name-1:deployer-r0'],
                     'verbs': ['*'],
@@ -499,7 +499,7 @@ class ProvisionTest(unittest.TestCase):
                 },
                 'rules': [
                     {
-                        'apiGroups': ['authorization.k8s.io'],
+                        'apiGroups': ['rbac.authorization.k8s.io'],
                         'resources': [
                             'roles', 'rolebindings', 'clusterroles',
                             'clusterrolebindings'
@@ -508,24 +508,24 @@ class ProvisionTest(unittest.TestCase):
                     },
                     # There is no rule for roles since no roles were provisioned.
                     {
-                        'apiGroups': ['authorization.k8s.io'],
+                        'apiGroups': ['rbac.authorization.k8s.io'],
                         'resources': ['rolebindings'],
                         'resourceNames': ['app-name-1:deployer-rb'],
                         'verbs': ['*'],
                     },
                     {
-                        'apiGroups': ['authorization.k8s.io'],
+                        'apiGroups': ['rbac.authorization.k8s.io'],
                         'resources': ['clusterroles'],
                         'resourceNames':
                             ['namespace-1:app-name-1:deployer-cleanup-cr'],
                         'verbs': ['*'],
                     },
                     {
-                        'apiGroups': ['authorization.k8s.io'],
+                        'apiGroups': ['rbac.authorization.k8s.io'],
                         'resources': ['clusterrolebindings'],
                         'resourceNames': [
-                            'namespace-1:app-name-1:deployer-cleanup-crb',
                             'namespace-1:app-name-1:cluster-admin:deployer-crb',
+                            'namespace-1:app-name-1:deployer-cleanup-crb',
                         ],
                         'verbs': ['*'],
                     }
