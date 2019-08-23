@@ -397,9 +397,10 @@ def make_deployer_rolebindings(schema, namespace, app_name, labels, sa_name):
   }
 
   roles_and_rolebindings = []
-  deployer_service_account = schema.x_google_marketplace.deployer_service_account
+  deployer_service_account = schema.is_v2(
+  ) and schema.x_google_marketplace.deployer_service_account
 
-  if not schema.is_v2() or not deployer_service_account:
+  if not deployer_service_account:
     roles_and_rolebindings.append(default_rolebinding)
     roles_and_rolebindings.extend(
         make_cleanup_rolebindings(
