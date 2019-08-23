@@ -509,13 +509,13 @@ def make_deployer_rolebindings(schema, namespace, app_name, labels, sa_name):
         'subjects': subjects,
     })
 
-  cleanup_rolebindings = make_cleanup_rolebindings(
-      namespace, app_name, labels, subjects,
-      get_name_list_by_kind('Role', roles_and_rolebindings),
-      get_name_list_by_kind('RoleBinding', roles_and_rolebindings),
-      get_name_list_by_kind('ClusterRole', roles_and_rolebindings),
-      get_name_list_by_kind('ClusterRoleBinding', roles_and_rolebindings))
-  roles_and_rolebindings.extend(cleanup_rolebindings)
+  roles_and_rolebindings.extend(
+      make_cleanup_rolebindings(
+          namespace, app_name, labels, subjects,
+          get_name_list_by_kind('Role', roles_and_rolebindings),
+          get_name_list_by_kind('RoleBinding', roles_and_rolebindings),
+          get_name_list_by_kind('ClusterRole', roles_and_rolebindings),
+          get_name_list_by_kind('ClusterRoleBinding', roles_and_rolebindings)))
 
   return roles_and_rolebindings
 
