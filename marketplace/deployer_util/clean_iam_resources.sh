@@ -23,9 +23,11 @@ set -eox pipefail
 # Note that only resources of a one-shot deployer have this label.
 # Resources of a KALM-managed deployer have
 # app.kubernetes.io/component=kalm.marketplace.cloud.google.com label.
-# TODO(eshiroma): Also clean up ClusterRoles and ClusterRoleBindings
-# once deployment grants the deployer permission.
 kubectl delete --namespace="$NAMESPACE" \
   ServiceAccount,Role,RoleBinding \
+  -l 'app.kubernetes.io/component'='deployer.marketplace.cloud.google.com','app.kubernetes.io/name'="$NAME" \
+  --ignore-not-found
+kubectl delete \
+  ClusterRole,ClusterRoleBinding \
   -l 'app.kubernetes.io/component'='deployer.marketplace.cloud.google.com','app.kubernetes.io/name'="$NAME" \
   --ignore-not-found
