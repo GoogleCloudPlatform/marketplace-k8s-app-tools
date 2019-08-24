@@ -545,6 +545,9 @@ def make_cleanup_rolebindings(namespace, app_name, labels, subjects,
       'subjects': subjects,
   }
 
+  # This cannot be cleaned up with the rest of the ClusterRole{,Bindings},
+  # so omit the labels that are used to select the resources for deletion.
+  # It will be cleaned up during app deletion instead (by OwnerRef).
   cleanup_clusterrole = {
       'apiVersion':
           'rbac.authorization.k8s.io/v1',
@@ -552,7 +555,6 @@ def make_cleanup_rolebindings(namespace, app_name, labels, subjects,
           'ClusterRole',
       'metadata': {
           'name': cleanup_clusterrole_name,
-          'labels': labels,
       },
       'rules': [{
           'apiGroups': ['rbac.authorization.k8s.io'],

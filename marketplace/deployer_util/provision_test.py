@@ -133,7 +133,6 @@ class ProvisionTest(unittest.TestCase):
                     'ClusterRole',
                 'metadata': {
                     'name': 'namespace-1:app-name-1:deployer-cleanup-cr',
-                    'labels': ['label-1'],
                 },
                 'rules': [
                     {
@@ -356,7 +355,6 @@ class ProvisionTest(unittest.TestCase):
                     'ClusterRole',
                 'metadata': {
                     'name': 'namespace-1:app-name-1:deployer-cleanup-cr',
-                    'labels': ['label-1'],
                 },
                 'rules': [{
                     'apiGroups': ['rbac.authorization.k8s.io'],
@@ -495,7 +493,6 @@ class ProvisionTest(unittest.TestCase):
                     'ClusterRole',
                 'metadata': {
                     'name': 'namespace-1:app-name-1:deployer-cleanup-cr',
-                    'labels': ['label-1'],
                 },
                 'rules': [
                     {
