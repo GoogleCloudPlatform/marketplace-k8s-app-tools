@@ -280,13 +280,18 @@ echo "INFO Wait for service accounts to be deleted."
   --kind=serviceaccounts,roles,rolebindings \
   --timeout="$deletion_timeout" \
   || clean_and_exit "ERROR Some service accounts or roles were not deleted"
-selector="app.kubernetes.io/component=deployer.marketplace.cloud.google.com,app.kubernetes.io/name=$NAME"
 /scripts/wait_for_deletion.sh \
   --namespace="" \
   --kind=clusterroles,clusterrolebindings \
   --timeout="$deletion_timeout" \
-  --selector="$selector" \
+  --selector="app.kubernetes.io/component=deployer.marketplace.cloud.google.com,app.kubernetes.io/name=$NAME" \
   || clean_and_exit "ERROR Some roles were not deleted"
+/scripts/wait_for_deletion.sh \
+  --namespace="" \
+  --kind=clusterrolebindings \
+  --timeout="$deletion_timeout" \
+  --selector="app.kubernetes.io/component=deployer-cleanup.marketplace.cloud.google.com,app.kubernetes.io/name=$NAME" \
+  || clean_and_exit "ERROR ClusterRoleBinding for resource cleanup was not deleted"
 trap - EXIT
 
 clean_resources
