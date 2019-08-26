@@ -12,7 +12,6 @@
 # limitations under the License.
 
 import unittest
-import logging
 
 import provision
 from provision import dns1123_name
