@@ -368,12 +368,16 @@ def provision_deployer(schema, app_name, namespace, deployer_image,
           },
       },
   ]
+
+  cluster_scoped_labels = labels.copy()
+  cluster_scoped_labels['marketplace.cloud.google.com/namespace'] = namespace
   manifests += make_deployer_rolebindings(schema, namespace, app_name, labels,
-                                          sa_name)
+                                          cluster_scoped_labels, sa_name)
   return manifests
 
 
-def make_deployer_rolebindings(schema, namespace, app_name, labels, sa_name):
+def make_deployer_rolebindings(schema, namespace, app_name, namespaced_labels,
+                               cluster_scoped_labels, sa_name):
   subjects = [{
       'kind': 'ServiceAccount',
       'name': sa_name,
@@ -385,7 +389,7 @@ def make_deployer_rolebindings(schema, namespace, app_name, labels, sa_name):
       'metadata': {
           'name': '{}:deployer-rb'.format(app_name),
           'namespace': namespace,
-          'labels': labels,
+          'labels': namespaced_labels,
       },
       'roleRef': {
           'apiGroup': 'rbac.authorization.k8s.io',
@@ -402,7 +406,7 @@ def make_deployer_rolebindings(schema, namespace, app_name, labels, sa_name):
   if not deployer_service_account:
     roles_and_rolebindings.append(default_rolebinding)
     roles_and_rolebindings.extend(
-        make_cleanup_rolebindings(namespace, app_name, labels, subjects,
+        make_cleanup_rolebindings(namespace, app_name, subjects,
                                   roles_and_rolebindings))
     return roles_and_rolebindings
 
@@ -419,7 +423,7 @@ def make_deployer_rolebindings(schema, namespace, app_name, labels, sa_name):
         'metadata': {
             'name': role_name,
             'namespace': namespace,
-            'labels': labels,
+            'labels': namespaced_labels,
         },
         'rules': rules,
     })
@@ -429,7 +433,7 @@ def make_deployer_rolebindings(schema, namespace, app_name, labels, sa_name):
         'metadata': {
             'name': '{}:deployer-rb{}'.format(app_name, i),
             'namespace': namespace,
-            'labels': labels,
+            'labels': namespaced_labels,
         },
         'roleRef': {
             'apiGroup': 'rbac.authorization.k8s.io',
@@ -446,7 +450,7 @@ def make_deployer_rolebindings(schema, namespace, app_name, labels, sa_name):
         'kind': 'ClusterRole',
         'metadata': {
             'name': role_name,
-            'labels': labels,
+            'labels': cluster_scoped_labels,
         },
         'rules': rules,
     })
@@ -455,7 +459,7 @@ def make_deployer_rolebindings(schema, namespace, app_name, labels, sa_name):
         'kind': 'ClusterRoleBinding',
         'metadata': {
             'name': '{}:{}:deployer-crb{}'.format(namespace, app_name, i),
-            'labels': labels,
+            'labels': cluster_scoped_labels,
         },
         'roleRef': {
             'apiGroup': 'rbac.authorization.k8s.io',
@@ -471,7 +475,7 @@ def make_deployer_rolebindings(schema, namespace, app_name, labels, sa_name):
         'metadata': {
             'name': limit_name('{}:{}:deployer-rb'.format(app_name, role), 64),
             'namespace': namespace,
-            'labels': labels,
+            'labels': namespaced_labels,
         },
         'roleRef': {
             'apiGroup': 'rbac.authorization.k8s.io',
@@ -491,7 +495,7 @@ def make_deployer_rolebindings(schema, namespace, app_name, labels, sa_name):
                     '{}:{}:{}:deployer-crb'.format(namespace, app_name, role),
                     64),
             'labels':
-                labels,
+                cluster_scoped_labels,
         },
         'roleRef': {
             'apiGroup': 'rbac.authorization.k8s.io',
@@ -502,7 +506,7 @@ def make_deployer_rolebindings(schema, namespace, app_name, labels, sa_name):
     })
 
   roles_and_rolebindings.extend(
-      make_cleanup_rolebindings(namespace, app_name, labels, subjects,
+      make_cleanup_rolebindings(namespace, app_name, subjects,
                                 roles_and_rolebindings))
 
   return roles_and_rolebindings
@@ -513,8 +517,15 @@ def get_name_list_by_kind(kind, resource_list):
              filter(lambda r: r['kind'] == kind, resource_list))
 
 
-def make_cleanup_rolebindings(namespace, app_name, labels, subjects,
+def make_cleanup_rolebindings(namespace, app_name, subjects,
                               roles_and_rolebindings):
+  labels = {
+      'app.kubernetes.io/component':
+          'deployer-cleanup.marketplace.cloud.google.com',
+      'marketplace.cloud.google.com/deployer':
+          'Dependent',
+  }
+
   role_names = get_name_list_by_kind('Role', roles_and_rolebindings)
   rolebinding_names = get_name_list_by_kind('RoleBinding',
                                             roles_and_rolebindings)
@@ -555,6 +566,7 @@ def make_cleanup_rolebindings(namespace, app_name, labels, subjects,
           'ClusterRole',
       'metadata': {
           'name': cleanup_clusterrole_name,
+          'labels': labels,
       },
       'rules': [{
           'apiGroups': ['rbac.authorization.k8s.io'],

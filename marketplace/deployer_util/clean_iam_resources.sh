@@ -27,11 +27,15 @@ kubectl delete --namespace="$NAMESPACE" \
   ServiceAccount,Role,RoleBinding \
   -l 'app.kubernetes.io/component'='deployer.marketplace.cloud.google.com','app.kubernetes.io/name'="$NAME" \
   --ignore-not-found
-# TODO(eshiroma): ensure that the cluster-scoped resources are deleted.
-# (Update wait_for_deletion to handle, and accept labels)
-# Note: the ClusterRole created for cleanup cannot be deleted here, as
-# its rules grant permission to clean up. It is deleted with the app.
 kubectl delete \
   ClusterRole,ClusterRoleBinding \
-  -l 'app.kubernetes.io/component'='deployer.marketplace.cloud.google.com','app.kubernetes.io/name'="$NAME" \
+  -l 'app.kubernetes.io/component'='deployer.marketplace.cloud.google.com','app.kubernetes.io/name'="$NAME",'marketplace.cloud.google.com/namespace'="$NAMESPACE" \
+  --ignore-not-found
+# Delete the ClusterRoleBinding that grants permission to clean up
+# cluster-scoped resources for the app. The ClusterRole itself cannot
+# be deleted, as its rules grant permission to clean up. Instead, the
+# ClusterRole is deleted with the app.
+kubectl delete \
+  ClusterRoleBinding \
+  -l 'app.kubernetes.io/component'='deployer-cleanup.marketplace.cloud.google.com','app.kubernetes.io/name'="$NAME",'marketplace.cloud.google.com/namespace'="$NAMESPACE" \
   --ignore-not-found

@@ -31,6 +31,10 @@ case $i in
     timeout="${i#*=}"
     shift
     ;;
+  --selector=*)
+    selector="${i#*=}"
+    shift
+    ;;
   *)
     echo "Unrecognized flag: $i"
     exit 1
@@ -43,9 +47,11 @@ poll_interval=4
 
 while true; do
   # Everything under the namespace needs to be removed after app/uninstall
+  # Can also be called with an empty namespace for cluster-scoped resources.
   echo "INFO Checking if $kind were deleted"
   resources=$(kubectl get $kind \
     --namespace="$namespace" \
+    --selector "$selector" \
     -o=json \
     | jq -r '.items[] | "\(.kind)/\(.metadata.name)"')
 
