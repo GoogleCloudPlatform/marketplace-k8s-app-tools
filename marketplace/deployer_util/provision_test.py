@@ -110,7 +110,9 @@ class ProvisionTest(unittest.TestCase):
                 'metadata': {
                     'name': 'app-name-1:deployer-rb',
                     'namespace': 'namespace-1',
-                    'labels': ['label-1'],
+                    'labels': {
+                        'some-key': 'some-value'
+                    },
                 },
                 'roleRef': {
                     'apiGroup': 'rbac.authorization.k8s.io',
@@ -126,7 +128,8 @@ class ProvisionTest(unittest.TestCase):
             },
         ],
         provision.make_deployer_rolebindings(schema, 'namespace-1',
-                                             'app-name-1', ['label-1'],
+                                             'app-name-1',
+                                             {'some-key': 'some-value'},
                                              'app-name-deployer-sa'))
 
   def test_make_deployer_rolebindings_all_roles(self):
@@ -175,7 +178,9 @@ class ProvisionTest(unittest.TestCase):
                 'metadata': {
                     'name': 'app-name-1:deployer-r0',
                     'namespace': 'namespace-1',
-                    'labels': ['label-1'],
+                    'labels': {
+                        'some-key': 'some-value'
+                    },
                 },
                 'rules': [{
                     'apiGroups': ['apps/v1'],
@@ -191,7 +196,9 @@ class ProvisionTest(unittest.TestCase):
                 'metadata': {
                     'name': 'app-name-1:deployer-rb0',
                     'namespace': 'namespace-1',
-                    'labels': ['label-1'],
+                    'labels': {
+                        'some-key': 'some-value'
+                    },
                 },
                 'roleRef': {
                     'apiGroup': 'rbac.authorization.k8s.io',
@@ -211,7 +218,9 @@ class ProvisionTest(unittest.TestCase):
                     'ClusterRole',
                 'metadata': {
                     'name': 'namespace-1:app-name-1:deployer-cr0',
-                    'labels': ['label-1'],
+                    'labels': {
+                        'some-key': 'some-value'
+                    },
                 },
                 'rules': [{
                     'apiGroups': ['v1'],
@@ -226,7 +235,9 @@ class ProvisionTest(unittest.TestCase):
                     'ClusterRoleBinding',
                 'metadata': {
                     'name': 'namespace-1:app-name-1:deployer-crb0',
-                    'labels': ['label-1'],
+                    'labels': {
+                        'some-key': 'some-value'
+                    },
                 },
                 'roleRef': {
                     'apiGroup': 'rbac.authorization.k8s.io',
@@ -247,7 +258,9 @@ class ProvisionTest(unittest.TestCase):
                 'metadata': {
                     'name': 'app-name-1:edit:deployer-rb',
                     'namespace': 'namespace-1',
-                    'labels': ['label-1'],
+                    'labels': {
+                        'some-key': 'some-value'
+                    },
                 },
                 'roleRef': {
                     'apiGroup': 'rbac.authorization.k8s.io',
@@ -268,7 +281,9 @@ class ProvisionTest(unittest.TestCase):
                     'ClusterRoleBinding',
                 'metadata': {
                     'name': 'namespace-1:app-name-1:cluster-admin:deployer-crb',
-                    'labels': ['label-1'],
+                    'labels': {
+                        'some-key': 'some-value'
+                    },
                 },
                 'roleRef': {
                     'apiGroup': 'rbac.authorization.k8s.io',
@@ -283,7 +298,8 @@ class ProvisionTest(unittest.TestCase):
             }
         ],
         provision.make_deployer_rolebindings(schema, 'namespace-1',
-                                             'app-name-1', ['label-1'],
+                                             'app-name-1',
+                                             {'some-key': 'some-value'},
                                              'app-name-deployer-sa'))
 
   def test_make_deployer_rolebindings_clusterrole_only(self):
@@ -318,7 +334,9 @@ class ProvisionTest(unittest.TestCase):
                 'metadata': {
                     'name': 'app-name-1:deployer-rb',
                     'namespace': 'namespace-1',
-                    'labels': ['label-1'],
+                    'labels': {
+                        'some-key': 'some-value'
+                    },
                 },
                 'roleRef': {
                     'apiGroup': 'rbac.authorization.k8s.io',
@@ -339,7 +357,9 @@ class ProvisionTest(unittest.TestCase):
                     'ClusterRoleBinding',
                 'metadata': {
                     'name': 'namespace-1:app-name-1:cluster-admin:deployer-crb',
-                    'labels': ['label-1'],
+                    'labels': {
+                        'some-key': 'some-value'
+                    },
                 },
                 'roleRef': {
                     'apiGroup': 'rbac.authorization.k8s.io',
@@ -354,5 +374,6 @@ class ProvisionTest(unittest.TestCase):
             }
         ],
         provision.make_deployer_rolebindings(schema, 'namespace-1',
-                                             'app-name-1', ['label-1'],
+                                             'app-name-1',
+                                             {'some-key': 'some-value'},
                                              'app-name-deployer-sa'))
