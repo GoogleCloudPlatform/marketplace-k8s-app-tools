@@ -111,7 +111,7 @@ class ProvisionTest(unittest.TestCase):
                     'name': 'app-name-1:deployer-rb',
                     'namespace': 'namespace-1',
                     'labels': {
-                        'label-key': 'label-value'
+                        'some-key': 'some-value'
                     },
                 },
                 'roleRef': {
@@ -200,7 +200,7 @@ class ProvisionTest(unittest.TestCase):
             },
         ],
         provision.make_deployer_rolebindings(
-            schema, 'namespace-1', 'app-name-1', {'label-key': 'label-value'},
+            schema, 'namespace-1', 'app-name-1', {'some-key': 'some-value'},
             {'cluster-scope-label-key': 'cluster-scope-label-value'},
             'app-name-deployer-sa'))
 
@@ -251,7 +251,7 @@ class ProvisionTest(unittest.TestCase):
                     'name': 'app-name-1:deployer-r0',
                     'namespace': 'namespace-1',
                     'labels': {
-                        'label-key': 'label-value'
+                        'some-key': 'some-value'
                     },
                 },
                 'rules': [{
@@ -269,7 +269,7 @@ class ProvisionTest(unittest.TestCase):
                     'name': 'app-name-1:deployer-rb0',
                     'namespace': 'namespace-1',
                     'labels': {
-                        'label-key': 'label-value'
+                        'some-key': 'some-value'
                     },
                 },
                 'roleRef': {
@@ -331,7 +331,7 @@ class ProvisionTest(unittest.TestCase):
                     'name': 'app-name-1:edit:deployer-rb',
                     'namespace': 'namespace-1',
                     'labels': {
-                        'label-key': 'label-value'
+                        'some-key': 'some-value'
                     },
                 },
                 'roleRef': {
@@ -448,7 +448,7 @@ class ProvisionTest(unittest.TestCase):
             },
         ],
         provision.make_deployer_rolebindings(
-            schema, 'namespace-1', 'app-name-1', {'label-key': 'label-value'},
+            schema, 'namespace-1', 'app-name-1', {'some-key': 'some-value'},
             {'cluster-scope-label-key': 'cluster-scope-label-value'},
             'app-name-deployer-sa'))
 
@@ -485,7 +485,7 @@ class ProvisionTest(unittest.TestCase):
                     'name': 'app-name-1:deployer-rb',
                     'namespace': 'namespace-1',
                     'labels': {
-                        'label-key': 'label-value'
+                        'some-key': 'some-value'
                     },
                 },
                 'roleRef': {
@@ -598,6 +598,6 @@ class ProvisionTest(unittest.TestCase):
             },
         ],
         provision.make_deployer_rolebindings(
-            schema, 'namespace-1', 'app-name-1', {'label-key': 'label-value'},
+            schema, 'namespace-1', 'app-name-1', {'some-key': 'some-value'},
             {'cluster-scope-label-key': 'cluster-scope-label-value'},
             'app-name-deployer-sa'))
