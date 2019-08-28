@@ -154,9 +154,9 @@ steps:
   args:
   - -exc
   - |
-    CLUSTER_NAME='$BUILD_ID'
-    gcloud container clusters create '$CLUSTER_NAME' --zone '${_CLUSTER_LOCATION}' --project '$PROJECT_ID'
-    gcloud container clusters get-credentials '$CLUSTER_NAME' --zone '${_CLUSTER_LOCATION}' --project '$PROJECT_ID'
+    # Use the BUILD_ID as the cluster name
+    gcloud container clusters create '$BUILD_ID' --zone '${_CLUSTER_LOCATION}' --project '$PROJECT_ID'
+    gcloud container clusters get-credentials '$BUILD_ID' --zone '${_CLUSTER_LOCATION}' --project '$PROJECT_ID'
     mkdir -p /workspace/.kube/
     cp -r $$HOME/.kube/ /workspace/
     mkdir -p /workspace/.config/gcloud/
