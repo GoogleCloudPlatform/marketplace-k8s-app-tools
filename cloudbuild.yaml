@@ -163,7 +163,7 @@ steps:
     mkdir -p /workspace/.config/gcloud/
     cp -r $$HOME/.config/gcloud/ /workspace/.config/
 
-- id: Verify
+- id: &Verify Verify
   name: gcr.io/$PROJECT_ID/k8s/dev:sha_$COMMIT_SHA
   waitFor:
   - *BuildDev
