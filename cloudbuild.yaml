@@ -183,7 +183,8 @@ steps:
 
 - id: Cleanup
   name: gcr.io/gcloud-builders/gcloud-cleanup
-  waitFor: *Verify
+  waitFor:
+  - *Verify
   entrypoint: bash
   args:
   - -exc
