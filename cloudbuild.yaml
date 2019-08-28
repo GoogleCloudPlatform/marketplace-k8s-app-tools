@@ -154,7 +154,7 @@ steps:
   args:
   - -exc
   - |
-    CLUSTER_NAME='testing-marketplace-$BUILD_ID'
+    CLUSTER_NAME='$BUILD_ID'
     gcloud container clusters create '$CLUSTER_NAME' --zone '${_CLUSTER_LOCATION}' --project '$PROJECT_ID'
     gcloud container clusters get-credentials '$CLUSTER_NAME' --zone '${_CLUSTER_LOCATION}' --project '$PROJECT_ID'
     mkdir -p /workspace/.kube/
