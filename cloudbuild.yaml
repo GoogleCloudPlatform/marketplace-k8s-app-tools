@@ -181,6 +181,14 @@ steps:
   - --output-sync
   - tests/integration
 
+- id: Cleanup
+  name: gcr.io/gcloud-builders/gcloud-cleanup
+  waitFor: *Verify
+  entrypoint: bash
+  args:
+  - -exc
+  - gcloud container clusters delete 'c-$BUILD_ID' --zone '${_CLUSTER_LOCATION}' --project '$PROJECT_ID' --quiet
+
 images:
   - gcr.io/$PROJECT_ID/k8s/dev:sha_$COMMIT_SHA
   - gcr.io/$PROJECT_ID/k8s/dev:sha_$SHORT_SHA
