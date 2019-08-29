@@ -155,9 +155,10 @@ steps:
   - -exc
   - |
     # Use the 'c-$BUILD_ID' as the cluster name as it must start with a letter,
-    # and have a max length of 40 chars (BUILD_ID is 37).
+    # and have a max length of 40 chars (BUILD_ID is 37). Then install App CRD.
     gcloud container clusters create 'c-$BUILD_ID' --zone '${_CLUSTER_LOCATION}' --project '$PROJECT_ID'
     gcloud container clusters get-credentials 'c-$BUILD_ID' --zone '${_CLUSTER_LOCATION}' --project '$PROJECT_ID'
+    kubectl apply -f "https://raw.githubusercontent.com/GoogleCloudPlatform/marketplace-k8s-app-tools/master/crd/app-crd.yaml"
     mkdir -p /workspace/.kube/
     cp -r $$HOME/.kube/ /workspace/
     mkdir -p /workspace/.config/gcloud/
