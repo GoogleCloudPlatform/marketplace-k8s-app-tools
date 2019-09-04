@@ -183,7 +183,7 @@ steps:
   - tests/integration
 
 - id: Cleanup
-  name: gcr.io/gcloud-builders/gcloud
+  name: gcr.io/cloud-builders/gcloud
   waitFor:
   - *Verify
   entrypoint: bash
