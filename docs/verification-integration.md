@@ -3,7 +3,7 @@
 Applications are executed in our Verification system to ensure that:
 
 1. Installation succeeds: All resources are applied and waited for to become healthy.
-1. Functionality tests pass: The deployer starts the Tester Pod and watches its exit status.Zero means
+1. Functionality tests pass: The deployer starts the Tester Pod and watches its exit status. Zero means
 success, non-zero means failure.
 1. Uninstallation succeeds: Application and all its resources are successfully removed from the cluster.
 
@@ -11,7 +11,7 @@ Successful results are required before application can be published to the GCP M
 
 ## Functionality tests
 
-Packaging functionality tests involves some steps.
+Packaging functionality tests involves the following steps.
 
 ### 1. Create a `/data-test` folder
 
@@ -70,7 +70,17 @@ command to run verification:
 
 ```
 mpdev verify \
-  --deployer="$deployer"
+  --deployer=<deployer image to be verified>
+```
+
+Make sure to include both the image name and the sha256/tag of the image, ex:
+
+```
+--deployer=gcr.io/my-project/my-app/deployer@sha256:123456789abcdef123456789abcdef123456789abcdef123456789abcdef1234
+```
+or
+```
+--deployer=gcr.io/my-project/my-app/deployer:1.0
 ```
 
 In summary, this is what happens:
