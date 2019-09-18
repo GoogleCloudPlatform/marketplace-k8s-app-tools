@@ -275,6 +275,7 @@ It defines how this object will be handled. Each type has a different set of pro
 - `NAME`: To be used as the name of the app.
 - `NAMESPACE`: To be used as the kubernetes namespace where the app will installed.
 - `IMAGE`: Link to a docker image.
+- `MASKED_FIELD`: A string value whose characters will be masked when entered in the UI.
 - `GENERATED_PASSWORD`: A value to be generated at deployment time, following common password requirements.
 - `REPORTING_SECRET`: The Secret resource name containing the usage reporting credentials
 - `SERVICE_ACCOUNT`: The name of a pre-provisioned k8s `ServiceAccount`. If it does not exist, one is created.
@@ -340,6 +341,24 @@ properties:
   # Application object definition
   {{- end }}
   ```
+---
+
+### type: MASKED_FIELD
+
+Properties of this type will have their user-entered value masked by default in the UI, offering the user the option to reveal the value as plain text. 
+
+Example:
+
+```yaml
+properties:
+  customSecret:
+    title: User-specified password
+    description: The password to be used for login.
+    maxLength: 32
+    type: string
+    x-google-marketplace:
+      type: MASKED_FIELD
+```
 
 ---
 
