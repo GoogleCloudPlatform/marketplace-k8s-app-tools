@@ -297,8 +297,8 @@ different set of properties.
 #### Supported types
 
 - `NAME`: Indicates that the property is the name of the app.
-- `NAMESPACE`: Indicates that the property is the Kubernetes namespace where the
-   app will installed.
+- [`NAMESPACE`](#type-namespace): Indicates that the property is the Kubernetes
+  namespace where the app will installed.
 - `REPORTING_SECRET`: The Secret resource name that contains the credentials
   for usage reports. These credentials are used by the
   [usage-based billing agent](https://github.com/GoogleCloudPlatform/ubbagent).
@@ -320,6 +320,25 @@ different set of properties.
   is enabled on the cluster for the deployment.
 - [`INGRESS_AVAILABLE`](#type-ingress_available): Indicates whether the cluster is detected to have Ingress support.
 - [`TLS_CERTIFICATE`](#type-tls_certificate): To be used to support a custom certificate or generate a self-signed certificate.
+
+---
+
+### type: NAMESPACE
+
+This property is required. It specifies the target namespace where all of application
+resources are installed into.
+
+A `default` value can be specified, in which case the UI will auto-select this
+namespace instead of using the default heuristics of picking or creating a namespace.
+
+```yaml
+properties:
+  namespace:
+    type: string
+    default: desired-fixed-namespace
+    x-google-marketplace:
+      type: NAMESPACE
+```
 
 ---
 
