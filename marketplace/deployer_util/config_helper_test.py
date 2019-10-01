@@ -129,24 +129,13 @@ class ConfigHelperTest(unittest.TestCase):
     schema = config_helper.Schema.load_yaml(SCHEMA)
     self.assertEqual(
         {
-            'propertyString',
-            'propertyStringWithDefault',
-            'propertyInt',
-            'propertyIntWithDefault',
-            'propertyInteger',
-            'propertyIntegerWithDefault',
-            'propertyNumber',
-            'propertyNumberWithDefault',
-            'propertyBoolean',
-            'propertyBooleanWithDefault',
-            'propertyImage',
-            'propertyDeployerImage',
-            'propertyPassword',
-            'applicationUid',
-            'istioEnabled',
-            'ingressAvailable',
-            'certificate',
-            'customSecret',
+            'propertyString', 'propertyStringWithDefault', 'propertyInt',
+            'propertyIntWithDefault', 'propertyInteger',
+            'propertyIntegerWithDefault', 'propertyNumber',
+            'propertyNumberWithDefault', 'propertyBoolean',
+            'propertyBooleanWithDefault', 'propertyImage',
+            'propertyDeployerImage', 'propertyPassword', 'applicationUid',
+            'istioEnabled', 'ingressAvailable', 'certificate', 'customSecret'
         }, set(schema.properties))
     self.assertEqual(str, schema.properties['propertyString'].type)
     self.assertIsNone(schema.properties['propertyString'].default)
