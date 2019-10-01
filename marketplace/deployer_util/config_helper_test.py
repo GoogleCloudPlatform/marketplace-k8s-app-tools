@@ -78,6 +78,12 @@ properties:
         generatedProperties:
           base64EncodedPrivateKey: keyEncoded
           base64EncodedCertificate: crtEncoded
+  customSecret:
+    title: Secret needed by the app.
+    description: User-entered text to be masked in the UI.
+    type: string
+    x-google-marketplace:
+      type: MASKED_FIELD
 required:
 - propertyString
 - propertyPassword
@@ -123,13 +129,24 @@ class ConfigHelperTest(unittest.TestCase):
     schema = config_helper.Schema.load_yaml(SCHEMA)
     self.assertEqual(
         {
-            'propertyString', 'propertyStringWithDefault', 'propertyInt',
-            'propertyIntWithDefault', 'propertyInteger',
-            'propertyIntegerWithDefault', 'propertyNumber',
-            'propertyNumberWithDefault', 'propertyBoolean',
-            'propertyBooleanWithDefault', 'propertyImage',
-            'propertyDeployerImage', 'propertyPassword', 'applicationUid',
-            'istioEnabled', 'ingressAvailable', 'certificate'
+            'propertyString',
+            'propertyStringWithDefault',
+            'propertyInt',
+            'propertyIntWithDefault',
+            'propertyInteger',
+            'propertyIntegerWithDefault',
+            'propertyNumber',
+            'propertyNumberWithDefault',
+            'propertyBoolean',
+            'propertyBooleanWithDefault',
+            'propertyImage',
+            'propertyDeployerImage',
+            'propertyPassword',
+            'applicationUid',
+            'istioEnabled',
+            'ingressAvailable',
+            'certificate',
+            'customSecret',
         }, set(schema.properties))
     self.assertEqual(str, schema.properties['propertyString'].type)
     self.assertIsNone(schema.properties['propertyString'].default)
@@ -173,6 +190,7 @@ class ConfigHelperTest(unittest.TestCase):
                      schema.properties['ingressAvailable'].xtype)
     self.assertEqual(str, schema.properties['certificate'].type)
     self.assertEqual('TLS_CERTIFICATE', schema.properties['certificate'].xtype)
+    self.assertEqual('MASKED_FIELD', schema.properties['customSecret'].xtype)
 
   def test_invalid_names(self):
     self.assertRaises(
