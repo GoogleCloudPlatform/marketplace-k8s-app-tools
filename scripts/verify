@@ -40,6 +40,10 @@ case $i in
     additional_deployer_role="${i#*=}"
     shift
     ;;
+  --image_pull_secret=*)
+    image_pull_secret="${i#*=}"
+    shift
+    ;;
   *)
     echo "Unrecognized flag: $i"
     exit 1
@@ -51,6 +55,79 @@ done
 [[ -z "$parameters" ]] && parameters="{}"
 [[ -z "$wait_timeout" ]] && wait_timeout=600
 
+error_summary_path="$(mktemp)"
+
+function delete_namespace() {
+  if [[ -z "$namespace_deleted" ]]; then
+    echo "INFO Collecting events for namespace \"$NAMESPACE\""
+    kubectl get events --namespace="$NAMESPACE" || echo "ERROR Failed to get events for namespace \"$NAMESPACE\""
+    error_events="$(kubectl get events --namespace="$NAMESPACE" --field-selector="type!=Normal" || echo "ERROR Failed to get events for namespace \"$NAMESPACE\"")"
+
+    if [[ ! -z $deployer_name ]]; then
+      echo "INFO Collecting logs for deployer"
+      deployer_logs="$(kubectl logs "jobs/$deployer_name" --namespace="$NAMESPACE" --tail 9999 || echo "ERROR Failed to get logs for deployer $deployer_name")"
+      echo "$deployer_logs"
+
+      deployer_errors="$(echo "$deployer_logs" | /scripts/filter_deployer_logs.py)"
+    fi
+
+    echo "INFO Deleting namespace \"$NAMESPACE\""
+    kubectl get all --namespace "$NAMESPACE" --output=yaml
+    kubectl delete namespace "$NAMESPACE"
+    namespace_deleted="true"
+  fi
+}
+
+function clean_resources() {
+  if [[ -z "$resources_cleaned" ]]; then
+    echo "INFO cleaning all resources."
+    delete_namespace
+    if [[ ! -z "$deployer_role_name" ]]; then
+      kubectl delete clusterrolebinding "$deployer_role_name"
+    fi
+    resources_cleaned="true"
+  fi
+}
+
+function clean_and_exit() {
+  if [[ -n "$1" ]]; then
+    echo "$1"
+    echo "$1" >> "$error_summary_path"
+  fi
+  clean_resources
+  exit 1
+}
+
+function print_summary() {
+  if [[ -n "$error_events" ]]; then
+    echo >> "$error_summary_path"
+    echo "Error events found in namespace \"$NAMESPACE\"" >> "$error_summary_path"
+    echo "$error_events" >> "$error_summary_path"
+  fi
+
+  if [[ -n "$deployer_errors" ]]; then
+    echo >> "$error_summary_path"
+    echo "Error traces found in deployer" >> "$error_summary_path"
+    echo "$deployer_errors" >> "$error_summary_path"
+  fi
+
+  if [[ -s "$error_summary_path" ]]; then
+    echo "=== ERROR SUMMARY ==="
+    cat "$error_summary_path"
+    echo "====================="
+  fi
+}
+
+# If any command returns with non-zero exit code, set -e will cause the script
+# to exit. Printing the summary prior to exit
+handle_failure() {
+  code=$?
+  clean_resources
+  print_summary
+  exit $code
+}
+trap "handle_failure" EXIT
+
 # Extract schema and values files.
 docker run \
     --entrypoint=/bin/bash \
@@ -61,11 +138,15 @@ echo "$parameters" \
   | json2yaml \
 > /data/values.yaml
 
-# Compose test id.
-test_id="$(cat /dev/urandom \
+function random_string() {
+  cat /dev/urandom \
     | tr -dc 'a-z0-9' \
     | head -c 8 \
-|| true)"
+    || true
+}
+
+# Compose test id.
+test_id="$(random_string)"
 
 # Extract keys for name and namespace.
 name_key="$(extract_schema_key.py \
@@ -80,17 +161,19 @@ export NAMESPACE="apptest-$test_id"
 
 # Stitch in name and namespace parameters.
 parameters=$(echo "$parameters" \
-  | jq \
-    --arg name_key "$name_key" \
-    --arg name "$NAME" \
-    --arg namespace_key "$namespace_key" \
-    --arg namespace "$NAMESPACE" \
-    '.[$name_key] = $name | .[$namespace_key] = $namespace')
+  | jq ".$name_key = \"$NAME\" | .$namespace_key = \"$NAMESPACE\"")
 
 echo "INFO Parameters: $parameters"
 
 echo "INFO Creates namespace \"$NAMESPACE\""
 kubectl create namespace "$NAMESPACE"
+
+if [[ -n "$image_pull_secret" ]]; then
+  echo "Copying secret/$image_pull_secret from namespace/default to namespace/$NAMESPACE."
+  kubectl get secret "$image_pull_secret" --namespace=default --export -o=yaml | kubectl create --namespace="$NAMESPACE" -f -
+  kubectl get secret "$image_pull_secret" --namespace="$NAMESPACE"
+  kubectl patch namespace "$NAMESPACE" -p "{\"metadata\": {\"annotations\": {\"marketplace.cloud.google.com/imagePullSecret\": \"$image_pull_secret\"}}}"
+fi
 
 if [[ "$istio" = "enabled" ]]; then
   echo "INFO Enabling istio in \"$NAMESPACE\" (istio-injection=enabled)."
@@ -99,41 +182,33 @@ if [[ "$istio" = "enabled" ]]; then
   # TODO(#327): Handle multiple ISTIO_ENABLED properties in schema.
   istio_enabled_key="$(extract_schema_key.py \
     --schema_file=/data/schema.yaml \
-    --type ISTIO_ENABLED)" | head -n 1
+    --type=ISTIO_ENABLED \
+    | head -n 1)"
 
   # Stitch in ISTIO_ENABLED parameter if applicable.
-  if [[ ! -z $istio_enabled_key ]]; then
+  if [[ -n $istio_enabled_key ]]; then
     parameters=$(echo "$parameters" \
-      | jq \
-        --arg istio_enabled_key "$istio_enabled_key" \
-        '.[$istio_enabled_key] = true')
+      | jq ".$istio_enabled_key = true")
   fi
 fi
 
-function delete_namespace() {
-  echo "INFO Collecting events for namespace \"$NAMESPACE\""
-  kubectl get events --namespace="$NAMESPACE" || echo "ERROR Failed to get events for namespace \"$NAMESPACE\""
+reporting_secret_key="$(extract_schema_key.py \
+  --schema_file=/data/schema.yaml \
+  --type=REPORTING_SECRET \
+  | head -n 1)"
 
-  if [[ ! -z $deployer_name ]]; then
-    echo "INFO Collecting logs for deployer"
-    kubectl logs "jobs/$deployer_name" --namespace="$NAMESPACE" || echo "ERROR Failed to get logs for deployer $deployer_name"
+# Stitch in fake REPORTING_SECRET parameter if applicable.
+if [[ -n "$reporting_secret_key" ]]; then
+  if [[ "$(echo "$parameters" | jq ".$reporting_secret_key")" == "null" ]]; then
+    reporting_secret_name="fake-reporting-secret-$(random_string)"
+    echo "Creating fake reporting secret $reporting_secret_name"
+    cat "/data/fake-reporting-secret-manifest.yaml" \
+      | env -i "SECRET_NAME=$reporting_secret_name" envsubst \
+      | kubectl apply -f - --namespace="$NAMESPACE"
+    parameters=$(echo "$parameters" \
+      | jq ".$reporting_secret_key = \"$reporting_secret_name\"")
   fi
-
-  echo "INFO Deleting namespace \"$NAMESPACE\""
-  kubectl get all --namespace "$NAMESPACE" --output=yaml
-  kubectl delete namespace "$NAMESPACE"
-}
-
-function clean_and_exit() {
-  message=$1
-  [[ -z "$message" ]] || echo "$message"
-
-  delete_namespace
-  if [[ ! -z "$deployer_role_name" ]]; then
-    kubectl delete clusterrolebinding "$deployer_role_name"
-  fi
-  exit 1
-}
+fi
 
 # Add additional role if deployer needs more privileges.
 if [[ ! -z "$additional_deployer_role" ]]; then
@@ -190,20 +265,23 @@ echo "INFO Wait for the applications to be deleted"
   --namespace="$NAMESPACE" \
   --kind=applications.app.k8s.io \
   --timeout="$deletion_timeout" \
-  || clean_and_exit "ERROR Some applications where not deleted"
+  || clean_and_exit "ERROR Some applications were not deleted"
 
 echo "INFO Wait for standard resources were deleted."
 /scripts/wait_for_deletion.sh \
   --namespace="$NAMESPACE" \
   --kind=all \
   --timeout="$deletion_timeout" \
-  || clean_and_exit "ERROR Some resources where not deleted"
+  || clean_and_exit "ERROR Some resources were not deleted"
 
 echo "INFO Wait for service accounts to be deleted."
 /scripts/wait_for_deletion.sh \
   --namespace="$NAMESPACE" \
   --kind=serviceaccounts,roles,rolebindings \
   --timeout="$deletion_timeout" \
-  || clean_and_exit "ERROR Some service accounts or roles where not deleted"
+  || clean_and_exit "ERROR Some service accounts or roles were not deleted"
 
-delete_namespace
+trap - EXIT
+
+clean_resources
+print_summary

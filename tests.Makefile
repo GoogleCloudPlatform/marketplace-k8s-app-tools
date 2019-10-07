@@ -55,15 +55,15 @@ TEST_ID := $(shell cat /dev/urandom | tr -dc 'a-z0-9' | head -c 8)
 	TEST_ID=$(TEST_ID) \
 	REGISTRY=$(REGISTRY) \
 	MARKETPLACE_TOOLS_TAG=$(MARKETPLACE_TOOLS_TAG) \
-	  ./tests/marketplace/deployer_helm_tiller_base/onbuild/standard_v2/run_test
+		./tests/marketplace/deployer_helm_tiller_base/onbuild/standard_v2/run_test
 	@touch "$@"
 
 
 .PHONY: tests/marketplace/deployer/helm_tiller_onbuild
 tests/marketplace/deployer/helm_tiller_onbuild: \
 		.tests/marketplace/deployer/helm_tiller_onbuild/helm-dependency-build \
-		.tests/marketplace/deployer/helm_tiller_onbuild/standard
-
+		.tests/marketplace/deployer/helm_tiller_onbuild/standard \
+		.tests/marketplace/deployer/helm_tiller_onbuild/standard_v2
 
 .tests/marketplace/deployer/envsubst:
 	mkdir -p "$@"
@@ -81,6 +81,21 @@ tests/marketplace/deployer/helm_tiller_onbuild: \
 	REGISTRY=$(REGISTRY) \
 	MARKETPLACE_TOOLS_TAG=$(MARKETPLACE_TOOLS_TAG) \
 	  ./tests/marketplace/deployer_envsubst_base/standard/run_test
+	@touch "$@"
+
+.tests/marketplace/deployer/envsubst/standard_v2: \
+		.build/marketplace/deployer/envsubst \
+		.build/marketplace/dev \
+		.build/var/MARKETPLACE_TOOLS_TAG \
+		.build/var/REGISTRY \
+		$(shell find tests/marketplace/deployer_envsubst_base/standard_v2 -type f) \
+		tests.Makefile \
+		| .tests/marketplace/deployer/envsubst
+	$(call print_target)
+	TEST_ID=$(TEST_ID) \
+	REGISTRY=$(REGISTRY) \
+	MARKETPLACE_TOOLS_TAG=$(MARKETPLACE_TOOLS_TAG) \
+		./tests/marketplace/deployer_envsubst_base/standard_v2/run_test
 	@touch "$@"
 
 .tests/marketplace/deployer/envsubst/full: \
@@ -101,7 +116,8 @@ tests/marketplace/deployer/helm_tiller_onbuild: \
 .PHONY: tests/marketplace/deployer/envsubst
 tests/marketplace/deployer/envsubst: \
 		.tests/marketplace/deployer/envsubst/full \
-		.tests/marketplace/deployer/envsubst/standard
+		.tests/marketplace/deployer/envsubst/standard \
+		.tests/marketplace/deployer/envsubst/standard_v2
 
 
 .PHONY: tests/integration

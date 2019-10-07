@@ -1,4 +1,3 @@
-# Copyright 2018 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -47,6 +46,9 @@ class ProvisionTest(unittest.TestCase):
     self.assertEqual(text[:-5], expected)
     self.assertRegexpMatches(text[-5:], r'-[a-f0-9]{4}')
 
+  def assertListElementsEqual(self, list1, list2):
+    return self.assertEqual(sorted(list1), sorted(list2))
+
   def test_deployer_image_inject(self):
     schema = config_helper.Schema.load_yaml('''
     properties:
@@ -80,3 +82,298 @@ class ProvisionTest(unittest.TestCase):
           'gcr.io/test/test@sha256:0123456789abcdef')
     with self.assertRaises(Exception):
       provision.deployer_image_to_repo_prefix('gcr.io/test/test:0.1.1')
+
+  def test_make_deployer_rolebindings_no_roles(self):
+    schema = config_helper.Schema.load_yaml("""
+        x-google-marketplace:
+          # v2 required fields
+          schemaVersion: v2
+          applicationApiVersion: v1beta1
+          publishedVersion: 0.0.1
+          publishedVersionMetadata:
+            releaseNote: Initial release
+            recommended: True
+          images: {}
+
+        properties:
+          simple:
+            type: string
+      """)
+    self.assertEquals(
+        [
+            # The default namespace rolebinding should be created
+            {
+                'apiVersion':
+                    'rbac.authorization.k8s.io/v1',
+                'kind':
+                    'RoleBinding',
+                'metadata': {
+                    'name': 'app-name-1:deployer-rb',
+                    'namespace': 'namespace-1',
+                    'labels': {
+                        'some-key': 'some-value'
+                    },
+                },
+                'roleRef': {
+                    'apiGroup': 'rbac.authorization.k8s.io',
+                    # Note: predefined ones are actually cluster roles.
+                    'kind': 'ClusterRole',
+                    'name': 'cluster-admin',
+                },
+                'subjects': [{
+                    'kind': 'ServiceAccount',
+                    'name': 'app-name-deployer-sa',
+                    'namespace': 'namespace-1',
+                }],
+            },
+        ],
+        provision.make_deployer_rolebindings(schema, 'namespace-1',
+                                             'app-name-1',
+                                             {'some-key': 'some-value'},
+                                             'app-name-deployer-sa'))
+
+  def test_make_deployer_rolebindings_all_roles(self):
+    schema = config_helper.Schema.load_yaml("""
+        x-google-marketplace:
+          # v2 required fields
+          schemaVersion: v2
+          applicationApiVersion: v1beta1
+          publishedVersion: 0.0.1
+          publishedVersionMetadata:
+            releaseNote: Initial release
+            recommended: True
+          images: {}
+
+          deployerServiceAccount:
+            roles:
+            - type: Role
+              rulesType: CUSTOM
+              rules:
+              - apiGroups: ['apps/v1']
+                resources: ['Deployment']
+                verbs: ['*']
+            - type: ClusterRole
+              rulesType: CUSTOM
+              rules:
+              - apiGroups: ['v1']
+                resources: ['Secret']
+                verbs: ['*']
+            - type: Role
+              rulesType: PREDEFINED
+              rulesFromRoleName: edit
+            - type: ClusterRole
+              rulesType: PREDEFINED
+              rulesFromRoleName: cluster-admin
+        properties:
+          simple:
+            type: string
+      """)
+    self.assertListElementsEqual(
+        [
+            {
+                'apiVersion':
+                    'rbac.authorization.k8s.io/v1',
+                'kind':
+                    'Role',
+                'metadata': {
+                    'name': 'app-name-1:deployer-r0',
+                    'namespace': 'namespace-1',
+                    'labels': {
+                        'some-key': 'some-value'
+                    },
+                },
+                'rules': [{
+                    'apiGroups': ['apps/v1'],
+                    'resources': ['Deployment'],
+                    'verbs': ['*'],
+                }],
+            },
+            {
+                'apiVersion':
+                    'rbac.authorization.k8s.io/v1',
+                'kind':
+                    'RoleBinding',
+                'metadata': {
+                    'name': 'app-name-1:deployer-rb0',
+                    'namespace': 'namespace-1',
+                    'labels': {
+                        'some-key': 'some-value'
+                    },
+                },
+                'roleRef': {
+                    'apiGroup': 'rbac.authorization.k8s.io',
+                    'kind': 'Role',
+                    'name': 'app-name-1:deployer-r0',
+                },
+                'subjects': [{
+                    'kind': 'ServiceAccount',
+                    'name': 'app-name-deployer-sa',
+                    'namespace': 'namespace-1',
+                }]
+            },
+            {
+                'apiVersion':
+                    'rbac.authorization.k8s.io/v1',
+                'kind':
+                    'ClusterRole',
+                'metadata': {
+                    'name': 'namespace-1:app-name-1:deployer-cr0',
+                    'labels': {
+                        'some-key': 'some-value'
+                    },
+                },
+                'rules': [{
+                    'apiGroups': ['v1'],
+                    'resources': ['Secret'],
+                    'verbs': ['*'],
+                }],
+            },
+            {
+                'apiVersion':
+                    'rbac.authorization.k8s.io/v1',
+                'kind':
+                    'ClusterRoleBinding',
+                'metadata': {
+                    'name': 'namespace-1:app-name-1:deployer-crb0',
+                    'labels': {
+                        'some-key': 'some-value'
+                    },
+                },
+                'roleRef': {
+                    'apiGroup': 'rbac.authorization.k8s.io',
+                    'kind': 'ClusterRole',
+                    'name': 'namespace-1:app-name-1:deployer-cr0',
+                },
+                'subjects': [{
+                    'kind': 'ServiceAccount',
+                    'name': 'app-name-deployer-sa',
+                    'namespace': 'namespace-1',
+                }],
+            },
+            {
+                'apiVersion':
+                    'rbac.authorization.k8s.io/v1',
+                'kind':
+                    'RoleBinding',
+                'metadata': {
+                    'name': 'app-name-1:edit:deployer-rb',
+                    'namespace': 'namespace-1',
+                    'labels': {
+                        'some-key': 'some-value'
+                    },
+                },
+                'roleRef': {
+                    'apiGroup': 'rbac.authorization.k8s.io',
+                    # Note: predefined ones are actually cluster roles.
+                    'kind': 'ClusterRole',
+                    'name': 'edit',
+                },
+                'subjects': [{
+                    'kind': 'ServiceAccount',
+                    'name': 'app-name-deployer-sa',
+                    'namespace': 'namespace-1',
+                }],
+            },
+            {
+                'apiVersion':
+                    'rbac.authorization.k8s.io/v1',
+                'kind':
+                    'ClusterRoleBinding',
+                'metadata': {
+                    'name': 'namespace-1:app-name-1:cluster-admin:deployer-crb',
+                    'labels': {
+                        'some-key': 'some-value'
+                    },
+                },
+                'roleRef': {
+                    'apiGroup': 'rbac.authorization.k8s.io',
+                    'kind': 'ClusterRole',
+                    'name': 'cluster-admin',
+                },
+                'subjects': [{
+                    'kind': 'ServiceAccount',
+                    'name': 'app-name-deployer-sa',
+                    'namespace': 'namespace-1',
+                }],
+            }
+        ],
+        provision.make_deployer_rolebindings(schema, 'namespace-1',
+                                             'app-name-1',
+                                             {'some-key': 'some-value'},
+                                             'app-name-deployer-sa'))
+
+  def test_make_deployer_rolebindings_clusterrole_only(self):
+    schema = config_helper.Schema.load_yaml("""
+        x-google-marketplace:
+          # v2 required fields
+          schemaVersion: v2
+          applicationApiVersion: v1beta1
+          publishedVersion: 0.0.1
+          publishedVersionMetadata:
+            releaseNote: Initial release
+            recommended: True
+          images: {}
+
+          deployerServiceAccount:
+            roles:
+            - type: ClusterRole
+              rulesType: PREDEFINED
+              rulesFromRoleName: cluster-admin
+        properties:
+          simple:
+            type: string
+      """)
+    self.assertListElementsEqual(
+        [
+            # The default namespace rolebinding should also be created
+            {
+                'apiVersion':
+                    'rbac.authorization.k8s.io/v1',
+                'kind':
+                    'RoleBinding',
+                'metadata': {
+                    'name': 'app-name-1:deployer-rb',
+                    'namespace': 'namespace-1',
+                    'labels': {
+                        'some-key': 'some-value'
+                    },
+                },
+                'roleRef': {
+                    'apiGroup': 'rbac.authorization.k8s.io',
+                    # Note: predefined ones are actually cluster roles.
+                    'kind': 'ClusterRole',
+                    'name': 'cluster-admin',
+                },
+                'subjects': [{
+                    'kind': 'ServiceAccount',
+                    'name': 'app-name-deployer-sa',
+                    'namespace': 'namespace-1',
+                }],
+            },
+            {
+                'apiVersion':
+                    'rbac.authorization.k8s.io/v1',
+                'kind':
+                    'ClusterRoleBinding',
+                'metadata': {
+                    'name': 'namespace-1:app-name-1:cluster-admin:deployer-crb',
+                    'labels': {
+                        'some-key': 'some-value'
+                    },
+                },
+                'roleRef': {
+                    'apiGroup': 'rbac.authorization.k8s.io',
+                    'kind': 'ClusterRole',
+                    'name': 'cluster-admin',
+                },
+                'subjects': [{
+                    'kind': 'ServiceAccount',
+                    'name': 'app-name-deployer-sa',
+                    'namespace': 'namespace-1',
+                }],
+            }
+        ],
+        provision.make_deployer_rolebindings(schema, 'namespace-1',
+                                             'app-name-1',
+                                             {'some-key': 'some-value'},
+                                             'app-name-deployer-sa'))

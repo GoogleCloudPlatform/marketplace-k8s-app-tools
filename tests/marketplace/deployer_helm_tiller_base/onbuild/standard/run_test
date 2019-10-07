@@ -22,8 +22,9 @@ docker run \
   > dev
 chmod a+x dev
 
-app_parameters="{}"
+# Runs diagnostic tool to make sure your environment is properly setup.
+./dev doctor
+
 ./dev \
   /scripts/verify \
-      --deployer="$image" \
-      --parameters="$app_parameters"
+      --deployer="$image"

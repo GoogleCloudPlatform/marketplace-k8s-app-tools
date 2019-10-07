@@ -38,6 +38,7 @@ XTYPE_APPLICATION_UID = 'APPLICATION_UID'
 XTYPE_ISTIO_ENABLED = 'ISTIO_ENABLED'
 XTYPE_INGRESS_AVAILABLE = 'INGRESS_AVAILABLE'
 XTYPE_TLS_CERTIFICATE = 'TLS_CERTIFICATE'
+XTYPE_MASKED_FIELD = 'MASKED_FIELD'
 
 WIDGET_TYPES = ['help']
 
@@ -101,8 +102,8 @@ class Schema:
 
   def __init__(self, dictionary):
     self._x_google_marketplace = _maybe_get_and_apply(
-        dictionary,
-        'x-google-marketplace', lambda v: SchemaXGoogleMarketplace(v))
+        dictionary, 'x-google-marketplace',
+        lambda v: SchemaXGoogleMarketplace(v))
 
     self._required = dictionary.get('required', [])
     self._properties = {
@@ -194,6 +195,7 @@ class SchemaXGoogleMarketplace:
     self._published_version_meta = None
     self._images = None
     self._cluster_constraints = None
+    self._deployer_service_account = None
 
     self._schema_version = dictionary.get('schemaVersion', _SCHEMA_VERSION_1)
     if self._schema_version not in _SCHEMA_VERSIONS:
@@ -224,6 +226,10 @@ class SchemaXGoogleMarketplace:
                        'x-google-marketplace.images is required')
     self._images = {k: SchemaImage(k, v) for k, v in images.iteritems()}
 
+    if 'deployerServiceAccount' in dictionary:
+      self._deployer_service_account = SchemaXServiceAccount(
+          dictionary['deployerServiceAccount'])
+
   def validate(self):
     pass
 
@@ -250,6 +256,10 @@ class SchemaXGoogleMarketplace:
   @property
   def managed_updates(self):
     return self._managed_updates
+
+  @property
+  def deployer_service_account(self):
+    return self._deployer_service_account
 
   def is_v2(self):
     return self._schema_version == _SCHEMA_VERSION_2
@@ -511,7 +521,8 @@ class SchemaProperty:
       xt = _must_get(self._x, 'type',
                      'Property {} has {} without a type'.format(name, XGOOGLE))
 
-      if xt in (XTYPE_NAME, XTYPE_NAMESPACE, XTYPE_DEPLOYER_IMAGE):
+      if xt in (XTYPE_NAME, XTYPE_NAMESPACE, XTYPE_DEPLOYER_IMAGE,
+                XTYPE_MASKED_FIELD):
         _property_must_have_type(self, str)
       elif xt in (XTYPE_ISTIO_ENABLED, XTYPE_INGRESS_AVAILABLE):
         _property_must_have_type(self, bool)
@@ -522,7 +533,7 @@ class SchemaProperty:
       elif xt == XTYPE_IMAGE:
         _property_must_have_type(self, str)
         d = self._x.get('image', {})
-        self._image = SchemaXImage(d)
+        self._image = SchemaXImage(d, self._default)
       elif xt == XTYPE_PASSWORD:
         _property_must_have_type(self, str)
         d = self._x.get('generatedPassword', {})
@@ -669,9 +680,18 @@ class SchemaXApplicationUid:
 class SchemaXImage:
   """Accesses IMAGE and DEPLOYER_IMAGE properties."""
 
-  def __init__(self, dictionary):
+  def __init__(self, dictionary, default):
     self._split_by_colon = None
     self._split_to_registry_repo_tag = None
+
+    if not default:
+      raise InvalidSchema('default image value must be specified')
+    if not default.startswith('gcr.io'):
+      raise InvalidSchema(
+          'default image value must state registry: {}'.format(default))
+    if ':' not in default:
+      raise InvalidSchema(
+          'default image value is missing a tag or digest: {}'.format(default))
 
     generated_properties = dictionary.get('generatedProperties', {})
     if 'splitByColon' in generated_properties:

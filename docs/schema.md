@@ -299,7 +299,6 @@ different set of properties.
 - `NAME`: Indicates that the property is the name of the app.
 - `NAMESPACE`: Indicates that the property is the Kubernetes namespace where the
    app will installed.
-- `IMAGE`: Indicates that the property is a link to a Docker image.
 - `REPORTING_SECRET`: The Secret resource name that contains the credentials
   for usage reports. These credentials are used by the
   [usage-based billing agent](https://github.com/GoogleCloudPlatform/ubbagent).
@@ -313,6 +312,7 @@ different set of properties.
   created when users deploy the application.
 - [`STRING`](#type-string): A string that needs special handling, such as a
   string that is base64-encoded.
+- [`IMAGE`](#type-image): Indicates that the property is a link to a Docker image.
 - [`APPLICATION_UID`](#type-application_uid): The UUID of the created
   `Application` object.
 - [`ISTIO_ENABLED`](#type-istio_enabled): Indicates whether [Istio](https://istio.io)
@@ -369,13 +369,13 @@ properties:
           rulesType: CUSTOM        # We specify our own custom RBAC rules
           rules:
           - apiGroups: ['apps.kubernetes.io/v1alpha1']
-            resources: ['Application']
+            resources: ['applications']
             verbs: ['*']
         - type: ClusterRole
           rulesType: CUSTOM
           rules:
           - apiGroups: ['etcd.database.coreos.com/v1beta2']
-            resources: ['EtcdCluster']
+            resources: ['etcdclusters']
             verbs: ['*']
 ```
 
@@ -425,6 +425,17 @@ properties:
 
 In the example above, manifests can reference the password as
 `explicitPassword`, and its base64Encoded value as `explicitPasswordEncoded`.
+
+---
+
+### type: IMAGE
+
+Define an `IMAGE` type property for each image used by the application,
+other than the deployer image itself. Set the default property value to the
+image in your staging GCR repository. This property indicates which images should
+be published as a part of your application, and ensures that the
+correct published images are used when users deploy the app from the
+GCP Marketplace UI.
 
 ---
 
@@ -644,3 +655,4 @@ indicates whether Istio is enabled on the cluster.
 - `OPTIONAL`: The app works with Istio but does not require it.
 - `REQUIRED`: The app requires Istio to work properly.
 - `UNSUPPORTED`: The app does not support Istio.
+

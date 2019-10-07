@@ -46,7 +46,7 @@ properties:
     default: false
   propertyImage:
     type: string
-    default: gcr.io/google/busybox
+    default: gcr.io/google/busybox:1.0
     x-google-marketplace:
       type: IMAGE
   propertyDeployerImage:
@@ -78,6 +78,12 @@ properties:
         generatedProperties:
           base64EncodedPrivateKey: keyEncoded
           base64EncodedCertificate: crtEncoded
+  customSecret:
+    title: Secret needed by the app.
+    description: User-entered text to be masked in the UI.
+    type: string
+    x-google-marketplace:
+      type: MASKED_FIELD
 required:
 - propertyString
 - propertyPassword
@@ -129,7 +135,7 @@ class ConfigHelperTest(unittest.TestCase):
             'propertyNumberWithDefault', 'propertyBoolean',
             'propertyBooleanWithDefault', 'propertyImage',
             'propertyDeployerImage', 'propertyPassword', 'applicationUid',
-            'istioEnabled', 'ingressAvailable', 'certificate'
+            'istioEnabled', 'ingressAvailable', 'certificate', 'customSecret'
         }, set(schema.properties))
     self.assertEqual(str, schema.properties['propertyString'].type)
     self.assertIsNone(schema.properties['propertyString'].default)
@@ -155,7 +161,7 @@ class ConfigHelperTest(unittest.TestCase):
     self.assertEqual(False,
                      schema.properties['propertyBooleanWithDefault'].default)
     self.assertEqual(str, schema.properties['propertyImage'].type)
-    self.assertEqual('gcr.io/google/busybox',
+    self.assertEqual('gcr.io/google/busybox:1.0',
                      schema.properties['propertyImage'].default)
     self.assertEqual('IMAGE', schema.properties['propertyImage'].xtype)
     self.assertEqual('DEPLOYER_IMAGE',
@@ -173,6 +179,7 @@ class ConfigHelperTest(unittest.TestCase):
                      schema.properties['ingressAvailable'].xtype)
     self.assertEqual(str, schema.properties['certificate'].type)
     self.assertEqual('TLS_CERTIFICATE', schema.properties['certificate'].xtype)
+    self.assertEqual('MASKED_FIELD', schema.properties['customSecret'].xtype)
 
   def test_invalid_names(self):
     self.assertRaises(
@@ -191,8 +198,8 @@ class ConfigHelperTest(unittest.TestCase):
 
   def test_invalid_property_types(self):
     self.assertRaisesRegexp(
-        config_helper.InvalidSchema,
-        r'.*must be of type string$', lambda: config_helper.Schema.load_yaml("""
+        config_helper.InvalidSchema, r'.*must be of type string$',
+        lambda: config_helper.Schema.load_yaml("""
             properties:
               u:
                 type: integer
@@ -200,8 +207,8 @@ class ConfigHelperTest(unittest.TestCase):
                   type: NAME
             """))
     self.assertRaisesRegexp(
-        config_helper.InvalidSchema,
-        r'.*must be of type string$', lambda: config_helper.Schema.load_yaml("""
+        config_helper.InvalidSchema, r'.*must be of type string$',
+        lambda: config_helper.Schema.load_yaml("""
             properties:
               u:
                 type: number
@@ -209,8 +216,8 @@ class ConfigHelperTest(unittest.TestCase):
                   type: NAMESPACE
             """))
     self.assertRaisesRegexp(
-        config_helper.InvalidSchema,
-        r'.*must be of type string$', lambda: config_helper.Schema.load_yaml("""
+        config_helper.InvalidSchema, r'.*must be of type string$',
+        lambda: config_helper.Schema.load_yaml("""
             properties:
               u:
                 type: int
@@ -218,8 +225,8 @@ class ConfigHelperTest(unittest.TestCase):
                   type: DEPLOYER_IMAGE
             """))
     self.assertRaisesRegexp(
-        config_helper.InvalidSchema,
-        r'.*must be of type string$', lambda: config_helper.Schema.load_yaml("""
+        config_helper.InvalidSchema, r'.*must be of type string$',
+        lambda: config_helper.Schema.load_yaml("""
             properties:
               u:
                 type: boolean
@@ -227,8 +234,8 @@ class ConfigHelperTest(unittest.TestCase):
                   type: APPLICATION_UID
             """))
     self.assertRaisesRegexp(
-        config_helper.InvalidSchema, r'.*must be of type boolean$', lambda:
-        config_helper.Schema.load_yaml("""
+        config_helper.InvalidSchema, r'.*must be of type boolean$',
+        lambda: config_helper.Schema.load_yaml("""
             properties:
               u:
                 type: string
@@ -236,8 +243,8 @@ class ConfigHelperTest(unittest.TestCase):
                   type: ISTIO_ENABLED
             """))
     self.assertRaisesRegexp(
-        config_helper.InvalidSchema, r'.*must be of type boolean$', lambda:
-        config_helper.Schema.load_yaml("""
+        config_helper.InvalidSchema, r'.*must be of type boolean$',
+        lambda: config_helper.Schema.load_yaml("""
             properties:
               u:
                 type: string
@@ -313,11 +320,49 @@ class ConfigHelperTest(unittest.TestCase):
     self.assertEqual('application.create',
                      schema.properties['u'].application_uid.application_create)
 
+  def test_image_default_missing(self):
+    self.assertRaisesRegexp(
+        config_helper.InvalidSchema, r'.*default image value must be specified',
+        lambda: config_helper.Schema.load_yaml("""
+        properties:
+          i:
+            type: string
+            x-google-marketplace:
+              type: IMAGE
+        """))
+
+  def test_image_default_missing_repo(self):
+    self.assertRaisesRegexp(
+        config_helper.InvalidSchema,
+        r'.*default image value must state registry',
+        lambda: config_helper.Schema.load_yaml("""
+        properties:
+          i:
+            type: string
+            default: $REGISTRY/some-repo:some-tag
+            x-google-marketplace:
+              type: IMAGE
+        """))
+
+  def test_image_default_missing_tag_or_digest(self):
+    self.assertRaisesRegexp(
+        config_helper.InvalidSchema,
+        r'.*default image value is missing a tag or digest',
+        lambda: config_helper.Schema.load_yaml("""
+        properties:
+          i:
+            type: string
+            default: gcr.io/some-repo
+            x-google-marketplace:
+              type: IMAGE
+        """))
+
   def test_image_type(self):
     schema = config_helper.Schema.load_yaml("""
         properties:
           i:
             type: string
+            default: gcr.io/some-repo:some-tag
             x-google-marketplace:
               type: IMAGE
         """)
@@ -330,6 +375,7 @@ class ConfigHelperTest(unittest.TestCase):
         properties:
           i:
             type: string
+            default: gcr.io/some-repo:some-tag
             x-google-marketplace:
               type: IMAGE
               image:
@@ -347,6 +393,7 @@ class ConfigHelperTest(unittest.TestCase):
         properties:
           i:
             type: string
+            default: gcr.io/some-repo:some-tag
             x-google-marketplace:
               type: IMAGE
               image:
@@ -365,6 +412,7 @@ class ConfigHelperTest(unittest.TestCase):
         properties:
           di:
             type: string
+            default: gcr.io/some-repo:some-tag
             x-google-marketplace:
               type: DEPLOYER_IMAGE
         """)
@@ -461,8 +509,8 @@ class ConfigHelperTest(unittest.TestCase):
     self.assertEqual(False, schema.properties['pb'].str_to_type('False'))
     self.assertEqual(False, schema.properties['pb'].str_to_type('no'))
     self.assertEqual(False, schema.properties['pb'].str_to_type('No'))
-    self.assertRaises(config_helper.InvalidValue, lambda: schema.properties[
-        'pb'].str_to_type('bad'))
+    self.assertRaises(config_helper.InvalidValue,
+                      lambda: schema.properties['pb'].str_to_type('bad'))
 
   def test_invalid_default_type(self):
     self.assertRaises(
@@ -779,6 +827,89 @@ class ConfigHelperTest(unittest.TestCase):
                 type: INVALID_TYPE
           """)
 
+  def test_deployer_service_account(self):
+    schema = config_helper.Schema.load_yaml("""
+        x-google-marketplace:
+          # v2 required fields
+          schemaVersion: v2
+          applicationApiVersion: v1beta1
+          publishedVersion: 6.5.130
+          publishedVersionMetadata:
+            releaseNote: Bug fixes
+            releaseTypes:
+            - BUG_FIX
+          images:
+            main:
+              properties:
+                main.image:
+                  type: FULL
+
+          deployerServiceAccount:
+            roles:
+            - type: ClusterRole
+              rulesType: PREDEFINED
+              rulesFromRoleName: cluster-admin
+            - type: ClusterRole
+              rulesType: PREDEFINED
+              rulesFromRoleName: admin
+            - type: Role
+              rulesType: PREDEFINED
+              rulesFromRoleName: edit
+            - type: Role
+              rulesType: PREDEFINED
+              rulesFromRoleName: view
+            - type: ClusterRole
+              rulesType: CUSTOM
+              rules:
+              - apiGroups: ['v1']
+                resources: ['Secret']
+                verbs: ['*']
+              - apiGroups: ['v1']
+                resources: ['ConfigMap']
+                verbs: ['*']
+            - type: Role
+              rulesType: CUSTOM
+              rules:
+              - apiGroups: ['apps/v1']
+                resources: ['Deployment']
+                verbs: ['*']
+              - apiGroups: ['apps/v1']
+                resources: ['StatefulSet']
+                verbs: ['*']
+        properties:
+          simple:
+            type: string
+      """)
+    dsa = schema.x_google_marketplace.deployer_service_account
+    self.assertIsNotNone(dsa)
+    self.assertListEqual(['cluster-admin', 'admin'],
+                         dsa.predefined_cluster_roles())
+    self.assertListEqual(['edit', 'view'], dsa.predefined_roles())
+    self.assertListEqual([[
+        {
+            'apiGroups': ['v1'],
+            'resources': ['Secret'],
+            'verbs': ['*']
+        },
+        {
+            'apiGroups': ['v1'],
+            'resources': ['ConfigMap'],
+            'verbs': ['*']
+        },
+    ]], dsa.custom_cluster_role_rules())
+    self.assertListEqual([[
+        {
+            'apiGroups': ['apps/v1'],
+            'resources': ['Deployment'],
+            'verbs': ['*']
+        },
+        {
+            'apiGroups': ['apps/v1'],
+            'resources': ['StatefulSet'],
+            'verbs': ['*']
+        },
+    ]], dsa.custom_role_rules())
+
   def test_validate_good(self):
     schema = config_helper.Schema.load_yaml("""
         applicationApiVersion: v1beta1
@@ -809,8 +940,8 @@ class ConfigHelperTest(unittest.TestCase):
 
   def test_validate_missing_app_api_version(self):
     self.assertRaisesRegexp(
-        config_helper.InvalidSchema,
-        'applicationApiVersion', lambda: config_helper.Schema.load_yaml("""
+        config_helper.InvalidSchema, 'applicationApiVersion',
+        lambda: config_helper.Schema.load_yaml("""
             properties:
               simple:
                 type: string
@@ -818,8 +949,8 @@ class ConfigHelperTest(unittest.TestCase):
 
   def test_validate_bad_form_too_many_items(self):
     self.assertRaisesRegexp(
-        config_helper.InvalidSchema,
-        'form', lambda: config_helper.Schema.load_yaml("""
+        config_helper.InvalidSchema, 'form',
+        lambda: config_helper.Schema.load_yaml("""
             applicationApiVersion: v1beta1
             form:
             - widget: help
@@ -830,8 +961,8 @@ class ConfigHelperTest(unittest.TestCase):
 
   def test_validate_bad_form_missing_type(self):
     self.assertRaisesRegexp(
-        config_helper.InvalidSchema,
-        'form', lambda: config_helper.Schema.load_yaml("""
+        config_helper.InvalidSchema, 'form',
+        lambda: config_helper.Schema.load_yaml("""
             applicationApiVersion: v1beta1
             form:
             - description: My arbitrary <i>description</i>
@@ -839,8 +970,8 @@ class ConfigHelperTest(unittest.TestCase):
 
   def test_validate_bad_form_unrecognized_type(self):
     self.assertRaisesRegexp(
-        config_helper.InvalidSchema,
-        'form', lambda: config_helper.Schema.load_yaml("""
+        config_helper.InvalidSchema, 'form',
+        lambda: config_helper.Schema.load_yaml("""
             applicationApiVersion: v1beta1
             form:
             - widget: magical
@@ -849,8 +980,8 @@ class ConfigHelperTest(unittest.TestCase):
 
   def test_validate_bad_form_missing_description(self):
     self.assertRaisesRegexp(
-        config_helper.InvalidSchema,
-        'form', lambda: config_helper.Schema.load_yaml("""
+        config_helper.InvalidSchema, 'form',
+        lambda: config_helper.Schema.load_yaml("""
             applicationApiVersion: v1beta1
             form:
             - widget: help

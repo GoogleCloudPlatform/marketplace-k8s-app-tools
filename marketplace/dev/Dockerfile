@@ -17,9 +17,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         wget \
      && rm -rf /var/lib/apt/lists/*
 
-RUN pip install wheel \
-    && pip install google-cloud-storage
-
 RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add - && \
     apt-key fingerprint 0EBFCD88 && \
     add-apt-repository \
@@ -42,6 +39,7 @@ RUN gcloud auth configure-docker
 COPY marketplace/deployer_util/* /bin/
 COPY scripts/* /scripts/
 COPY marketplace/dev/bin/* /bin/
+COPY marketplace/dev/fake-reporting-secret-manifest.yaml /data/fake-reporting-secret-manifest.yaml 
 RUN mv /scripts/doctor.py /scripts/doctor
 ENV PATH="/scripts:${PATH}"
 
