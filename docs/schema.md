@@ -154,8 +154,8 @@ Note that:
     properties:
       mysql.image:
         type: string
-...
-```
+    ...
+    ```
 
 ## Referencing values in an `envsubst`-based deployer
 
