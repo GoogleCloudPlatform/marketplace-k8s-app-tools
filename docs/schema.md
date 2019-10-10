@@ -629,7 +629,7 @@ x-google-marketplace:
 ```
 
 You can also define restrictions for the version of the cluster. For example, if the application
-requires that the cluster runs k8s version greater or equals to 1.13.7, use:
+requires that the cluster runs k8s version greater than or equal to 1.13.7, use:
 
 ```yaml
 x-google-marketplace:
