@@ -628,6 +628,18 @@ x-google-marketplace:
           minimumNodeCount: 3
 ```
 
+You can also define restrictions for the version of the cluster. For example, if the application
+requires that the cluster runs k8s version greater or equals to 1.13.7, use:
+
+```yaml
+x-google-marketplace:
+  clusterConstraints:
+    k8sVersion: >=1.13.7
+```
+
+Any semver pattern is accepted, however it is recommended that the constraints are kept to a 
+minimum, so the application is deployable over a wider range of clusters.
+
 ---
 
 ### istio
