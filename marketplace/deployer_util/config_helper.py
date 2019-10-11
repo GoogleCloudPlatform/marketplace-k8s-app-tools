@@ -38,6 +38,7 @@ XTYPE_APPLICATION_UID = 'APPLICATION_UID'
 XTYPE_ISTIO_ENABLED = 'ISTIO_ENABLED'
 XTYPE_INGRESS_AVAILABLE = 'INGRESS_AVAILABLE'
 XTYPE_TLS_CERTIFICATE = 'TLS_CERTIFICATE'
+XTYPE_MASKED_FIELD = 'MASKED_FIELD'
 
 WIDGET_TYPES = ['help']
 
@@ -520,7 +521,8 @@ class SchemaProperty:
       xt = _must_get(self._x, 'type',
                      'Property {} has {} without a type'.format(name, XGOOGLE))
 
-      if xt in (XTYPE_NAME, XTYPE_NAMESPACE, XTYPE_DEPLOYER_IMAGE):
+      if xt in (XTYPE_NAME, XTYPE_NAMESPACE, XTYPE_DEPLOYER_IMAGE,
+                XTYPE_MASKED_FIELD):
         _property_must_have_type(self, str)
       elif xt in (XTYPE_ISTIO_ENABLED, XTYPE_INGRESS_AVAILABLE):
         _property_must_have_type(self, bool)
