@@ -1,4 +1,9 @@
-# Managed Updates (Alpha)
+# Managed Updates
+
+****** OBSOLETE ******
+
+Managed updates are 
+
 
 ## Overview
 

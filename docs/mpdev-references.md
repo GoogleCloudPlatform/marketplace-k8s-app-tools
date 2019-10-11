@@ -113,3 +113,19 @@ properties:
 ```
 
 Properties in `/data-test/schema.yaml` will overlay properties in `/data/schema.yaml`. This can also be used overwrite existing default values for verification.
+
+### Publish a release's metadata
+
+If you want to support managed updates (beta) for your application, use the
+`mpdev publish` command to publish information about the release to your
+Cloud Storage bucket.
+
+Upload your container images to your Container Registry repository. Then, run
+this command to publish the information for the release:
+
+```sh
+mpdev publish \
+  --deployer_image=gcr.io/your-project/your-company/your-app/deployer:[VERSION] \
+  --gcs_repo=gs://your-bucket/your-company/your-app/[TRACK]
+
+```

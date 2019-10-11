@@ -289,6 +289,116 @@ you must also specify a `type`, described in
 Use the following types to indicate how the properties in your schema are
 treated by GCP Marketplace.
 
+### `schemaVersion`
+
+The version of the schema. If you want to
+[support managed updates for your app](https://cloud.google.com/marketplace/docs/partners/kubernetes-solutions/support-managed-updates), the value must be `v2`.
+
+### (Required) `applicationApiVersion`
+
+The version of the Application Custom Resource object. As of November 2019,
+the version is `v1beta1`.
+
+### (Required) `publishedVersion`
+
+The release version for the application, as a string. This must match the
+release tag on all your application images. For example, `'1.0.5'`.
+
+### `publishedVersionMetadata`
+
+Information about the version, shown to users in the GCP Console when they
+view their Kubernetes workloads.
+
+#### `releaseNote`
+
+Information about the release, using the
+[YAML folding style, with a block chomping indicator](https://yaml-multiline.info).
+For example:
+
+```yaml
+releaseNote: >-
+  Bug fixes and performance enhancements.
+```
+
+#### (Optional) `releaseTypes`
+
+A list of release types, which can be one or more of the following:
+
+- `Feature`
+- `BugFix`
+- `Security`. We recommend using `Security` only if the update addresses a
+  critical security issue. In the GCP Console, security updates are displayed
+  more prominently than other types of updates.
+
+#### `recommended`
+
+A boolean that indicates whether the update is recommended, such as for a
+security update. If `true`, users are encouraged to update as soon as possible.
+
+### `managedUpdates`
+
+Use this section to indicate that your deployer supports managed updates. If
+you omit this section, users must manually update their installations.
+
+#### `kalmSupported`
+
+If you want to support managed updates for your app, set this to `true`.
+
+### `images`
+
+New for schema v2. Declare the images for your application in this section.
+
+In the following, the following images are declared, in addition to the
+deployer:
+
+`gcr.io/your-project/your-company/your-app:1.0.1`
+`gcr.io/your-project/your-company/your-app/init:1.0.1`
+
+The images can be passed as parameters or values to your template or charts
+(as applicable) using the `properties` section. The `init` image is passed
+to the template under these different parameteres or values:
+
+- `imageInitFull=gcr.io/your-project/your-company/your-app:1.0.1`
+- `imageInitRegistry=gcr.io`
+- `imageInitRepo=your-project/your-company/your-app`
+- `imageInitTag=1.0.1`
+T
+he primary image above is passed under 2 different parameters/values:
+
+- `imageRepo=gcr.io/your-project/your-company/your-app`
+- `imageTag=1.0.1`
+
+Note that when users deploy your app from GCP Marketplace, the final image
+names are different, but follow the same release tag and name prefix rule. For
+example, the published images could be under:
+
+- `marketplace.gcr.io/your-company/your-app:1.0.1`
+- `marketplace.gcr.io/your-company/your-app/deployer:1.0.1`
+- `marketplace.gcr.io/your-company/your-app/init:1.0.1`
+
+
+Example `images` section:
+
+```yaml
+  images:
+    '':  # Primary image has no name and is required.
+      properties:
+        imageRepo:
+          type: REPO_WITH_REGISTRY
+        imageTag:
+          type: TAG
+    init:
+      properties:
+        imageInitFull:
+          type: FULL
+        imageInitRegistry:
+          type: REGISTRY
+        imageInitRepo:
+          type: REPO_WITHOUT_REGISTRY
+        imageInitTag:
+          type: TAG
+```
+
 ### `type`
 
 Defines how the property must be handled by GCP Marketplace. Each type has a
@@ -312,7 +422,7 @@ different set of properties.
   created when users deploy the application.
 - [`STRING`](#type-string): A string that needs special handling, such as a
   string that is base64-encoded.
-- [`IMAGE`](#type-image): Indicates that the property is a link to a Docker image.
+- [`IMAGE`](#type-image): Indicates that the property is a link to a Docker image. **Schema v1 only. If you want to support managed updates for your app, use [`images`](#images) instead.**
 - [`APPLICATION_UID`](#type-application_uid): The UUID of the created
   `Application` object.
 - [`ISTIO_ENABLED`](#type-istio_enabled): Indicates whether [Istio](https://istio.io)
@@ -429,6 +539,8 @@ In the example above, manifests can reference the password as
 ---
 
 ### type: IMAGE
+
+**No longer used in schema v2. If you want to support managed updates for your application, use [`x-google-marketplace.images`](#images).**
 
 Define an `IMAGE` type property for each image used by the application,
 other than the deployer image itself. Set the default property value to the
