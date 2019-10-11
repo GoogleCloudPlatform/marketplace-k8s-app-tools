@@ -302,6 +302,7 @@ different set of properties.
 - `REPORTING_SECRET`: The Secret resource name that contains the credentials
   for usage reports. These credentials are used by the
   [usage-based billing agent](https://github.com/GoogleCloudPlatform/ubbagent).
+- `MASKED_FIELD`: A string value whose characters will be masked when entered in the UI.
 - [`GENERATED_PASSWORD`](#type-generated_password): Indicates that the property
   is a value to be generated when the application is deployed.
 - [`SERVICE_ACCOUNT`](#type-service_account): The name of a pre-provisioned
@@ -320,6 +321,24 @@ different set of properties.
 - [`INGRESS_AVAILABLE`](#type-ingress_available): Indicates whether the cluster is detected to have Ingress support.
 - [`TLS_CERTIFICATE`](#type-tls_certificate): To be used to support a custom certificate or generate a self-signed certificate.
 
+---
+
+### type: MASKED_FIELD
+
+Properties of this type will have their user-entered value masked by default in the UI, offering the user the option to reveal the value as plain text. 
+
+Example:
+
+```yaml
+properties:
+  customSecret:
+    title: User-specified password
+    description: The password to be used for login.
+    maxLength: 32
+    type: string
+    x-google-marketplace:
+      type: MASKED_FIELD
+```
 ---
 
 ### type: GENERATED_PASSWORD
@@ -655,4 +674,3 @@ indicates whether Istio is enabled on the cluster.
 - `OPTIONAL`: The app works with Istio but does not require it.
 - `REQUIRED`: The app requires Istio to work properly.
 - `UNSUPPORTED`: The app does not support Istio.
-
