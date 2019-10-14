@@ -29,7 +29,7 @@ if [[ -e "${GCLOUD_CONFIG}" ]]; then
   # Note: readlink -f doesn't work on non-GNU so we would fallback to python in that case.
   canonical_gcloud_config="$( \
     readlink -f "${GCLOUD_CONFIG}" 2> /dev/null \
-    || python -c 'import os,sys;print(os.path.realpath(sys.argv[1]))' "${GCLOUD_CONFIG}" \
+    || python3 -c 'import os,sys;print(os.path.realpath(sys.argv[1]))' "${GCLOUD_CONFIG}" \
   )"
   gcloud_original_path=(--env "GCLOUD_ORIGINAL_PATH=${canonical_gcloud_config}")
 fi
