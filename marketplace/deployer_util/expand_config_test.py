@@ -219,10 +219,10 @@ class ExpandConfigTest(unittest.TestCase):
         """)
     result = expand_config.expand({}, schema)
 
-    cert_json = json.loads(result['c1'])
     self.assertIsNotNone(result['c1'])
-    self.assertEqual(result['c1.Base64Key'], cert_json['private_key'])
-    self.assertEqual(result['c1.Base64Crt'], cert_json['certificate'])
+    cert_json = json.loads(result['c1'])
+    self.assertEqual(result['c1.Base64Key'], base64.b64encode(cert_json['private_key'].encode('ascii')).decode('ascii'))
+    self.assertEqual(result['c1.Base64Crt'], base64.b64encode(cert_json['certificate'].encode('ascii')).decode('ascii'))
 
     key = OpenSSL.crypto.load_privatekey(
         OpenSSL.crypto.FILETYPE_PEM, base64.b64decode(result['c1.Base64Key']))
@@ -269,8 +269,8 @@ class ExpandConfigTest(unittest.TestCase):
     self.assertEqual(
         {
             'c1': '{"private_key": "key", "certificate": "vrt"}',
-            'c1.Base64Key': 'key',
-            'c1.Base64Crt': 'vrt',
+            'c1.Base64Key': 'a2V5',
+            'c1.Base64Crt': 'dnJ0',
         }, result)
 
   def test_generate_password(self):
