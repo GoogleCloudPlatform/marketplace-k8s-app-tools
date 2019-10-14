@@ -9,10 +9,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     jq \
     procps \
     python \
-    python-openssl \
-    python-pip \
-    python-setuptools \
-    python-yaml \
+    python3-openssl \
+    python3-pip \
+    python3-setuptools \
+    python3-yaml \
     wget \
     && rm -rf /var/lib/apt/lists/*
 
