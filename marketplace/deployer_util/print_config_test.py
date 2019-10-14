@@ -35,7 +35,7 @@ class PrintConfigTest(unittest.TestCase):
       f.write("""
               propertyInt: 3
               propertyString: abc
-              """.encode('utf_8'))
+              """)
       f.flush()
 
       values = config_helper.load_values(f.name, '/non/existence/dir', schema)
@@ -61,8 +61,8 @@ class PrintConfigTest(unittest.TestCase):
         'dotted.dotted.dotted.propertyString': 'triple_nested',
     }
     actual = print_config.output_yaml(values)
-    self.assertEquals(
-        yaml.load(actual), {
+    self.assertEqual(
+        yaml.full_load(actual), {
             'propertyInt': 1,
             'propertyString': 'unnested',
             'dotted': {

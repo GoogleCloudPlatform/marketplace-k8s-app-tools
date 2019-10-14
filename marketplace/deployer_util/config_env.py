@@ -35,7 +35,7 @@ def main():
 
   values = schema_values_common.load_values(args)
   # Convert values to strings to pass to subprocess.
-  values = {k: str(v) for k, v in values.iteritems()}
+  values = {k: str(v) for k, v in values.items()}
 
   # Default env vars should NOT be passed on to the new environment.
   default_vars = [

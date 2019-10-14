@@ -107,7 +107,7 @@ def process(schema, values, deployer_image, deployer_entrypoint, version_repo,
       props[prop.name] = property_generator.generate_tls_certificate()
 
   # Merge input and provisioned properties.
-  app_params = dict(list(values.iteritems()) + list(props.iteritems()))
+  app_params = dict(list(values.items()) + list(props.items()))
 
   use_kalm = False
   if (schema.is_v2() and
@@ -511,7 +511,7 @@ def make_v1_config(schema, namespace, app_name, labels, app_params):
           'namespace': namespace,
           'labels': labels,
       },
-      'data': {k: str(v) for k, v in app_params.iteritems()},
+      'data': {k: str(v) for k, v in app_params.items()},
   }
 
 
@@ -533,7 +533,7 @@ def make_v2_config(schema, deployer_image, namespace, app_name, labels,
 
 
 def make_app_params_yaml(app_params, deployer_image):
-  final_app_params = {k: v for k, v in app_params.iteritems()}
+  final_app_params = {k: v for k, v in app_params.items()}
   final_app_params['__image_repo_prefix__'] = deployer_image_to_repo_prefix(
       deployer_image)
   return yaml.safe_dump(final_app_params, default_flow_style=False, indent=2)
@@ -713,7 +713,7 @@ def limit_name(name, length=127):
     result = result[:length - 5]
     # Hash and get the first 4 characters of the hash.
     m = hashlib.sha256()
-    m.update(name)
+    m.update(name.encode('utf_8'))
     h4sh = m.hexdigest()[:4]
     result = '{}-{}'.format(result, h4sh)
   return result

@@ -68,8 +68,9 @@ def expand(values_dict, schema, app_uid=''):
   """Returns the expanded values according to schema."""
   schema.validate()
 
-  valid_property_names = set(schema.properties.keys() +
-                             [_IMAGE_REPO_PREFIX_PROPERTY_NAME])
+  valid_property_names = set(schema.properties.keys())
+  valid_property_names.add(_IMAGE_REPO_PREFIX_PROPERTY_NAME)
+
   for k in values_dict:
     if k not in valid_property_names:
       raise InvalidProperty('No such property defined in schema: {}'.format(k))
@@ -89,7 +90,7 @@ def expand(values_dict, schema, app_uid=''):
     generate_v2_image_properties(schema, values_dict, generated)
 
   # Copy explicitly specified values and generate values into result.
-  for k, prop in schema.properties.iteritems():
+  for k, prop in schema.properties.items():
     v = values_dict.get(k, None)
 
     # The value is not explicitly specified and
@@ -139,7 +140,7 @@ def expand(values_dict, schema, app_uid=''):
   validate_required_props(result, schema)
 
   # Copy generated properties into result, validating no collisions.
-  for k, v in generated.iteritems():
+  for k, v in generated.items():
     if k in result:
       raise InvalidProperty(
           'The property is to be generated, but already has a value: {}'.format(
@@ -156,7 +157,7 @@ def validate_required_props(values, schema):
 
 
 def validate_value_types(values, schema):
-  for k, v in values.iteritems():
+  for k, v in values.items():
     prop = schema.properties[k]
     if not isinstance(v, prop.type):
       raise InvalidProperty(
@@ -191,8 +192,8 @@ def generate_v1_properties_for_image(prop, value, result):
     before_value, after_value = parts
     result[before_name] = before_value
     result[after_name] = after_value
-  if prop.image._split_to_registry_repo_tag:
-    reg_name, repo_name, tag_name = prop.image._split_to_registry_repo_tag
+  if prop.image.split_to_registry_repo_tag:
+    reg_name, repo_name, tag_name = prop.image.split_to_registry_repo_tag
     parts = value.split(':', 1)
     if len(parts) != 2:
       raise InvalidProperty(
@@ -243,17 +244,15 @@ def generate_v2_image_properties(schema, values_dict, result):
 
 def generate_properties_for_string(prop, value, result):
   if prop.string.base64_encoded:
-    result[prop.string.base64_encoded] = base64.b64encode(value)
+    result[prop.string.base64_encoded] = base64.b64encode(value.encode('ascii'))
 
 
 def generate_properties_for_tls_certificate(prop, value, result):
   certificate = json.loads(value)
   if prop.tls_certificate.base64_encoded_private_key:
-    result[prop.tls_certificate.base64_encoded_private_key] = base64.b64encode(
-        certificate['private_key'])
+    result[prop.tls_certificate.base64_encoded_private_key] = certificate['private_key']
   if prop.tls_certificate.base64_encoded_certificate:
-    result[prop.tls_certificate.base64_encoded_certificate] = base64.b64encode(
-        certificate['certificate'])
+    result[prop.tls_certificate.base64_encoded_certificate] = certificate['certificate']
 
 
 def write_values(values, values_file):

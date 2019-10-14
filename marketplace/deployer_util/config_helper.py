@@ -82,7 +82,7 @@ def _read_values_to_dict(values_dir, schema):
   # Data read in as strings. Convert them to proper types defined in schema.
   result = {
       k: schema.properties[k].str_to_type(v) if k in schema.properties else v
-      for k, v in result.iteritems()
+      for k, v in result.items()
   }
   return result
 
@@ -93,12 +93,12 @@ class Schema:
   @staticmethod
   def load_yaml_file(filepath):
     with io.open(filepath, 'r') as f:
-      d = yaml.load(f)
+      d = yaml.full_load(f)
       return Schema(d)
 
   @staticmethod
   def load_yaml(yaml_str):
-    return Schema(yaml.load(yaml_str))
+    return Schema(yaml.full_load(yaml_str))
 
   def __init__(self, dictionary):
     self._x_google_marketplace = _maybe_get_and_apply(
@@ -108,7 +108,7 @@ class Schema:
     self._required = dictionary.get('required', [])
     self._properties = {
         k: SchemaProperty(k, v, k in self._required)
-        for k, v in dictionary.get('properties', {}).iteritems()
+        for k, v in dictionary.get('properties', {}).items()
     }
 
     self._app_api_version = dictionary.get(
@@ -171,7 +171,7 @@ class Schema:
 
   def properties_matching(self, definition):
     return [
-        v for k, v in self._properties.iteritems()
+        v for k, v in self._properties.items()
         if v.matches_definition(definition)
     ]
 
@@ -224,7 +224,7 @@ class SchemaXGoogleMarketplace:
 
     images = _must_get(dictionary, 'images',
                        'x-google-marketplace.images is required')
-    self._images = {k: SchemaImage(k, v) for k, v in images.iteritems()}
+    self._images = {k: SchemaImage(k, v) for k, v in images.items()}
 
     if 'deployerServiceAccount' in dictionary:
       self._deployer_service_account = SchemaXServiceAccount(
@@ -368,8 +368,8 @@ class SchemaResourceConstraintRequests:
   """Accesses a single resource's requests."""
 
   def __init__(self, dictionary):
-    self.cpu = dictionary.get('cpu', None)
-    self.memory = dictionary.get('memory', None)
+    self._cpu = dictionary.get('cpu', None)
+    self._memory = dictionary.get('memory', None)
 
   @property
   def cpu(self):
@@ -407,7 +407,7 @@ class SchemaImage:
     self._name = name
     self._properties = {
         k: SchemaImageProjectionProperty(k, v)
-        for k, v in dictionary.get('properties', {}).iteritems()
+        for k, v in dictionary.get('properties', {}).items()
     }
 
   @property
@@ -645,7 +645,7 @@ class SchemaProperty:
     """
 
     def _matches(dictionary, subdict):
-      for k, sv in subdict.iteritems():
+      for k, sv in subdict.items():
         v = dictionary.get(k, None)
         if isinstance(v, dict):
           if not _matches(v, sv):
@@ -656,7 +656,7 @@ class SchemaProperty:
       return True
 
     return _matches(
-        dict(list(self._d.iteritems()) + [('name', self._name)]), definition)
+        dict(list(self._d.items()) + [('name', self._name)]), definition)
 
   def __eq__(self, other):
     if not isinstance(other, SchemaProperty):
@@ -717,7 +717,7 @@ class SchemaXImage:
     return self._split_by_colon
 
   @property
-  def _split_to_registry_repo_tag(self):
+  def split_to_registry_repo_tag(self):
     """Return 3-tuple, or None"""
     return self._split_to_registry_repo_tag
 

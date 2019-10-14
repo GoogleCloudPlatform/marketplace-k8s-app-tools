@@ -46,9 +46,6 @@ class ProvisionTest(unittest.TestCase):
     self.assertEqual(text[:-5], expected)
     self.assertRegexpMatches(text[-5:], r'-[a-f0-9]{4}')
 
-  def assertListElementsEqual(self, list1, list2):
-    return self.assertEqual(sorted(list1), sorted(list2))
-
   def test_deployer_image_inject(self):
     schema = config_helper.Schema.load_yaml('''
     properties:
@@ -59,7 +56,7 @@ class ProvisionTest(unittest.TestCase):
     ''')
     values = {}
     deployer_image = 'gcr.io/cloud-marketplace/partner/solution/deployer:latest'
-    self.assertEquals(
+    self.assertEqual(
         provision.inject_deployer_image_properties(values, schema,
                                                    deployer_image),
         {"deployer_image": deployer_image})
@@ -99,7 +96,7 @@ class ProvisionTest(unittest.TestCase):
           simple:
             type: string
       """)
-    self.assertEquals(
+    self.assertEqual(
         [
             # The default namespace rolebinding should be created
             {
@@ -168,7 +165,7 @@ class ProvisionTest(unittest.TestCase):
           simple:
             type: string
       """)
-    self.assertListElementsEqual(
+    self.assertCountEqual(
         [
             {
                 'apiVersion':
@@ -323,7 +320,7 @@ class ProvisionTest(unittest.TestCase):
           simple:
             type: string
       """)
-    self.assertListElementsEqual(
+    self.assertCountEqual(
         [
             # The default namespace rolebinding should also be created
             {

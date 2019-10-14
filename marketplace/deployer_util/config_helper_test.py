@@ -97,7 +97,7 @@ class ConfigHelperTest(unittest.TestCase):
 
   def test_load_yaml_file(self):
     with tempfile.NamedTemporaryFile('w') as f:
-      f.write(SCHEMA.encode('utf_8'))
+      f.write(SCHEMA)
       f.flush()
 
       schema = config_helper.Schema.load_yaml_file(f.name)
@@ -368,7 +368,7 @@ class ConfigHelperTest(unittest.TestCase):
         """)
     self.assertIsNotNone(schema.properties['i'].image)
     self.assertIsNone(schema.properties['i'].image.split_by_colon)
-    self.assertIsNone(schema.properties['i'].image._split_to_registry_repo_tag)
+    self.assertIsNone(schema.properties['i'].image.split_to_registry_repo_tag)
 
   def test_image_type_splitbycolon(self):
     schema = config_helper.Schema.load_yaml("""

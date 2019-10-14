@@ -23,21 +23,21 @@ TEST_BINARY = ['echo', '-n', 'kubectl']
 class KubectlTest(unittest.TestCase):
 
   def test_create(self):
-    self.assertEquals(
+    self.assertEqual(
         kubectl.create('namespace', 'ns-1', binary=TEST_BINARY),
         'kubectl create namespace ns-1')
 
   def test_get(self):
-    self.assertEquals(
+    self.assertEqual(
         kubectl.get('namespaces', binary=TEST_BINARY),
         'kubectl get namespaces --output=json')
 
   def test_delete(self):
-    self.assertEquals(
+    self.assertEqual(
         kubectl.delete('namespace', 'ns-1', binary=TEST_BINARY),
         'kubectl delete namespace ns-1')
 
   def test_apply(self):
-    self.assertEquals(
+    self.assertEqual(
         kubectl.apply('/tmp/resource.yaml', binary=TEST_BINARY),
         'kubectl apply --filename=/tmp/resource.yaml')
