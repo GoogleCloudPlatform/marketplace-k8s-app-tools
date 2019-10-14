@@ -221,10 +221,8 @@ class ExpandConfigTest(unittest.TestCase):
 
     cert_json = json.loads(result['c1'])
     self.assertIsNotNone(result['c1'])
-    self.assertEqual(result['c1.Base64Key'],
-                     cert_json['private_key'])
-    self.assertEqual(result['c1.Base64Crt'],
-                     cert_json['certificate'])
+    self.assertEqual(result['c1.Base64Key'], cert_json['private_key'])
+    self.assertEqual(result['c1.Base64Crt'], cert_json['certificate'])
 
     key = OpenSSL.crypto.load_privatekey(
         OpenSSL.crypto.FILETYPE_PEM, base64.b64decode(result['c1.Base64Key']))
@@ -267,7 +265,7 @@ class ExpandConfigTest(unittest.TestCase):
         """)
     result = expand_config.expand(
         {'c1': '{"private_key": "key", "certificate": "vrt"}'}, schema)
-    
+
     self.assertEqual(
         {
             'c1': '{"private_key": "key", "certificate": "vrt"}',

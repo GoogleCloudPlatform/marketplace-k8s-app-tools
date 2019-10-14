@@ -250,9 +250,11 @@ def generate_properties_for_string(prop, value, result):
 def generate_properties_for_tls_certificate(prop, value, result):
   certificate = json.loads(value)
   if prop.tls_certificate.base64_encoded_private_key:
-    result[prop.tls_certificate.base64_encoded_private_key] = certificate['private_key']
+    result[prop.tls_certificate
+           .base64_encoded_private_key] = certificate['private_key']
   if prop.tls_certificate.base64_encoded_certificate:
-    result[prop.tls_certificate.base64_encoded_certificate] = certificate['certificate']
+    result[prop.tls_certificate
+           .base64_encoded_certificate] = certificate['certificate']
 
 
 def write_values(values, values_file):
