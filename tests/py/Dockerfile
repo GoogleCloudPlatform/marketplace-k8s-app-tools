@@ -8,8 +8,8 @@ RUN apt-get update \
         python-yaml \
     && rm -rf /var/lib/apt/lists/*
 
-RUN pip2 install wheel \
-    && pip2 install google-cloud-storage
+RUN pip3 install wheel \
+    && pip3 install google-cloud-storage
 
 # Install lint tools.
-RUN pip2 install futures pyflakes yapf
+RUN pip3 install futures pyflakes yapf
