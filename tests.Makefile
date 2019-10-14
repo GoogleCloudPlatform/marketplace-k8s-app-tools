@@ -146,7 +146,7 @@ $(PYTHON_TEST_TARGETS): %.__pytest__: .build/tests/py
 	$(info === Running tests in directory $* ===)
 	@docker run --rm \
 	  -v $(PWD):/data:ro \
-	  --entrypoint python2 \
+	  --entrypoint python3 \
 	  tests/py \
 	  -m unittest discover -s "/data/$*" -p "*_test.py"
 
