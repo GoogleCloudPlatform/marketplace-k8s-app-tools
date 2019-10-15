@@ -320,6 +320,7 @@ different set of properties.
   is enabled on the cluster for the deployment.
 - [`INGRESS_AVAILABLE`](#type-ingress_available): Indicates whether the cluster is detected to have Ingress support.
 - [`TLS_CERTIFICATE`](#type-tls_certificate): To be used to support a custom certificate or generate a self-signed certificate.
+- [`DEPLOYER_IMAGE`](#type-deployer_image): Indicates that the property is the name of the Docker deployer image.
 
 ---
 
@@ -609,6 +610,20 @@ data:
   tls.key: $TLS_CERTIFICATE_KEY
   tls.crt: $TLS_CERTIFICATE_CRT
 type: kubernetes.io/tls
+```
+
+---
+
+### type: DEPLOYER_IMAGE
+
+This property provides a reference to the Docker deployer image that is used to deployer the installation.
+
+```yaml
+properties:
+  deployer:
+    type: string
+    x-google-marketplace:
+      type: DEPLOYER_IMAGE
 ```
 
 ---
