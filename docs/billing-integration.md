@@ -43,6 +43,8 @@ The reporting secret contains the following three fields (see an [example](https
 
 **Note:** when viewing the YAML representation of this secret (for example, via `kubectl get`), every field is base64-encoded and will be automatically decoded by Kubernetes when reading values. The **reporting-key** field is encoded an additional time, so your application will need to decode it (after it is automatically decoded by Kubernetes once) if it needs to read the actual JSON key data.
 
+Also see [Getting a reporting secret for testing](#getting-a-reporting-secret-for-testing).
+
 ## Using the Metering Agent
 
 You can choose to use the Marketplace-provided [metering agent](https://github.com/GoogleCloudPlatform/ubbagent) to simplify usage reporting. The metering agent can be included into your Kubernetes deployment as a sidecar container, included in your own container, or built directly into your application if it's written in Go. Including the agent as a sidecar is the most straightforward.
@@ -225,7 +227,7 @@ With this configuration in place, the application can send usage reports to the 
 
 Reports are sent to the agent over a simple http interface. Each report contains a value for a single metric. The following example script sends a report for a single request.
 ```shell
-$ read -d '' REPORT <<EOF
+read -d '' REPORT <<EOF
 {
   "name": "requests",
   "startTime": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
@@ -233,7 +235,8 @@ $ read -d '' REPORT <<EOF
   "value": { "int64Value": 1 }
 }
 EOF
-$ curl -X POST -d "$REPORT" 'http://localhost:4567/report'
+
+curl -X POST -d "$REPORT" 'http://localhost:4567/report'
 ```
 
 For one-shot requests like this, the start and end times can be equal. For a report that spans a longer period of time, you should set the start and end times to cover time span.
@@ -242,7 +245,7 @@ For one-shot requests like this, the start and end times can be equal. For a rep
 
 Your app can monitor the metering agent's status and modify its behavior if usage reports begin to fail. For example:
 ```shell
-$ curl 'http://localhost:4567/status'
+curl 'http://localhost:4567/status'
 {
   "lastReportSuccess": "2019-04-01T12:06:32Z",
   "currentFailureCount": 3,
@@ -263,11 +266,43 @@ Additionally, if you've configured a `disk` endpoint, you can inspect the conten
 
 ### Getting a Reporting Secret for Testing
 
-There's currently no way to create a valid reporting secret for your application until it's published in GCP Marketplace (it doesn't need to be published publicly). You can use [this](https://storage.cloud.google.com/cloud-marketplace-tools/reporting_secrets/fake_reporting_secret.yaml) fake secret file which is structurally correct, but will fail authentication. Use the following procedure to get a valid secret for testing:
+#### Using a fake reporting secret
 
-* Once pricing has been submitted and published, submit and have published an initial version of your app. This version does not need to have working metering configuration, but should include the `REPORTING_SECRET` entry in schema.yaml.
+We provide a [fake reporting secret](https://storage.cloud.google.com/cloud-marketplace-tools/reporting_secrets/fake_reporting_secret.yaml)
+which you can use for testing. This secret is structurally correct, but will fail authentication with Service Control.
+
+You can use this secret directly using the following command:
+
+```shell
+mpdev install ... \
+  --parameters='{..., "reportingSecret": "gs://cloud-marketplace-tools/reporting_secrets/fake_reporting_secret.yaml"}'
+```
+
+Alternately, you can download and apply this secret to your target namespace and then point your application to it:
+
+```shell
+gsutil cp gs://cloud-marketplace-tools/reporting_secrets/fake_reporting_secret.yaml .
+
+# The downloaded secret doesn't have a name. Give it one and apply to the target namespace.
+
+echo "metadata: {name: fake-reporting-secret}" >> fake_reporting_secret.yaml
+kubectl apply -n my-namespace -f fake_reporting_secret.yaml
+
+# Now install the app. The value for reportingSecret matches the name we gave the fake secret.
+
+mpdev install ... \
+  --parameters='{..., "reportingSecret": "fake-reporting-secret"}'
+
+```
+
+#### Obtaining a real reporting secret
+
+* Once pricing has been submitted and published, privately submit and have an initially published version of your app. This version does not need to have working metering configuration, but should include the `REPORTING_SECRET` entry in schema.yaml.
 * Deploy your application to a cluster.
 * Once deployed, read the reporting secret installed into the cluster and use it for additional local testing. For example:
+
 ```shell
-$ kubectl get secret "my-app-reporting-secret" -n my-namespace --output json
+kubectl get secret "my-app-reporting-secret" -n my-namespace -oyaml
 ```
+
+This secret can be re-applied to the target namespace, and its name can be used directly in `mpdev install --parameters`.
