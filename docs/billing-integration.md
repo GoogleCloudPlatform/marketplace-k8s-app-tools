@@ -269,7 +269,7 @@ Additionally, if you've configured a `disk` endpoint, you can inspect the conten
 #### Using a fake reporting secret
 
 We provide a [fake reporting secret](https://storage.cloud.google.com/cloud-marketplace-tools/reporting_secrets/fake_reporting_secret.yaml)
-which you can use for testing. This secret is structurally correct, but will fail authentication.
+which you can use for testing. This secret is structurally correct, but will fail authentication with Service Control.
 
 You can use this secret directly using the following command:
 
@@ -278,7 +278,7 @@ mpdev install ... \
   --parameters='{..., "reportingSecret": "gs://cloud-marketplace-tools/reporting_secrets/fake_reporting_secret.yaml"}'
 ```
 
-Alternately, you can download and apply this secret to your target namespace and then point your application to it.
+Alternately, you can download and apply this secret to your target namespace and then point your application to it:
 
 ```shell
 gsutil cp gs://cloud-marketplace-tools/reporting_secrets/fake_reporting_secret.yaml .
@@ -297,7 +297,7 @@ mpdev install ... \
 
 #### Obtaining a real reporting secret
 
-* Once pricing has been submitted and published, submit and have published an initial version of your app. This version does not need to have working metering configuration, but should include the `REPORTING_SECRET` entry in schema.yaml.
+* Once pricing has been submitted and published, privately submit and have an initially published version of your app. This version does not need to have working metering configuration, but should include the `REPORTING_SECRET` entry in schema.yaml.
 * Deploy your application to a cluster.
 * Once deployed, read the reporting secret installed into the cluster and use it for additional local testing. For example:
 
