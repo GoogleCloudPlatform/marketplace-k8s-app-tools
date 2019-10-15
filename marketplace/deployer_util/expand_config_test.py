@@ -221,8 +221,14 @@ class ExpandConfigTest(unittest.TestCase):
 
     self.assertIsNotNone(result['c1'])
     cert_json = json.loads(result['c1'])
-    self.assertEqual(result['c1.Base64Key'], base64.b64encode(cert_json['private_key'].encode('ascii')).decode('ascii'))
-    self.assertEqual(result['c1.Base64Crt'], base64.b64encode(cert_json['certificate'].encode('ascii')).decode('ascii'))
+    self.assertEqual(
+        result['c1.Base64Key'],
+        base64.b64encode(
+            cert_json['private_key'].encode('ascii')).decode('ascii'))
+    self.assertEqual(
+        result['c1.Base64Crt'],
+        base64.b64encode(
+            cert_json['certificate'].encode('ascii')).decode('ascii'))
 
     key = OpenSSL.crypto.load_privatekey(
         OpenSSL.crypto.FILETYPE_PEM, base64.b64decode(result['c1.Base64Key']))

@@ -47,9 +47,9 @@ def generate_tls_certificate():
 
   return json.dumps({
       'private_key':
-              OpenSSL.crypto.dump_privatekey(OpenSSL.crypto.FILETYPE_PEM,
-                                             key).decode('ascii'),
+          OpenSSL.crypto.dump_privatekey(OpenSSL.crypto.FILETYPE_PEM,
+                                         key).decode('ascii'),
       'certificate':
-              OpenSSL.crypto.dump_certificate(OpenSSL.crypto.FILETYPE_PEM,
-                                              cert).decode('ascii')
+          OpenSSL.crypto.dump_certificate(OpenSSL.crypto.FILETYPE_PEM,
+                                          cert).decode('ascii')
   })
