@@ -11,9 +11,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 RUN pip3 install \
+      setuptools \
+      wheel \
+    && pip3 install \
       pyOpenSSL \
-      pyyaml \
-      setuptools
+      pyyaml
 
 RUN wget -q -O /bin/kubectl \
         https://storage.googleapis.com/kubernetes-release/release/v1.13.2/bin/linux/amd64/kubectl \

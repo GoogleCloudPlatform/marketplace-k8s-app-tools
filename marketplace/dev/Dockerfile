@@ -10,12 +10,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         make \
         python3 \
         python3-pip \
-        python3-setuptools \
         software-properties-common \
         wget \
      && rm -rf /var/lib/apt/lists/*
 
 RUN pip3 install \
+      setuptools \
+      wheel \
+    && pip3 install \
       pyOpenSSL \
       pyyaml
 
