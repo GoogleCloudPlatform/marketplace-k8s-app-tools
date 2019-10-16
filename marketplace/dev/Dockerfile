@@ -1,4 +1,9 @@
-FROM gcr.io/cloud-builders/gcloud
+FROM python:3.7
+
+# Add the Cloud SDK distribution URI as a package source
+RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+# Import the Google Cloud Platform public key
+RUN curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
         apt-transport-https \
@@ -6,18 +11,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         ca-certificates \
         curl \
         gettext \
+        google-cloud-sdk \
         jq \
         make \
-        python3 \
-        python3-pip \
         software-properties-common \
         wget \
      && rm -rf /var/lib/apt/lists/*
 
 RUN pip3 install \
-      setuptools \
       wheel \
-    && pip3 install \
       pyOpenSSL \
       pyyaml
 
