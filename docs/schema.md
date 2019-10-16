@@ -408,8 +408,8 @@ different set of properties.
 #### Supported types
 
 - `NAME`: Indicates that the property is the name of the app.
-- `NAMESPACE`: Indicates that the property is the Kubernetes namespace where the
-   app will installed.
+- [`NAMESPACE`](#type-namespace): Indicates that the property is the Kubernetes
+  namespace where the app will installed.
 - `REPORTING_SECRET`: The Secret resource name that contains the credentials
   for usage reports. These credentials are used by the
   [usage-based billing agent](https://github.com/GoogleCloudPlatform/ubbagent).
@@ -453,6 +453,25 @@ properties:
     x-google-marketplace:
       type: MASKED_FIELD
 ```
+---
+
+### type: NAMESPACE
+
+This property is required. It specifies the target namespace where all of application
+resources are installed into.
+
+A `default` value can be specified, in which case the UI will auto-select this
+namespace instead of using the default heuristics of picking or creating a namespace.
+
+```yaml
+properties:
+  namespace:
+    type: string
+    default: desired-fixed-namespace
+    x-google-marketplace:
+      type: NAMESPACE
+```
+
 ---
 
 ### type: GENERATED_PASSWORD
