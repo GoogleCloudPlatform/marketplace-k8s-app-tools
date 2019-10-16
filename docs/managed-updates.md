@@ -2,8 +2,22 @@
 
 ****** OBSOLETE ******
 
-Managed updates are 
+Application Manager is now beta. The information in this guide is now in the
+resources below. If you were part of the Managed Updates Alpha, you must update
+your images and re-submit them to GCP Marketplace.
 
+Use the following resources for building your application:
+
+* If you already have a Kubernetes application on GCP Marketplace, read the
+[checklist to support managed updates](https://cloud.google.com/marketplace/docs/partners/kubernetes-solutions/support-managed-updates)
+for your GCP Marketplace listing.
+
+* [Read the updated guide to create your deployer schema](schema.md).
+
+* Read the overview of
+[selling Kubernetes applications on GCP Marketplace](https://cloud.google.com/marketplace/docs/partners/kubernetes-solutions/).
+
+****** OBSOLETE ******
 
 ## Overview
 

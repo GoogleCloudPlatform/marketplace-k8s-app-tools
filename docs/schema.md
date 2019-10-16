@@ -342,7 +342,8 @@ you omit this section, users must manually update their installations.
 
 #### `kalmSupported`
 
-If you want to support managed updates for your app, set this to `true`.
+If you want to support managed updates for your application, set this to
+`true`.
 
 ### `images`
 
@@ -352,16 +353,16 @@ In the following, the following images are declared, in addition to the
 deployer:
 
 `gcr.io/your-project/your-company/your-app:1.0.1`
-`gcr.io/your-project/your-company/your-app/init:1.0.1`
+`gcr.io/your-project/your-company/your-app/proxy:1.0.1`
 
 The images can be passed as parameters or values to your template or charts
-(as applicable) using the `properties` section. The `init` image is passed
-to the template under these different parameteres or values:
+(as applicable) using the `properties` section. The `proxy` image is passed
+to the template with these different values:
 
-- `imageInitFull=gcr.io/your-project/your-company/your-app:1.0.1`
-- `imageInitRegistry=gcr.io`
-- `imageInitRepo=your-project/your-company/your-app`
-- `imageInitTag=1.0.1`
+- `imageProxyFull=gcr.io/your-project/your-company/your-app:1.0.1`
+- `imageProxyRegistry=gcr.io`
+- `imageProxyRepo=your-project/your-company/your-app`
+- `imageProxyTag=1.0.1`
 T
 he primary image above is passed under 2 different parameters/values:
 
@@ -412,6 +413,7 @@ different set of properties.
 - `REPORTING_SECRET`: The Secret resource name that contains the credentials
   for usage reports. These credentials are used by the
   [usage-based billing agent](https://github.com/GoogleCloudPlatform/ubbagent).
+- [`MASKED_FIELD`](#type-masked_field): A string value whose characters will be masked when entered in the UI.
 - [`GENERATED_PASSWORD`](#type-generated_password): Indicates that the property
   is a value to be generated when the application is deployed.
 - [`SERVICE_ACCOUNT`](#type-service_account): The name of a pre-provisioned
@@ -430,6 +432,27 @@ different set of properties.
 - [`INGRESS_AVAILABLE`](#type-ingress_available): Indicates whether the cluster is detected to have Ingress support.
 - [`TLS_CERTIFICATE`](#type-tls_certificate): To be used to support a custom certificate or generate a self-signed certificate.
 
+---
+
+### type: MASKED_FIELD
+
+Indicates that the property where the value that the user enters must be
+masked. Use this annotation for fields such as passwords chosen by the user.
+In the GCP Marketplace UI, users will also see an option to reveal the
+value as plain text.
+
+Example:
+
+```yaml
+properties:
+  customSecret:
+    title: User-specified password
+    description: The password to be used for login.
+    maxLength: 32
+    type: string
+    x-google-marketplace:
+      type: MASKED_FIELD
+```
 ---
 
 ### type: GENERATED_PASSWORD
@@ -767,4 +790,3 @@ indicates whether Istio is enabled on the cluster.
 - `OPTIONAL`: The app works with Istio but does not require it.
 - `REQUIRED`: The app requires Istio to work properly.
 - `UNSUPPORTED`: The app does not support Istio.
-
