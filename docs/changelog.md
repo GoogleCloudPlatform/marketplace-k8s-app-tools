@@ -1,6 +1,6 @@
 # Release notes
 
-## Managed updates beta release
+## Application Manager Beta
 
 * (Beta) You can now support managed updates for your applications. When you
   publish an updated version of the app, users can update the app in their
