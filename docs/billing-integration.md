@@ -2,8 +2,8 @@
 
 ## Overview
 
-This guide provides an overview of billing integration for Kubernetes applications in
-GCP Marketplace.
+This guide provides an overview of billing integration for Kubernetes
+applications in GCP Marketplace.
 
 ## See Also
 
