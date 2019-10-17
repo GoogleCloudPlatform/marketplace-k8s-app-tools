@@ -32,6 +32,10 @@ RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add - && \
     apt-get -y update && \
     apt-get -y install docker-ce=17.12.0~ce-0~ubuntu
 
+RUN curl -LO curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.16.2/bin/linux/amd64/kubectl \
+    && chmod +x ./kubectl \
+    && mv ./kubectl /usr/local/bin/kubectl
+
 RUN mkdir -p /bin/helm-downloaded \
      && wget -q -O /bin/helm-downloaded/helm.tar.gz \
         https://storage.googleapis.com/kubernetes-helm/helm-v2.10.0-linux-amd64.tar.gz \
