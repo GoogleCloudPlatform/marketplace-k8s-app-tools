@@ -5,7 +5,9 @@ applications that you distribute on Google Cloud Platform (GCP) Marketplace.
 The deployer image packages your application's configuration and runs
 when users deploy your application to their clusters.
 
-[Read the overview of distributing Kubernetes applications on GCP Marketplace](https://cloud.google.com/marketplace/docs/partners/kubernetes-solutions/).
+## Prerequisites
+
+* You must be a GCP Marketplace partner. [Read the overview of distributing Kubernetes applications on GCP Marketplace](https://cloud.google.com/marketplace/docs/partners/kubernetes-solutions/).
 
 ## About the deployer image
 
@@ -22,11 +24,23 @@ The deployer image is a Docker container image that has these characteristics:
 
 - It can be executed as a standalone
   [`Job`](https://kubernetes.io/docs/concepts/workloads/controllers/jobs-run-to-completion/).
-  After users enter the input parameters, the Job's Pod installs all the
-  components of the application, then exists.
+  After a user enters the input parameters, the Job's Pod installs all the
+  components of the application, then exits.
 
 To install the application components, the deployer image includes the
 full manifests of all Kubernetes resources that need to be installed.
+
+## Using the `mpdev` development tools
+
+The `mpdev` tool is a container that bundles the libraries you need to develop
+and test your application. You can use it to inspect your development
+environment, test your application's installation, and run smoke tests
+on your application.
+
+[Review the prerequisites, and install the development tool](https://github.com/GoogleCloudPlatform/marketplace-k8s-app-tools/blob/master/docs/tool-prerequisites.md).
+
+For information on using `mpdev` to test your application, read the
+[`mpdev` reference](https://github.com/GoogleCloudPlatform/marketplace-k8s-app-tools/blob/master/docs/mpdev-references.md).
 
 ## Building your deployer
 
@@ -45,23 +59,22 @@ First, decide how you want to create your Kubernetes application manifests:
     Learn about [building your deployer with `envsubst`](building-deployer-envsubst.md).
 
 Regardless of the method you choose, your deployer needs a `schema.yaml` file,
-which declares the parameters for provisioning the application. 
-
-Note that whichever deployer guide you choose to follow, a `schema.yaml` file is
-required. It declares parameters required for provisioning the application. See
-[here](schema.md) for a reference of this file.
+which declares the parameters for provisioning the application.
+[Learn more about creating a schema](schema.md) for your application.
 
 ## Publishing a new version
 
 A new application version is submitted by pushing the corresponding deployer image
 to the staging repo.
 
-### Tags
+### Tagging your deployer image
 
-The deployer image **must** carry the primary track ID as its docker tag.
+The deployer image **must** carry the primary track ID as its Docker tag.
 Marketplace uses the image last tagged with that primary track ID tag when it looks
 for new versions of each track. The deployer image **should** also carry a unique
-version as its docker tag.
+version as its Docker tag.
+
+[Learn about organizing your releases in tracks](https://cloud.google.com/marketplace/docs/partners/kubernetes-solutions/set-up-environment#organize-images).
 
 The application images are located from references in the deployer's `schema.yaml`.
 Each of these images **should** carry the primary track ID as its docker tag.
