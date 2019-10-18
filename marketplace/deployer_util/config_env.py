@@ -39,8 +39,8 @@ def main():
 
   # Default env vars should NOT be passed on to the new environment.
   default_vars = [
-      v.split('=')[0] for v in subprocess.check_output(
-          ['env -0'], env={}, shell=True).split('\0') if v
+      v.decode('utf-8').split('=')[0] for v in subprocess.check_output(
+          ['env -0'], env={}, shell=True).split(b'\0') if v
   ]
   command = (['/usr/bin/env'] + ['--unset={}'.format(v) for v in default_vars] +
              [args.command] + args.arguments)
