@@ -693,3 +693,19 @@ indicates whether Istio is enabled on the cluster.
 - `OPTIONAL`: The app works with Istio but does not require it.
 - `REQUIRED`: The app requires Istio to work properly.
 - `UNSUPPORTED`: The app does not support Istio.
+
+## form
+
+### help widget
+
+You can add a blob of basic HTML text to the top of the configuration form
+using the following syntax:
+
+```yaml
+# This is at the top level of your schema.yaml
+form:
+- widget: help
+  description: My arbitrary <i>description</i> text.
+```
+
+Note that currently only a single instance of this `help` widget can be specified.
