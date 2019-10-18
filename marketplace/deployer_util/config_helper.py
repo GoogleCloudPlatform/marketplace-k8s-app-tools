@@ -76,7 +76,7 @@ def _read_values_to_dict(values_dir, schema):
       raise InvalidName('Invalid config parameter name: {}'.format(filename))
     file_path = os.path.join(values_dir, filename)
     with open(file_path, "r") as f:
-      data = f.read().decode('utf-8')
+      data = f.read()
       result[filename] = data
 
   # Data read in as strings. Convert them to proper types defined in schema.
