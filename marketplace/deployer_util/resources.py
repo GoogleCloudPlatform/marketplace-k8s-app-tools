@@ -27,12 +27,14 @@ def set_resource_ownership(app_uid, app_name, app_api_version, resource):
       owner_reference = existing_owner_reference
       break
 
-  if not owner_reference:
+  is_crd = ('kind' in resource['metadata'] and resource['metadata']['kind'] == 'CustomResourceDefinition')
+  if not owner_reference and not is_crd:
     owner_reference = {}
     resource['metadata']['ownerReferences'].append(owner_reference)
 
-  owner_reference['apiVersion'] = app_api_version
-  owner_reference['kind'] = "Application"
-  owner_reference['blockOwnerDeletion'] = True
-  owner_reference['name'] = app_name
-  owner_reference['uid'] = app_uid
+  if owner_reference != None:
+    owner_reference['apiVersion'] = app_api_version
+    owner_reference['kind'] = "Application"
+    owner_reference['blockOwnerDeletion'] = True
+    owner_reference['name'] = app_name
+    owner_reference['uid'] = app_uid
