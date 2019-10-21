@@ -87,7 +87,7 @@ def main():
       if elapsed_healthy_time > min_time_before_healthy:
         break
 
-    if time.time() - poll_start_time > args.timeout:
+    if time.time() - poll_start_time > float(args.timeout):
       raise Exception(
           "ERROR Application did not get ready before timeout of {} seconds"
           .format(args.timeout))
