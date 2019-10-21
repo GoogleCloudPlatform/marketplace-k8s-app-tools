@@ -66,7 +66,7 @@ class Command:
       raise CommandException(self._error)
 
   def json(self):
-    return json.loads(self._output)
+    return json.loads(self._output.decode())
 
   @property
   def exitcode(self):
