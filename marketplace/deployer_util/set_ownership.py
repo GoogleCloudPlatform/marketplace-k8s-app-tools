@@ -29,6 +29,34 @@ _PROG_HELP = """
 Scans the manifest folder kubernetes resources and set the Application to own
 the ones defined in its list of components kinds.
 """
+# All Kinds from `kubectl api-resources --namespaced=false`
+_CLUSTER_SCOPED_KINDS = [
+    "Namespace",
+    "Node",
+    "PersistentVolume",
+    "MutatingWebhookConfiguration",
+    "ValidatingWebhookConfiguration",
+    "CustomResourceDefinition",
+    "APIService",
+    "AuditSink",
+    "TokenReview",
+    "SelfSubjectAccessReview",
+    "SelfSubjectRulesReview",
+    "SubjectAccessReview",
+    "CertificateSigningRequest",
+    "PodSecurityPolicy",
+    "StorageState",
+    "StorageVersionMigration",
+    "RuntimeClass",
+    "PodSecurityPolicy",
+    "ClusterRoleBinding",
+    "ClusterRole",
+    "PriorityClass",
+    "CSIDriver",
+    "CSINode",
+    "StorageClass",
+    "VolumeAttachment",
+]
 
 
 def main():
@@ -81,7 +109,8 @@ def main():
 
     kinds = map(lambda x: x["kind"], apps[0]["spec"].get("componentKinds", []))
 
-    excluded_kinds = ["PersistentVolumeClaim", "Application"]
+    excluded_kinds = ["PersistentVolumeClaim",
+                      "Application"].extend(_CLUSTER_SCOPED_KINDS)
     included_kinds = [kind for kind in kinds if kind not in excluded_kinds]
   else:
     included_kinds = None

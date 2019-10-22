@@ -74,10 +74,3 @@ class ResourcesTest(unittest.TestCase):
 
     self.assertListElementsEqual(resource['metadata']['ownerReferences'],
                                  [APP_OWNER_REF])
-
-  def test_cluster_scoped_resource_no_ownerrefs_noop(self):
-    resource = {'metadata': {'ownerReferences': []}}
-
-    set_resource_ownership(APP_UID, APP_NAME, APP_API_VERSION, resource)
-
-    self.assertListElementsEqual(resource['metadata']['ownerReferences'], [])
