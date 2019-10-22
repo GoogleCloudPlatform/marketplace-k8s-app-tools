@@ -24,7 +24,7 @@ def generate_password(config):
   """Generate password value for SchemaXPassword config."""
   pw = GeneratePassword(config.length, config.include_symbols)
   if config.base64:
-    pw = base64.b64encode(pw)
+    pw = base64.b64encode(pw.encode()).decode()
   return pw
 
 

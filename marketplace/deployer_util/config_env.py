@@ -50,12 +50,12 @@ def main():
       stdin=subprocess.PIPE,
       stdout=subprocess.PIPE,
       stderr=subprocess.PIPE)
-  stdoutdata, stderrdata = p.communicate(input=sys.stdin.read())
+  stdoutdata, stderrdata = p.communicate(input=sys.stdin.buffer.read())
   if stdoutdata:
-    sys.stdout.write(stdoutdata)
+    sys.stdout.buffer.write(stdoutdata)
     sys.stdout.flush()
   if stderrdata:
-    sys.stderr.write(stderrdata)
+    sys.stderr.buffer.write(stderrdata)
     sys.stderr.flush()
   sys.exit(p.returncode)
 
