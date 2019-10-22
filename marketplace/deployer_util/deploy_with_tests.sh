@@ -76,6 +76,26 @@ create_manifests.sh --mode="test"
   --manifests "/data/manifest-expanded" \
   --dest "/data/resources.yaml"
 
+# Kubeflow hack: Remove the owner reference on cluster-scoped IAM resources.
+deployer_uid=$(kubectl get "applications.app.k8s.io/$NAME" \
+  -l 'app.kubernetes.io/component'='deployer.marketplace.cloud.google.com','app.kubernetes.io/name'="$NAME" \
+  --namespace="$NAMESPACE" \
+  --output=jsonpath='{.items[0].metadata.uid}')
+deployer_clusterroles=($(kubectl get clusterroles \
+  -l 'app.kubernetes.io/name'="$NAME" \
+  --output=custom-columns=NAME:.metadata.name \
+  | sed -n '1!p')) # removes the column header, which we have to print
+deployer_clusterrolebindings=($(kubectl get deployer_clusterrolebindings \
+  -l 'app.kubernetes.io/name'="$NAME" \
+  --output=custom-columns=NAME:.metadata.name \
+  | sed -n '1!p'))
+echo $deployer_clusterroles \
+  | xargs -n1 -I{} kubectl patch clusterrole {} -p \
+  '{"metadata": {"ownerReferences": null}}'
+echo $deployer_clusterrolebindings \
+  | xargs -n1 -I{} kubectl patch clusterrolebinding {} -p \
+  '{"metadata": {"ownerReferences": null}}'
+
 separate_tester_resources.py \
   --app_uid "$app_uid" \
   --app_name "$NAME" \
