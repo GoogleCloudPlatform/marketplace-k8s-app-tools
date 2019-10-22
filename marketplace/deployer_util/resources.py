@@ -27,7 +27,8 @@ def set_resource_ownership(app_uid, app_name, app_api_version, resource):
       owner_reference = existing_owner_reference
       break
 
-  # Only set an OwnerRef on namespaced resources.
+  # Only set an OwnerRef on namespaced resources to comply with k8s spec.
+  # https://kubernetes.io/docs/concepts/workloads/controllers/garbage-collection/#owners-and-dependents
   if (not owner_reference and 'namespace' in resource['metadata'] and
       resource['metadata']['namespace']):
     owner_reference = {}
