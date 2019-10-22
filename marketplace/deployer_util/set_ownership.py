@@ -29,8 +29,10 @@ _PROG_HELP = """
 Scans the manifest folder kubernetes resources and set the Application to own
 the ones defined in its list of components kinds.
 """
-# All Kinds from `kubectl api-resources --namespaced=false`
+# From `kubectl api-resources --namespaced=false` with kubectl client and
+# server version of 1.13
 _CLUSTER_SCOPED_KINDS = [
+    "ComponentStatus",
     "Namespace",
     "Node",
     "PersistentVolume",
@@ -38,22 +40,17 @@ _CLUSTER_SCOPED_KINDS = [
     "ValidatingWebhookConfiguration",
     "CustomResourceDefinition",
     "APIService",
-    "AuditSink",
     "TokenReview",
     "SelfSubjectAccessReview",
     "SelfSubjectRulesReview",
     "SubjectAccessReview",
     "CertificateSigningRequest",
     "PodSecurityPolicy",
-    "StorageState",
-    "StorageVersionMigration",
-    "RuntimeClass",
+    "NodeMetrics",
     "PodSecurityPolicy",
     "ClusterRoleBinding",
     "ClusterRole",
     "PriorityClass",
-    "CSIDriver",
-    "CSINode",
     "StorageClass",
     "VolumeAttachment",
 ]
