@@ -77,7 +77,6 @@ create_manifests.sh --mode="test"
   --dest "/data/resources.yaml"
 
 # Kubeflow hack: Remove the owner reference on cluster-scoped IAM resources.
-# Kubeflow hack: Remove the owner reference on cluster-scoped IAM resources.
 if [[ $(kubectl auth can-i list,patch clusterroles \
     | grep 'yes' -c) -gt 0 ]]; then
   deployer_clusterroles=($(kubectl get clusterroles \
