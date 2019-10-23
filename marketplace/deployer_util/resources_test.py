@@ -37,14 +37,7 @@ class ResourcesTest(unittest.TestCase):
 # def set_resource_ownership(app_uid, app_name, app_api_version, resource):
 
   def test_resource_existing_app_ownerref_matching_uid_updates_existing(self):
-    resource = {
-        'metadata': {
-            'namespace': 'default',
-            'ownerReferences': [{
-                'uid': APP_UID
-            }]
-        }
-    }
+    resource = {'metadata': {'ownerReferences': [{'uid': APP_UID}]}}
 
     set_resource_ownership(APP_UID, APP_NAME, APP_API_VERSION, resource)
 
@@ -52,14 +45,7 @@ class ResourcesTest(unittest.TestCase):
                                  [APP_OWNER_REF])
 
   def test_resource_existing_app_ownerref_different_uid_adds_ownerref(self):
-    resource = {
-        'metadata': {
-            'namespace': 'default',
-            'ownerReferences': [{
-                'uid': OTHER_UID
-            }]
-        }
-    }
+    resource = {'metadata': {'ownerReferences': [{'uid': OTHER_UID}]}}
 
     set_resource_ownership(APP_UID, APP_NAME, APP_API_VERSION, resource)
 
@@ -68,7 +54,7 @@ class ResourcesTest(unittest.TestCase):
     }, APP_OWNER_REF])
 
   def test_resource_no_ownerrefs_adds_ownerref(self):
-    resource = {'metadata': {'namespace': 'default', 'ownerReferences': []}}
+    resource = {'metadata': {'ownerReferences': []}}
 
     set_resource_ownership(APP_UID, APP_NAME, APP_API_VERSION, resource)
 
