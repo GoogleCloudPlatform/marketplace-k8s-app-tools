@@ -49,6 +49,7 @@ export NAME
 export NAMESPACE
 
 # Kubeflow hack: Remove the owner reference on cluster-scoped IAM resources.
+set +e
 if kubectl auth can-i list,patch clusterroles | grep 'yes'; then
   deployer_clusterroles=($(kubectl get clusterroles \
     -l 'app.kubernetes.io/name'="$NAME" \
@@ -67,6 +68,7 @@ if kubectl auth can-i list,patch clusterrolebindings | grep 'yes'; then
     | xargs -n1 -I{} kubectl patch clusterrolebinding {} -p \
     '{"metadata": {"ownerReferences": null}}'
 fi
+set -e
 
 echo "Deploying application \"$NAME\""
 
