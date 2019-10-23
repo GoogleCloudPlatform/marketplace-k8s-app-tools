@@ -78,7 +78,7 @@ deployer_clusterroles=($(kubectl get clusterroles \
   -l 'app.kubernetes.io/name'="$NAME" \
   --output=custom-columns=NAME:.metadata.name \
   | sed -n '1!p')) # removes the column header, which we have to print
-deployer_clusterrolebindings=($(kubectl get deployer_clusterrolebindings \
+deployer_clusterrolebindings=($(kubectl get clusterrolebindings \
   -l 'app.kubernetes.io/name'="$NAME" \
   --output=custom-columns=NAME:.metadata.name \
   | sed -n '1!p'))
