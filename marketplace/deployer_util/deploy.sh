@@ -80,7 +80,7 @@ if [[ $(kubectl auth can-i get,update clusterroles | grep 'yes' -c) ]]; then
     '{"metadata": {"ownerReferences": null}}'
 fi
 if [[ $(kubectl auth can-i get,update clusterrolebindings | \
-      grep 'yes' -c) ]];then
+      grep 'yes' -c) ]]; then
   deployer_clusterrolebindings=($(kubectl get clusterrolebindings \
     -l 'app.kubernetes.io/name'="$NAME" \
     --output=custom-columns=NAME:.metadata.name \
