@@ -77,10 +77,6 @@ create_manifests.sh --mode="test"
   --dest "/data/resources.yaml"
 
 # Kubeflow hack: Remove the owner reference on cluster-scoped IAM resources.
-deployer_uid=$(kubectl get "applications.app.k8s.io/$NAME" \
-  -l 'app.kubernetes.io/component'='deployer.marketplace.cloud.google.com','app.kubernetes.io/name'="$NAME" \
-  --namespace="$NAMESPACE" \
-  --output=jsonpath='{.items[0].metadata.uid}')
 deployer_clusterroles=($(kubectl get clusterroles \
   -l 'app.kubernetes.io/name'="$NAME" \
   --output=custom-columns=NAME:.metadata.name \
