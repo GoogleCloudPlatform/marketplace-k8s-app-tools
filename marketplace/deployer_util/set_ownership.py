@@ -106,8 +106,8 @@ def main():
 
     kinds = map(lambda x: x["kind"], apps[0]["spec"].get("componentKinds", []))
 
-    excluded_kinds = ["PersistentVolumeClaim",
-                      "Application"].extend(_CLUSTER_SCOPED_KINDS)
+    excluded_kinds = ["PersistentVolumeClaim", "Application"]
+    excluded_kinds.extend(_CLUSTER_SCOPED_KINDS)
     included_kinds = [kind for kind in kinds if kind not in excluded_kinds]
   else:
     included_kinds = None
