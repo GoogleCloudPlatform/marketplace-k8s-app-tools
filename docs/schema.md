@@ -344,7 +344,7 @@ properties:
 
 ### type: MASKED_FIELD
 
-Properties of this type will have their user-entered value masked by default in the UI, offering the user the option to reveal the value as plain text. 
+Properties of this type will have their user-entered value masked by default in the UI, offering the user the option to reveal the value as plain text.
 
 Example:
 
@@ -693,3 +693,28 @@ indicates whether Istio is enabled on the cluster.
 - `OPTIONAL`: The app works with Istio but does not require it.
 - `REQUIRED`: The app requires Istio to work properly.
 - `UNSUPPORTED`: The app does not support Istio.
+
+## form
+
+### help widget
+
+You can add a blob of basic HTML text to the configuration form to provide
+additional instruction for the installation process. The user sees this
+before they deploy their application. (Post deploy instructions should be
+provided in the `notes` section of the `Application` resource.)
+You can use the following syntax:
+
+```yaml
+# This is at the top level of your schema.yaml
+form:
+- widget: help
+  description: My arbitrary <i>description</i> text.
+```
+
+Note that currently only a single instance of this `help` widget can be specified.
+
+The following HTML tags are allowed:
+- Link: `<a href="https://www.google.com">link</a>`
+- Heading: `<h2>`, `<h3>`
+- Paragraph: `<p>`
+- Text styling: `<b>`, `<i>`, `<u>`, `<em>`
