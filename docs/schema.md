@@ -616,7 +616,9 @@ type: kubernetes.io/tls
 
 ### type: DEPLOYER_IMAGE
 
-This property provides a reference to the Docker deployer image that is used to deployer the installation.
+A property of this type receives the name of the deployer image that is used for
+deploying the application. Use this property type instead of statically deriving
+the deployer image name from other application images.
 
 ```yaml
 properties:
