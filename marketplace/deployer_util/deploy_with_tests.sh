@@ -77,7 +77,7 @@ create_manifests.sh --mode="test"
   --dest "/data/resources.yaml"
 
 # Kubeflow hack: Remove the owner reference on cluster-scoped IAM resources.
-if [[ $(kubectl auth can-i get,update clusterroles | grep 'yes' -c) ]]; then
+if [[ $(kubectl auth can-i list,patch clusterroles | grep 'yes' -c) ]]; then
   deployer_clusterroles=($(kubectl get clusterroles \
     -l 'app.kubernetes.io/name'="$NAME" \
     --output=custom-columns=NAME:.metadata.name \
@@ -86,7 +86,7 @@ if [[ $(kubectl auth can-i get,update clusterroles | grep 'yes' -c) ]]; then
     | xargs -n1 -I{} kubectl patch clusterrole {} -p \
     '{"metadata": {"ownerReferences": null}}'
 fi
-if [[ $(kubectl auth can-i get,update clusterrolebindings | \
+if [[ $(kubectl auth can-i list,patch clusterrolebindings | \
       grep 'yes' -c) ]]; then
   deployer_clusterrolebindings=($(kubectl get clusterrolebindings \
     -l 'app.kubernetes.io/name'="$NAME" \
