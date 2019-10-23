@@ -48,6 +48,26 @@ NAMESPACE="$(/bin/print_config.py \
 export NAME
 export NAMESPACE
 
+# Kubeflow hack: Remove the owner reference on cluster-scoped IAM resources.
+if kubectl auth can-i list,patch clusterroles | grep 'yes'; then
+  deployer_clusterroles=($(kubectl get clusterroles \
+    -l 'app.kubernetes.io/name'="$NAME" \
+    --output=custom-columns=NAME:.metadata.name \
+    | sed -n '1!p')) # removes the column header, which we have to print
+  echo $deployer_clusterroles \
+    | xargs -n1 -I{} kubectl patch clusterrole {} -p \
+    '{"metadata": {"ownerReferences": null}}'
+fi
+if kubectl auth can-i list,patch clusterrolebindings | grep 'yes'; then
+  deployer_clusterrolebindings=($(kubectl get clusterrolebindings \
+    -l 'app.kubernetes.io/name'="$NAME" \
+    --output=custom-columns=NAME:.metadata.name \
+    | sed -n '1!p'))
+  echo $deployer_clusterrolebindings \
+    | xargs -n1 -I{} kubectl patch clusterrolebinding {} -p \
+    '{"metadata": {"ownerReferences": null}}'
+fi
+
 echo "Deploying application \"$NAME\""
 
 app_uid=$(kubectl get "applications.app.k8s.io/$NAME" \
@@ -68,28 +88,6 @@ create_manifests.sh
   --app_api_version "$app_api_version" \
   --manifests "/data/manifest-expanded" \
   --dest "/data/resources.yaml"
-
-# Kubeflow hack: Remove the owner reference on cluster-scoped IAM resources.
-if kubectl auth can-i list,patch clusterroles \
-    | grep 'yes' --quiet; then
-  deployer_clusterroles=($(kubectl get clusterroles \
-    -l 'app.kubernetes.io/name'="$NAME" \
-    --output=custom-columns=NAME:.metadata.name \
-    | sed -n '1!p')) # removes the column header, which we have to print
-  echo $deployer_clusterroles \
-    | xargs -n1 -I{} kubectl patch clusterrole {} -p \
-    '{"metadata": {"ownerReferences": null}}'
-fi
-if kubectl auth can-i list,patch clusterrolebindings \
-    | grep 'yes' --quiet; then
-  deployer_clusterrolebindings=($(kubectl get clusterrolebindings \
-    -l 'app.kubernetes.io/name'="$NAME" \
-    --output=custom-columns=NAME:.metadata.name \
-    | sed -n '1!p'))
-  echo $deployer_clusterrolebindings \
-    | xargs -n1 -I{} kubectl patch clusterrolebinding {} -p \
-    '{"metadata": {"ownerReferences": null}}'
-fi
 
 # Ensure assembly phase is "Pending", until successful kubectl apply.
 /bin/setassemblyphase.py \

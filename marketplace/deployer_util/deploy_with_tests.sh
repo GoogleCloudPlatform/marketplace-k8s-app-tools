@@ -63,7 +63,6 @@ app_uid=$(kubectl get "applications.app.k8s.io/$NAME" \
 app_api_version=$(kubectl get "applications.app.k8s.io/$NAME" \
   --namespace="$NAMESPACE" \
   --output=jsonpath='{.apiVersion}')
-
 /bin/expand_config.py --values_mode raw --app_uid "$app_uid"
 
 create_manifests.sh --mode="test"
@@ -76,6 +75,7 @@ create_manifests.sh --mode="test"
   --manifests "/data/manifest-expanded" \
   --dest "/data/resources.yaml"
 
+<<<<<<< Updated upstream
 # Kubeflow hack: Remove the owner reference on cluster-scoped IAM resources.
 if kubectl auth can-i list,patch clusterroles \
     | grep 'yes' --quiet; then
@@ -98,6 +98,8 @@ if kubectl auth can-i list,patch clusterrolebindings \
     '{"metadata": {"ownerReferences": null}}'
 fi
 
+=======
+>>>>>>> Stashed changes
 separate_tester_resources.py \
   --app_uid "$app_uid" \
   --app_name "$NAME" \
