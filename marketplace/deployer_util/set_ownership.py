@@ -59,9 +59,9 @@ _CLUSTER_SCOPED_KINDS = [
 def main():
   parser = ArgumentParser(description=_PROG_HELP)
   parser.add_argument(
-      "--app_name", help="The name of the applictation instance", required=True)
+      "--app_name", help="The name of the application instance", required=True)
   parser.add_argument(
-      "--app_uid", help="The uid of the applictation instance", required=True)
+      "--app_uid", help="The uid of the application instance", required=True)
   parser.add_argument(
       "--app_api_version",
       help="The apiVersion of the Application CRD",
