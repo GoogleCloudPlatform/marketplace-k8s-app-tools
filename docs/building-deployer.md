@@ -37,10 +37,10 @@ and test your application. You can use it to inspect your development
 environment, test your application's installation, and run smoke tests
 on your application.
 
-[Review the prerequisites, and install the development tool](https://github.com/GoogleCloudPlatform/marketplace-k8s-app-tools/blob/master/docs/tool-prerequisites.md).
+[Review the prerequisites, and install the development tool](/tool-prerequisites.md).
 
 For information on using `mpdev` to test your application, read the
-[`mpdev` reference](https://github.com/GoogleCloudPlatform/marketplace-k8s-app-tools/blob/master/docs/mpdev-references.md).
+[`mpdev` reference](/mpdev-references.md).
 
 ## Building your deployer
 
