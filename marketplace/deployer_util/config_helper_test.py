@@ -827,6 +827,42 @@ class ConfigHelperTest(unittest.TestCase):
                 type: INVALID_TYPE
           """)
 
+  def test_required_oauth_scopes_valid(self):
+    schema = config_helper.Schema.load_yaml("""
+      applicationApiVersion: v1beta1
+      properties:
+        simple:
+          type: string
+      x-google-marketplace:
+        clusterConstraints:
+          gcp:
+            nodes:
+              requiredOauthScopes:
+              - https://www.googleapis.com/auth/cloud-platform
+      """)
+    schema.validate()
+    self.assertEqual(
+        schema.x_google_marketplace.cluster_constraints.gcp.nodes
+        .required_oauth_scopes,
+        ["https://www.googleapis.com/auth/cloud-platform"])
+
+  def test_required_oauth_scopes_invalid_scope(self):
+    with self.assertRaisesRegexp(
+        config_helper.InvalidSchema,
+        "OAuth scope references must be fully-qualified"):
+      config_helper.Schema.load_yaml("""
+        applicationApiVersion: v1beta1
+        properties:
+          simple:
+            type: string
+        x-google-marketplace:
+          clusterConstraints:
+            gcp:
+              nodes:
+                requiredOauthScopes:
+                - cloud-platform
+        """)
+
   def test_deployer_service_account(self):
     schema = config_helper.Schema.load_yaml("""
         x-google-marketplace:
