@@ -69,10 +69,10 @@ to the staging repo.
 
 ### Tagging your deployer image
 
-The deployer image **must** carry the primary track ID as its Docker tag.
-Marketplace uses the image last tagged with that primary track ID tag when it looks
-for new versions of each track. The deployer image **should** also carry a unique
-version as its Docker tag.
+The deployer image **must**
+[carry the primary track ID and the specific release version ID as its Docker tag](docs/schema.md#required-published-version).
+Marketplace uses the last image tagged with the same primary track ID tag when it
+looks for new versions of each track.
 
 [Learn about organizing your releases in tracks](https://cloud.google.com/marketplace/docs/partners/kubernetes-solutions/set-up-environment#organize-images).
 
