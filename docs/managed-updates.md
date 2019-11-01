@@ -152,13 +152,13 @@ x-google-marketplace:
       Initial release.
     # releaseTypes list is optional.
     # "Security" should only be used if this is an important update to patch
-    # an existing vulnerability, as such updates will appear very prominent for users.
+    # an existing vulnerability, as such update will be very prominent to the user.
     releaseTypes:
     - Feature
     - BugFix
     - Security
-    # If "recommended" is "true", users using older releases are encouraged
-    # to update as soon as possible. This is useful if, for example, this release
+    # If recommend is true, users using older releases are encouraged
+    # to update as soon as possible. Useful if, for example, this release
     # fixes a critical issue.
     recommended: true
 
