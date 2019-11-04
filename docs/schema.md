@@ -201,7 +201,7 @@ To use the value of `port` in the manifest, use `$port`:
 ...
 ```
 
-Schema.yaml specification
+Schema.yaml v2 specification
 ---
 
 For an example of a `v2` `schema.yaml`, refer to [this sample schema](https://github.com/GoogleCloudPlatform/marketplace-k8s-app-tools/blob/master/tests/marketplace/deployer_envsubst_base/standard_v2/schema.yaml).
@@ -211,8 +211,8 @@ All `schema.yaml` files will be required to be `v2` starting in December of this
 ## `properties`
 
 The `properties` section contains the fields that users see in the GCP Console
-when they deploy your application. For each property, you can define the
-following sub-properties.
+when they deploy your app. For each property, you can define the following
+sub-properties.
 
 ### `title`
 
@@ -260,12 +260,12 @@ following syntax to define your list:
 ### `minimum`
 
 If the property is a number, the minimum value that users must enter.
-The value has to be greater or equal than `minimum`.
+The value has to be greater than or equal to `minimum`.
 
 ### `maximum`
 
 If the property is a number, the maximum value that users can enter.
-The value has to be less or equal than `maximum`.
+The value has to be less than or equal to `maximum`.
 
 ### `maxLength`
 
@@ -446,8 +446,8 @@ the following values:
 - `imageProxyRegistry=gcr.io`
 - `imageProxyRepo=your-project/your-company/your-app`
 - `imageProxyTag=1.0.1`
-T
-he primary image above is passed under 2 different parameters/values:
+
+The primary image above is passed under 2 different parameters/values:
 
 - `imageRepo=gcr.io/your-project/your-company/your-app`
 - `imageTag=1.0.1`
