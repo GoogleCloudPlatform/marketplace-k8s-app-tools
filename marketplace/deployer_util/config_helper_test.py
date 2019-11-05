@@ -747,7 +747,7 @@ class ConfigHelperTest(unittest.TestCase):
   def test_publishedVersion_semver(self):
     with self.assertRaisesRegexp(config_helper.InvalidSchema,
                                  'Invalid schema publishedVersion "6.5"'):
-      schema = config_helper.Schema.load_yaml("""
+      config_helper.Schema.load_yaml("""
           x-google-marketplace:
             schemaVersion: v2
             applicationApiVersion: v1beta1
@@ -766,7 +766,7 @@ class ConfigHelperTest(unittest.TestCase):
           """)
 
   def test_k8s_version_constraint(self):
-    schema = config_helper.Schema.load_yaml("""
+    config_helper.Schema.load_yaml("""
         applicationApiVersion: v1beta1
         properties:
           simple:
