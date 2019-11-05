@@ -766,7 +766,7 @@ class ConfigHelperTest(unittest.TestCase):
           """)
 
   def test_k8s_version_constraint(self):
-    config_helper.Schema.load_yaml("""
+    schema = config_helper.Schema.load_yaml("""
         applicationApiVersion: v1beta1
         properties:
           simple:
@@ -775,6 +775,9 @@ class ConfigHelperTest(unittest.TestCase):
           clusterConstraints:
             k8sVersion: '>1.11'
         """)
+    schema.validate()
+    self.assertEqual(
+        schema.x_google_marketplace.cluster_constraints.k8s_version, '>1.11')
 
   def test_resource_constraints(self):
     schema = config_helper.Schema.load_yaml("""
