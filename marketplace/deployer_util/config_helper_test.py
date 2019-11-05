@@ -744,6 +744,27 @@ class ConfigHelperTest(unittest.TestCase):
     self.assertEqual(schema.x_google_marketplace.managed_updates.kalm_supported,
                      True)
 
+  def test_publishedVersion_semver(self):
+    with self.assertRaisesRegexp(config_helper.InvalidSchema,
+                                 'Invalid schema publishedVersion "6.5"'):
+      schema = config_helper.Schema.load_yaml("""
+          x-google-marketplace:
+            schemaVersion: v2
+            applicationApiVersion: v1beta1
+
+            publishedVersion: '6.5'
+            publishedVersionMetadata:
+              releaseNote: Bug fixes
+            images:
+              main:
+                properties:
+                  main.image:
+                    type: FULL
+          properties:
+            simple:
+              type: string
+          """)
+
   def test_k8s_version_constraint(self):
     schema = config_helper.Schema.load_yaml("""
         applicationApiVersion: v1beta1
@@ -754,9 +775,6 @@ class ConfigHelperTest(unittest.TestCase):
           clusterConstraints:
             k8sVersion: '>1.11'
         """)
-    schema.validate()
-    self.assertEqual(
-        schema.x_google_marketplace.cluster_constraints.k8s_version, '>1.11')
 
   def test_resource_constraints(self):
     schema = config_helper.Schema.load_yaml("""

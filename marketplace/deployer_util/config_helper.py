@@ -23,6 +23,7 @@ import sys
 import yaml
 
 NAME_RE = re.compile(r'[a-zA-z0-9_\.\-]+$')
+SEMVER_RE = re.compile(r'^[0-9]+\.[0-9]+\..+$')
 
 XGOOGLE = 'x-google-marketplace'
 XTYPE_NAME = 'NAME'
@@ -217,6 +218,10 @@ class SchemaXGoogleMarketplace:
     self._published_version = _must_get(
         dictionary, 'publishedVersion',
         'x-google-marketplace.publishedVersion is required')
+    if not SEMVER_RE.match(self._published_version):
+      raise InvalidSchema(
+          'Invalid schema publishedVersion "{}"; must be semver including patch version'
+          .format(self._published_version))
     self._published_version_meta = _must_get_and_apply(
         dictionary, 'publishedVersionMetadata', lambda v: SchemaVersionMeta(v),
         'x-google-marketplace.publishedVersionMetadata is required')
