@@ -23,7 +23,11 @@ import sys
 import yaml
 
 NAME_RE = re.compile(r'[a-zA-z0-9_\.\-]+$')
-SEMVER_RE = re.compile(r'^[0-9]+\.[0-9]+\.([^.]+)$')
+# Suggested from https://semver.org
+SEMVER_RE = re.compile(r'^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)'
+                       '(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)'
+                       '(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?'
+                       '(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$')
 
 XGOOGLE = 'x-google-marketplace'
 XTYPE_NAME = 'NAME'
