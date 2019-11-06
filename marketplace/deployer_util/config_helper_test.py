@@ -689,7 +689,7 @@ class ConfigHelperTest(unittest.TestCase):
 
           applicationApiVersion: v1beta1
 
-          publishedVersion: 6.5.130
+          publishedVersion: 6.5.130-metadata
           publishedVersionMetadata:
             releaseNote: Bug fixes
             releaseTypes:
@@ -718,7 +718,8 @@ class ConfigHelperTest(unittest.TestCase):
     self.assertTrue(schema.x_google_marketplace.is_v2())
     self.assertEqual(schema.x_google_marketplace.app_api_version, 'v1beta1')
 
-    self.assertEqual(schema.x_google_marketplace.published_version, '6.5.130')
+    self.assertEqual(schema.x_google_marketplace.published_version,
+                     '6.5.130-metadata')
     version_meta = schema.x_google_marketplace.published_version_meta
     self.assertEqual(version_meta.release_note, 'Bug fixes')
     self.assertListEqual(version_meta.release_types, ['BUG_FIX'])
