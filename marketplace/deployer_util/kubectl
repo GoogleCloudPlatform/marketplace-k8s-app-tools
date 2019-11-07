@@ -1,0 +1,39 @@
+#!/bin/bash
+
+# Determines the best kubectl client to use based on the server version.
+# kubectl is compatible within 1 minor version (older or newer).
+
+set -euo pipefail
+
+readonly KUBECTL_BASE_LOCATION="/opt/kubectl"
+readonly DEFAULT_KUBECTL="${KUBECTL_BASE_LOCATION}/default/kubectl"
+
+# Extracts the server major and minor versions, stripping
+# SemVer expression characters like "+".
+version_output="$(${DEFAULT_KUBECTL} version --output=json)"
+major_version="$(echo "${version_output}" \
+  | jq -r '.serverVersion.major' \
+  | tr -c -d ".[:digit:]")"
+minor_version="$(echo "${version_output}" \
+  | jq -r '.serverVersion.minor' \
+  | tr -c -d ".[:digit:]")"
+
+# Derive the -1 and +1 versions.
+prev_minor_version="$(expr ${minor_version} - 1)"
+next_minor_version="$(expr ${minor_version} + 1)"
+
+# Find the best kubectl candidate to use.
+kubectl_to_use="${DEFAULT_KUBECTL}"
+for candidate in \
+  "${KUBECTL_BASE_LOCATION}/${major_version}.${minor_version}/kubectl" \
+  "${KUBECTL_BASE_LOCATION}/${major_version}.${next_minor_version}/kubectl" \
+  "${KUBECTL_BASE_LOCATION}/${major_version}.${prev_minor_version}/kubectl"; do
+  if [[ -e "${candidate}" ]]; then
+    kubectl_to_use="${candidate}"
+    break
+  fi
+done
+
+echo "Using ${kubectl_to_use} (server=${major_version}.${minor_version})" >&2
+
+exec "${kubectl_to_use}" "$@"

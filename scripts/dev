@@ -41,6 +41,6 @@ docker run \
   ${gcloud_mount[*]} \
   ${gcloud_original_path[*]} \
   ${EXTRA_DOCKER_PARAMS[*]} \
-  --rm \
+  -it --rm \
   "${MARKETPLACE_TOOLS_IMAGE}:${MARKETPLACE_TOOLS_TAG}" \
   "$@"
