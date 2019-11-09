@@ -711,6 +711,27 @@ indicates whether Istio is enabled on the cluster.
 - `REQUIRED`: The app requires Istio to work properly.
 - `UNSUPPORTED`: The app does not support Istio.
 
+---
+
+### gcp
+
+Use this property to indicate GCP-specific app requirements.
+
+You can can specify OAuth scopes required by your application. The UI requires
+existing clusters to have the specified scopes in order to be selected, and
+also includes the specified scopes in cluster creation. Note that the
+"https://www.googleapis.com/auth/devstorage.read_only" (or other storage-reading
+scope) is required by default for pulling images from GCR.
+
+```yaml
+x-google-marketplace:
+  clusterConstraints:
+    gcp:
+      nodes:
+        requiredOauthScopes:
+        - https://www.googleapis.com/auth/cloud-platform.read-only
+```
+
 ## form
 
 ### help widget
