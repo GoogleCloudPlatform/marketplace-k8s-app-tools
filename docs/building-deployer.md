@@ -37,10 +37,10 @@ and test your application. You can use it to inspect your development
 environment, test your application's installation, and run smoke tests
 on your application.
 
-[Review the prerequisites, and install the development tool](/tool-prerequisites.md).
+[Review the prerequisites, and install the development tool](tool-prerequisites.md).
 
 For information on using `mpdev` to test your application, read the
-[`mpdev` reference](/mpdev-references.md).
+[`mpdev` reference](mpdev-references.md).
 
 ## Building your deployer
 
@@ -59,32 +59,32 @@ First, decide how you want to create your Kubernetes application manifests:
     Learn about [building your deployer with `envsubst`](building-deployer-envsubst.md).
 
 Regardless of the method you choose, your deployer needs a `schema.yaml` file,
-which declares the parameters for provisioning the application.
-[Learn more about creating a schema](schema.md) for your application.
+which declares the parameters for provisioning the app.
+[Learn more about creating a schema](schema.md) for your app.
 
 ## Publishing a new version
 
-A new application version is submitted by pushing the corresponding deployer image
-to the staging repo.
+A new app version is submitted by pushing the corresponding deployer image to the
+staging repo.
 
-### Tagging your deployer image
+### Tagging your images
 
-The deployer image **must**
-[carry the primary track ID and the specific release version ID as its Docker tag](docs/schema.md#required-published-version).
+All of your app's images **must**
+[carry the primary track ID and the specific release version ID as its Docker tag](schema.md#required-published-version).
 Marketplace uses the last image tagged with the same primary track ID tag when it
 looks for new versions of each track.
 
 [Learn about organizing your releases in tracks](https://cloud.google.com/marketplace/docs/partners/kubernetes-solutions/set-up-environment#organize-images).
 
-The application images are located from references in the deployer's `schema.yaml`.
+The app images are located from references in the deployer's `schema.yaml`.
 Each of these images **should** carry the primary track ID as its docker tag.
 It **should** also carry a unique version as its docker tag. The deployer
 **should** reference these images using the unique version tag.
 
 For example, the tags can be `1.4` (track ID) and `1.4.34` (version). The previous
 deployer image carries the `1.4.33` tag, and _used_ to carry the `1.4` tag.
-The application image carries both `1.4` and `1.4.34` tags. It is possible for the
-application image to remain the same across minor versions, in which case it will
+The app image carries both `1.4` and `1.4.34` tags. It is possible for the
+app image to remain the same across minor versions, in which case it will
 carry all three tags: `1.4`, `1.4.33`, and `1.4.34`.
 A snapshot of the images and tags looks like this:
 - deployer (new): `1.4`, `1.4.34`
@@ -93,16 +93,16 @@ A snapshot of the images and tags looks like this:
 
 ### Copying of images into Marketplace public repo
 
-NOTE: Deployer and application images in the staging repo are never visible to the
+NOTE: Deployer and app images in the staging repo are never visible to the
 end users of Marketplace. In fact, they will _not_ have access to these
 staging repos. End users use the images from Marketplace's public GCR repo.
 
-The deployer image and all of the referenced application images will be copied
+The deployer image and all of the referenced app images will be copied
 into the final Marketplace's public GCR repo. This means that images will have
 new names, and potentially also new tags.
 
 The deployer does _not_, and **should not**, have the knowledge of how the
 re-published images should be named or tagged. This is because at deployment time,
-full names of the application images are passed to the deployer as input parameters.
-This is the reason why we require that all application images used by the deployer
+full names of the app images are passed to the deployer as input parameters.
+This is the reason why we require that all app images used by the deployer
 **must** be parameterized in `schema.yaml`.
