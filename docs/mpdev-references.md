@@ -137,3 +137,10 @@ mpdev publish \
   --gcs_repo=gs://your-bucket/your-company/your-app/[TRACK]
 
 ```
+
+You can now install the application at this version:
+
+```sh
+mpdev install \
+  --version_meta_file=gs://your-bucket/your-company/your-app/[TRACK]/[VERSION].yaml \
+  --parameters='{"name": "installation-1", "namespace": "test"}'
