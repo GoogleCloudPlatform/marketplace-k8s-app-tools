@@ -345,7 +345,7 @@ the version is `v1beta1`.
 ### (Required) `publishedVersion`
 
 The
-[release version for the application](docs/building-deployer.md#tagging-your-deployer-image),
+[release version for the application](building-deployer.md#tagging-your-deployer-image),
 as a string. This must match the release tag on all your application images. For
 example, `'1.0.5'`.
 
