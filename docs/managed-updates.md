@@ -1,6 +1,6 @@
 # Managed Updates
 
-****** OBSOLETE ******
+****** DEPRECATED ******
 
 Application Manager is now beta. The information in this guide is now in the
 resources below. If you were part of the Managed Updates Alpha, you must update
@@ -17,7 +17,7 @@ for your GCP Marketplace listing.
 * Read the overview of
 [selling Kubernetes applications on GCP Marketplace](https://cloud.google.com/marketplace/docs/partners/kubernetes-solutions/).
 
-****** OBSOLETE ******
+****** DEPRECATED ******
 
 ## Overview
 
