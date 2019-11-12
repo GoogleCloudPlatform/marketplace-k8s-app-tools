@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -eo pipefail
+set -euo pipefail
 
 # KUBE_CONFIG can point to a kubeconfig file or
 # the standard kubectl config directory.
@@ -34,6 +34,11 @@ if [[ -e "${GCLOUD_CONFIG}" ]]; then
   gcloud_original_path=(--env "GCLOUD_ORIGINAL_PATH=${canonical_gcloud_config}")
 fi
 
+terminal_docker_param="-t"
+if [[ -t 0 ]]; then
+  terminal_docker_param="-it"
+fi
+
 docker run \
   --mount "type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock,readonly" \
   --net=host \
@@ -41,6 +46,6 @@ docker run \
   ${gcloud_mount[*]} \
   ${gcloud_original_path[*]} \
   ${EXTRA_DOCKER_PARAMS[*]} \
-  -it --rm \
+  "${terminal_docker_param}" --rm \
   "${MARKETPLACE_TOOLS_IMAGE}:${MARKETPLACE_TOOLS_TAG}" \
   "$@"
