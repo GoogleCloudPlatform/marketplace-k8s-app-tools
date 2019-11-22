@@ -3,33 +3,34 @@
 You need a `schema.yaml` file when you [build your deployer](building-deployer.md).
 
 The schema file provides the following:
-- Information about the current release, such as release version, release
+- Information about the current release, such as its release version, release
   notes, etc.
-- Declaring __all__ images used by the application. These images must be
+- A declaration of all images used by the app. These images must be
   explicitly declared for security scanning, open source compliance, and
-  republishing to GCP Marketplace GCR.
-- Parameters that users can customize when they deploy the application,
-  including how they are rendered in the deployment configuration UI.
-- Cluster constraints and requirements, such as the minimum version of
+  republishing to the Google Cloud Marketplace Google Container Registry (GCR).
+- The parameters that users can customize when they deploy the app, and
+  how they are rendered in the deployment configuration UI.
+- Cluster constraints and requirements, such as the minimum required version of
   Kubernetes.
-- Other metadata, such as Managed Updates capabilities.
+- Other metadata, such as support for managed updates.
 
 ## Overview
 
-In your deployer image, you must add the schema file to `/data/schema.yaml`.
+In your deployer image, you must add the schema file at `/data/schema.yaml`.
 
-The format of `schema.yaml` follows a subset of JSON schema specifications.
-It also supports Marketplace specific extensions.
+The format of `schema.yaml` follows a subset of JSON schema specifications, and
+supports Google Cloud Marketplace-specific extensions.
 
 There are currently two versions of the schema. You can choose to follow either
- the `v1` or `v2` specifications for your `schema.yaml`
-file. However, if you want to support managed updates for your application, you
-must follow the `v2` specification. You are encouraged to use `v2` as it will
-soon become a requirement for all applications.
+the `v1` or `v2` specifications for your `schema.yaml` file, but it's recommended
+that you use the `v2` specification, as this will soon be required for all new apps.
+If you want to
+[support managed updates for your app](https://cloud.google.com/marketplace/docs/partners/kubernetes-solutions/support-managed-updates),
+then you must follow the `v2` specification.
 
-This is a basic example of a schema.yaml file. This declares 2 standard
-parameters that users have to choose when deploying an app: the name of the
-application instance and the Kubernetes namespace.
+This is a basic example of a `schema.yaml` file. This schema declares two standard
+parameters that users must specify when deploying the app: the name of the
+app instance, and the Kubernetes namespace.
 
 ```yaml
 # v1 or v2 specific sections are omitted.
@@ -79,16 +80,16 @@ x-google-marketplace:
 
   # This MUST be specified to indicate that the deployer supports managed updates.
   # Note that this could be left out or kalmSupported set to false, in
-  # which case the deployer uses schema v2 but does not support update.
+  # which case the deployer uses schema v2 but does not support updates.
   managedUpdates:
     kalmSupported: true
 
-  # Image declaration is required here. See the Images section below.
+  # Image declaration is required here. Refer to the Images section below.
   images: {}
 
-  # Other fields like clusterConstraints can be included here.
+  # Other fields, like clusterConstraints, can be included here.
 
-# Properties and Required sections are the comman in both v1 and v2.
+# The Properties and Required sections of v2 are structured the same as those of v1.
 properties: {}
 ```
 
@@ -99,15 +100,15 @@ The version of the schema. If you want to
 
 ### (Required) `applicationApiVersion`
 
-The version of the Application Custom Resource object. As of November 2019,
-the version is `v1beta1`.
+The version of the Application Custom Resource object. This version must
+be `v1beta1` or newer.
 
 ### (Required) `publishedVersion`
 
 The
-[release version for the application](building-deployer.md#tagging-your-deployer-image),
-as a string. This must match the release tag on all your application images. For
-example, `'1.0.5'`.
+[release version of the app](building-deployer.md#tagging-your-deployer-image),
+as a string. This must match the release tag on all your app images. For example,
+`'1.0.5'`.
 
 ### `publishedVersionMetadata`
 
@@ -132,8 +133,8 @@ A list of release types, which can be one or more of the following:
 - `Feature`
 - `BugFix`
 - `Security`. We recommend using `Security` only if the update addresses a
-  critical security issue. In the GCP Console, security updates are displayed
-  more prominently than other types of updates.
+  critical security issue. In the Google Cloud Console, security updates are
+  displayed more prominently than other types of updates.
 
 #### `recommended`
 
@@ -142,23 +143,22 @@ security update. If `true`, users are encouraged to update as soon as possible.
 
 ### `managedUpdates`
 
-Use this section to indicate that your deployer supports managed updates. If
+Used to indicate that your deployer supports managed updates. If
 you omit this section, users must manually update their installations.
 
 #### `kalmSupported`
 
-If you want to support managed updates for your application, set this to
+If you want to support managed updates for your app, set this to
 `true`.
 
 ### Image declaration
 
-Use this section to declare __all__ images used your application.
-Since the images are republished and end users will use the versions
-republished in Marketplace's public GCR, all workloads must also
-parameterize the image fields. At deploy time, the final locations
-of the images will be available via property values declare here.
-Note that no assumptions should be made about these final locations
-as they could change.
+A declaration of all images used in your app. Since the images are republished,
+and end users will use the versions republished in Google Cloud Marketplace's
+public GCR, all workloads must also parameterize the image fields. At deploy time,
+the final locations of the images will be available via property values declared
+here. You should not rely on knowing these final locations ahead of time, as they
+can change.
 
 Here is an example `images` section:
 
@@ -190,21 +190,21 @@ This example section declares two images, in addition to the deployer:
 `gcr.io/your-project/your-company/your-app/proxy:1.0.1`
 
 Their names are set as declared within the `images` section; their shared
-prefix `gcr.io/your-project/your-company/your-app` is set when you onboard
-your application for publishing, and externally to the `schema.yaml` file.
+prefix `gcr.io/your-project/your-company/your-app` is determined externally to
+the `schema.yaml` file, when you onboard your app for publishing.
 
-The images can be passed as parameters or values to your application templates
-or charts (as applicable) by using the `properties` section. Each property
-can pass either the full image name or a specific part of it, depending on
-its assigned `type`:
+The images can be passed as parameters or values to your app templates or
+charts (as applicable) by using the `properties` section. Each property can
+pass either the full image name or a specific part of it, depending on its
+assigned `type`:
 
 - `FULL` passes the entire image name,
   `gcr.io/your-project/your-company/your-app:1.0.1`
 - `REGISTRY` only passes the initial `gcr.io`
-- `REPO_WITHOUT_REGISTRY` passes only the repo, without the registry or tag,
-  which would be `your-project/your-company/your-app`
+- `REPO_WITHOUT_REGISTRY` passes only the repo, without the registry or tag;
+  for example, `your-project/your-company/your-app`
 - `REPO_WITH_REGISTRY` passes the repo, with the registry and without the
-  tag, which would be `gcr.io/your-project/your-company/your-app`
+  tag; for example, `gcr.io/your-project/your-company/your-app`
 - `TAG` only passes the image tag, which in this case is `1.0.1`
 
 In the earlier example, the `proxy` image is passed to the template with
@@ -220,39 +220,38 @@ The primary image above is passed under 2 different parameters/values:
 - `imageRepo=gcr.io/your-project/your-company/your-app`
 - `imageTag=1.0.1`
 
-Note that when users deploy your app from GCP Marketplace, the final image
-names are different, but follow the same release tag and name prefix rule. For
-example, the published images could be under:
+Note that when users deploy your app from Google Cloud Marketplace, the final
+image names are different, but follow the same release tag and name prefix rule.
+For example, the published images could be under:
 
 - `marketplace.gcr.io/your-company/your-app:1.0.1`
 - `marketplace.gcr.io/your-company/your-app/deployer:1.0.1`
 - `marketplace.gcr.io/your-company/your-app/proxy:1.0.1`
 
-## v1 specifications
+## v1 specification
 
 ```yaml
 # MUST match the version of the Application custom resource object.
 # This is the same as the top level applicationApiVersion field in v1.
 applicationApiVersion: v1beta1
 
-# Properties and Required sections are the comman in both v1 and v2.
+# The Properties and Required sections of v1 are structured the same as those of v2.
 properties: {}
 ```
 
 ### (Required) `applicationApiVersion`
 
-The version of the Application Custom Resource object. As of November 2019,
-the version is `v1beta1`.
+The version of the Application Custom Resource object. This version must
+be `v1beta1` or newer.
 
 ### Image declaration
 
-Use this section to declare __all__ images used your application.
-Since the images are republished and end users will use the versions
-republished in Marketplace's public GCR, all workloads must also
-parameterize the image fields. At deploy time, the final locations
-of the images will be available via property values declare here.
-Note that no assumptions should be made about these final locations
-as they could change.
+A declaration of all images used in your app. Since the images are republished,
+and end users will use the versions republished in Google Cloud Marketplace's
+public GCR, all workloads must also parameterize the image fields. At deploy time,
+the final locations of the images will be available via property values declared
+here. You should not rely on knowing these final locations ahead of time, as they
+can change.
 
 In `v1`, images are declared inside the `properties` section, as follows:
 
@@ -270,62 +269,54 @@ properties:
       type: IMAGE
 ```
 
-This example declares two images, in addition to the deployer (note that
-the `default` values specify the image names and are required):
+This example declares two images, in addition to the deployer:
 
 `gcr.io/your-project/your-company/your-app:1.0.1`
 `gcr.io/your-project/your-company/your-app/proxy:1.0.1`
 
+The `default` values specify the images' names, and are required.
+
 Note that the images share a common prefix
-`gcr.io/your-project/your-company/your-app`, which is set when you onboard
-your application for publishing, and externally to the `schema.yaml` file.
-A primary image for the application is required; its repository must be
-exactly the common prefix.
+`gcr.io/your-project/your-company/your-app`, which is set externally to the
+`schema.yaml` file, when you onboard your app for publishing. A primary image for
+your app is required; its repository must exactly match the common prefix of the
+images.
 
-The two declared properties, `mainImageName` and `proxyImageName` will
-receive the final republished images when end users deploy the app.
+The two declared properties, `mainImageName` and `proxyImageName`, receive the
+final republished images when end users deploy the app.
 
-Note that when users deploy your app from GCP Marketplace, the final image
-names are different, but follow the same release tag and name prefix rule. For
-example, the published images could be under:
+When users deploy your app from Google Cloud Marketplace, the final image names
+may be different, but they will follow the same release tag and name prefix rule.
+For example, the published images could be under:
 
 - `marketplace.gcr.io/your-company/your-app:1.0.1`
 - `marketplace.gcr.io/your-company/your-app/deployer:1.0.1`
 - `marketplace.gcr.io/your-company/your-app/proxy:1.0.1`
 
-Note: all `IMAGE` properties are not visible in the configuration UI.
+Note: `IMAGE` properties are not visible in the configuration UI.
 
 ## Properties
 
-This section is common to both `v1` and `v2` schemas.
+This section is a part of both the `v1` and `v2` schemas.
 
-Declared under `properties` section, these properties define what parameters
-are to be displayed in the configuration UI form and customized by the users
+The properties declared within the `properties` section define which
+parameters are displayed in the configuration UI form and customized by users
 before the app is deployed.
 
-`required` is a list of required parameters, which users must provide a value
-for prior to deployment.
+`required` is a list of required parameters, for which users must provide a
+value prior to deployment.
 
 ### Helm chart values
 
-There are a few important notes on how the schema properties interacts with
-the Helm chart:
+Each property defined in the schema maps to a Helm value, as defined in the
+Helm chart's `values.yaml` file. The properties in the schema should be a
+subset of the keys defined in `values.yaml`. For properties that map to nested
+fields in `values.yaml`, you can use the dot (`.`) notation in your schema.
 
-- Each property defined in the schema maps to a Helm value, as
-  as defined in the chart's `values.yaml` file. The properties in the schema
-  should be a subset of the keys defined in `values.yaml`.
+Default values in the schema override default values in `values.yaml`, as do
+any user-supplied inputs, as defined by the `properties` section of the schema.
 
-- User-supplied inputs, as defined by properties in the schema,
-  override the default values in `values.yaml`.
-
-- For properties that map to nested fields in `values.yaml`, you can use the
-  dot (`.`) notation in your schema.
-
-- In the `x-google-marketplace` section of the schema, `NAME` and `NAMESPACE`
-  are always required. These fields map to the Helm chart's `Release.Name` and
-  `Release.Namespace` directives respectively.
-
-- The defaults in the schema override the defaults in `values.yaml`.
+The `x-google-marketplace` section of the schema always requires a `NAME` and `NAMESPACE`. These fields map to the Helm chart's `Release.Name` and `Release.Namespace` directives, respectively.
 
 For example, let's say you have the following `values.yaml` file:
 
@@ -358,75 +349,9 @@ properties:
       type: IMAGE
 ```
 
-### Referencing values from a Helm-based deployer
-
-In Helm charts, you can reference schema parameters similar to value in
-`values.yaml`.
-
-For example, this `schema.yaml` gets a `port` from the user:
-
-```yaml
-applicationApiVersion: v1beta1
-properties:
-  port:
-    type: integer
-  name:
-    type: string
-    x-google-marketplace:
-      type: NAME
-  namespace:
-    type: string
-    x-google-marketplace:
-      type: NAMESPACE
-required:
-- name
-- namespace
-- port
-```
-
-In the Helm chart, you can use the value of `port` in the same way that you
-would use a value from `values.yaml`:
-
-```yaml
-...
-      containers:
-        - name: "myContainer"
-          image: "myImage"
-          ports:
-            - name: http
-              containerPort: {{ .Values.port }}
-...
-```
-
-Note that:
-
-- Values defined in `schema.yaml` override values defined in `values.yaml` when
-  users deploy your application. For example, if your `values.yaml` contains
-  `port: 80`, but a user sets the value of `port` to `21` before deploying, the
-  value `21` is used when your application is deployed.
-
-- You can use dots (`.`) to reference nested values. For example, if your
-  `values.yaml` looks like this:
-
-    ```yaml
-    mysql:
-      image: <path to image>
-    ```
-
-    You can use the image path in the schema file as `mysql.image`, as in this
-    example:
-
-    ```yaml
-    applicationApiVersion: v1beta1
-    properties:
-      mysql.image:
-        type: string
-    ...
-    ```
-
 ### Referencing values in an `envsubst`-based deployer
 
-All the parameters defined in `schema.yaml` can be used in your Kubernetes
+All of the parameters defined in `schema.yaml` can be used in your Kubernetes
 manifests. To use a parameter, use the name you defined in `schema.yaml`,
 prefixed with `$`.
 
@@ -466,14 +391,12 @@ To use the value of `port` in the manifest, use `$port`:
 
 ### Property specifications
 
-The `properties` section contains the fields that users see in the GCP Console
-when they deploy your app. For each property, you can define the following
-sub-properties.
+For each property, you can define the following sub-properties:
 
 #### `title`
 
-The text shown in the in the GCP Marketplace UI when users configure their
-deployment.
+The text shown in the in the Google Cloud Marketplace UI when users configure
+their deployment.
 
 ![Custom property in the UI](images/custom-property-ui.png)
 
@@ -493,12 +416,12 @@ in your user guides.
 
 #### `default`
 
-A default value to use for the property, if users don't provide a value.
+A default value for the property, if users don't provide a value.
 
 #### `enum`
 
-A list of valid values for the property, shown as a drop-down menu. Use the
-following syntax to define your list:
+A list of valid values for the property, shown as a drop-down menu. To define
+your list, use the following syntax:
 
 ```yaml
   testProperty:
@@ -516,12 +439,12 @@ following syntax to define your list:
 #### `minimum`
 
 If the property is a number, the minimum value that users must enter.
-The value has to be greater than or equal to `minimum`.
+The value must be greater than or equal to `minimum`.
 
 #### `maximum`
 
 If the property is a number, the maximum value that users can enter.
-The value has to be less than or equal to `maximum`.
+The value must be less than or equal to `maximum`.
 
 #### `maxLength`
 
@@ -529,7 +452,7 @@ For `string` properties, the maximum length of the value.
 
 #### `pattern`
 
-A regex pattern. The value needs to match `pattern`.
+A regex pattern. The value must match `pattern`.
 
 #### `x-google-marketplace`
 
@@ -538,8 +461,8 @@ When you add this annotation, you must also specify a `type`, described in
 
 ### Property `x-google-marketplace.type`
 
-Defines how the property must be handled by GCP Marketplace. Each type has a
-different set of properties.
+Defines how the property must be handled by Google Cloud Marketplace. Each type
+has a different set of properties.
 
 #### Supported types
 
@@ -549,29 +472,32 @@ different set of properties.
 - `REPORTING_SECRET`: The Secret resource name that contains the credentials
   for usage reports. These credentials are used by the
   [usage-based billing agent](https://github.com/GoogleCloudPlatform/ubbagent).
-- [`MASKED_FIELD`](#type-masked_field): A string value whose characters will be masked when entered in the UI.
+- [`MASKED_FIELD`](#type-masked_field): A string value whose characters will be
+  masked when entered in the UI.
 - [`GENERATED_PASSWORD`](#type-generated_password): Indicates that the property
-  is a value to be generated when the application is deployed.
+  is a value to be generated when the app is deployed.
 - [`SERVICE_ACCOUNT`](#type-service_account): The name of a pre-provisioned
   Kubernetes `ServiceAccount`. If the ServiceAccount does not exist, a new one
-  is created when users deploy the application.
+  is created when users deploy the app.
 - [`STORAGE_CLASS`](#type-storage_class): The name of a pre-provisioned
   Kubernetes `StorageClass`. If the StorageClass does not exist, a new one is
-  created when users deploy the application.
+  created when users deploy the app.
 - [`STRING`](#type-string): A string that needs special handling, such as a
   string that is base64-encoded.
 - [`APPLICATION_UID`](#type-application_uid): The UUID of the created
   `Application` object.
 - [`ISTIO_ENABLED`](#type-istio_enabled): Indicates whether [Istio](https://istio.io)
   is enabled on the cluster for the deployment.
-- [`INGRESS_AVAILABLE`](#type-ingress_available): Indicates whether the cluster is detected to have Ingress support.
-- [`TLS_CERTIFICATE`](#type-tls_certificate): To be used to support a custom certificate or generate a self-signed certificate.
+- [`INGRESS_AVAILABLE`](#type-ingress_available): Indicates whether the cluster is
+  detected to have Ingress support.
+- [`TLS_CERTIFICATE`](#type-tls_certificate): This is used to support a custom
+  certificate, or generate a self-signed certificate.
 
 #### type: MASKED_FIELD
 
-Indicates that the property where the value that the user enters must be
+Indicates that this is a property where the value that the user enters must be
 masked. Use this annotation for fields such as passwords chosen by the user.
-In the GCP Marketplace UI, users will also see an option to reveal the
+In the Google Cloud Marketplace UI, users will also see an option to reveal the
 value as plain text.
 
 Example:
@@ -589,11 +515,12 @@ properties:
 
 #### type: NAMESPACE
 
-This property is required. It specifies the target namespace where all of application
-resources are installed into.
+This property is required. It specifies the target namespace where all of app
+resources are installed.
 
-A `default` value can be specified, in which case the UI will auto-select this
-namespace instead of using the default heuristics of picking or creating a namespace.
+A `default` value can be specified, in which case the UI will auto-select the
+default namespace instead of using its typical heuristics for picking or
+creating a namespace.
 
 ```yaml
 properties:
@@ -620,8 +547,12 @@ properties:
         base64: True           # Default is True
 ```
 
-- `includeSymbols` if `True`, the special characters are included in the generated password.
-- `base64` if `True`, the generated password is passed as a base64-encoded value. This means it can be used directly in a `Secret` manifest. If the value is to be encoding in your helm template, this property should be set to `False`.
+- If `includeSymbols` is `True`, the special characters are included in the
+  generated password.
+- If `base64` is `True`, the generated password is passed as a base64-encoded
+  value. This means that it can be used directly in a `Secret` manifest. If the
+  value is to be encoded in your Helm template, this property should be set to
+  `False`.
 
 #### type: SERVICE_ACCOUNT
 
@@ -664,8 +595,8 @@ properties:
 All Storage Classes need to be defined as parameters in `schema.yaml`.
 
 If you add a Kubernetes `StorageClass` as a resource in your manifest, the
-deployment fails with an authentication error, because the deployer doesn't run
-with enough privileges to create a Storage Class.
+deployment will fail with an authentication error, because the deployer doesn't
+run with enough privileges to create a Storage Class.
 
 For example, this `schema.yaml` snippet creates a Storage Class:
 
@@ -683,8 +614,8 @@ The created `StorageClass` has the name `<namespace>-<app_name>-<property_name>`
 
 #### type: STRING
 
-This is used to represent a string that needs special handling. For example,
-if a string is base64 encoded.
+This is used to represent a string that needs special handling, such as a
+base64-encoded string.
 
 Example:
 
@@ -713,8 +644,8 @@ Your template must handle the following two scenarios:
   include an `Application` object in the manifest. This object is applied
   to update the placeholder.
 
-- If the value for the property is a UUID, the template must
-  NOT include an `Application` object in its manifest.
+- If the value for the property is a UUID, the template must NOT include
+  an `Application` object in its manifest.
 
 If you are using Helm, do not include the `Application` object in the manifest.
 
@@ -739,7 +670,7 @@ properties:
   value. You can use the boolean in the template to determine whether to
   include an `Application` resource in the manifest.
 
-  If you're using Helm, in the Helm chart, you can do one of the following:
+  If you're using Helm, you can do one of the following in the Helm chart:
 
   ```yaml
   {{- if not .Values.application_uid }}
@@ -755,15 +686,15 @@ properties:
 
 #### type: ISTIO_ENABLED
 
-This boolean property is True if the environment has [Istio](https://istio.io/)
-enabled, and False otherwise. The deployer and template can use this signal to
+This boolean property is `True` if the environment has [Istio](https://istio.io/)
+enabled, and `False` otherwise. The deployer and template can use this signal to
 adapt the deployment accordingly.
 
-[Review the limitations for GCP Marketplace apps on clusters that run Istio](https://cloud.google.com/marketplace/docs/partners/kubernetes-solutions/create-app-package#istio-limitations).
+[Review the limitations for Google Cloud Marketplace apps on clusters that run Istio](https://cloud.google.com/marketplace/docs/partners/kubernetes-solutions/create-app-package#istio-limitations).
 
 #### type: INGRESS_AVAILABLE
 
-This boolean property is True if the cluster has an Ingress controller. The
+This boolean property is `True` if the cluster has an Ingress controller. The
 deployer and template can use this signal to adapt the deployment accordingly.
 
 #### type: TLS_CERTIFICATE
@@ -771,7 +702,7 @@ deployer and template can use this signal to adapt the deployment accordingly.
 This property provides an SSL/TLS certificate for the Kubernetes manifest. By
 default, a self-signed certificate is generated.
 
-The example below shows the syntax to declare a certificate:
+The example below shows the syntax used to declare a certificate:
 
 ```yaml
 properties:
@@ -785,7 +716,7 @@ properties:
           base64EncodedCertificate: TLS_CERTIFICATE_CRT
 ```
 
-Where:
+where:
 
 * `base64EncodedPrivateKey` indicates the property that gets the private key.
 * `base64EncodedCertificate` indicates the property that gets the certificate.
@@ -800,8 +731,7 @@ in the following JSON format:
 }
 ```
 
-If you're using a Helm chart, you can handle the certificate in the following
-way:
+If you're using a Helm chart, you can handle the certificate like this:
 
 ```yaml
 apiVersion: v1
@@ -815,8 +745,8 @@ data:
 type: kubernetes.io/tls
 ```
 
-If you're using an `envsubst` manifest, you can handle the certificate in the
-following way:
+If you're using an `envsubst` manifest, you can handle the certificate this
+way:
 
 ```yaml
 apiVersion: v1
@@ -835,9 +765,9 @@ type: kubernetes.io/tls
 This section is common to both `v1` and `v2` schemas.
 
 Use `clusterConstraints` to specify the requirements for the Kubernetes
-cluster. The requirements determine whether your application can be run on
-the cluster. For example, you can specify that the cluster must be set up to
-run a minimum number of replicas.
+cluster. The requirements determine whether your app can be run on the
+cluster. For example, you can specify that the cluster must be set up to run
+a minimum number of replicas.
 
 For example, the following `schema.yaml` specifies that the cluster must have
 3 nodes, 256 MiB of memory, and 500 CPU millicores (0.5 CPU cores):
@@ -859,18 +789,17 @@ x-google-marketplace:
           type: REQUIRE_ONE_NODE_PER_REPLICA
 ```
 
-Each entry under `resources` is roughly equivalent to a workload in the
-application.
+Each entry under `resources` is roughly equivalent to a workload in the app.
 
 * `affinity` defines the relationship between the nodes and the replicas.
 
-    * `simpleNodeAffinity` is an affinity definition. It has 2 types:
+    * `simpleNodeAffinity` is an affinity definition. It has two types:
 
         * `REQUIRE_ONE_NODE_PER_REPLICA`: The number of nodes must be at least
           the same as the number of replicas, so that each replica is scheduled
           on a different node.
         * `REQUIRE_MINIMUM_NODE_COUNT`: The minimum number of nodes must be
-          specified separately in `minimumNodeCount`. For example:
+          specified separately, in `minimumNodeCount`. For example:
 
 ```yaml
 x-google-marketplace:
@@ -902,10 +831,10 @@ x-google-marketplace:
 ```
 
 Supported types:
-- `OPTIONAL`: The app works with Istio but does not require it.
+- `OPTIONAL`: The app works with Istio, but does not require it.
 - `REQUIRED`: The app requires Istio to work properly.
 - `UNSUPPORTED`: The app does not support Istio.
 
 If this section is not specified, users see a warning when the app is deployed
-to an Istio-enabled environment. The [`ISTIO_ENABLED`](#type-istio_enabled)
+to an Istio-enabled environment. The [`ISTIO_ENABLED`](#type-istio_enabled) type
 indicates whether Istio is enabled on the cluster.
