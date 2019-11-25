@@ -689,7 +689,7 @@ class ConfigHelperTest(unittest.TestCase):
 
           applicationApiVersion: v1beta1
 
-          publishedVersion: 6.5.130
+          publishedVersion: 6.5.130-metadata
           publishedVersionMetadata:
             releaseNote: Bug fixes
             releaseTypes:
@@ -718,7 +718,8 @@ class ConfigHelperTest(unittest.TestCase):
     self.assertTrue(schema.x_google_marketplace.is_v2())
     self.assertEqual(schema.x_google_marketplace.app_api_version, 'v1beta1')
 
-    self.assertEqual(schema.x_google_marketplace.published_version, '6.5.130')
+    self.assertEqual(schema.x_google_marketplace.published_version,
+                     '6.5.130-metadata')
     version_meta = schema.x_google_marketplace.published_version_meta
     self.assertEqual(version_meta.release_note, 'Bug fixes')
     self.assertListEqual(version_meta.release_types, ['BUG_FIX'])
@@ -743,6 +744,27 @@ class ConfigHelperTest(unittest.TestCase):
 
     self.assertEqual(schema.x_google_marketplace.managed_updates.kalm_supported,
                      True)
+
+  def test_publishedVersion_semver(self):
+    with self.assertRaisesRegexp(config_helper.InvalidSchema,
+                                 'Invalid schema publishedVersion "6.5"'):
+      config_helper.Schema.load_yaml("""
+          x-google-marketplace:
+            schemaVersion: v2
+            applicationApiVersion: v1beta1
+
+            publishedVersion: '6.5'
+            publishedVersionMetadata:
+              releaseNote: Bug fixes
+            images:
+              main:
+                properties:
+                  main.image:
+                    type: FULL
+          properties:
+            simple:
+              type: string
+          """)
 
   def test_k8s_version_constraint(self):
     schema = config_helper.Schema.load_yaml("""
@@ -826,6 +848,42 @@ class ConfigHelperTest(unittest.TestCase):
               istio:
                 type: INVALID_TYPE
           """)
+
+  def test_required_oauth_scopes_valid(self):
+    schema = config_helper.Schema.load_yaml("""
+      applicationApiVersion: v1beta1
+      properties:
+        simple:
+          type: string
+      x-google-marketplace:
+        clusterConstraints:
+          gcp:
+            nodes:
+              requiredOauthScopes:
+              - https://www.googleapis.com/auth/cloud-platform
+      """)
+    schema.validate()
+    self.assertEqual(
+        schema.x_google_marketplace.cluster_constraints.gcp.nodes
+        .required_oauth_scopes,
+        ["https://www.googleapis.com/auth/cloud-platform"])
+
+  def test_required_oauth_scopes_invalid_scope(self):
+    with self.assertRaisesRegexp(
+        config_helper.InvalidSchema,
+        "OAuth scope references must be fully-qualified"):
+      config_helper.Schema.load_yaml("""
+        applicationApiVersion: v1beta1
+        properties:
+          simple:
+            type: string
+        x-google-marketplace:
+          clusterConstraints:
+            gcp:
+              nodes:
+                requiredOauthScopes:
+                - cloud-platform
+        """)
 
   def test_deployer_service_account(self):
     schema = config_helper.Schema.load_yaml("""

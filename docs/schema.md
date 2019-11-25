@@ -491,7 +491,9 @@ has a different set of properties.
 - [`INGRESS_AVAILABLE`](#type-ingress_available): Indicates whether the cluster is
   detected to have Ingress support.
 - [`TLS_CERTIFICATE`](#type-tls_certificate): This is used to support a custom
-  certificate, or generate a self-signed certificate.
+  certificate, or to generate a self-signed certificate.
+- [`DEPLOYER_IMAGE`](#type-deployer_image): Indicates that the property is the
+  name of the Docker deployer image.
 
 #### type: MASKED_FIELD
 
@@ -518,9 +520,14 @@ properties:
 This property is required. It specifies the target namespace where all of app
 resources are installed.
 
+Properties of this type will have their user-entered value masked by default
+in the UI, offering the user the option to reveal the value as plain text.
+
 A `default` value can be specified, in which case the UI will auto-select the
 default namespace instead of using its typical heuristics for picking or
 creating a namespace.
+
+Example:
 
 ```yaml
 properties:
@@ -760,6 +767,20 @@ data:
 type: kubernetes.io/tls
 ```
 
+### type: DEPLOYER_IMAGE
+
+A property of this type receives the name of the deployer image that is used for
+deploying the application. Use this property type instead of statically deriving
+the deployer image name from other application images.
+
+```yaml
+properties:
+  deployer:
+    type: string
+    x-google-marketplace:
+      type: DEPLOYER_IMAGE
+```
+
 ## clusterConstraints
 
 This section is common to both `v1` and `v2` schemas.
@@ -835,6 +856,50 @@ Supported types:
 - `REQUIRED`: The app requires Istio to work properly.
 - `UNSUPPORTED`: The app does not support Istio.
 
-If this section is not specified, users see a warning when the app is deployed
-to an Istio-enabled environment. The [`ISTIO_ENABLED`](#type-istio_enabled) type
+If this section is not specified, users see a warning when deploying the app to
+an Istio-enabled environment. The [`ISTIO_ENABLED`](#type-istio_enabled) type
 indicates whether Istio is enabled on the cluster.
+
+### gcp
+
+Use this property to indicate GCP-specific app requirements.
+
+You can can specify [OAuth scopes](https://developers.google.com/identity/protocols/googlescopes)
+required by your app. The UI requires existing clusters to have the specified
+scopes in order to be selected, and also includes the specified scopes in cluster
+creation. Note that the "https://www.googleapis.com/auth/devstorage.read_only" (or
+other storage-reading scope) is required by default for pulling images from GCR.
+
+```yaml
+x-google-marketplace:
+  clusterConstraints:
+    gcp:
+      nodes:
+        requiredOauthScopes:
+        - https://www.googleapis.com/auth/cloud-platform.read-only
+```
+
+## form
+
+### help widget
+
+You can add a blob of basic HTML text to the configuration form to provide
+additional instruction for the installation process. The user sees this
+before they deploy their app. (You should provide post-deployment instructions
+in the `notes` section of the `Application` resource.)
+You can use the following syntax:
+
+```yaml
+# This is at the top level of your schema.yaml
+form:
+- widget: help
+  description: My arbitrary <i>description</i> text.
+```
+
+Note that currently only a single instance of this `help` widget can be specified.
+
+The following HTML tags are allowed:
+- Link: `<a href="https://www.google.com">link</a>`
+- Heading: `<h2>`, `<h3>`
+- Paragraph: `<p>`
+- Text styling: `<b>`, `<i>`, `<u>`, `<em>`

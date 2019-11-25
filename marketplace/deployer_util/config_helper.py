@@ -23,6 +23,11 @@ import sys
 import yaml
 
 NAME_RE = re.compile(r'[a-zA-z0-9_\.\-]+$')
+# Suggested from https://semver.org
+SEMVER_RE = re.compile(r'^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)'
+                       '(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)'
+                       '(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?'
+                       '(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$')
 
 XGOOGLE = 'x-google-marketplace'
 XTYPE_NAME = 'NAME'
@@ -41,6 +46,8 @@ XTYPE_TLS_CERTIFICATE = 'TLS_CERTIFICATE'
 XTYPE_MASKED_FIELD = 'MASKED_FIELD'
 
 WIDGET_TYPES = ['help']
+
+_OAUTH_SCOPE_PREFIX = 'https://www.googleapis.com/auth/'
 
 
 class InvalidName(Exception):
@@ -215,6 +222,10 @@ class SchemaXGoogleMarketplace:
     self._published_version = _must_get(
         dictionary, 'publishedVersion',
         'x-google-marketplace.publishedVersion is required')
+    if not SEMVER_RE.match(self._published_version):
+      raise InvalidSchema(
+          'Invalid schema publishedVersion "{}"; must be semver including patch version'
+          .format(self._published_version))
     self._published_version_meta = _must_get_and_apply(
         dictionary, 'publishedVersionMetadata', lambda v: SchemaVersionMeta(v),
         'x-google-marketplace.publishedVersionMetadata is required')
@@ -283,6 +294,7 @@ class SchemaClusterConstraints:
     self._k8s_version = dictionary.get('k8sVersion', None)
     self._resources = None
     self._istio = None
+    self._gcp = None
 
     if 'resources' in dictionary:
       resources = dictionary['resources']
@@ -290,8 +302,9 @@ class SchemaClusterConstraints:
         raise InvalidSchema('clusterConstraints.resources must be a list')
       self._resources = [SchemaResourceConstraints(r) for r in resources]
 
-    if 'istio' in dictionary:
-      self._istio = SchemaIstio(dictionary['istio'])
+    self._istio = _maybe_get_and_apply(dictionary, 'istio',
+                                       lambda v: SchemaIstio(v))
+    self._gcp = _maybe_get_and_apply(dictionary, 'gcp', lambda v: SchemaGcp(v))
 
   @property
   def k8s_version(self):
@@ -304,6 +317,10 @@ class SchemaClusterConstraints:
   @property
   def istio(self):
     return self._istio
+
+  @property
+  def gcp(self):
+    return self._gcp
 
 
 class SchemaResourceConstraints:
@@ -398,6 +415,36 @@ class SchemaIstio:
   @property
   def type(self):
     return self._type
+
+
+class SchemaGcp:
+  """Accesses top level GCP constraints."""
+
+  def __init__(self, dictionary):
+    self._nodes = _maybe_get_and_apply(dictionary, 'nodes',
+                                       lambda v: SchemaNodes(v))
+
+  @property
+  def nodes(self):
+    return self._nodes
+
+
+class SchemaNodes:
+  """Accesses GKE cluster node constraints."""
+
+  def __init__(self, dictionary):
+    self._required_oauth_scopes = dictionary.get('requiredOauthScopes', [])
+    if not isinstance(self._required_oauth_scopes, list):
+      raise InvalidSchema('nodes.requiredOauthScopes must be a list')
+    for scope in self._required_oauth_scopes:
+      if not scope.startswith(_OAUTH_SCOPE_PREFIX):
+        raise InvalidSchema(
+            'OAuth scope references must be fully-qualified (start with {})'
+            .format(_OAUTH_SCOPE_PREFIX))
+
+  @property
+  def required_oauth_scopes(self):
+    return self._required_oauth_scopes
 
 
 class SchemaImage:
@@ -840,7 +887,7 @@ def _must_contain(value, valid_list, error_msg):
   """Validates that value in valid_list, or raises InvalidSchema."""
   if value not in valid_list:
     raise InvalidSchema("{}. Must be one of {}".format(error_msg,
-                                                       ', '.join(_ISTIO_TYPES)))
+                                                       ', '.join(valid_list)))
 
 
 def _property_must_have_type(prop, expected_type):
