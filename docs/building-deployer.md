@@ -69,7 +69,7 @@ staging repo.
 
 ### Tagging your images
 
-All of your app's images **must**
+Each of your app's images **must**
 [carry the primary track ID and the specific release version ID as its Docker tag](schema.md#required-published-version).
 Marketplace uses the last image tagged with the same primary track ID tag when it
 looks for new versions of each track.
