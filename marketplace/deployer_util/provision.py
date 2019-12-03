@@ -383,7 +383,7 @@ def make_deployer_rolebindings(schema, namespace, app_name, labels, sa_name):
       'apiVersion': 'rbac.authorization.k8s.io/v1',
       'kind': 'RoleBinding',
       'metadata': {
-          'name': '{}:deployer-rb'.format(app_name),
+          'name': '{}-deployer-rb'.format(app_name),
           'namespace': namespace,
           'labels': labels,
       },
@@ -410,7 +410,7 @@ def make_deployer_rolebindings(schema, namespace, app_name, labels, sa_name):
     roles_and_rolebindings.append(default_rolebinding)
 
   for i, rules in enumerate(deployer_service_account.custom_role_rules()):
-    role_name = '{}:deployer-r{}'.format(app_name, i)
+    role_name = '{}-deployer-r{}'.format(app_name, i)
     roles_and_rolebindings.append({
         'apiVersion': 'rbac.authorization.k8s.io/v1',
         'kind': 'Role',
@@ -425,7 +425,7 @@ def make_deployer_rolebindings(schema, namespace, app_name, labels, sa_name):
         'apiVersion': 'rbac.authorization.k8s.io/v1',
         'kind': 'RoleBinding',
         'metadata': {
-            'name': '{}:deployer-rb{}'.format(app_name, i),
+            'name': '{}-deployer-rb{}'.format(app_name, i),
             'namespace': namespace,
             'labels': labels,
         },
@@ -467,7 +467,7 @@ def make_deployer_rolebindings(schema, namespace, app_name, labels, sa_name):
         'apiVersion': 'rbac.authorization.k8s.io/v1',
         'kind': 'RoleBinding',
         'metadata': {
-            'name': limit_name('{}:{}:deployer-rb'.format(app_name, role), 64),
+            'name': limit_name('{}:{}-deployer-rb'.format(app_name, role), 64),
             'namespace': namespace,
             'labels': labels,
         },
