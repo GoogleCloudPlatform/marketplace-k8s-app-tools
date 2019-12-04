@@ -81,7 +81,7 @@ def main():
       action="store_true",
       help="Do not look for Application resource to determine "
       "what kinds to include. I.e. set owner references for "
-      "all of the resources in the manifests")
+      "all of the (namespaced) resources in the manifests")
   args = parser.parse_args()
 
   resources = []
@@ -107,7 +107,6 @@ def main():
     kinds = map(lambda x: x["kind"], apps[0]["spec"].get("componentKinds", []))
 
     excluded_kinds = ["PersistentVolumeClaim", "Application"]
-    excluded_kinds.extend(_CLUSTER_SCOPED_KINDS)
     included_kinds = [kind for kind in kinds if kind not in excluded_kinds]
   else:
     included_kinds = None
@@ -136,6 +135,12 @@ def dump(outfile, resources, included_kinds, app_name, app_uid,
          app_api_version):
   to_be_dumped = []
   for resource in resources:
+    if resource["kind"] in _CLUSTER_SCOPED_KINDS:
+      # Cluster-scoped resources cannot be owned by a namespaced resource:
+      # https://kubernetes.io/docs/concepts/workloads/controllers/garbage-collection/#owners-and-dependents
+      log.info("Application '{:s}' does not own cluster-scoped '{:s}/{:s}'",
+               app_name, resource["kind"], resource["metadata"]["name"])
+      continue
     if included_kinds is None or resource["kind"] in included_kinds:
       log.info("Application '{:s}' owns '{:s}/{:s}'", app_name,
                resource["kind"], resource["metadata"]["name"])
