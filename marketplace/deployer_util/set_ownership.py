@@ -145,6 +145,9 @@ def dump(outfile, resources, included_kinds, app_name, app_uid,
           app_name=app_name,
           app_api_version=app_api_version,
           resource=resource)
+    else:
+      log.info("Application '{:s}' doesn't own '{:s}/{:s}'", app_name,
+               resource["kind"], resource["metadata"]["name"])
     to_be_dumped.append(resource)
   yaml.safe_dump_all(to_be_dumped, outfile, default_flow_style=False, indent=2)
 
