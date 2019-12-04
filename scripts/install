@@ -129,7 +129,6 @@ echo "${parameters}" \
   | set_ownership.py \
     --manifests=- \
     --dest=- \
-    --noapp \
     --app_name="${name}" \
     --app_uid="${app_uid}" \
     --app_api_version="${app_version}" \
