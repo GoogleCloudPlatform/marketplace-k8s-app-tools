@@ -601,10 +601,10 @@ Marketplace will copy and republishin into the public
 visible to the end users. As an example, let's assume your staging
 repo is `gcr.io/your-company/wordpress`.
 
-For each solution, there are always __at least__ one deployer image
-and one primary application image. These two have predefined names:
-`deployer` and `wordpress`. For this example, let's
-say your application uses an additional image called `mariadb`.
+For each solution, there is always one deployer image with the
+predefined name `deployer`. There is usually a primary application
+image named `wordpress` in this case. For this example, let's say
+your application uses an additional image called `mariadb`.
 
 Each track of your application is associated with a track tag, which
 should be the same name. If you don't know what a track is, see the
