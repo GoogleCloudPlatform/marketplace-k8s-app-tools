@@ -778,6 +778,34 @@ class SchemaXServiceAccount:
 
   def __init__(self, dictionary):
     self._roles = dictionary.get('roles', [])
+    for role in self._roles:
+      if role.get('rulesType') == 'PREDEFINED':
+        if role.get('rules'):
+          raise InvalidSchema('rules can only be used with rulesType CUSTOM')
+        if not role.get('rulesFromRoleName'):
+          raise InvalidSchema('Missing rulesFromRoleName for PREDEFINED role')
+      elif role.get('rulesType') == 'CUSTOM':
+        if role.get('rulesFromRoleName'):
+          raise InvalidSchema(
+              'rulesFromRoleName can only be used with rulesType PREDEFINED')
+        if not role.get('rules'):
+          raise InvalidSchema('Missing rules for CUSTOM role')
+        for rule in role.get('rules', []):
+          if rule.get('nonResourceURLs'):
+            raise InvalidSchema(
+                'Only attributes for resourceRules are supported in rules')
+          if not rule.get('apiGroups') or not filter(lambda x: x,
+                                                     rule.get('apiGroups')):
+            raise InvalidSchema("Missing or empty apiGroups in rules. "
+                                "Did you mean [\"v1\"] or [\"*\"]?")
+          if not rule.get('resources') or not filter(lambda x: x,
+                                                     rule.get('resources')):
+            raise InvalidSchema('Missing or empty resources in rules.')
+          if not rule.get('verbs') or not filter(lambda x: x,
+                                                 rule.get('verbs')):
+            raise InvalidSchema('Missing or empty verbs in rules.')
+      else:
+        raise InvalidSchema('rulesType must be one of PREDEFINED or CUSTOM')
 
   def custom_role_rules(self):
     """Returns a list of rules for custom Roles."""
