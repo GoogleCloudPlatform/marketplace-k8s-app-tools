@@ -633,6 +633,22 @@ class ConfigHelperTest(unittest.TestCase):
         },
     ]], sa.custom_role_rules())
 
+  def test_service_account_missing_rulesType(self):
+    with self.assertRaisesRegexp(
+        config_helper.InvalidSchema,
+        'rulesType must be one of PREDEFINED or CUSTOM'):
+      config_helper.Schema.load_yaml("""
+          properties:
+            sa:
+              type: string
+              x-google-marketplace:
+                type: SERVICE_ACCOUNT
+                serviceAccount:
+                  roles:
+                  - type: Role
+                    rulesFromRoleName: view
+          """)
+
   def test_service_account_predefined_rules(self):
     with self.assertRaisesRegexp(
         config_helper.InvalidSchema,
@@ -705,6 +721,21 @@ class ConfigHelperTest(unittest.TestCase):
                       verbs: ["get"]
           """)
 
+  def test_service_account_custom_missingRules(self):
+    with self.assertRaisesRegexp(config_helper.InvalidSchema,
+                                 'Missing rules for CUSTOM role'):
+      config_helper.Schema.load_yaml("""
+          properties:
+            sa:
+              type: string
+              x-google-marketplace:
+                type: SERVICE_ACCOUNT
+                serviceAccount:
+                  roles:
+                  - type: Role
+                    rulesType: CUSTOM
+          """)
+
   def test_service_account_custom_empty_apiGroups(self):
     with self.assertRaisesRegexp(
         config_helper.InvalidSchema,
@@ -725,9 +756,9 @@ class ConfigHelperTest(unittest.TestCase):
                       verbs: ['*']
           """)
 
-  def test_service_account_custom_missingRules(self):
+  def test_service_account_custom_empty_resources(self):
     with self.assertRaisesRegexp(config_helper.InvalidSchema,
-                                 'Missing rules for CUSTOM role'):
+                                 'Missing or empty resources in rules'):
       config_helper.Schema.load_yaml("""
           properties:
             sa:
@@ -738,12 +769,15 @@ class ConfigHelperTest(unittest.TestCase):
                   roles:
                   - type: Role
                     rulesType: CUSTOM
+                    rules:
+                    - apiGroups: ['v1']
+                      resources: ['']
+                      verbs: ['*']
           """)
 
-  def test_service_account_missing_rulesType(self):
-    with self.assertRaisesRegexp(
-        config_helper.InvalidSchema,
-        'rulesType must be one of PREDEFINED or CUSTOM'):
+  def test_service_account_custom_empty_verbs(self):
+    with self.assertRaisesRegexp(config_helper.InvalidSchema,
+                                 'Missing or empty verbs in rules'):
       config_helper.Schema.load_yaml("""
           properties:
             sa:
@@ -753,7 +787,11 @@ class ConfigHelperTest(unittest.TestCase):
                 serviceAccount:
                   roles:
                   - type: Role
-                    rulesFromRoleName: view
+                    rulesType: CUSTOM
+                    rules:
+                    - apiGroups: ['v1']
+                      resources: ['Pods']
+                      verbs: ['']
           """)
 
   def test_storage_class(self):

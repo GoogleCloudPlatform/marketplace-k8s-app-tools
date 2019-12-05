@@ -798,6 +798,12 @@ class SchemaXServiceAccount:
                                                      rule.get('apiGroups')):
             raise InvalidSchema("Missing or empty apiGroups in rules. "
                                 "Did you mean [\"v1\"] or [\"*\"]?")
+          if not rule.get('resources') or not filter(lambda x: x,
+                                                     rule.get('resources')):
+            raise InvalidSchema('Missing or empty resources in rules.')
+          if not rule.get('verbs') or not filter(lambda x: x,
+                                                 rule.get('verbs')):
+            raise InvalidSchema('Missing or empty verbs in rules.')
       else:
         raise InvalidSchema('rulesType must be one of PREDEFINED or CUSTOM')
 
