@@ -297,8 +297,8 @@ different set of properties.
 #### Supported types
 
 - `NAME`: Indicates that the property is the name of the app.
-- `NAMESPACE`: Indicates that the property is the Kubernetes namespace where the
-   app will installed.
+- [`NAMESPACE`](#type-namespace): Indicates that the property is the Kubernetes
+  namespace where the app will installed.
 - `REPORTING_SECRET`: The Secret resource name that contains the credentials
   for usage reports. These credentials are used by the
   [usage-based billing agent](https://github.com/GoogleCloudPlatform/ubbagent).
@@ -320,12 +320,32 @@ different set of properties.
   is enabled on the cluster for the deployment.
 - [`INGRESS_AVAILABLE`](#type-ingress_available): Indicates whether the cluster is detected to have Ingress support.
 - [`TLS_CERTIFICATE`](#type-tls_certificate): To be used to support a custom certificate or generate a self-signed certificate.
+- [`DEPLOYER_IMAGE`](#type-deployer_image): Indicates that the property is the name of the Docker deployer image.
+
+---
+
+### type: NAMESPACE
+
+This property is required. It specifies the target namespace where all of application
+resources are installed into.
+
+A `default` value can be specified, in which case the UI will auto-select this
+namespace instead of using the default heuristics of picking or creating a namespace.
+
+```yaml
+properties:
+  namespace:
+    type: string
+    default: desired-fixed-namespace
+    x-google-marketplace:
+      type: NAMESPACE
+```
 
 ---
 
 ### type: MASKED_FIELD
 
-Properties of this type will have their user-entered value masked by default in the UI, offering the user the option to reveal the value as plain text. 
+Properties of this type will have their user-entered value masked by default in the UI, offering the user the option to reveal the value as plain text.
 
 Example:
 
@@ -594,6 +614,22 @@ type: kubernetes.io/tls
 
 ---
 
+### type: DEPLOYER_IMAGE
+
+A property of this type receives the name of the deployer image that is used for
+deploying the application. Use this property type instead of statically deriving
+the deployer image name from other application images.
+
+```yaml
+properties:
+  deployer:
+    type: string
+    x-google-marketplace:
+      type: DEPLOYER_IMAGE
+```
+
+---
+
 ## clusterConstraints
 
 Use `clusterConstraints` to specify the requirements for the Kubernetes
@@ -674,3 +710,50 @@ indicates whether Istio is enabled on the cluster.
 - `OPTIONAL`: The app works with Istio but does not require it.
 - `REQUIRED`: The app requires Istio to work properly.
 - `UNSUPPORTED`: The app does not support Istio.
+
+---
+
+### gcp
+
+Use this property to indicate GCP-specific app requirements.
+
+You can can specify [OAuth scopes](https://developers.google.com/identity/protocols/googlescopes)
+required by your application. The UI requires existing clusters to have the
+specified scopes in order to be selected, and also includes the specified
+scopes in cluster creation. Note that the "https://www.googleapis.com/auth/devstorage.read_only"
+(or other storage-reading scope) is required by default for pulling images
+from GCR.
+
+```yaml
+x-google-marketplace:
+  clusterConstraints:
+    gcp:
+      nodes:
+        requiredOauthScopes:
+        - https://www.googleapis.com/auth/cloud-platform.read-only
+```
+
+## form
+
+### help widget
+
+You can add a blob of basic HTML text to the configuration form to provide
+additional instruction for the installation process. The user sees this
+before they deploy their application. (Post deploy instructions should be
+provided in the `notes` section of the `Application` resource.)
+You can use the following syntax:
+
+```yaml
+# This is at the top level of your schema.yaml
+form:
+- widget: help
+  description: My arbitrary <i>description</i> text.
+```
+
+Note that currently only a single instance of this `help` widget can be specified.
+
+The following HTML tags are allowed:
+- Link: `<a href="https://www.google.com">link</a>`
+- Heading: `<h2>`, `<h3>`
+- Paragraph: `<p>`
+- Text styling: `<b>`, `<i>`, `<u>`, `<em>`

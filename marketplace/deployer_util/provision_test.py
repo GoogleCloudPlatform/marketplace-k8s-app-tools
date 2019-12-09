@@ -105,7 +105,7 @@ class ProvisionTest(unittest.TestCase):
                 'kind':
                     'RoleBinding',
                 'metadata': {
-                    'name': 'app-name-1:deployer-rb',
+                    'name': 'app-name-1-deployer-rb',
                     'namespace': 'namespace-1',
                     'labels': {
                         'some-key': 'some-value'
@@ -173,7 +173,7 @@ class ProvisionTest(unittest.TestCase):
                 'kind':
                     'Role',
                 'metadata': {
-                    'name': 'app-name-1:deployer-r0',
+                    'name': 'app-name-1-deployer-r0',
                     'namespace': 'namespace-1',
                     'labels': {
                         'some-key': 'some-value'
@@ -191,7 +191,7 @@ class ProvisionTest(unittest.TestCase):
                 'kind':
                     'RoleBinding',
                 'metadata': {
-                    'name': 'app-name-1:deployer-rb0',
+                    'name': 'app-name-1-deployer-rb0',
                     'namespace': 'namespace-1',
                     'labels': {
                         'some-key': 'some-value'
@@ -200,7 +200,7 @@ class ProvisionTest(unittest.TestCase):
                 'roleRef': {
                     'apiGroup': 'rbac.authorization.k8s.io',
                     'kind': 'Role',
-                    'name': 'app-name-1:deployer-r0',
+                    'name': 'app-name-1-deployer-r0',
                 },
                 'subjects': [{
                     'kind': 'ServiceAccount',
@@ -253,7 +253,7 @@ class ProvisionTest(unittest.TestCase):
                 'kind':
                     'RoleBinding',
                 'metadata': {
-                    'name': 'app-name-1:edit:deployer-rb',
+                    'name': 'app-name-1:edit-deployer-rb',
                     'namespace': 'namespace-1',
                     'labels': {
                         'some-key': 'some-value'
@@ -329,7 +329,7 @@ class ProvisionTest(unittest.TestCase):
                 'kind':
                     'RoleBinding',
                 'metadata': {
-                    'name': 'app-name-1:deployer-rb',
+                    'name': 'app-name-1-deployer-rb',
                     'namespace': 'namespace-1',
                     'labels': {
                         'some-key': 'some-value'

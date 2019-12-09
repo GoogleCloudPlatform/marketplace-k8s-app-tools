@@ -30,9 +30,9 @@ def main():
 
   parser = ArgumentParser(description=_PROG_HELP)
   parser.add_argument(
-      "--app_name", required=True, help="the name of the applictation instance")
+      "--app_name", required=True, help="the name of the application instance")
   parser.add_argument(
-      "--app_uid", required=True, help="the uid of the applictation instance")
+      "--app_uid", required=True, help="the uid of the application instance")
   parser.add_argument(
       "--app_api_version",
       required=True,

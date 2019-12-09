@@ -23,6 +23,24 @@ RUN pip3 install \
       pyOpenSSL \
       pyyaml
 
+RUN mkdir -p /opt/kubectl/1.13 \
+    && wget -q -O /opt/kubectl/1.13/kubectl \
+        https://storage.googleapis.com/kubernetes-release/release/v1.13.12/bin/linux/amd64/kubectl \
+    && chmod 755 /opt/kubectl/1.13/kubectl
+RUN mkdir -p /opt/kubectl/1.14 \
+    && wget -q -O /opt/kubectl/1.14/kubectl \
+        https://storage.googleapis.com/kubernetes-release/release/v1.14.8/bin/linux/amd64/kubectl \
+    && chmod 755 /opt/kubectl/1.14/kubectl
+RUN mkdir -p /opt/kubectl/1.15 \
+    && wget -q -O /opt/kubectl/1.15/kubectl \
+        https://storage.googleapis.com/kubernetes-release/release/v1.15.5/bin/linux/amd64/kubectl \
+    && chmod 755 /opt/kubectl/1.15/kubectl
+RUN mkdir -p /opt/kubectl/1.16 \
+    && wget -q -O /opt/kubectl/1.16/kubectl \
+        https://storage.googleapis.com/kubernetes-release/release/v1.16.2/bin/linux/amd64/kubectl \
+    && chmod 755 /opt/kubectl/1.16/kubectl
+RUN ln -s /opt/kubectl/1.14 /opt/kubectl/default
+
 RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add - && \
     apt-key fingerprint 0EBFCD88 && \
     add-apt-repository \
@@ -51,7 +69,8 @@ COPY scripts/* /scripts/
 COPY marketplace/dev/bin/* /bin/
 COPY marketplace/dev/fake-reporting-secret-manifest.yaml /data/fake-reporting-secret-manifest.yaml 
 RUN mv /scripts/doctor.py /scripts/doctor
-ENV PATH="/scripts:${PATH}"
+
+ENV PATH="/scripts:/bin:${PATH}"
 
 RUN mkdir -p /data/
 

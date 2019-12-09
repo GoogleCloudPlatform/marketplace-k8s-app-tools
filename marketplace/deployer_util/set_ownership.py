@@ -29,14 +29,39 @@ _PROG_HELP = """
 Scans the manifest folder kubernetes resources and set the Application to own
 the ones defined in its list of components kinds.
 """
+# From `kubectl api-resources --namespaced=false` with kubectl client and
+# server version of 1.13
+_CLUSTER_SCOPED_KINDS = [
+    "ComponentStatus",
+    "Namespace",
+    "Node",
+    "PersistentVolume",
+    "MutatingWebhookConfiguration",
+    "ValidatingWebhookConfiguration",
+    "CustomResourceDefinition",
+    "APIService",
+    "TokenReview",
+    "SelfSubjectAccessReview",
+    "SelfSubjectRulesReview",
+    "SubjectAccessReview",
+    "CertificateSigningRequest",
+    "PodSecurityPolicy",
+    "NodeMetrics",
+    "PodSecurityPolicy",
+    "ClusterRoleBinding",
+    "ClusterRole",
+    "PriorityClass",
+    "StorageClass",
+    "VolumeAttachment",
+]
 
 
 def main():
   parser = ArgumentParser(description=_PROG_HELP)
   parser.add_argument(
-      "--app_name", help="The name of the applictation instance", required=True)
+      "--app_name", help="The name of the application instance", required=True)
   parser.add_argument(
-      "--app_uid", help="The uid of the applictation instance", required=True)
+      "--app_uid", help="The uid of the application instance", required=True)
   parser.add_argument(
       "--app_api_version",
       help="The apiVersion of the Application CRD",
@@ -56,7 +81,7 @@ def main():
       action="store_true",
       help="Do not look for Application resource to determine "
       "what kinds to include. I.e. set owner references for "
-      "all of the resources in the manifests")
+      "all of the (namespaced) resources in the manifests")
   args = parser.parse_args()
 
   resources = []
@@ -110,6 +135,12 @@ def dump(outfile, resources, included_kinds, app_name, app_uid,
          app_api_version):
   to_be_dumped = []
   for resource in resources:
+    if resource["kind"] in _CLUSTER_SCOPED_KINDS:
+      # Cluster-scoped resources cannot be owned by a namespaced resource:
+      # https://kubernetes.io/docs/concepts/workloads/controllers/garbage-collection/#owners-and-dependents
+      log.info("Application '{:s}' does not own cluster-scoped '{:s}/{:s}'",
+               app_name, resource["kind"], resource["metadata"]["name"])
+      continue
     if included_kinds is None or resource["kind"] in included_kinds:
       log.info("Application '{:s}' owns '{:s}/{:s}'", app_name,
                resource["kind"], resource["metadata"]["name"])

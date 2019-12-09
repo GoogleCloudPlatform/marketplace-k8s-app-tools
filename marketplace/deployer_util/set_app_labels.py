@@ -41,10 +41,10 @@ def main():
       "or - to write to stdout",
       required=True)
   parser.add_argument(
-      "--name", help="The name of the applictation instance", required=True)
+      "--name", help="The name of the application instance", required=True)
   parser.add_argument(
       "--namespace",
-      help="The namespace where the applictation is installed",
+      help="The namespace where the application is installed",
       required=True)
   args = parser.parse_args()
 

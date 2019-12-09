@@ -20,9 +20,23 @@ RUN pip3 install \
       pyOpenSSL \
       pyyaml
 
-RUN wget -q -O /bin/kubectl \
-        https://storage.googleapis.com/kubernetes-release/release/v1.13.2/bin/linux/amd64/kubectl \
-    && chmod 755 /bin/kubectl
+RUN mkdir -p /opt/kubectl/1.13 \
+    && wget -q -O /opt/kubectl/1.13/kubectl \
+        https://storage.googleapis.com/kubernetes-release/release/v1.13.12/bin/linux/amd64/kubectl \
+    && chmod 755 /opt/kubectl/1.13/kubectl
+RUN mkdir -p /opt/kubectl/1.14 \
+    && wget -q -O /opt/kubectl/1.14/kubectl \
+        https://storage.googleapis.com/kubernetes-release/release/v1.14.8/bin/linux/amd64/kubectl \
+    && chmod 755 /opt/kubectl/1.14/kubectl
+RUN mkdir -p /opt/kubectl/1.15 \
+    && wget -q -O /opt/kubectl/1.15/kubectl \
+        https://storage.googleapis.com/kubernetes-release/release/v1.15.5/bin/linux/amd64/kubectl \
+    && chmod 755 /opt/kubectl/1.15/kubectl
+RUN mkdir -p /opt/kubectl/1.16 \
+    && wget -q -O /opt/kubectl/1.16/kubectl \
+        https://storage.googleapis.com/kubernetes-release/release/v1.16.2/bin/linux/amd64/kubectl \
+    && chmod 755 /opt/kubectl/1.16/kubectl
+RUN ln -s /opt/kubectl/1.14 /opt/kubectl/default
 
 RUN mkdir -p /bin/helm-downloaded \
     && wget -q -O /bin/helm-downloaded/helm.tar.gz \
