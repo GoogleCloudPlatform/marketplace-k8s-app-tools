@@ -260,7 +260,7 @@ def generate_properties_for_tls_certificate(prop, value, result):
 def write_values(values, values_file):
   if not os.path.exists(os.path.dirname(values_file)):
     os.makedirs(os.path.dirname(values_file))
-  with open(values_file, 'w') as f:
+  with open(values_file, 'w', encoding='utf-8') as f:
     data = yaml.safe_dump(values, default_flow_style=False, indent=2)
     f.write(data)
 

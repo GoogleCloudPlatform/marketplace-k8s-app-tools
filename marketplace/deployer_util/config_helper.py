@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-#
 # Copyright 2018 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -66,7 +64,7 @@ def load_values(values_file, values_dir, schema):
   if values_file == '-':
     return yaml.safe_load(sys.stdin.read())
   if values_file and os.path.isfile(values_file):
-    with open(values_file, 'r') as f:
+    with open(values_file, 'r', encoding='utf-8') as f:
       return yaml.safe_load(f.read())
   return _read_values_to_dict(values_dir, schema)
 
@@ -82,7 +80,7 @@ def _read_values_to_dict(values_dir, schema):
     if not NAME_RE.match(filename):
       raise InvalidName('Invalid config parameter name: {}'.format(filename))
     file_path = os.path.join(values_dir, filename)
-    with open(file_path, "r") as f:
+    with open(file_path, "r", encoding='utf-8') as f:
       data = f.read()
       result[filename] = data
 
@@ -100,12 +98,12 @@ class Schema:
   @staticmethod
   def load_yaml_file(filepath):
     with io.open(filepath, 'r') as f:
-      d = yaml.full_load(f)
+      d = yaml.safe_load(f)
       return Schema(d)
 
   @staticmethod
   def load_yaml(yaml_str):
-    return Schema(yaml.full_load(yaml_str))
+    return Schema(yaml.safe_load(yaml_str))
 
   def __init__(self, dictionary):
     self._x_google_marketplace = _maybe_get_and_apply(

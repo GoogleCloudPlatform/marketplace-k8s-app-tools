@@ -57,7 +57,7 @@ def main():
     else:
       raise Exception("Helm hook {} is not supported".format(helm_hook))
 
-  with open(manifest, "w") as out:
+  with open(manifest, "w", encoding='utf-8') as out:
     yaml.dump_all(
         filtered_resources, out, default_flow_style=False, explicit_start=True)
 

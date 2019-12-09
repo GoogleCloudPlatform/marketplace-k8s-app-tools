@@ -713,7 +713,7 @@ def limit_name(name, length=127):
     result = result[:length - 5]
     # Hash and get the first 4 characters of the hash.
     m = hashlib.sha256()
-    m.update(name.encode('utf-8'))
+    m.update(name.encode('ascii'))
     h4sh = m.hexdigest()[:4]
     result = '{}-{}'.format(result, h4sh)
   return result

@@ -38,5 +38,5 @@ def _gcs_load(path):
 def _file_load(path):
   """Returns a file's contents as a string."""
   _, _, file_path = path.split('/', 2)
-  with open(file_path, 'r') as file_handle:
+  with open(file_path, 'r', encoding='utf-8') as file_handle:
     return file_handle.read()

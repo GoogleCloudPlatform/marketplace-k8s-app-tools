@@ -72,7 +72,7 @@ def main():
     write_resources(resources, sys.stdout)
     sys.stdout.flush()
   else:
-    with open(args.dest, "w") as outfile:
+    with open(args.dest, "w", encoding='utf-8') as outfile:
       write_resources(resources, outfile)
 
 

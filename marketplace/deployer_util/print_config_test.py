@@ -62,7 +62,7 @@ class PrintConfigTest(unittest.TestCase):
     }
     actual = print_config.output_yaml(values)
     self.assertEqual(
-        yaml.full_load(actual), {
+        yaml.safe_load(actual), {
             'propertyInt': 1,
             'propertyString': 'unnested',
             'dotted': {

@@ -75,11 +75,11 @@ def main():
       nontest_resources.append(resource)
 
   if nontest_resources:
-    with open(args.out_manifests, "w") as outfile:
+    with open(args.out_manifests, "w", encoding='utf-8') as outfile:
       yaml.safe_dump_all(nontest_resources, outfile, default_flow_style=False)
 
   if test_resources:
-    with open(args.out_test_manifests, "a") as test_outfile:
+    with open(args.out_test_manifests, "a", encoding='utf-8') as test_outfile:
       yaml.safe_dump_all(test_resources, test_outfile, default_flow_style=False)
 
 

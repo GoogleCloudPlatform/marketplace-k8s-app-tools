@@ -121,7 +121,7 @@ def main():
         app_api_version=args.app_api_version)
     sys.stdout.flush()
   else:
-    with open(args.dest, "w") as outfile:
+    with open(args.dest, "w", encoding='utf-8') as outfile:
       dump(
           outfile,
           resources,

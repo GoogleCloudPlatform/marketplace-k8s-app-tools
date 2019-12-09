@@ -21,7 +21,7 @@ import log_util as log
 
 def load_yaml(filename):
   """ Helper function for loading a single yaml entry from file """
-  with open(filename, "r") as stream:
+  with open(filename, "r", encoding='utf-8') as stream:
     content = stream.read()
     return yaml.safe_load(content)
 
@@ -45,7 +45,7 @@ def overlay_yaml_file(orig, dest):
   y2 = load_yaml(dest)
 
   add_or_replace(y1, y2)
-  with open(dest, "w") as out:
+  with open(dest, "w", encoding='utf-8') as out:
     yaml.dump(y2, out)
 
 
@@ -60,7 +60,7 @@ def load_resources_yaml(filename):
     A list of structured kubernetes resources"""
 
   log.info("Reading " + filename)
-  with open(filename, "r") as stream:
+  with open(filename, "r", encoding='utf-8') as stream:
     content = stream.read()
     return parse_resources_yaml(content)
 
