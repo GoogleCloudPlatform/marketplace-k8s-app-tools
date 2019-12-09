@@ -843,6 +843,81 @@ class ConfigHelperTest(unittest.TestCase):
                   type: UNKNOWN
             """))
 
+  def test_partner_and_solution_ids(self):
+    schema_yaml = """
+        x-google-marketplace:
+          schemaVersion: v2
+          partnerId: partner-a
+          applicationApiVersion: v1beta1
+          publishedVersion: 6.5.130-metadata
+          publishedVersionMetadata:
+            releaseNote: Bug fixes
+          images: {}
+        properties: {}
+        """
+    self.assertRaisesRegexp(
+        config_helper.InvalidSchema,
+        r'x-google-marketplace.partnerId and x-google-marketplace.solutionId.*',
+        lambda: config_helper.Schema.load_yaml(schema_yaml))
+
+    schema_yaml = """
+        x-google-marketplace:
+          schemaVersion: v2
+          solutionId: solution-a
+          applicationApiVersion: v1beta1
+          publishedVersion: 6.5.130-metadata
+          publishedVersionMetadata:
+            releaseNote: Bug fixes
+          images: {}
+        properties: {}
+        """
+    self.assertRaisesRegexp(
+        config_helper.InvalidSchema,
+        r'x-google-marketplace.partnerId and x-google-marketplace.solutionId.*',
+        lambda: config_helper.Schema.load_yaml(schema_yaml))
+
+    schema_yaml = """
+        x-google-marketplace:
+          schemaVersion: v2
+          partnerId: partner-a
+          solutionId: solution-a
+          applicationApiVersion: v1beta1
+          publishedVersion: 6.5.130-metadata
+          publishedVersionMetadata:
+            releaseNote: Bug fixes
+          images: {}
+        properties: {}
+        """
+    schema = config_helper.Schema.load_yaml(schema_yaml)
+    self.assertEquals('partner-a', schema.x_google_marketplace.partner_id)
+    self.assertEquals('solution-a', schema.x_google_marketplace.solution_id)
+
+  def test_image_properties_are_not_allowed_in_v2(self):
+    schema = config_helper.Schema.load_yaml("""
+        x-google-marketplace:
+          schemaVersion: v2
+
+          applicationApiVersion: v1beta1
+
+          publishedVersion: 6.5.130-metadata
+          publishedVersionMetadata:
+            releaseNote: Bug fixes
+          images:
+            main:
+              properties:
+                main.image:
+                  type: FULL
+        properties:
+          image:
+            type: string
+            default: gcr.io/a/b:1.0
+            x-google-marketplace:
+              type: IMAGE
+        """)
+    self.assertRaisesRegexp(config_helper.InvalidSchema,
+                            r'.*x-google-marketplace.type=IMAGE.*',
+                            lambda: schema.validate())
+
   def test_v2_fields(self):
     schema = config_helper.Schema.load_yaml("""
         x-google-marketplace:
