@@ -19,6 +19,7 @@ from __future__ import division
 from __future__ import print_function
 
 from argparse import ArgumentParser
+import json
 
 from yaml_util import load_resources_yaml
 from resources import find_application_resource
@@ -41,7 +42,6 @@ def main():
   args = parser.parse_args()
 
   schema = schema_values_common.load_schema(args)
-  values = schema_values_common.load_values(args)
   resources = load_resources_yaml(args.manifests)
 
   app = find_application_resource(resources)
@@ -50,6 +50,7 @@ def main():
   if not mp_deploy_info:
     raise Exception('Application resource is missing '
                     '"marketplace.cloud.google.com/deploy-info" annotation')
+  validate_deploy_info_annotation(mp_deploy_info, schema)
 
   version = app.get('spec', {}).get('descriptor', {}).get('version')
   if not version or not isinstance(version, str):
@@ -62,6 +63,27 @@ def main():
           'Application resource\'s spec.descriptor.version "{}" does not match '
           'schema.yaml\'s publishedVersion "{}"'.format(version,
                                                         published_version))
+
+
+def validate_deploy_info_annotation(content, schema=None):
+  try:
+    parsed = json.loads(content)
+    if 'partner_id' not in parsed:
+      raise Exception('marketplace.cloud.google.com/deploy-info annotation '
+                      'on the Application resource must contain a partner_id')
+    if 'solution_id' not in parsed:
+      raise Exception('marketplace.cloud.google.com/deploy-info annotation '
+                      'on the Application resource must contain a solution_id')
+    if (schema and schema.x_google_marketplace and
+        schema.x_google_marketplace.partner_id):
+      if (parsed['partner_id'] != schema.x_google_marketplace.partner_id or
+          parsed['solution_id'] != schema.x_google_marketplace.solution_id):
+        raise Exception('Partner or solution ID values in the schema and the '
+                        'Application resource are not consistent')
+  except ValueError:
+    raise Exception(
+        'marketplace.cloud.google.com/deploy-info annotation on the '
+        'Application resource must be valid JSON')
 
 
 if __name__ == "__main__":
