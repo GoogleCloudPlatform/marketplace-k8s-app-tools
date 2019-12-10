@@ -96,7 +96,7 @@ form:
 class ConfigHelperTest(unittest.TestCase):
 
   def test_load_yaml_file(self):
-    with tempfile.NamedTemporaryFile('w') as f:
+    with tempfile.NamedTemporaryFile('w', encoding='utf-8') as f:
       f.write(SCHEMA)
       f.flush()
 

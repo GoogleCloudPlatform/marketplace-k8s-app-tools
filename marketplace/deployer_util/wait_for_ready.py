@@ -27,7 +27,7 @@ def main():
   parser = ArgumentParser(description=_PROG_HELP)
   parser.add_argument('--name')
   parser.add_argument('--namespace')
-  parser.add_argument('--timeout')
+  parser.add_argument('--timeout', type=float)
   args = parser.parse_args()
 
   log.info("Wait {} seconds for the application '{}' to get into ready state",
@@ -87,7 +87,7 @@ def main():
       if elapsed_healthy_time > min_time_before_healthy:
         break
 
-    if time.time() - poll_start_time > float(args.timeout):
+    if time.time() - poll_start_time > args.timeout:
       raise Exception(
           "ERROR Application did not get ready before timeout of {} seconds"
           .format(args.timeout))

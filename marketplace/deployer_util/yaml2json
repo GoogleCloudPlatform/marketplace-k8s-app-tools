@@ -28,5 +28,5 @@ def _fallback_serializer(obj):
 
 
 content = sys.stdin.read()
-for loaded in yaml.load_all(content):
+for loaded in yaml.safe_load_all(content):
   print(json.dumps(loaded, default=_fallback_serializer))
