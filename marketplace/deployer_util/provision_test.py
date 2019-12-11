@@ -45,7 +45,7 @@ class ProvisionTest(unittest.TestCase):
 
   def assertModifiedName(self, text, expected):
     self.assertEqual(text[:-5], expected)
-    self.assertRegexpMatches(text[-5:], r'-[a-f0-9]{4}')
+    self.assertRegex(text[-5:], r'-[a-f0-9]{4}')
 
   def test_deployer_image_inject(self):
     schema = config_helper.Schema.load_yaml('''

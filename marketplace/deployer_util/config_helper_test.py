@@ -121,7 +121,7 @@ class ConfigHelperTest(unittest.TestCase):
                   - propertyB
                   - propertyC
                   """
-    self.assertRaisesRegexp(config_helper.InvalidSchema,
+    self.assertRaisesRegex(config_helper.InvalidSchema,
                             r'propertyB, propertyC', load_and_validate,
                             schema_yaml)
 
@@ -197,7 +197,7 @@ class ConfigHelperTest(unittest.TestCase):
         """)
 
   def test_invalid_property_types(self):
-    self.assertRaisesRegexp(
+    self.assertRaisesRegex(
         config_helper.InvalidSchema, r'.*must be of type string$',
         lambda: config_helper.Schema.load_yaml("""
             properties:
@@ -206,7 +206,7 @@ class ConfigHelperTest(unittest.TestCase):
                 x-google-marketplace:
                   type: NAME
             """))
-    self.assertRaisesRegexp(
+    self.assertRaisesRegex(
         config_helper.InvalidSchema, r'.*must be of type string$',
         lambda: config_helper.Schema.load_yaml("""
             properties:
@@ -215,7 +215,7 @@ class ConfigHelperTest(unittest.TestCase):
                 x-google-marketplace:
                   type: NAMESPACE
             """))
-    self.assertRaisesRegexp(
+    self.assertRaisesRegex(
         config_helper.InvalidSchema, r'.*must be of type string$',
         lambda: config_helper.Schema.load_yaml("""
             properties:
@@ -224,7 +224,7 @@ class ConfigHelperTest(unittest.TestCase):
                 x-google-marketplace:
                   type: DEPLOYER_IMAGE
             """))
-    self.assertRaisesRegexp(
+    self.assertRaisesRegex(
         config_helper.InvalidSchema, r'.*must be of type string$',
         lambda: config_helper.Schema.load_yaml("""
             properties:
@@ -233,7 +233,7 @@ class ConfigHelperTest(unittest.TestCase):
                 x-google-marketplace:
                   type: APPLICATION_UID
             """))
-    self.assertRaisesRegexp(
+    self.assertRaisesRegex(
         config_helper.InvalidSchema, r'.*must be of type boolean$',
         lambda: config_helper.Schema.load_yaml("""
             properties:
@@ -242,7 +242,7 @@ class ConfigHelperTest(unittest.TestCase):
                 x-google-marketplace:
                   type: ISTIO_ENABLED
             """))
-    self.assertRaisesRegexp(
+    self.assertRaisesRegex(
         config_helper.InvalidSchema, r'.*must be of type boolean$',
         lambda: config_helper.Schema.load_yaml("""
             properties:
@@ -321,7 +321,7 @@ class ConfigHelperTest(unittest.TestCase):
                      schema.properties['u'].application_uid.application_create)
 
   def test_image_default_missing(self):
-    self.assertRaisesRegexp(
+    self.assertRaisesRegex(
         config_helper.InvalidSchema, r'.*default image value must be specified',
         lambda: config_helper.Schema.load_yaml("""
         properties:
@@ -332,7 +332,7 @@ class ConfigHelperTest(unittest.TestCase):
         """))
 
   def test_image_default_missing_repo(self):
-    self.assertRaisesRegexp(
+    self.assertRaisesRegex(
         config_helper.InvalidSchema,
         r'.*default image value must state registry',
         lambda: config_helper.Schema.load_yaml("""
@@ -345,7 +345,7 @@ class ConfigHelperTest(unittest.TestCase):
         """))
 
   def test_image_default_missing_tag_or_digest(self):
-    self.assertRaisesRegexp(
+    self.assertRaisesRegex(
         config_helper.InvalidSchema,
         r'.*default image value is missing a tag or digest',
         lambda: config_helper.Schema.load_yaml("""
@@ -634,7 +634,7 @@ class ConfigHelperTest(unittest.TestCase):
     ]], sa.custom_role_rules())
 
   def test_service_account_missing_rulesType(self):
-    with self.assertRaisesRegexp(
+    with self.assertRaisesRegex(
         config_helper.InvalidSchema,
         'rulesType must be one of PREDEFINED or CUSTOM'):
       config_helper.Schema.load_yaml("""
@@ -650,7 +650,7 @@ class ConfigHelperTest(unittest.TestCase):
           """)
 
   def test_service_account_predefined_rules(self):
-    with self.assertRaisesRegexp(
+    with self.assertRaisesRegex(
         config_helper.InvalidSchema,
         'rules can only be used with rulesType CUSTOM'):
       config_helper.Schema.load_yaml("""
@@ -670,7 +670,7 @@ class ConfigHelperTest(unittest.TestCase):
           """)
 
   def test_service_account_predefined_missing_rulesFromRoleName(self):
-    with self.assertRaisesRegexp(
+    with self.assertRaisesRegex(
         config_helper.InvalidSchema,
         'Missing rulesFromRoleName for PREDEFINED role'):
       config_helper.Schema.load_yaml("""
@@ -686,7 +686,7 @@ class ConfigHelperTest(unittest.TestCase):
           """)
 
   def test_service_account_custom_rulesFromRoleName(self):
-    with self.assertRaisesRegexp(
+    with self.assertRaisesRegex(
         config_helper.InvalidSchema,
         'rulesFromRoleName can only be used with rulesType PREDEFINED'):
       config_helper.Schema.load_yaml("""
@@ -703,7 +703,7 @@ class ConfigHelperTest(unittest.TestCase):
           """)
 
   def test_service_account_custom_nonResourceAttributes(self):
-    with self.assertRaisesRegexp(
+    with self.assertRaisesRegex(
         config_helper.InvalidSchema,
         'Only attributes for resourceRules are supported in rules'):
       config_helper.Schema.load_yaml("""
@@ -722,7 +722,7 @@ class ConfigHelperTest(unittest.TestCase):
           """)
 
   def test_service_account_custom_missingRules(self):
-    with self.assertRaisesRegexp(config_helper.InvalidSchema,
+    with self.assertRaisesRegex(config_helper.InvalidSchema,
                                  'Missing rules for CUSTOM role'):
       config_helper.Schema.load_yaml("""
           properties:
@@ -737,7 +737,7 @@ class ConfigHelperTest(unittest.TestCase):
           """)
 
   def test_service_account_custom_empty_apiGroups(self):
-    with self.assertRaisesRegexp(
+    with self.assertRaisesRegex(
         config_helper.InvalidSchema,
         r'^Missing or empty apiGroups in rules. Did you mean'):
       config_helper.Schema.load_yaml("""
@@ -757,7 +757,7 @@ class ConfigHelperTest(unittest.TestCase):
           """)
 
   def test_service_account_custom_empty_resources(self):
-    with self.assertRaisesRegexp(config_helper.InvalidSchema,
+    with self.assertRaisesRegex(config_helper.InvalidSchema,
                                  'Missing or empty resources in rules'):
       config_helper.Schema.load_yaml("""
           properties:
@@ -776,7 +776,7 @@ class ConfigHelperTest(unittest.TestCase):
           """)
 
   def test_service_account_custom_empty_verbs(self):
-    with self.assertRaisesRegexp(config_helper.InvalidSchema,
+    with self.assertRaisesRegex(config_helper.InvalidSchema,
                                  'Missing or empty verbs in rules'):
       config_helper.Schema.load_yaml("""
           properties:
@@ -907,7 +907,7 @@ class ConfigHelperTest(unittest.TestCase):
                      True)
 
   def test_publishedVersion_semver(self):
-    with self.assertRaisesRegexp(config_helper.InvalidSchema,
+    with self.assertRaisesRegex(config_helper.InvalidSchema,
                                  'Invalid schema publishedVersion "6.5"'):
       config_helper.Schema.load_yaml("""
           x-google-marketplace:
@@ -997,7 +997,7 @@ class ConfigHelperTest(unittest.TestCase):
                      "OPTIONAL")
 
   def test_istio_invalid_type(self):
-    with self.assertRaisesRegexp(config_helper.InvalidSchema,
+    with self.assertRaisesRegex(config_helper.InvalidSchema,
                                  "Invalid type of istio constraint"):
       config_helper.Schema.load_yaml("""
           applicationApiVersion: v1beta1
@@ -1030,7 +1030,7 @@ class ConfigHelperTest(unittest.TestCase):
         ["https://www.googleapis.com/auth/cloud-platform"])
 
   def test_required_oauth_scopes_invalid_scope(self):
-    with self.assertRaisesRegexp(
+    with self.assertRaisesRegex(
         config_helper.InvalidSchema,
         "OAuth scope references must be fully-qualified"):
       config_helper.Schema.load_yaml("""
@@ -1158,7 +1158,7 @@ class ConfigHelperTest(unittest.TestCase):
     self.assertEqual(schema.app_api_version, 'v1beta1')
 
   def test_validate_missing_app_api_version(self):
-    self.assertRaisesRegexp(
+    self.assertRaisesRegex(
         config_helper.InvalidSchema, 'applicationApiVersion',
         lambda: config_helper.Schema.load_yaml("""
             properties:
@@ -1167,7 +1167,7 @@ class ConfigHelperTest(unittest.TestCase):
             """).validate())
 
   def test_validate_bad_form_too_many_items(self):
-    self.assertRaisesRegexp(
+    self.assertRaisesRegex(
         config_helper.InvalidSchema, 'form',
         lambda: config_helper.Schema.load_yaml("""
             applicationApiVersion: v1beta1
@@ -1179,7 +1179,7 @@ class ConfigHelperTest(unittest.TestCase):
             """).validate())
 
   def test_validate_bad_form_missing_type(self):
-    self.assertRaisesRegexp(
+    self.assertRaisesRegex(
         config_helper.InvalidSchema, 'form',
         lambda: config_helper.Schema.load_yaml("""
             applicationApiVersion: v1beta1
@@ -1188,7 +1188,7 @@ class ConfigHelperTest(unittest.TestCase):
             """).validate())
 
   def test_validate_bad_form_unrecognized_type(self):
-    self.assertRaisesRegexp(
+    self.assertRaisesRegex(
         config_helper.InvalidSchema, 'form',
         lambda: config_helper.Schema.load_yaml("""
             applicationApiVersion: v1beta1
@@ -1198,7 +1198,7 @@ class ConfigHelperTest(unittest.TestCase):
             """).validate())
 
   def test_validate_bad_form_missing_description(self):
-    self.assertRaisesRegexp(
+    self.assertRaisesRegex(
         config_helper.InvalidSchema, 'form',
         lambda: config_helper.Schema.load_yaml("""
             applicationApiVersion: v1beta1
