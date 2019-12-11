@@ -121,9 +121,8 @@ class ConfigHelperTest(unittest.TestCase):
                   - propertyB
                   - propertyC
                   """
-    self.assertRaisesRegex(config_helper.InvalidSchema,
-                            r'propertyB, propertyC', load_and_validate,
-                            schema_yaml)
+    self.assertRaisesRegex(config_helper.InvalidSchema, r'propertyB, propertyC',
+                           load_and_validate, schema_yaml)
 
   def test_types_and_defaults(self):
     schema = config_helper.Schema.load_yaml(SCHEMA)
@@ -650,9 +649,8 @@ class ConfigHelperTest(unittest.TestCase):
           """)
 
   def test_service_account_predefined_rules(self):
-    with self.assertRaisesRegex(
-        config_helper.InvalidSchema,
-        'rules can only be used with rulesType CUSTOM'):
+    with self.assertRaisesRegex(config_helper.InvalidSchema,
+                                'rules can only be used with rulesType CUSTOM'):
       config_helper.Schema.load_yaml("""
           properties:
             sa:
@@ -723,7 +721,7 @@ class ConfigHelperTest(unittest.TestCase):
 
   def test_service_account_custom_missingRules(self):
     with self.assertRaisesRegex(config_helper.InvalidSchema,
-                                 'Missing rules for CUSTOM role'):
+                                'Missing rules for CUSTOM role'):
       config_helper.Schema.load_yaml("""
           properties:
             sa:
@@ -758,7 +756,7 @@ class ConfigHelperTest(unittest.TestCase):
 
   def test_service_account_custom_empty_resources(self):
     with self.assertRaisesRegex(config_helper.InvalidSchema,
-                                 'Missing or empty resources in rules'):
+                                'Missing or empty resources in rules'):
       config_helper.Schema.load_yaml("""
           properties:
             sa:
@@ -777,7 +775,7 @@ class ConfigHelperTest(unittest.TestCase):
 
   def test_service_account_custom_empty_verbs(self):
     with self.assertRaisesRegex(config_helper.InvalidSchema,
-                                 'Missing or empty verbs in rules'):
+                                'Missing or empty verbs in rules'):
       config_helper.Schema.load_yaml("""
           properties:
             sa:
@@ -908,7 +906,7 @@ class ConfigHelperTest(unittest.TestCase):
 
   def test_publishedVersion_semver(self):
     with self.assertRaisesRegex(config_helper.InvalidSchema,
-                                 'Invalid schema publishedVersion "6.5"'):
+                                'Invalid schema publishedVersion "6.5"'):
       config_helper.Schema.load_yaml("""
           x-google-marketplace:
             schemaVersion: v2
@@ -998,7 +996,7 @@ class ConfigHelperTest(unittest.TestCase):
 
   def test_istio_invalid_type(self):
     with self.assertRaisesRegex(config_helper.InvalidSchema,
-                                 "Invalid type of istio constraint"):
+                                "Invalid type of istio constraint"):
       config_helper.Schema.load_yaml("""
           applicationApiVersion: v1beta1
           properties:

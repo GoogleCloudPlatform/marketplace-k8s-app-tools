@@ -36,8 +36,7 @@ class ResourcesTest(unittest.TestCase):
 
     set_resource_ownership(APP_UID, APP_NAME, APP_API_VERSION, resource)
 
-    self.assertEqual(resource['metadata']['ownerReferences'],
-                                 [APP_OWNER_REF])
+    self.assertEqual(resource['metadata']['ownerReferences'], [APP_OWNER_REF])
 
   def test_resource_existing_app_ownerref_different_uid_adds_ownerref(self):
     resource = {'metadata': {'ownerReferences': [{'uid': OTHER_UID}]}}
@@ -53,5 +52,4 @@ class ResourcesTest(unittest.TestCase):
 
     set_resource_ownership(APP_UID, APP_NAME, APP_API_VERSION, resource)
 
-    self.assertEqual(resource['metadata']['ownerReferences'],
-                                 [APP_OWNER_REF])
+    self.assertEqual(resource['metadata']['ownerReferences'], [APP_OWNER_REF])
