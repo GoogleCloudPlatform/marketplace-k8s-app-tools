@@ -153,7 +153,7 @@ class Schema:
         raise InvalidSchema('form items must have a description.')
 
     if is_v2:
-      for _, p in self._properties.iteritems():
+      for _, p in self._properties.items():
         if p.xtype == XTYPE_IMAGE:
           raise InvalidSchema(
               'No properties should have x-google-marketplace.type=IMAGE in '
