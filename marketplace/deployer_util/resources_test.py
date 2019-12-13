@@ -14,6 +14,7 @@
 
 import unittest
 
+from resources import find_application_resource
 from resources import set_resource_ownership
 
 APP_API_VERSION = 'v1beta1'
@@ -30,6 +31,9 @@ APP_OWNER_REF = {
 
 
 class ResourcesTest(unittest.TestCase):
+
+  def assertListElementsEqual(self, list1, list2):
+    return self.assertEqual(sorted(list1), sorted(list2))
 
   def test_resource_existing_app_ownerref_matching_uid_updates_existing(self):
     resource = {'metadata': {'ownerReferences': [{'uid': APP_UID}]}}
@@ -52,4 +56,62 @@ class ResourcesTest(unittest.TestCase):
 
     set_resource_ownership(APP_UID, APP_NAME, APP_API_VERSION, resource)
 
-    self.assertEqual(resource['metadata']['ownerReferences'], [APP_OWNER_REF])
+    self.assertListElementsEqual(resource['metadata']['ownerReferences'],
+                                 [APP_OWNER_REF])
+
+  def test_find_application_resource(self):
+    expected_app_resource = {
+        # Intentionally some version we don't support,
+        # but the api group should suffice.
+        'apiVersion': 'app.k8s.io/v9999',
+        'kind': 'Application',
+    }
+    resources = [
+        {
+            'apiVersion': 'v1',
+            'kind': 'ServiceAccount',
+        },
+        {
+            'apiVersion': 'application.mycompany.com/v1beta1',
+            'kind': 'Application',
+        },
+        expected_app_resource,
+        {
+            'apiVersion': 'batch/v1',
+            'kind': 'Job',
+        },
+    ]
+    self.assertEqual(expected_app_resource,
+                     find_application_resource(resources))
+
+  def test_find_application_resource_none_exists(self):
+    resources = [
+        {
+            'apiVersion': 'v1',
+            'kind': 'ServiceAccount',
+        },
+        {
+            'apiVersion': 'application.mycompany.com/v1beta1',
+            'kind': 'Application',
+        },
+        {
+            'apiVersion': 'batch/v1',
+            'kind': 'Job',
+        },
+    ]
+    self.assertRaisesRegex(Exception, r'.*does not include an Application.*',
+                           lambda: find_application_resource(resources))
+
+  def test_find_application_resource_multiple_ones_exist(self):
+    resources = [
+        {
+            'apiVersion': 'app.k8s.io/v1alpha1',
+            'kind': 'Application',
+        },
+        {
+            'apiVersion': 'app.k8s.io/v1beta1',
+            'kind': 'Application',
+        },
+    ]
+    self.assertRaisesRegex(Exception, r'.*multiple Applications.*',
+                           lambda: find_application_resource(resources))
