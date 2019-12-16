@@ -133,6 +133,7 @@ def dump(outfile, resources, included_kinds, app_name, app_uid,
       # https://kubernetes.io/docs/concepts/workloads/controllers/garbage-collection/#owners-and-dependents
       log.info("Application '{:s}' does not own cluster-scoped '{:s}/{:s}'",
                app_name, resource["kind"], resource["metadata"]["name"])
+      to_be_dumped.append(resource)
       continue
     if included_kinds is None or resource["kind"] in included_kinds:
       log.info("Application '{:s}' owns '{:s}/{:s}'", app_name,
