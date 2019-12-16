@@ -217,7 +217,7 @@ following sub-properties.
 
 ### `title`
 
-The text shown in the in the GCP Marketplace UI when users configure their
+The text shown in the GCP Marketplace UI when users configure their
 deployment.
 
 ![Custom property in the UI](images/custom-property-ui.png)
