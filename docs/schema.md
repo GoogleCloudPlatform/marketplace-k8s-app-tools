@@ -5,9 +5,11 @@ You need a `schema.yaml` file when you [build your deployer](building-deployer.m
 The schema file provides the following:
 - Information about the current release, such as its release version, release
   notes, etc.
-- A declaration of all images used by the app. These images must be
-  explicitly declared for security scanning, open source compliance, and
+- A declaration and parameterization of all images used by the app. These images
+  must be explicitly declared for security scanning, open source compliance, and
   republishing to the Google Cloud Marketplace Google Container Registry (GCR).
+  They must be accepted as parameters because their final locations will only be
+  known at the time of deployment.
 - The parameters that users can customize when they deploy the app, and
   how they are rendered in the deployment configuration UI.
 - Cluster constraints and requirements, such as the minimum required version of
@@ -93,7 +95,7 @@ x-google-marketplace:
 properties: {}
 ```
 
-### `schemaVersion`
+### (Required) `schemaVersion`
 
 The version of the schema. If you want to
 [support managed updates for your app](https://cloud.google.com/marketplace/docs/partners/kubernetes-solutions/support-managed-updates), the value must be `v2`.
@@ -126,7 +128,7 @@ releaseNote: >-
   Bug fixes and performance enhancements.
 ```
 
-#### (Optional) `releaseTypes`
+#### `releaseTypes`
 
 A list of release types, which can be one or more of the following:
 
@@ -151,14 +153,14 @@ you omit this section, users must manually update their installations.
 If you want to support managed updates for your app, set this to
 `true`.
 
-### Image declaration
+### Image declaration and parameterization
 
-A declaration of all images used in your app. Since the images are republished,
-and end users will use the versions republished in Google Cloud Marketplace's
-public GCR, all workloads must also parameterize the image fields. At deploy time,
-the final locations of the images will be available via property values declared
-here. You should not rely on knowing these final locations ahead of time, as they
-can change.
+A declaration and parameterization of all images used in your app. Since the
+images are republished, and end users will use the versions republished in
+Google Cloud Marketplace's public Container Registry, all workloads must
+also parameterize the image fields. At deploy time, the final locations of
+the images will be available via property values declared here. You should
+not rely on knowing these final locations ahead of time, as they can change.
 
 Here is an example `images` section:
 
@@ -244,14 +246,14 @@ properties: {}
 The version of the Application Custom Resource object. This version must
 be `v1beta1` or newer.
 
-### Image declaration
+### Image declaration and parameterization
 
-A declaration of all images used in your app. Since the images are republished,
-and end users will use the versions republished in Google Cloud Marketplace's
-public GCR, all workloads must also parameterize the image fields. At deploy time,
-the final locations of the images will be available via property values declared
-here. You should not rely on knowing these final locations ahead of time, as they
-can change.
+A declaration and parameterization of all images used in your app. Since the
+images are republished, and end users will use the versions republished in
+Google Cloud Marketplace's public Container Registry, all workloads must also
+parameterize the image fields. At deploy time, the final locations of the
+images will be available via property values declared here. You should not
+rely on knowing these final locations ahead of time, as they can change.
 
 In `v1`, images are declared inside the `properties` section, as follows:
 
@@ -809,6 +811,8 @@ x-google-marketplace:
         simpleNodeAffinity:
           type: REQUIRE_ONE_NODE_PER_REPLICA
 ```
+
+### resources
 
 Each entry under `resources` is roughly equivalent to a workload in the app.
 
