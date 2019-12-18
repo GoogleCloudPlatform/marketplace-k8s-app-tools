@@ -133,15 +133,13 @@ def main():
 
 def dump(outfile, resources, included_kinds, app_name, app_uid,
          app_api_version):
-  to_be_dumped = []
-  for resource in resources:
+  def maybe_assign_ownership(resource):
     if resource["kind"] in _CLUSTER_SCOPED_KINDS:
       # Cluster-scoped resources cannot be owned by a namespaced resource:
       # https://kubernetes.io/docs/concepts/workloads/controllers/garbage-collection/#owners-and-dependents
       log.info("Application '{:s}' does not own cluster-scoped '{:s}/{:s}'",
                app_name, resource["kind"], resource["metadata"]["name"])
-      to_be_dumped.append(resource)
-      continue
+
     if included_kinds is None or resource["kind"] in included_kinds:
       log.info("Application '{:s}' owns '{:s}/{:s}'", app_name,
                resource["kind"], resource["metadata"]["name"])
@@ -151,7 +149,10 @@ def dump(outfile, resources, included_kinds, app_name, app_uid,
           app_name=app_name,
           app_api_version=app_api_version,
           resource=resource)
-    to_be_dumped.append(resource)
+
+    return resource
+
+  to_be_dumped = [maybe_assign_ownership(resource) for resource in resources]
   yaml.safe_dump_all(to_be_dumped, outfile, default_flow_style=False, indent=2)
 
 
