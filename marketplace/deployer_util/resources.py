@@ -14,7 +14,7 @@
 
 
 def set_resource_ownership(app_uid, app_name, app_api_version, resource):
-  """ Set the app as owner of the resource"""
+  """Set the app as owner of the resource"""
 
   if 'metadata' not in resource:
     resource['metadata'] = {}
@@ -36,3 +36,16 @@ def set_resource_ownership(app_uid, app_name, app_api_version, resource):
   owner_reference['blockOwnerDeletion'] = True
   owner_reference['name'] = app_name
   owner_reference['uid'] = app_uid
+
+
+def find_application_resource(resources):
+  """Finds the Application resource from a list of resource manifests."""
+  apps = [
+      r for r in resources if r["kind"] == "Application" and
+      r["apiVersion"].startswith('app.k8s.io/')
+  ]
+  if len(apps) == 0:
+    raise Exception("Set of resources does not include an Application")
+  if len(apps) > 1:
+    raise Exception("Set of resources includes multiple Applications")
+  return apps[0]
