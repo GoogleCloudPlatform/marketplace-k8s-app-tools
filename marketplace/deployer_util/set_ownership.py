@@ -21,7 +21,6 @@ import yaml
 import log_util as log
 
 from argparse import ArgumentParser
-from resources import find_application_resource
 from resources import set_resource_ownership
 from yaml_util import load_resources_yaml
 from yaml_util import parse_resources_yaml
@@ -96,8 +95,16 @@ def main():
       resources += load_resources_yaml(os.path.join(args.manifests, filename))
 
   if not args.noapp:
-    app = find_application_resource(resources)
-    kinds = map(lambda x: x["kind"], app["spec"].get("componentKinds", []))
+    apps = [r for r in resources if r["kind"] == "Application"]
+
+    if len(apps) == 0:
+      raise Exception("Set of resources in {:s} does not include one of "
+                      "Application kind".format(args.manifests))
+    if len(apps) > 1:
+      raise Exception("Set of resources in {:s} includes more than one of "
+                      "Application kind".format(args.manifests))
+
+    kinds = map(lambda x: x["kind"], apps[0]["spec"].get("componentKinds", []))
 
     excluded_kinds = ["PersistentVolumeClaim", "Application"]
     included_kinds = [kind for kind in kinds if kind not in excluded_kinds]
