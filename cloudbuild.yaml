@@ -180,7 +180,7 @@ steps:
   - MARKETPLACE_TOOLS_TAG=testing-sha_$COMMIT_SHA
   args:
   - make
-  - -j4
+  - -j10
   - --output-sync
   - tests/integration
 
