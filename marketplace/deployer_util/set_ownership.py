@@ -133,6 +133,7 @@ def main():
 
 def dump(outfile, resources, included_kinds, app_name, app_uid,
          app_api_version):
+
   def maybe_assign_ownership(resource):
     if resource["kind"] in _CLUSTER_SCOPED_KINDS:
       # Cluster-scoped resources cannot be owned by a namespaced resource:
