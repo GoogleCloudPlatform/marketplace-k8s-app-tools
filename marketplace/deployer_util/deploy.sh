@@ -69,8 +69,6 @@ create_manifests.sh
   --manifests "/data/manifest-expanded" \
   --dest "/data/resources.yaml"
 
-validate_app_resource.py --manifests "/data/resources.yaml"
-
 # Ensure assembly phase is "Pending", until successful kubectl apply.
 /bin/setassemblyphase.py \
   --manifest "/data/resources.yaml" \

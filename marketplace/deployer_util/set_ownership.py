@@ -21,7 +21,6 @@ import yaml
 import log_util as log
 
 from argparse import ArgumentParser
-from resources import find_application_resource
 from resources import set_resource_ownership
 from yaml_util import load_resources_yaml
 from yaml_util import parse_resources_yaml
@@ -96,8 +95,16 @@ def main():
       resources += load_resources_yaml(os.path.join(args.manifests, filename))
 
   if not args.noapp:
-    app = find_application_resource(resources)
-    kinds = map(lambda x: x["kind"], app["spec"].get("componentKinds", []))
+    apps = [r for r in resources if r["kind"] == "Application"]
+
+    if len(apps) == 0:
+      raise Exception("Set of resources in {:s} does not include one of "
+                      "Application kind".format(args.manifests))
+    if len(apps) > 1:
+      raise Exception("Set of resources in {:s} includes more than one of "
+                      "Application kind".format(args.manifests))
+
+    kinds = map(lambda x: x["kind"], apps[0]["spec"].get("componentKinds", []))
 
     excluded_kinds = ["PersistentVolumeClaim", "Application"]
     included_kinds = [kind for kind in kinds if kind not in excluded_kinds]
@@ -126,14 +133,14 @@ def main():
 
 def dump(outfile, resources, included_kinds, app_name, app_uid,
          app_api_version):
-  to_be_dumped = []
-  for resource in resources:
+
+  def maybe_assign_ownership(resource):
     if resource["kind"] in _CLUSTER_SCOPED_KINDS:
       # Cluster-scoped resources cannot be owned by a namespaced resource:
       # https://kubernetes.io/docs/concepts/workloads/controllers/garbage-collection/#owners-and-dependents
       log.info("Application '{:s}' does not own cluster-scoped '{:s}/{:s}'",
                app_name, resource["kind"], resource["metadata"]["name"])
-      continue
+
     if included_kinds is None or resource["kind"] in included_kinds:
       log.info("Application '{:s}' owns '{:s}/{:s}'", app_name,
                resource["kind"], resource["metadata"]["name"])
@@ -143,7 +150,10 @@ def dump(outfile, resources, included_kinds, app_name, app_uid,
           app_name=app_name,
           app_api_version=app_api_version,
           resource=resource)
-    to_be_dumped.append(resource)
+
+    return resource
+
+  to_be_dumped = [maybe_assign_ownership(resource) for resource in resources]
   yaml.safe_dump_all(to_be_dumped, outfile, default_flow_style=False, indent=2)
 
 
