@@ -137,7 +137,7 @@ echo "${parameters}" \
 
 echo "INFO: Applying the following manifests:"
 cat "${manifest_dir}"
-
 kubectl apply \
   --namespace="${namespace}" \
   --filename="${manifest_dir}"
+rm -r "${manifest_dir}"
