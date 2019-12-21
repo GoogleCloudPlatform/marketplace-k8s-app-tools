@@ -135,7 +135,9 @@ echo "${parameters}" \
     --app_uid="${app_uid}" \
     --app_api_version="${app_version}"
 
-echo "Applying the following manifests: " $(cat "${manifest_dir}") &>2
+echo "INFO: Applying the following manifests:"
+cat "${manifest_dir}"
+
 kubectl apply \
   --namespace="${namespace}" \
   --filename="${manifest_dir}"
