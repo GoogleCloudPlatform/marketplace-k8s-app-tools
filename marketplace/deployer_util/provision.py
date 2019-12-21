@@ -120,7 +120,7 @@ def process(schema, values, deployer_image, deployer_entrypoint, version_repo,
                'Falling back to provisioning the deployer job only.')
 
   if use_kalm:
-    provisioned_manifests = provision_kalm(
+    manifests += provision_kalm(
         schema,
         version_repo=version_repo,
         app_name=app_name,
@@ -129,7 +129,7 @@ def process(schema, values, deployer_image, deployer_entrypoint, version_repo,
         image_pull_secret=image_pull_secret,
         app_params=app_params)
   else:
-    provisioned_manifests = provision_deployer(
+    manifests += provision_deployer(
         schema,
         app_name=app_name,
         namespace=namespace,
@@ -137,9 +137,6 @@ def process(schema, values, deployer_image, deployer_entrypoint, version_repo,
         deployer_entrypoint=deployer_entrypoint,
         image_pull_secret=image_pull_secret,
         app_params=app_params)
-
-  manifests += provisioned_manifests
-  log.info("Provisioned manifests: {}", provisioned_manifests)
   return manifests
 
 
