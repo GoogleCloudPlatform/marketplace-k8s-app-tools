@@ -113,7 +113,8 @@ app_uid=$(kubectl get "applications.app.k8s.io/$name" \
   --output=jsonpath='{.metadata.uid}')
 
 # Provisions external resource dependencies and the deployer resources.
-# We set the application as the owner for all of these resources.
+# We set the application as the owner for all of the namespaced resources.
+manifest_dir="/tmp/${namespace}_${name}_$(date +'%Y-%m-%d_%H-%M-%S')"
 echo "${parameters}" \
   | provision.py \
     --values_mode=stdin \
@@ -128,11 +129,15 @@ echo "${parameters}" \
     --namespace="${namespace}" \
   | set_ownership.py \
     --manifests=- \
-    --dest=- \
+    --dest="${manifest_dir}" \
     --noapp \
     --app_name="${name}" \
     --app_uid="${app_uid}" \
-    --app_api_version="${app_version}" \
-  | kubectl apply \
-    --namespace="$namespace" \
-    --filename=-
+    --app_api_version="${app_version}"
+
+echo "INFO: Applying the following manifests:"
+cat "${manifest_dir}"
+kubectl apply \
+  --namespace="${namespace}" \
+  --filename="${manifest_dir}"
+rm -r "${manifest_dir}"

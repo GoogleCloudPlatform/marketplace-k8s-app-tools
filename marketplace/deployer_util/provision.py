@@ -114,6 +114,7 @@ def process(schema, values, deployer_image, deployer_entrypoint, version_repo,
       schema.x_google_marketplace.managed_updates.kalm_supported):
     if version_repo:
       use_kalm = True
+      log.info('Using KALM for deployment')
     else:
       log.warn('The deployer supports KALM but no --version-repo specified. '
                'Falling back to provisioning the deployer job only.')
@@ -399,8 +400,6 @@ def make_deployer_rolebindings(schema, namespace, app_name, labels, sa_name):
   ) or not schema.x_google_marketplace.deployer_service_account:
     return [default_rolebinding]
 
-  # TODO(eshiroma): Also grant permission to clean up the provisioned IAM
-  # resources by name.
   roles_and_rolebindings = []
   deployer_service_account = schema.x_google_marketplace.deployer_service_account
 

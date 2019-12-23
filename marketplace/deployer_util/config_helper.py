@@ -152,14 +152,6 @@ class Schema:
       if 'description' not in item:
         raise InvalidSchema('form items must have a description.')
 
-    if is_v2:
-      for _, p in self._properties.items():
-        if p.xtype == XTYPE_IMAGE:
-          raise InvalidSchema(
-              'No properties should have x-google-marketplace.type=IMAGE in '
-              'schema v2. Images must be declared in the top level '
-              'x-google-marketplace.images')
-
   @property
   def x_google_marketplace(self):
     return self._x_google_marketplace
@@ -206,8 +198,6 @@ class SchemaXGoogleMarketplace:
     self._app_api_version = None
     self._published_version = None
     self._published_version_meta = None
-    self._partner_id = None
-    self._solution_id = None
     self._images = None
     self._cluster_constraints = None
     self._deployer_service_account = None
@@ -216,14 +206,6 @@ class SchemaXGoogleMarketplace:
     if self._schema_version not in _SCHEMA_VERSIONS:
       raise InvalidSchema('Invalid schema version {}'.format(
           self._schema_version))
-
-    self._partner_id = dictionary.get('partnerId', None)
-    self._solution_id = dictionary.get('solutionId', None)
-    if self._partner_id or self._solution_id:
-      if not self._partner_id or not self._solution_id:
-        raise InvalidSchema(
-            'x-google-marketplace.partnerId and x-google-marketplace.solutionId'
-            ' must be specified or missing together')
 
     if 'clusterConstraints' in dictionary:
       self._cluster_constraints = SchemaClusterConstraints(
@@ -275,14 +257,6 @@ class SchemaXGoogleMarketplace:
   @property
   def published_version_meta(self):
     return self._published_version_meta
-
-  @property
-  def partner_id(self):
-    return self._partner_id
-
-  @property
-  def solution_id(self):
-    return self._solution_id
 
   @property
   def images(self):
@@ -818,12 +792,21 @@ class SchemaXServiceAccount:
           if rule.get('nonResourceURLs'):
             raise InvalidSchema(
                 'Only attributes for resourceRules are supported in rules')
+<<<<<<< HEAD
           if not rule.get('apiGroups') or not list(
               filter(lambda x: x, rule.get('apiGroups'))):
             raise InvalidSchema("Missing or empty apiGroups in rules. "
                                 "Did you mean [\"v1\"] or [\"*\"]?")
           if not rule.get('resources') or not list(
               filter(lambda x: x, rule.get('resources'))):
+=======
+          if not rule.get('apiGroups'):
+            raise InvalidSchema("Missing apiGroups in rules. "
+                                "Did you mean [\"\"] (only core APIs)"
+                                "or [\"*\"] (all)?")
+          if not rule.get('resources') or not filter(lambda x: x,
+                                                     rule.get('resources')):
+>>>>>>> master
             raise InvalidSchema('Missing or empty resources in rules.')
           if not rule.get('verbs') or not list(
               filter(lambda x: x, rule.get('verbs'))):
