@@ -1,4 +1,4 @@
-FROM python:3.7
+FROM gcr.io/google-appengine/python
 
 # Add the Cloud SDK distribution URI as a package source
 RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
@@ -50,10 +50,6 @@ RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add - && \
     apt-get -y update && \
     apt-get -y install docker-ce=17.12.0~ce-0~ubuntu
 
-RUN curl -LO curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.16.2/bin/linux/amd64/kubectl \
-    && chmod +x ./kubectl \
-    && mv ./kubectl /usr/local/bin/kubectl
-
 RUN mkdir -p /bin/helm-downloaded \
      && wget -q -O /bin/helm-downloaded/helm.tar.gz \
         https://storage.googleapis.com/kubernetes-helm/helm-v2.10.0-linux-amd64.tar.gz \
@@ -67,7 +63,7 @@ RUN gcloud auth configure-docker
 COPY marketplace/deployer_util/* /bin/
 COPY scripts/* /scripts/
 COPY marketplace/dev/bin/* /bin/
-COPY marketplace/dev/fake-reporting-secret-manifest.yaml /data/fake-reporting-secret-manifest.yaml 
+COPY marketplace/dev/fake-reporting-secret-manifest.yaml /data/fake-reporting-secret-manifest.yaml
 RUN mv /scripts/doctor.py /scripts/doctor
 
 ENV PATH="/scripts:/bin:${PATH}"

@@ -1,4 +1,4 @@
-FROM python:3.7
+FROM gcr.io/google-appengine/python
 
 RUN pip3 install \
       futures \
