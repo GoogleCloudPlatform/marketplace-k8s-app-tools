@@ -114,6 +114,7 @@ def process(schema, values, deployer_image, deployer_entrypoint, version_repo,
       schema.x_google_marketplace.managed_updates.kalm_supported):
     if version_repo:
       use_kalm = True
+      log.info('Using KALM for deployment')
     else:
       log.warn('The deployer supports KALM but no --version-repo specified. '
                'Falling back to provisioning the deployer job only.')
