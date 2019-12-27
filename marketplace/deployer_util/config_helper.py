@@ -792,21 +792,12 @@ class SchemaXServiceAccount:
           if rule.get('nonResourceURLs'):
             raise InvalidSchema(
                 'Only attributes for resourceRules are supported in rules')
-<<<<<<< HEAD
-          if not rule.get('apiGroups') or not list(
-              filter(lambda x: x, rule.get('apiGroups'))):
-            raise InvalidSchema("Missing or empty apiGroups in rules. "
-                                "Did you mean [\"v1\"] or [\"*\"]?")
-          if not rule.get('resources') or not list(
-              filter(lambda x: x, rule.get('resources'))):
-=======
           if not rule.get('apiGroups'):
             raise InvalidSchema("Missing apiGroups in rules. "
                                 "Did you mean [\"\"] (only core APIs)"
                                 "or [\"*\"] (all)?")
           if not rule.get('resources') or not filter(lambda x: x,
                                                      rule.get('resources')):
->>>>>>> master
             raise InvalidSchema('Missing or empty resources in rules.')
           if not rule.get('verbs') or not list(
               filter(lambda x: x, rule.get('verbs'))):
