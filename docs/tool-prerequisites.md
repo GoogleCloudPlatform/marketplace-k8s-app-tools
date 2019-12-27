@@ -49,7 +49,7 @@ kubectl apply -f "https://raw.githubusercontent.com/GoogleCloudPlatform/marketpl
 Run the following to diagnose and correctly setup your environment.
 
 ```shell
-mpdev /scripts/doctor.py
+mpdev /scripts/doctor
 ```
 
 Save your gcloud project to an environment variable.
