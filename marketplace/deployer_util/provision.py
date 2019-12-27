@@ -400,8 +400,6 @@ def make_deployer_rolebindings(schema, namespace, app_name, labels, sa_name):
   ) or not schema.x_google_marketplace.deployer_service_account:
     return [default_rolebinding]
 
-  # TODO(eshiroma): Also grant permission to clean up the provisioned IAM
-  # resources by name.
   roles_and_rolebindings = []
   deployer_service_account = schema.x_google_marketplace.deployer_service_account
 
