@@ -1,4 +1,4 @@
-FROM gcr.io/google-appengine/python
+FROM marketplace.gcr.io/google/python
 
 # Add the Cloud SDK distribution URI as a package source
 RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
