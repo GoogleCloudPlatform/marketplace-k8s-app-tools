@@ -1,4 +1,4 @@
-FROM marketplace.gcr.io/google/python
+FROM gcr.io/google-appengine/python
 
 RUN pip3 install \
       futures \
@@ -8,4 +8,3 @@ RUN pip3 install \
       pyyaml \
       wheel \
       yapf
-
