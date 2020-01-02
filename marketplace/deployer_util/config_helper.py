@@ -796,8 +796,8 @@ class SchemaXServiceAccount:
             raise InvalidSchema("Missing apiGroups in rules. "
                                 "Did you mean [\"\"] (only core APIs)"
                                 "or [\"*\"] (all)?")
-          if not rule.get('resources') or not list(filter(lambda x: x,
-                                                     rule.get('resources'))):
+          if not rule.get('resources') or not list(
+              filter(lambda x: x, rule.get('resources'))):
             raise InvalidSchema('Missing or empty resources in rules.')
           if not rule.get('verbs') or not list(
               filter(lambda x: x, rule.get('verbs'))):

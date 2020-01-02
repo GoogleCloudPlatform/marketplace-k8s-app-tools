@@ -744,7 +744,7 @@ class ConfigHelperTest(unittest.TestCase):
 
   def test_service_account_custom_missing_apiGroups(self):
     with self.assertRaisesRegex(config_helper.InvalidSchema,
-                                 r'^Missing apiGroups in rules. Did you mean'):
+                                r'^Missing apiGroups in rules. Did you mean'):
       config_helper.Schema.load_yaml("""
           properties:
             sa:
