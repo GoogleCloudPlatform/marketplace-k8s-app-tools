@@ -1,19 +1,15 @@
-FROM launcher.gcr.io/google/debian9
+FROM marketplace.gcr.io/google/python
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     bash \
     ca-certificates \
     gettext \
     jq \
-    python3 \
-    python3-pip \
     wget \
     && rm -rf /var/lib/apt/lists/*
 
 RUN pip3 install \
-      setuptools \
       wheel \
-    && pip3 install \
       pyOpenSSL \
       pyyaml
 
