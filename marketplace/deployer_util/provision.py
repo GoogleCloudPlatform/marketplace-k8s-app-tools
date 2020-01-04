@@ -14,9 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import hashlib
-import re
 from argparse import ArgumentParser
+from make_dns1123_name import dns1123_name, limit_name
 
 import yaml
 
@@ -689,33 +688,6 @@ def get_property_value(schema, values, xtype):
     raise Exception('Unable to find exactly one property with '
                     'x-google-marketplace.type={}'.format(xtype))
   return values[candidates[0].name]
-
-
-def dns1123_name(name):
-  """Turns a name into a proper DNS-1123 subdomain.
-
-  This does NOT work on all names. It assumes the name is mostly correct
-  and handles only certain situations.
-  """
-  # Attempt to fix the input name.
-  fixed = name.lower()
-  fixed = re.sub(r'[.]', '-', fixed)
-  fixed = re.sub(r'[^a-z0-9-]', '', fixed)
-  fixed = fixed.strip('-')
-  fixed = limit_name(fixed, 64)
-  return fixed
-
-
-def limit_name(name, length=127):
-  result = name
-  if len(result) > length:
-    result = result[:length - 5]
-    # Hash and get the first 4 characters of the hash.
-    m = hashlib.sha256()
-    m.update(name)
-    h4sh = m.hexdigest()[:4]
-    result = '{}-{}'.format(result, h4sh)
-  return result
 
 
 def add_preprovisioned_labels(manifests, prop_name):
