@@ -22,6 +22,7 @@ _PROG_HELP = """
 Turns a name into a proper DNS-1123 subdomain, with limitations.
 """
 
+
 def main():
   parser = ArgumentParser(description=_PROG_HELP)
   parser.add_argument('--name', required=True)
