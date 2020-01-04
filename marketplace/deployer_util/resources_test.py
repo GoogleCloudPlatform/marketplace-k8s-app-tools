@@ -13,7 +13,7 @@
 
 import unittest
 
-from resources import set_resource_ownership
+from resources import set_app_resource_ownership, set_service_account_resource_ownership
 
 APP_API_VERSION = 'v1beta1'
 APP_NAME = 'wordpress-1'
@@ -26,6 +26,15 @@ APP_OWNER_REF = {
     'name': APP_NAME,
     'uid': APP_UID,
 }
+ACCOUNT_NAME = 'test-sa'
+ACCOUNT_UID = '11111111-2222-3333-4444-555555555555'
+ACCOUNT_OWNER_REF = {
+    'apiVersion': 'v1',
+    'kind': 'ServiceAccount',
+    'blockOwnerDeletion': True,
+    'name': ACCOUNT_NAME,
+    'uid': ACCOUNT_UID,
+}
 
 
 class ResourcesTest(unittest.TestCase):
@@ -33,13 +42,10 @@ class ResourcesTest(unittest.TestCase):
   def assertListElementsEqual(self, list1, list2):
     return self.assertEqual(sorted(list1), sorted(list2))
 
-
-# def set_resource_ownership(app_uid, app_name, app_api_version, resource):
-
   def test_resource_existing_app_ownerref_matching_uid_updates_existing(self):
     resource = {'metadata': {'ownerReferences': [{'uid': APP_UID}]}}
 
-    set_resource_ownership(APP_UID, APP_NAME, APP_API_VERSION, resource)
+    set_app_resource_ownership(APP_UID, APP_NAME, APP_API_VERSION, resource)
 
     self.assertListElementsEqual(resource['metadata']['ownerReferences'],
                                  [APP_OWNER_REF])
@@ -47,7 +53,7 @@ class ResourcesTest(unittest.TestCase):
   def test_resource_existing_app_ownerref_different_uid_adds_ownerref(self):
     resource = {'metadata': {'ownerReferences': [{'uid': OTHER_UID}]}}
 
-    set_resource_ownership(APP_UID, APP_NAME, APP_API_VERSION, resource)
+    set_app_resource_ownership(APP_UID, APP_NAME, APP_API_VERSION, resource)
 
     self.assertListElementsEqual(resource['metadata']['ownerReferences'], [{
         'uid': OTHER_UID
@@ -56,7 +62,32 @@ class ResourcesTest(unittest.TestCase):
   def test_resource_no_ownerrefs_adds_ownerref(self):
     resource = {'metadata': {'ownerReferences': []}}
 
-    set_resource_ownership(APP_UID, APP_NAME, APP_API_VERSION, resource)
+    set_app_resource_ownership(APP_UID, APP_NAME, APP_API_VERSION, resource)
 
     self.assertListElementsEqual(resource['metadata']['ownerReferences'],
                                  [APP_OWNER_REF])
+
+  def test_resource_existing_sa_ownerref_matching_uid_updates_existing(self):
+    resource = {'metadata': {'ownerReferences': [{'uid': ACCOUNT_UID}]}}
+
+    set_service_account_resource_ownership(ACCOUNT_UID, ACCOUNT_NAME, resource)
+
+    self.assertListElementsEqual(resource['metadata']['ownerReferences'],
+                                 [ACCOUNT_OWNER_REF])
+
+  def test_resource_existing_sa_ownerref_different_uid_adds_ownerref(self):
+    resource = {'metadata': {'ownerReferences': [{'uid': OTHER_UID}]}}
+
+    set_service_account_resource_ownership(ACCOUNT_UID, ACCOUNT_NAME, resource)
+
+    self.assertListElementsEqual(resource['metadata']['ownerReferences'], [{
+        'uid': OTHER_UID
+    }, ACCOUNT_OWNER_REF])
+
+  def test_resource_no_ownerrefs_sa_ownerref(self):
+    resource = {'metadata': {'ownerReferences': []}}
+
+    set_service_account_resource_ownership(ACCOUNT_UID, ACCOUNT_NAME, resource)
+
+    self.assertListElementsEqual(resource['metadata']['ownerReferences'],
+                                 [ACCOUNT_OWNER_REF])
