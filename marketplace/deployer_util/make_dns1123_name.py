@@ -56,3 +56,7 @@ def limit_name(name, length=127):
     h4sh = m.hexdigest()[:4]
     result = '{}-{}'.format(result, h4sh)
   return result
+
+
+if __name__ == "__main__":
+  main()
