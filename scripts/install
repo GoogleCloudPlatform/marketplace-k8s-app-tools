@@ -116,6 +116,7 @@ app_uid=$(kubectl get "applications.app.k8s.io/$name" \
 
 # Create ServiceAccount instance.
 deployer_name="$(echo ${name} | make_dns1123_name.py)"
+echo "DEPLOYER_NAME: $deployer_name"
 kubectl apply --namespace="$namespace" --filename=- <<EOF
 apiVersion: "v1"
 kind: ServiceAccount
