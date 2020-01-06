@@ -21,7 +21,7 @@ import yaml
 import log_util as log
 
 from argparse import ArgumentParser
-from resources import set_resource_ownership
+from resources import set_app_resource_ownership
 from yaml_util import load_resources_yaml
 from yaml_util import parse_resources_yaml
 
@@ -145,7 +145,7 @@ def dump(outfile, resources, included_kinds, app_name, app_uid,
       log.info("Application '{:s}' owns '{:s}/{:s}'", app_name,
                resource["kind"], resource["metadata"]["name"])
       resource = copy.deepcopy(resource)
-      set_resource_ownership(
+      set_app_resource_ownership(
           app_uid=app_uid,
           app_name=app_name,
           app_api_version=app_api_version,
