@@ -114,8 +114,23 @@ app_uid=$(kubectl get "applications.app.k8s.io/$name" \
   --namespace="$namespace" \
   --output=jsonpath='{.metadata.uid}')
 
+# Create ServiceAccount instance.
+deployer_name="$(echo ${name} | make_dns1123_name.py)"
+kubectl apply --namespace="$namespace" --filename=- <<EOF
+apiVersion: "v1"
+kind: ServiceAccount
+metadata:
+  name: "${deployer_name}"
+  namespace: "${namespace}"
+EOF
+
+deployer_uid=$(kubectl get sa ${deployer_name} \
+  --namespace="$namespace" \
+  --output=jsonpath='{.metadata.uid}')
+
 # Provisions external resource dependencies and the deployer resources.
-# We set the application as the owner for all of the namespaced resources.
+# We set the application as the owner for all of the namespaced resources,
+# and the deployer as the owner of it's dependent RBAC resources.
 manifest_dir="/tmp/${namespace}_${name}_$(date +'%Y-%m-%d_%H-%M-%S')"
 echo "${parameters}" \
   | provision.py \
@@ -135,7 +150,9 @@ echo "${parameters}" \
     --noapp \
     --app_name="${name}" \
     --app_uid="${app_uid}" \
-    --app_api_version="${app_version}"
+    --app_api_version="${app_version}" \
+    --deployer_name="{$deployer_name}" \
+    --deployer_uid="{$deployer_uid}"
 
 echo "INFO: Applying the following manifests:"
 cat "${manifest_dir}"
