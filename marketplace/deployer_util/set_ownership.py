@@ -153,7 +153,7 @@ def dump(outfile, resources, included_kinds, app_name, app_uid,
       log.info("Application '{:s}' owns '{:s}/{:s}'", app_name,
                resource["kind"], resource["metadata"]["name"])
       resource = copy.deepcopy(resource)
-      set_resource_ownership(
+      set_app_resource_ownership(
           app_uid=app_uid,
           app_name=app_name,
           app_api_version=app_api_version,
