@@ -21,7 +21,7 @@ import yaml
 import log_util as log
 
 from argparse import ArgumentParser
-from resources import set_resource_ownership
+from resources import set_app_resource_ownership
 from yaml_util import load_resources_yaml
 from yaml_util import parse_resources_yaml
 
