@@ -63,14 +63,6 @@ def main():
   parser.add_argument(
       "--app_uid", help="The uid of the application instance", required=True)
   parser.add_argument(
-      "--deployer_name",
-      help="The name of the deployer service account instance",
-      required=True)
-  parser.add_argument(
-      "--deployer_uid",
-      help="The uid of the deployer service account instance",
-      required=True)
-  parser.add_argument(
       "--app_api_version",
       help="The apiVersion of the Application CRD",
       required=True)
