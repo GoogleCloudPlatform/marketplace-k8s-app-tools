@@ -171,8 +171,8 @@ def dump(outfile, resources, included_kinds, app_name, app_uid, app_api_version,
                resource["kind"], resource["metadata"]["name"])
       resource = copy.deepcopy(resource)
       set_service_account_resource_ownership(
-          deployer_uid=deployer_uid,
-          deployer_name=deployer_name,
+          account_uid=deployer_uid,
+          account_name=deployer_name,
           resource=resource)
 
     return resource
