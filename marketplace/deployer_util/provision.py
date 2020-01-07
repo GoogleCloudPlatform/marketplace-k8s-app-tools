@@ -37,6 +37,7 @@ def main():
   schema_values_common.add_to_argument_parser(parser)
   parser.add_argument('--deployer_image', required=True)
   parser.add_argument('--deployer_entrypoint', default=None)
+  parser.add_argument('--deployer_service_account_name', required=True)
   parser.add_argument('--version_repo', default=None)
   parser.add_argument('--image_pull_secret', default=None)
   args = parser.parse_args()
@@ -49,12 +50,13 @@ def main():
       deployer_image=args.deployer_image,
       deployer_entrypoint=args.deployer_entrypoint,
       version_repo=args.version_repo,
-      image_pull_secret=args.image_pull_secret)
+      image_pull_secret=args.image_pull_secret,
+      deployer_service_account_name=args.deployer_service_account_name)
   print(yaml.safe_dump_all(manifests, default_flow_style=False, indent=2))
 
 
 def process(schema, values, deployer_image, deployer_entrypoint, version_repo,
-            image_pull_secret):
+            image_pull_secret, deployer_service_account_name):
   props = {}
   manifests = []
   app_name = get_name(schema, values)
@@ -126,7 +128,8 @@ def process(schema, values, deployer_image, deployer_entrypoint, version_repo,
         namespace=namespace,
         deployer_image=deployer_image,
         image_pull_secret=image_pull_secret,
-        app_params=app_params)
+        app_params=app_params,
+        deployer_service_account_name=deployer_service_account_name)
   else:
     manifests += provision_deployer(
         schema,
@@ -135,7 +138,8 @@ def process(schema, values, deployer_image, deployer_entrypoint, version_repo,
         deployer_image=deployer_image,
         deployer_entrypoint=deployer_entrypoint,
         image_pull_secret=image_pull_secret,
-        app_params=app_params)
+        app_params=app_params,
+        deployer_service_account_name=deployer_service_account_name)
   return manifests
 
 
@@ -164,12 +168,11 @@ def provision_from_storage(key, value, app_name, namespace):
 
 
 def provision_kalm(schema, version_repo, app_name, namespace, deployer_image,
-                   app_params, image_pull_secret):
+                   app_params, deployer_service_account_name,
+                   image_pull_secret):
   """Provisions KALM resource for installing the application."""
   if not version_repo:
     raise Exception('A valid --version_repo must be specified')
-
-  sa_name = dns1123_name('{}-deployer-sa'.format(app_name))
 
   labels = {
       'app.kubernetes.io/component': 'kalm.marketplace.cloud.google.com',
@@ -209,7 +212,7 @@ def provision_kalm(schema, version_repo, app_name, namespace, deployer_image,
           'applicationRef': {
               'name': app_name,
           },
-          'serviceAccountName': sa_name,
+          'serviceAccountName': deployer_service_account_name,
           'valuesSecretRef': {
               'name': secret['metadata']['name']
           }
@@ -220,7 +223,7 @@ def provision_kalm(schema, version_repo, app_name, namespace, deployer_image,
       'apiVersion': 'v1',
       'kind': 'ServiceAccount',
       'metadata': {
-          'name': sa_name,
+          'name': deployer_service_account_name,
           'namespace': namespace,
           'labels': labels,
       },
@@ -231,8 +234,10 @@ def provision_kalm(schema, version_repo, app_name, namespace, deployer_image,
     }]
 
   role_binding = {
-      'apiVersion': 'rbac.authorization.k8s.io/v1',
-      'kind': 'RoleBinding',
+      'apiVersion':
+          'rbac.authorization.k8s.io/v1',
+      'kind':
+          'RoleBinding',
       'metadata': {
           'name': '{}-deployer-rb'.format(app_name),
           'namespace': namespace,
@@ -245,7 +250,7 @@ def provision_kalm(schema, version_repo, app_name, namespace, deployer_image,
       },
       'subjects': [{
           'kind': 'ServiceAccount',
-          'name': sa_name,
+          'name': deployer_service_account_name,
       },]
   }
 
@@ -259,9 +264,9 @@ def provision_kalm(schema, version_repo, app_name, namespace, deployer_image,
 
 
 def provision_deployer(schema, app_name, namespace, deployer_image,
-                       deployer_entrypoint, app_params, image_pull_secret):
+                       deployer_entrypoint, app_params,
+                       deployer_service_account_name, image_pull_secret):
   """Provisions resources to run the deployer."""
-  sa_name = dns1123_name('{}-deployer-sa'.format(app_name))
   labels = {
       'app.kubernetes.io/component': 'deployer.marketplace.cloud.google.com',
       'marketplace.cloud.google.com/deployer': 'Dependent',
@@ -276,7 +281,7 @@ def provision_deployer(schema, app_name, namespace, deployer_image,
                             app_params)
     pod_spec = {
         'serviceAccountName':
-            sa_name,
+            deployer_service_account_name,
         'containers': [{
             'name':
                 'deployer',
@@ -304,7 +309,7 @@ def provision_deployer(schema, app_name, namespace, deployer_image,
     config = make_v1_config(schema, namespace, app_name, labels, app_params)
     pod_spec = {
         'serviceAccountName':
-            sa_name,
+            deployer_service_account_name,
         'containers': [{
             'name':
                 'deployer',
@@ -334,7 +339,7 @@ def provision_deployer(schema, app_name, namespace, deployer_image,
       'apiVersion': 'v1',
       'kind': 'ServiceAccount',
       'metadata': {
-          'name': sa_name,
+          'name': deployer_service_account_name,
           'namespace': namespace,
           'labels': labels,
       },
@@ -369,7 +374,7 @@ def provision_deployer(schema, app_name, namespace, deployer_image,
       },
   ]
   manifests += make_deployer_rolebindings(schema, namespace, app_name, labels,
-                                          sa_name)
+                                          deployer_service_account_name)
   return manifests
 
 

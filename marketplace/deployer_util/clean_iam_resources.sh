@@ -19,12 +19,13 @@ set -eox pipefail
 [[ -z "$NAME" ]] && echo "NAME must be set" && exit 1
 [[ -z "$NAMESPACE" ]] && echo "NAMESPACE must be set" && exit 1
 
-# Delete the service account and RBAC objects by labels.
+# Delete the service account (which owns its RBAC objects) by label.
+# Update _DEPLOYER_OWNED_KINDS in set_ownership.py to delete additional
+# resource types besides Role and RoleBinding.
 # Note that only resources of a one-shot deployer have this label.
 # Resources of a KALM-managed deployer have
 # app.kubernetes.io/component=kalm.marketplace.cloud.google.com label.
-# TODO(#347): Only delete the ServiceAccount once it owns the Role{,Binding}
 kubectl delete --namespace="$NAMESPACE" \
-  ServiceAccount,Role,RoleBinding \
+  ServiceAccount \
   -l 'app.kubernetes.io/component'='deployer.marketplace.cloud.google.com','app.kubernetes.io/name'="$NAME" \
   --ignore-not-found
