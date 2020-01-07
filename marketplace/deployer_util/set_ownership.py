@@ -54,6 +54,7 @@ _CLUSTER_SCOPED_KINDS = [
     "StorageClass",
     "VolumeAttachment",
 ]
+_DEPLOYER_OWNED_KINDS = ["Role", "RoleBinding"]
 
 
 def main():
@@ -165,7 +166,7 @@ def dump(outfile, resources, included_kinds, app_name, app_uid, app_api_version,
           app_api_version=app_api_version,
           resource=resource)
 
-    if deployer_name and deployer_uid and is_namespaced_deployer_component(
+    if deployer_name and deployer_uid and should_be_deployer_owned(
         resource):
       log.info("ServiceAccount '{:s}' owns '{:s}/{:s}'", deployer_name,
                resource["kind"], resource["metadata"]["name"])
@@ -181,8 +182,8 @@ def dump(outfile, resources, included_kinds, app_name, app_uid, app_api_version,
   yaml.safe_dump_all(to_be_dumped, outfile, default_flow_style=False, indent=2)
 
 
-def is_namespaced_deployer_component(resource):
-  if resource["kind"] in _CLUSTER_SCOPED_KINDS:
+def should_be_deployer_owned(resource):
+  if not resource["kind"] in _DEPLOYER_OWNED_KINDS:
     return False
   if resource.get("metadata", {}).get("labels", {}).get(
       "app.kubernetes.io/component") != "deployer.marketplace.cloud.google.com":
