@@ -130,7 +130,7 @@ deployer_uid=$(kubectl get sa ${deployer_name} \
 
 # Provisions external resource dependencies and the deployer resources.
 # We set the application as the owner for all of the namespaced resources,
-# and the deployer as the owner of it's dependent RBAC resources.
+# and the deployer as the owner of its dependent RBAC resources.
 manifest_dir="/tmp/${namespace}_${name}_$(date +'%Y-%m-%d_%H-%M-%S')"
 echo "${parameters}" \
   | provision.py \
