@@ -148,7 +148,7 @@ $(PYTHON_TEST_TARGETS): %.__pytest__: .build/tests/py
 	  -v $(PWD):/data \
 	  --entrypoint runtests.sh \
 	  tests/py \
-    "$*"
+	  "$*"
 
 .build/tests: | .build
 	mkdir -p "$@"
