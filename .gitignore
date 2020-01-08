@@ -3,3 +3,4 @@
 .vscode/
 *.pyc
 *.swp
+.coverage
