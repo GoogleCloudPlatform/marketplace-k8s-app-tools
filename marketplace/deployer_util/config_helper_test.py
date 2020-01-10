@@ -599,6 +599,9 @@ class ConfigHelperTest(unittest.TestCase):
                   - apiGroups: ['apps/v1']
                     resources: ['Deployment']
                     verbs: ['*']
+                  - apiGroups: ['']
+                    resources: ['Pods']
+                    verbs: ['*']
                   - apiGroups: ['apps/v1']
                     resources: ['StatefulSet']
                     verbs: ['*']
@@ -624,6 +627,11 @@ class ConfigHelperTest(unittest.TestCase):
         {
             'apiGroups': ['apps/v1'],
             'resources': ['Deployment'],
+            'verbs': ['*']
+        },
+        {
+            'apiGroups': [''],
+            'resources': ['Pods'],
             'verbs': ['*']
         },
         {
@@ -736,10 +744,9 @@ class ConfigHelperTest(unittest.TestCase):
                     rulesType: CUSTOM
           """)
 
-  def test_service_account_custom_empty_apiGroups(self):
-    with self.assertRaisesRegexp(
-        config_helper.InvalidSchema,
-        r'^Missing or empty apiGroups in rules. Did you mean'):
+  def test_service_account_custom_missing_apiGroups(self):
+    with self.assertRaisesRegexp(config_helper.InvalidSchema,
+                                 r'^Missing apiGroups in rules. Did you mean'):
       config_helper.Schema.load_yaml("""
           properties:
             sa:
@@ -751,8 +758,7 @@ class ConfigHelperTest(unittest.TestCase):
                   - type: Role
                     rulesType: CUSTOM
                     rules:
-                    - apiGroups: ['']
-                      resources: ['Pods']
+                    - resources: ['Pods']
                       verbs: ['*']
           """)
 
