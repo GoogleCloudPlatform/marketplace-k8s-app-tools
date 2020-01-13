@@ -295,6 +295,12 @@ def provision_deployer(schema, app_name, namespace, deployer_image,
                 'subPath': 'values.yaml',
                 'readOnly': True,
             },],
+            'resources': {
+                'requests': {
+                    'memory': '\"64Mi\"',
+                    'cpu': '\"250m\"'
+                }
+            },
         },],
         'restartPolicy':
             'Never',
@@ -321,6 +327,12 @@ def provision_deployer(schema, app_name, namespace, deployer_image,
                 'name': 'config-volume',
                 'mountPath': '/data/values',
             },],
+            'resources': {
+                'requests': {
+                    'memory': '\"64Mi\"',
+                    'cpu': '\"250m\"'
+                }
+            },
         },],
         'restartPolicy':
             'Never',
