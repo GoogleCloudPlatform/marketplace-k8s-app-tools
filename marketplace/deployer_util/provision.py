@@ -283,18 +283,21 @@ def provision_deployer(schema, app_name, namespace, deployer_image,
         'serviceAccountName':
             deployer_service_account_name,
         'containers': [{
-            'name':
-                'deployer',
-            'image':
-                deployer_image,
-            'imagePullPolicy':
-                'Always',
+            'name': 'deployer',
+            'image': deployer_image,
+            'imagePullPolicy': 'Always',
             'volumeMounts': [{
                 'name': 'config-volume',
                 'mountPath': '/data/values.yaml',
                 'subPath': 'values.yaml',
                 'readOnly': True,
             },],
+            'resources': {
+                'requests': {
+                    'memory': '42Mi',
+                    'cpu': '150m'
+                }
+            },
         },],
         'restartPolicy':
             'Never',
@@ -311,16 +314,19 @@ def provision_deployer(schema, app_name, namespace, deployer_image,
         'serviceAccountName':
             deployer_service_account_name,
         'containers': [{
-            'name':
-                'deployer',
-            'image':
-                deployer_image,
-            'imagePullPolicy':
-                'Always',
+            'name': 'deployer',
+            'image': deployer_image,
+            'imagePullPolicy': 'Always',
             'volumeMounts': [{
                 'name': 'config-volume',
                 'mountPath': '/data/values',
             },],
+            'resources': {
+                'requests': {
+                    'memory': '42Mi',
+                    'cpu': '150m'
+                }
+            },
         },],
         'restartPolicy':
             'Never',
