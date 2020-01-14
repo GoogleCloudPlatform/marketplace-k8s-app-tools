@@ -294,8 +294,8 @@ def provision_deployer(schema, app_name, namespace, deployer_image,
             },],
             'resources': {
                 'requests': {
-                    'memory': '\"42Mi\"',
-                    'cpu': '\"150m\"'
+                    'memory': '42Mi',
+                    'cpu': '150m'
                 }
             },
         },],
@@ -323,8 +323,8 @@ def provision_deployer(schema, app_name, namespace, deployer_image,
             },],
             'resources': {
                 'requests': {
-                    'memory': '\"42Mi\"',
-                    'cpu': '\"150m\"'
+                    'memory': '42Mi',
+                    'cpu': '150m'
                 }
             },
         },],
