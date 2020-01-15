@@ -3,6 +3,9 @@ x-google-marketplace:
 
   applicationApiVersion: v1beta1
 
+  partnerId: partner
+  solutionId: wordpress
+
   publishedVersion: 0.0.1
   publishedVersionMetadata:
     releaseNote: Initial release

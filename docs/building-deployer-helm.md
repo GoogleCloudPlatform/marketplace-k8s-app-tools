@@ -64,6 +64,11 @@ Use the following content:
 ```yaml
 applicationApiVersion: v1beta1
 
+x-google-marketplace:
+  # IMPORTANT: These IDs must match your listing ID in Marketplace.
+  partnerId: partner
+  solutionId: wordpress
+
 properties:
   name:
     type: string
@@ -85,6 +90,10 @@ In the main chart's `templates` directory, add `application.yaml`
 with the following content. This manifest describes the application
 and is used in the UI.
 
+It's important to note that `partner_id` and `product_id` must match
+the values declared in the schema, `partnerId` and `solutionId`
+respectively, which must also match your listing ID in Marketplace.
+
 ```yaml
 apiVersion: app.k8s.io/v1beta1
 kind: Application
@@ -93,6 +102,8 @@ metadata:
   namespace: "{{ .Release.Namespace }}"
   labels:
     app.kubernetes.io/name: "{{ .Release.Name }}"
+  annotations:
+    marketplace.cloud.google.com/deploy-info: '{"partner_id": "partner", "product_id": "wordpress", "partner_name": "Partner"}'
 spec:
   descriptor:
     type: Wordpress
