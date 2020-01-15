@@ -33,7 +33,7 @@ Instead of using your personal credential to log in, it's recommended
 to use a Service Account instead.
 
 A new Service Account and proper permissions can be created using the
-following commands. `PROJECT-ID` is the (non-numeric) name of your
+following commands. `PROJECT-ID` is the (non-numeric) identifier of your
 GCP project. This assumes that you're already logged in with `gcloud`.
 
 ```shell
@@ -81,7 +81,7 @@ gcloud auth application-default login
 
 ### Running the `doctor` command
 
-For the very least, you need to connect to a GKE cluster. Follow
+At the very least, you need to connect to a GKE cluster. Follow
 [this instruction](docs/tool-prerequisites.md)
 to ensure you have a properly setup environment.
 
