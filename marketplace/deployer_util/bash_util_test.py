@@ -1,4 +1,3 @@
-# Lint as: python3
 """Tests for bash_util."""
 
 from bash_util import Command, CommandException

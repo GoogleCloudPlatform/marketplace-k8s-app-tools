@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
 import tempfile
 import unittest
 
@@ -1287,6 +1288,27 @@ class ConfigHelperTest(unittest.TestCase):
             - widget: help
             """).validate())
 
+  def test_read_values_to_dict(self):
+    dirname = tempfile.mkdtemp()
+    with open(os.path.join(dirname, "file1"), "w") as stream:
+      stream.write("value1")
+    with open(os.path.join(dirname, "file2"), "w") as stream:
+      stream.write("2")
+
+    schema = """
+    properties:
+      key1:
+        type: string
+      key2:
+        type: number
+    """
+    expected_values = {
+      "file1": u"value1",
+      "file2": u"2"
+    }
+    actual_values = config_helper._read_values_to_dict(dirname,
+        config_helper.Schema.load_yaml(schema))
+    self.assertEqual(actual_values, expected_values)
 
 if __name__ == 'main':
   unittest.main()
