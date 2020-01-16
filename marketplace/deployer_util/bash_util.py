@@ -18,6 +18,7 @@ import subprocess
 
 
 class CommandException(Exception):
+
   def __init__(self, exitcode, message):
     self._exitcode = exitcode
     super(Exception, self).__init__(message)

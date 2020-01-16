@@ -3,12 +3,13 @@
 import dict_util
 import unittest
 
+
 class DictUtilTest(unittest.TestCase):
 
   def test_deep_get(self):
     c = {'c': 1}
-    b = {'b': c }
-    a = {'a': b }
+    b = {'b': c}
+    a = {'a': b}
     self.assertEqual(dict_util.deep_get(a, 'a'), b)
     self.assertEqual(dict_util.deep_get(a, 'a', 'b'), c)
     self.assertEqual(dict_util.deep_get(a, 'a', 'b', 'c'), 1)

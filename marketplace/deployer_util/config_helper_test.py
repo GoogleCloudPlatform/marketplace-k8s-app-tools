@@ -1302,13 +1302,11 @@ class ConfigHelperTest(unittest.TestCase):
       key2:
         type: number
     """
-    expected_values = {
-      "file1": u"value1",
-      "file2": u"2"
-    }
-    actual_values = config_helper._read_values_to_dict(dirname,
-        config_helper.Schema.load_yaml(schema))
+    expected_values = {"file1": u"value1", "file2": u"2"}
+    actual_values = config_helper._read_values_to_dict(
+        dirname, config_helper.Schema.load_yaml(schema))
     self.assertEqual(actual_values, expected_values)
+
 
 if __name__ == 'main':
   unittest.main()

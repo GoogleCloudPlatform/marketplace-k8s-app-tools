@@ -3,6 +3,7 @@
 from bash_util import Command, CommandException
 import unittest
 
+
 class BashUtilTest(unittest.TestCase):
 
   def test_command_success(self):
@@ -12,7 +13,8 @@ class BashUtilTest(unittest.TestCase):
 
   def test_command_success_json(self):
     cmd = Command('echo \'{"string": "mystring", "int": 1, "float": 1.5}\'')
-    self.assertEqual(cmd.output, '{"string": "mystring", "int": 1, "float": 1.5}\n')
+    self.assertEqual(cmd.output,
+                     '{"string": "mystring", "int": 1, "float": 1.5}\n')
     self.assertEqual(cmd.exitcode, 0)
     self.assertEqual(cmd.json(), {"string": "mystring", "int": 1, "float": 1.5})
 
@@ -26,4 +28,4 @@ class BashUtilTest(unittest.TestCase):
       Command('cat nonexistentfile')
     self.assertEqual(context.exception.exitcode, 1)
     self.assertEqual(context.exception.message,
-        'cat: nonexistentfile: No such file or directory\n')
+                     'cat: nonexistentfile: No such file or directory\n')
