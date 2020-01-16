@@ -259,7 +259,7 @@ In `v1`, images are declared inside the `properties` section, as follows:
 
 ```yaml
 properties:
-  mainImageName:  # A primary image is required.
+  mainImageName:
     type: string
     default: gcr.io/your-project/your-company/your-app:1.0.1
     x-google-marketplace:
@@ -280,9 +280,9 @@ The `default` values specify the images' names, and are required.
 
 Note that the images share a common prefix
 `gcr.io/your-project/your-company/your-app`, which is set externally to the
-`schema.yaml` file, when you onboard your app for publishing. A primary image for
-your app is required; its repository must exactly match the common prefix of the
-images.
+`schema.yaml` file, when you onboard your app for publishing. If your app
+contains a primary image, its repository must exactly match the common prefix
+of the images.
 
 The two declared properties, `mainImageName` and `proxyImageName`, receive the
 final republished images when end users deploy the app.
