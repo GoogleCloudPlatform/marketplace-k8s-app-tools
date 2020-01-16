@@ -105,7 +105,7 @@ def check_kubectl(args):
                      stdout=subprocess.DEVNULL,
                      stderr=subprocess.DEVNULL)
   if p.returncode != 0:
-    return TaskEvent(
+    return make_run_event(
         p=p,
         success=False,
         message='''

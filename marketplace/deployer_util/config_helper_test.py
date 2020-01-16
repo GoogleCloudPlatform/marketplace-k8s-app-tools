@@ -599,6 +599,9 @@ class ConfigHelperTest(unittest.TestCase):
                   - apiGroups: ['apps/v1']
                     resources: ['Deployment']
                     verbs: ['*']
+                  - apiGroups: ['']
+                    resources: ['Pods']
+                    verbs: ['*']
                   - apiGroups: ['apps/v1']
                     resources: ['StatefulSet']
                     verbs: ['*']
@@ -627,11 +630,175 @@ class ConfigHelperTest(unittest.TestCase):
             'verbs': ['*']
         },
         {
+            'apiGroups': [''],
+            'resources': ['Pods'],
+            'verbs': ['*']
+        },
+        {
             'apiGroups': ['apps/v1'],
             'resources': ['StatefulSet'],
             'verbs': ['*']
         },
     ]], sa.custom_role_rules())
+
+  def test_service_account_missing_rulesType(self):
+    with self.assertRaisesRegexp(
+        config_helper.InvalidSchema,
+        'rulesType must be one of PREDEFINED or CUSTOM'):
+      config_helper.Schema.load_yaml("""
+          properties:
+            sa:
+              type: string
+              x-google-marketplace:
+                type: SERVICE_ACCOUNT
+                serviceAccount:
+                  roles:
+                  - type: Role
+                    rulesFromRoleName: view
+          """)
+
+  def test_service_account_predefined_rules(self):
+    with self.assertRaisesRegexp(
+        config_helper.InvalidSchema,
+        'rules can only be used with rulesType CUSTOM'):
+      config_helper.Schema.load_yaml("""
+          properties:
+            sa:
+              type: string
+              x-google-marketplace:
+                type: SERVICE_ACCOUNT
+                serviceAccount:
+                  roles:
+                  - type: Role
+                    rulesType: PREDEFINED
+                    rules:
+                    - apiGroups: ['']
+                      resources: ['Deployment']
+                      verbs: ['*']
+          """)
+
+  def test_service_account_predefined_missing_rulesFromRoleName(self):
+    with self.assertRaisesRegexp(
+        config_helper.InvalidSchema,
+        'Missing rulesFromRoleName for PREDEFINED role'):
+      config_helper.Schema.load_yaml("""
+          properties:
+            sa:
+              type: string
+              x-google-marketplace:
+                type: SERVICE_ACCOUNT
+                serviceAccount:
+                  roles:
+                  - type: Role
+                    rulesType: PREDEFINED
+          """)
+
+  def test_service_account_custom_rulesFromRoleName(self):
+    with self.assertRaisesRegexp(
+        config_helper.InvalidSchema,
+        'rulesFromRoleName can only be used with rulesType PREDEFINED'):
+      config_helper.Schema.load_yaml("""
+          properties:
+            sa:
+              type: string
+              x-google-marketplace:
+                type: SERVICE_ACCOUNT
+                serviceAccount:
+                  roles:
+                  - type: Role
+                    rulesType: CUSTOM
+                    rulesFromRoleName: edit
+          """)
+
+  def test_service_account_custom_nonResourceAttributes(self):
+    with self.assertRaisesRegexp(
+        config_helper.InvalidSchema,
+        'Only attributes for resourceRules are supported in rules'):
+      config_helper.Schema.load_yaml("""
+          properties:
+            sa:
+              type: string
+              x-google-marketplace:
+                type: SERVICE_ACCOUNT
+                serviceAccount:
+                  roles:
+                  - type: Role
+                    rulesType: CUSTOM
+                    rules:
+                    - nonResourceURLs: ['/version', '/healthz']
+                      verbs: ["get"]
+          """)
+
+  def test_service_account_custom_missingRules(self):
+    with self.assertRaisesRegexp(config_helper.InvalidSchema,
+                                 'Missing rules for CUSTOM role'):
+      config_helper.Schema.load_yaml("""
+          properties:
+            sa:
+              type: string
+              x-google-marketplace:
+                type: SERVICE_ACCOUNT
+                serviceAccount:
+                  roles:
+                  - type: Role
+                    rulesType: CUSTOM
+          """)
+
+  def test_service_account_custom_missing_apiGroups(self):
+    with self.assertRaisesRegexp(config_helper.InvalidSchema,
+                                 r'^Missing apiGroups in rules. Did you mean'):
+      config_helper.Schema.load_yaml("""
+          properties:
+            sa:
+              type: string
+              x-google-marketplace:
+                type: SERVICE_ACCOUNT
+                serviceAccount:
+                  roles:
+                  - type: Role
+                    rulesType: CUSTOM
+                    rules:
+                    - resources: ['Pods']
+                      verbs: ['*']
+          """)
+
+  def test_service_account_custom_empty_resources(self):
+    with self.assertRaisesRegexp(config_helper.InvalidSchema,
+                                 'Missing or empty resources in rules'):
+      config_helper.Schema.load_yaml("""
+          properties:
+            sa:
+              type: string
+              x-google-marketplace:
+                type: SERVICE_ACCOUNT
+                serviceAccount:
+                  roles:
+                  - type: Role
+                    rulesType: CUSTOM
+                    rules:
+                    - apiGroups: ['v1']
+                      resources: ['']
+                      verbs: ['*']
+          """)
+
+  def test_service_account_custom_empty_verbs(self):
+    with self.assertRaisesRegexp(config_helper.InvalidSchema,
+                                 'Missing or empty verbs in rules'):
+      config_helper.Schema.load_yaml("""
+          properties:
+            sa:
+              type: string
+              x-google-marketplace:
+                type: SERVICE_ACCOUNT
+                serviceAccount:
+                  roles:
+                  - type: Role
+                    rulesType: CUSTOM
+                    rules:
+                    - apiGroups: ['v1']
+                      resources: ['Pods']
+                      verbs: ['']
+          """)
 
   def test_storage_class(self):
     schema = config_helper.Schema.load_yaml("""
@@ -681,6 +848,81 @@ class ConfigHelperTest(unittest.TestCase):
                 x-google-marketplace:
                   type: UNKNOWN
             """))
+
+  def test_partner_and_solution_ids(self):
+    schema_yaml = """
+        x-google-marketplace:
+          schemaVersion: v2
+          partnerId: partner-a
+          applicationApiVersion: v1beta1
+          publishedVersion: 6.5.130-metadata
+          publishedVersionMetadata:
+            releaseNote: Bug fixes
+          images: {}
+        properties: {}
+        """
+    self.assertRaisesRegexp(
+        config_helper.InvalidSchema,
+        r'x-google-marketplace.partnerId and x-google-marketplace.solutionId.*',
+        lambda: config_helper.Schema.load_yaml(schema_yaml))
+
+    schema_yaml = """
+        x-google-marketplace:
+          schemaVersion: v2
+          solutionId: solution-a
+          applicationApiVersion: v1beta1
+          publishedVersion: 6.5.130-metadata
+          publishedVersionMetadata:
+            releaseNote: Bug fixes
+          images: {}
+        properties: {}
+        """
+    self.assertRaisesRegexp(
+        config_helper.InvalidSchema,
+        r'x-google-marketplace.partnerId and x-google-marketplace.solutionId.*',
+        lambda: config_helper.Schema.load_yaml(schema_yaml))
+
+    schema_yaml = """
+        x-google-marketplace:
+          schemaVersion: v2
+          partnerId: partner-a
+          solutionId: solution-a
+          applicationApiVersion: v1beta1
+          publishedVersion: 6.5.130-metadata
+          publishedVersionMetadata:
+            releaseNote: Bug fixes
+          images: {}
+        properties: {}
+        """
+    schema = config_helper.Schema.load_yaml(schema_yaml)
+    self.assertEquals('partner-a', schema.x_google_marketplace.partner_id)
+    self.assertEquals('solution-a', schema.x_google_marketplace.solution_id)
+
+  def test_image_properties_are_not_allowed_in_v2(self):
+    schema = config_helper.Schema.load_yaml("""
+        x-google-marketplace:
+          schemaVersion: v2
+
+          applicationApiVersion: v1beta1
+
+          publishedVersion: 6.5.130-metadata
+          publishedVersionMetadata:
+            releaseNote: Bug fixes
+          images:
+            main:
+              properties:
+                main.image:
+                  type: FULL
+        properties:
+          image:
+            type: string
+            default: gcr.io/a/b:1.0
+            x-google-marketplace:
+              type: IMAGE
+        """)
+    self.assertRaisesRegexp(config_helper.InvalidSchema,
+                            r'.*x-google-marketplace.type=IMAGE.*',
+                            lambda: schema.validate())
 
   def test_v2_fields(self):
     schema = config_helper.Schema.load_yaml("""

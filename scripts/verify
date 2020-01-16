@@ -161,7 +161,7 @@ export NAMESPACE="apptest-$test_id"
 
 # Stitch in name and namespace parameters.
 parameters=$(echo "$parameters" \
-  | jq ".$name_key = \"$NAME\" | .$namespace_key = \"$NAMESPACE\"")
+  | jq ".\"$name_key\" = \"$NAME\" | .\"$namespace_key\" = \"$NAMESPACE\"")
 
 echo "INFO Parameters: $parameters"
 
@@ -188,7 +188,7 @@ if [[ "$istio" = "enabled" ]]; then
   # Stitch in ISTIO_ENABLED parameter if applicable.
   if [[ -n $istio_enabled_key ]]; then
     parameters=$(echo "$parameters" \
-      | jq ".$istio_enabled_key = true")
+      | jq ".\"$istio_enabled_key\" = true")
   fi
 fi
 
@@ -199,14 +199,14 @@ reporting_secret_key="$(extract_schema_key.py \
 
 # Stitch in fake REPORTING_SECRET parameter if applicable.
 if [[ -n "$reporting_secret_key" ]]; then
-  if [[ "$(echo "$parameters" | jq ".$reporting_secret_key")" == "null" ]]; then
+  if [[ "$(echo "$parameters" | jq ".\"$reporting_secret_key\"")" == "null" ]]; then
     reporting_secret_name="fake-reporting-secret-$(random_string)"
     echo "Creating fake reporting secret $reporting_secret_name"
     cat "/data/fake-reporting-secret-manifest.yaml" \
       | env -i "SECRET_NAME=$reporting_secret_name" envsubst \
       | kubectl apply -f - --namespace="$NAMESPACE"
     parameters=$(echo "$parameters" \
-      | jq ".$reporting_secret_key = \"$reporting_secret_name\"")
+      | jq ".\"$reporting_secret_key\" = \"$reporting_secret_name\"")
   fi
 fi
 
