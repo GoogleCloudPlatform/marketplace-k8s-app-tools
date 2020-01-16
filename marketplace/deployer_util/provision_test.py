@@ -501,7 +501,8 @@ class ProvisionTest(unittest.TestCase):
     image_pull_secret = "image_pull_secret"
     deployer_service_account_name = "deployer_service_account_name"
     provision.process(schema, values, deployer_image, deployer_entrypoint,
-        version_repo, image_pull_secret, deployer_service_account_name)
+                      version_repo, image_pull_secret,
+                      deployer_service_account_name)
 
   def test_process_schema_v1(self):
     schema = self.generate_schema_v1()
