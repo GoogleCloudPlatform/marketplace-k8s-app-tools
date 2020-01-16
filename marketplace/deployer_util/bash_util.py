@@ -18,7 +18,14 @@ import subprocess
 
 
 class CommandException(Exception):
-  pass
+
+  def __init__(self, exitcode, message):
+    self._exitcode = exitcode
+    super(Exception, self).__init__(message)
+
+  @property
+  def exitcode(self):
+    return self._exitcode
 
 
 class Command:
@@ -33,37 +40,18 @@ class Command:
         parsedCmd, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     self._exitcode = None
     self._output = None
-    self._error = None
     self._print_call = print_call
     self._print_result = print_result
     self._run()
 
-  def jq(self, query):
-    return self.pipe("jq {}".format(query))
-
-  def pipe(self, cmd):
-    if self._print_call:
-      print("| " + cmd)
-
-    parsedCmd = shlex.split(cmd)
-    p2 = subprocess.Popen(
-        parsedCmd,
-        stdin=self._process.stdout,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE)
-
-    self._process = p2
-    self._run()
-    return self
-
   def _run(self):
-    self._output, self._error = self._process.communicate()
+    self._output, error_message = self._process.communicate()
     self._exitcode = self._process.returncode
     if self._print_result:
-      print("result: " + str((self._exitcode, self._output, self._error)))
+      print("result: " + str((self._exitcode, self._output, error_message)))
 
     if self._exitcode > 0:
-      raise CommandException(self._error)
+      raise CommandException(self._exitcode, error_message)
 
   def json(self):
     return json.loads(self._output)
@@ -75,7 +63,3 @@ class Command:
   @property
   def output(self):
     return self._output
-
-  @property
-  def error(self):
-    return self._error
