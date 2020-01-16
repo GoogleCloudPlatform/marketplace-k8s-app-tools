@@ -864,25 +864,6 @@ If this section is not specified, users see a warning when deploying the app to
 an Istio-enabled environment. The [`ISTIO_ENABLED`](#type-istio_enabled) type
 indicates whether Istio is enabled on the cluster.
 
-### gcp
-
-Use this property to indicate GCP-specific app requirements.
-
-You can can specify [OAuth scopes](https://developers.google.com/identity/protocols/googlescopes)
-required by your app. The UI requires existing clusters to have the specified
-scopes in order to be selected, and also includes the specified scopes in cluster
-creation. Note that the "https://www.googleapis.com/auth/devstorage.read_only" (or
-other storage-reading scope) is required by default for pulling images from GCR.
-
-```yaml
-x-google-marketplace:
-  clusterConstraints:
-    gcp:
-      nodes:
-        requiredOauthScopes:
-        - https://www.googleapis.com/auth/cloud-platform.read-only
-```
-
 ## form
 
 ### help widget
