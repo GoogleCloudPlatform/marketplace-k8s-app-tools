@@ -119,11 +119,11 @@ to the same **release** must be tagged with that release version, in addition to
 A summary of the requirements is below.
 
 - (_NEW_) Each of your images has both `1.0` (track) and `1.0.1` (release) tags.
-- There must be a primary application image:
-  `gcr.io/your-project/your-company/your-app`. Note that the name of the primary
-  image is the prefix for all other images.
 - There must be a deployer image:
   `gcr.io/your-project/your-company/your-app/deployer`
+- Your app likely has a primary application image:
+  `gcr.io/your-project/your-company/your-app`.
+  Note that all other images are prefixed with this name.
 - You can add other images that the application needs:
   `gcr.io/your-project/your-company/your-app/proxy`,
   `gcr.io/your-project/your-company/your-app/init`.
