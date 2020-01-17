@@ -167,7 +167,7 @@ Here is an example `images` section:
 ```yaml
 x-google-marketplace:
   images:
-    '':  # Primary image has no name and is required.
+    '':  # Primary image has no name.
     proxy: {}
       properties:
         imageRepo:
