@@ -21,7 +21,7 @@ import yaml
 
 from argparse import ArgumentParser
 
-import schema_values_common
+from . import schema_values_common
 
 _PROG_HELP = """
 Generates a version metadata in yaml format from schema.yaml.

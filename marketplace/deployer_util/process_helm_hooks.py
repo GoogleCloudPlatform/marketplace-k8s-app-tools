@@ -17,9 +17,9 @@
 import yaml
 
 from argparse import ArgumentParser
-from constants import GOOGLE_CLOUD_TEST
-from dict_util import deep_get
-from yaml_util import load_resources_yaml
+from .constants import GOOGLE_CLOUD_TEST
+from .dict_util import deep_get
+from .yaml_util import load_resources_yaml
 ''' Remove all resources considered to be Kuberenetes Helm tests from
     a given manifest file. '''
 

@@ -15,7 +15,7 @@
 import tempfile
 import unittest
 
-import config_helper
+from . import config_helper
 
 SCHEMA = """
 properties:
@@ -859,7 +859,7 @@ class ConfigHelperTest(unittest.TestCase):
           images: {}
         properties: {}
         """
-    self.assertRaisesRegexp(
+    self.assertRaisesRegex(
         config_helper.InvalidSchema,
         r'x-google-marketplace.partnerId and x-google-marketplace.solutionId.*',
         lambda: config_helper.Schema.load_yaml(schema_yaml))
@@ -875,7 +875,7 @@ class ConfigHelperTest(unittest.TestCase):
           images: {}
         properties: {}
         """
-    self.assertRaisesRegexp(
+    self.assertRaisesRegex(
         config_helper.InvalidSchema,
         r'x-google-marketplace.partnerId and x-google-marketplace.solutionId.*',
         lambda: config_helper.Schema.load_yaml(schema_yaml))
@@ -893,8 +893,8 @@ class ConfigHelperTest(unittest.TestCase):
         properties: {}
         """
     schema = config_helper.Schema.load_yaml(schema_yaml)
-    self.assertEquals('partner-a', schema.x_google_marketplace.partner_id)
-    self.assertEquals('solution-a', schema.x_google_marketplace.solution_id)
+    self.assertEqual('partner-a', schema.x_google_marketplace.partner_id)
+    self.assertEqual('solution-a', schema.x_google_marketplace.solution_id)
 
   def test_image_properties_are_not_allowed_in_v2(self):
     schema = config_helper.Schema.load_yaml("""
@@ -918,7 +918,7 @@ class ConfigHelperTest(unittest.TestCase):
             x-google-marketplace:
               type: IMAGE
         """)
-    self.assertRaisesRegexp(config_helper.InvalidSchema,
+    self.assertRaisesRegex(config_helper.InvalidSchema,
                             r'.*x-google-marketplace.type=IMAGE.*',
                             lambda: schema.validate())
 

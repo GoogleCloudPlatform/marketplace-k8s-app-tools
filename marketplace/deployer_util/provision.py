@@ -15,15 +15,15 @@
 # limitations under the License.
 
 from argparse import ArgumentParser
-from make_dns1123_name import dns1123_name, limit_name
+from .make_dns1123_name import dns1123_name, limit_name
 
 import yaml
 
-import config_helper
-import log_util as log
-import property_generator
-import schema_values_common
-import storage
+from . import config_helper
+from . import log_util as log
+from . import property_generator
+from . import schema_values_common
+from . import storage
 
 _PROG_HELP = """
 Reads the schemas and writes k8s manifests for objects

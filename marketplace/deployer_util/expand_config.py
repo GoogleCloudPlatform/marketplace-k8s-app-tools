@@ -21,9 +21,9 @@ from argparse import ArgumentParser
 
 import yaml
 
-import config_helper
-import property_generator
-import schema_values_common
+from . import config_helper
+from . import property_generator
+from . import schema_values_common
 
 _PROG_HELP = """
 Modifies the configuration parameter files in a directory

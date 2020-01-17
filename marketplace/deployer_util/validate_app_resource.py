@@ -14,16 +14,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 from argparse import ArgumentParser
 import json
 
-from yaml_util import load_resources_yaml
-from resources import find_application_resource
-import schema_values_common
+from .yaml_util import load_resources_yaml
+from .resources import find_application_resource
+from . import schema_values_common
 
 _PROG_HELP = """
 Extract the Application resource from the input manifests and validate

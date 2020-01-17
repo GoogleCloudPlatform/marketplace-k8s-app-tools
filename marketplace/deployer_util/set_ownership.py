@@ -18,14 +18,14 @@ import copy
 import os
 import sys
 import yaml
-import log_util as log
+from . import log_util as log
 
 from argparse import ArgumentParser
-from resources import find_application_resource
-from resources import set_app_resource_ownership
-from resources import set_service_account_resource_ownership
-from yaml_util import load_resources_yaml
-from yaml_util import parse_resources_yaml
+from .resources import find_application_resource
+from .resources import set_app_resource_ownership
+from .resources import set_service_account_resource_ownership
+from .yaml_util import load_resources_yaml
+from .yaml_util import parse_resources_yaml
 
 _PROG_HELP = """
 Scans the manifest folder kubernetes resources and set the Application to own
@@ -109,7 +109,7 @@ def main():
 
   if not args.noapp:
     app = find_application_resource(resources)
-    kinds = map(lambda x: x["kind"], app["spec"].get("componentKinds", []))
+    kinds = [x["kind"] for x in app["spec"].get("componentKinds", [])]
 
     excluded_kinds = ["PersistentVolumeClaim", "Application"]
     included_kinds = [kind for kind in kinds if kind not in excluded_kinds]

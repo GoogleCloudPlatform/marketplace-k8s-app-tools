@@ -14,7 +14,7 @@
 
 import functools
 
-import config_helper
+from . import config_helper
 
 VALUES_FILE = {
     'stdin': '-',

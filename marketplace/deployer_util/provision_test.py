@@ -14,11 +14,11 @@
 
 import unittest
 
-import provision
-from provision import dns1123_name
-from provision import limit_name
+from . import provision
+from .provision import dns1123_name
+from .provision import limit_name
 
-import config_helper
+from . import config_helper
 
 
 class ProvisionTest(unittest.TestCase):

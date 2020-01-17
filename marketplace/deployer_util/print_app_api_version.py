@@ -18,7 +18,7 @@ import sys
 
 from argparse import ArgumentParser
 
-import config_helper
+from . import config_helper
 
 _PROG_HELP = """
 Prints the applicationApiVersion defined in the schema file.

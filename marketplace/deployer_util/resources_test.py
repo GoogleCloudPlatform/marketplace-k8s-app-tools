@@ -14,10 +14,10 @@
 
 import unittest
 
-from resources import find_application_resource
-from resources import set_app_resource_ownership
-from resources import set_resource_ownership
-from resources import set_service_account_resource_ownership
+from .resources import find_application_resource
+from .resources import set_app_resource_ownership
+from .resources import set_resource_ownership
+from .resources import set_service_account_resource_ownership
 
 APP_API_VERSION = 'v1beta1'
 APP_NAME = 'wordpress-1'
@@ -119,7 +119,7 @@ class ResourcesTest(unittest.TestCase):
             'kind': 'Job',
         },
     ]
-    self.assertRaisesRegexp(Exception, r'.*does not include an Application.*',
+    self.assertRaisesRegex(Exception, r'.*does not include an Application.*',
                             lambda: find_application_resource(resources))
 
   def test_find_application_resource_multiple_ones_exist(self):
@@ -133,5 +133,5 @@ class ResourcesTest(unittest.TestCase):
             'kind': 'Application',
         },
     ]
-    self.assertRaisesRegexp(Exception, r'.*multiple Applications.*',
+    self.assertRaisesRegex(Exception, r'.*multiple Applications.*',
                             lambda: find_application_resource(resources))

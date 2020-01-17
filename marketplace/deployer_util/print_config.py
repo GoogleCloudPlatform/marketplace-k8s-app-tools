@@ -21,8 +21,8 @@ from argparse import ArgumentParser
 
 import yaml
 
-import config_helper
-import schema_values_common
+from . import config_helper
+from . import schema_values_common
 
 _PROG_HELP = """
 Outputs configuration parameters constructed from files in a directory.

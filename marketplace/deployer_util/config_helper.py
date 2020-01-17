@@ -823,10 +823,10 @@ class SchemaXServiceAccount:
                                 "Did you mean [\"\"] (only core APIs)"
                                 "or [\"*\"] (all)?")
           if not rule.get('resources') or not list(
-              filter(lambda x: x, rule.get('resources'))):
+              [x for x in rule.get('resources') if x]):
             raise InvalidSchema('Missing or empty resources in rules.')
           if not rule.get('verbs') or not list(
-              filter(lambda x: x, rule.get('verbs'))):
+              [x for x in rule.get('verbs') if x]):
             raise InvalidSchema('Missing or empty verbs in rules.')
       else:
         raise InvalidSchema('rulesType must be one of PREDEFINED or CUSTOM')

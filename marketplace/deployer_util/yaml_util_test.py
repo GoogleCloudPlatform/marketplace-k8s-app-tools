@@ -15,7 +15,7 @@
 
 import unittest
 
-from yaml_util import parse_resources_yaml
+from .yaml_util import parse_resources_yaml
 
 
 class YamlUtilTest(unittest.TestCase):

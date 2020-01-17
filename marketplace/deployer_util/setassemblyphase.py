@@ -17,7 +17,7 @@
 import os
 import yaml
 
-from yaml_util import load_resources_yaml
+from .yaml_util import load_resources_yaml
 from argparse import ArgumentParser
 '''Scans a manifest for an Application resource and sets the assembly phase.'''
 

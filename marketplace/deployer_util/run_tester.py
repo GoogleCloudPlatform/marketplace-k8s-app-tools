@@ -15,14 +15,14 @@
 # limitations under the License.
 
 import time
-import log_util as log
+from . import log_util as log
 
 from argparse import ArgumentParser
-from bash_util import Command
-from bash_util import CommandException
-from constants import LOG_SMOKE_TEST
-from dict_util import deep_get
-from yaml_util import load_resources_yaml
+from .bash_util import Command
+from .bash_util import CommandException
+from .constants import LOG_SMOKE_TEST
+from .dict_util import deep_get
+from .yaml_util import load_resources_yaml
 
 _PROG_HELP = "Deploy and run tester pods and wait for them to finish execution"
 

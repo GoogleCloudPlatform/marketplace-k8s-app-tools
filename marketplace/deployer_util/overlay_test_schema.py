@@ -18,10 +18,10 @@ import yaml
 import os.path
 from argparse import ArgumentParser
 
-import log_util as log
-from constants import LOG_SMOKE_TEST
-from dict_util import deep_get
-from yaml_util import load_yaml
+from . import log_util as log
+from .constants import LOG_SMOKE_TEST
+from .dict_util import deep_get
+from .yaml_util import load_yaml
 
 _PROG_HELP = """
 Overlay properties declared in the test schema over the original

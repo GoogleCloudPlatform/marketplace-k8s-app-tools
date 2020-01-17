@@ -18,7 +18,7 @@ import yaml
 import copy
 
 from argparse import ArgumentParser
-from yaml_util import load_resources_yaml
+from .yaml_util import load_resources_yaml
 
 _K8S_APP_LABEL_KEY = 'app.kubernetes.io/name'
 
@@ -50,7 +50,7 @@ def main():
   manifest = args.manifest
   app_name = args.application_name
   resources = load_resources_yaml(manifest)
-  resources = map(lambda r: ensure_resource_has_app_label(r, app_name),
+  resources = [ensure_resource_has_app_label(r, app_name) for r in resources]
                   resources)
   with open(manifest, "w", encoding='utf-8') as out:
     yaml.dump_all(resources, out, default_flow_style=False, explicit_start=True)
