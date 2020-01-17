@@ -14,7 +14,7 @@
 
 import copy
 import yaml
-from . import log_util as log
+import log_util as log
 
 
 def load_yaml(filename):

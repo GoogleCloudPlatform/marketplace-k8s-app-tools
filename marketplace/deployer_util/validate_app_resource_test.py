@@ -14,8 +14,8 @@
 
 import unittest
 
-from . import config_helper
-from .validate_app_resource import validate_deploy_info_annotation
+import config_helper
+from validate_app_resource import validate_deploy_info_annotation
 
 
 class ValidateAppResourceTest(unittest.TestCase):

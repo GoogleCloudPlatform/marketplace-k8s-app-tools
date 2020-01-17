@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .bash_util import Command
+from bash_util import Command
 
 
 class InvalidPath(Exception):

@@ -19,8 +19,8 @@ import OpenSSL
 import tempfile
 import unittest
 
-from . import config_helper
-from . import expand_config
+import config_helper
+import expand_config
 
 
 class ExpandConfigTest(unittest.TestCase):

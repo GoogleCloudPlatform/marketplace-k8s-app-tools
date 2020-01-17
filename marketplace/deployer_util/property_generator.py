@@ -17,7 +17,7 @@ import json
 import OpenSSL
 import random
 
-from .password import GeneratePassword
+from password import GeneratePassword
 
 
 def generate_password(config):

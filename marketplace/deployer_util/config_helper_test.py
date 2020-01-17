@@ -15,7 +15,7 @@
 import tempfile
 import unittest
 
-from . import config_helper
+import config_helper
 
 SCHEMA = """
 properties:

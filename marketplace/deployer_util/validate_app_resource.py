@@ -17,9 +17,9 @@
 from argparse import ArgumentParser
 import json
 
-from .yaml_util import load_resources_yaml
-from .resources import find_application_resource
-from . import schema_values_common
+from yaml_util import load_resources_yaml
+from resources import find_application_resource
+import schema_values_common
 
 _PROG_HELP = """
 Extract the Application resource from the input manifests and validate

@@ -17,8 +17,8 @@ import unittest
 
 import yaml
 
-from . import config_helper
-from . import print_config
+import config_helper
+import print_config
 
 
 class PrintConfigTest(unittest.TestCase):

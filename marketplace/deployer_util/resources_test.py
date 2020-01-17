@@ -14,10 +14,10 @@
 
 import unittest
 
-from .resources import find_application_resource
-from .resources import set_app_resource_ownership
-from .resources import set_resource_ownership
-from .resources import set_service_account_resource_ownership
+from resources import find_application_resource
+from resources import set_app_resource_ownership
+from resources import set_resource_ownership
+from resources import set_service_account_resource_ownership
 
 APP_API_VERSION = 'v1beta1'
 APP_NAME = 'wordpress-1'
