@@ -7,4 +7,7 @@ RUN pip3 install \
       pyOpenSSL \
       pyyaml \
       wheel \
-      yapf
+      yapf \
+      coverage
+
+COPY runtests.sh /bin/

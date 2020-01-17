@@ -71,13 +71,13 @@ def validate_deploy_info_annotation(content, schema=None):
     if 'partner_id' not in parsed:
       raise Exception('marketplace.cloud.google.com/deploy-info annotation '
                       'on the Application resource must contain a partner_id')
-    if 'solution_id' not in parsed:
+    if 'product_id' not in parsed:
       raise Exception('marketplace.cloud.google.com/deploy-info annotation '
-                      'on the Application resource must contain a solution_id')
+                      'on the Application resource must contain a product_id')
     if (schema and schema.x_google_marketplace and
         schema.x_google_marketplace.partner_id):
       if (parsed['partner_id'] != schema.x_google_marketplace.partner_id or
-          parsed['solution_id'] != schema.x_google_marketplace.solution_id):
+          parsed['product_id'] != schema.x_google_marketplace.solution_id):
         raise Exception('Partner or solution ID values in the schema and the '
                         'Application resource are not consistent')
   except ValueError:

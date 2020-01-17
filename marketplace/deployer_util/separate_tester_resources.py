@@ -20,7 +20,7 @@ import yaml
 from argparse import ArgumentParser
 from constants import GOOGLE_CLOUD_TEST
 from dict_util import deep_get
-from resources import set_resource_ownership
+from resources import set_app_resource_ownership
 from yaml_util import load_resources_yaml
 
 _PROG_HELP = "Separate the tester job from resources manifest into a different manifest"
@@ -64,7 +64,7 @@ def main():
     if deep_get(resource, 'metadata', 'annotations',
                 GOOGLE_CLOUD_TEST) == 'test':
       print("INFO Tester resource: {}".format(full_name))
-      set_resource_ownership(
+      set_app_resource_ownership(
           app_uid=args.app_uid,
           app_name=args.app_name,
           app_api_version=args.app_api_version,

@@ -145,16 +145,17 @@ tests/py: $(PYTHON_TEST_TARGETS)
 $(PYTHON_TEST_TARGETS): %.__pytest__: .build/tests/py
 	$(info === Running tests in directory $* ===)
 	@docker run --rm \
-	  -v $(PWD):/data:ro \
-	  --entrypoint python3 \
+	  -v $(PWD):/data \
+	  --entrypoint runtests.sh \
 	  tests/py \
-	  -m unittest discover -s "/data/$*" -p "*_test.py"
+	  "$*"
 
 .build/tests: | .build
 	mkdir -p "$@"
 
 
-.build/tests/py: tests/py/Dockerfile | .build/tests
+.build/tests/py: tests/py/Dockerfile \
+                 tests/py/runtests.sh | .build/tests
 	$(call print_target)
 	docker build -t tests/py tests/py
 	@touch "$@"

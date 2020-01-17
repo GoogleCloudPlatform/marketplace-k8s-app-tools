@@ -21,7 +21,9 @@ import yaml
 import log_util as log
 
 from argparse import ArgumentParser
-from resources import set_resource_ownership
+from resources import find_application_resource
+from resources import set_app_resource_ownership
+from resources import set_service_account_resource_ownership
 from yaml_util import load_resources_yaml
 from yaml_util import parse_resources_yaml
 
@@ -54,6 +56,7 @@ _CLUSTER_SCOPED_KINDS = [
     "StorageClass",
     "VolumeAttachment",
 ]
+_DEPLOYER_OWNED_KINDS = ["Role", "RoleBinding"]
 
 
 def main():
@@ -66,6 +69,16 @@ def main():
       "--app_api_version",
       help="The apiVersion of the Application CRD",
       required=True)
+  parser.add_argument(
+      "--deployer_name",
+      help="The name of the deployer service account instance. "
+      "If deployer_uid is also set, the deployer service account is set "
+      "as the owner of namespaced deployer components.")
+  parser.add_argument(
+      "--deployer_uid",
+      help="The uid of the deployer service account instance. "
+      "If deployer_name is also set, the deployer service account is set "
+      "as the owner of namespaced deployer components.")
   parser.add_argument(
       "--manifests",
       help="The folder containing the manifest templates, "
@@ -95,16 +108,8 @@ def main():
       resources += load_resources_yaml(os.path.join(args.manifests, filename))
 
   if not args.noapp:
-    apps = [r for r in resources if r["kind"] == "Application"]
-
-    if len(apps) == 0:
-      raise Exception("Set of resources in {:s} does not include one of "
-                      "Application kind".format(args.manifests))
-    if len(apps) > 1:
-      raise Exception("Set of resources in {:s} includes more than one of "
-                      "Application kind".format(args.manifests))
-
-    kinds = map(lambda x: x["kind"], apps[0]["spec"].get("componentKinds", []))
+    app = find_application_resource(resources)
+    kinds = map(lambda x: x["kind"], app["spec"].get("componentKinds", []))
 
     excluded_kinds = ["PersistentVolumeClaim", "Application"]
     included_kinds = [kind for kind in kinds if kind not in excluded_kinds]
@@ -118,7 +123,9 @@ def main():
         included_kinds,
         app_name=args.app_name,
         app_uid=args.app_uid,
-        app_api_version=args.app_api_version)
+        app_api_version=args.app_api_version,
+        deployer_name=args.deployer_name,
+        deployer_uid=args.deployer_uid)
     sys.stdout.flush()
   else:
     with open(args.dest, "w", encoding='utf-8') as outfile:
@@ -128,11 +135,13 @@ def main():
           included_kinds,
           app_name=args.app_name,
           app_uid=args.app_uid,
-          app_api_version=args.app_api_version)
+          app_api_version=args.app_api_version,
+          deployer_name=args.deployer_name,
+          deployer_uid=args.deployer_uid)
 
 
-def dump(outfile, resources, included_kinds, app_name, app_uid,
-         app_api_version):
+def dump(outfile, resources, included_kinds, app_name, app_uid, app_api_version,
+         deployer_name, deployer_uid):
 
   def maybe_assign_ownership(resource):
     if resource["kind"] in _CLUSTER_SCOPED_KINDS:
@@ -145,16 +154,34 @@ def dump(outfile, resources, included_kinds, app_name, app_uid,
       log.info("Application '{:s}' owns '{:s}/{:s}'", app_name,
                resource["kind"], resource["metadata"]["name"])
       resource = copy.deepcopy(resource)
-      set_resource_ownership(
+      set_app_resource_ownership(
           app_uid=app_uid,
           app_name=app_name,
           app_api_version=app_api_version,
+          resource=resource)
+
+    if deployer_name and deployer_uid and should_be_deployer_owned(resource):
+      log.info("ServiceAccount '{:s}' owns '{:s}/{:s}'", deployer_name,
+               resource["kind"], resource["metadata"]["name"])
+      resource = copy.deepcopy(resource)
+      set_service_account_resource_ownership(
+          account_uid=deployer_uid,
+          account_name=deployer_name,
           resource=resource)
 
     return resource
 
   to_be_dumped = [maybe_assign_ownership(resource) for resource in resources]
   yaml.safe_dump_all(to_be_dumped, outfile, default_flow_style=False, indent=2)
+
+
+def should_be_deployer_owned(resource):
+  if not resource["kind"] in _DEPLOYER_OWNED_KINDS:
+    return False
+  if resource.get("metadata", {}).get("labels", {}).get(
+      "app.kubernetes.io/component") != "deployer.marketplace.cloud.google.com":
+    return False
+  return True
 
 
 if __name__ == "__main__":
