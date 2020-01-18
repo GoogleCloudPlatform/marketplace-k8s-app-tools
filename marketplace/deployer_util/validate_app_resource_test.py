@@ -28,11 +28,11 @@ class ValidateAppResourceTest(unittest.TestCase):
   def test_deploy_info_must_contain_partner_id(self):
     self.assertRaisesRegexp(
         Exception, r'.*must contain a partner_id.*',
-        lambda: validate_deploy_info_annotation('{"solution_id": "solution"}'))
+        lambda: validate_deploy_info_annotation('{"product_id": "solution"}'))
 
-  def test_deploy_info_must_contain_solution_id(self):
+  def test_deploy_info_must_contain_product_id(self):
     self.assertRaisesRegexp(
-        Exception, r'.*must contain a solution_id.*',
+        Exception, r'.*must contain a product_id.*',
         lambda: validate_deploy_info_annotation('{"partner_id": "partner"}'))
 
   def test_deploy_info_must_match_schema(self):
@@ -51,15 +51,15 @@ class ValidateAppResourceTest(unittest.TestCase):
     self.assertRaisesRegexp(
         Exception, r'Partner or solution ID values.*schema.*not consistent',
         lambda: validate_deploy_info_annotation(
-            '{"partner_id": "partner-a", "solution_id": "solution-b"}', schema))
+            '{"partner_id": "partner-a", "product_id": "solution-b"}', schema))
     self.assertRaisesRegexp(
         Exception, r'Partner or solution ID values.*schema.*not consistent',
         lambda: validate_deploy_info_annotation(
-            '{"partner_id": "partner-b", "solution_id": "solution-a"}', schema))
+            '{"partner_id": "partner-b", "product_id": "solution-a"}', schema))
     validate_deploy_info_annotation(
-        '{"partner_id": "partner-a", "solution_id": "solution-a"}', schema)
+        '{"partner_id": "partner-a", "product_id": "solution-a"}', schema)
 
-  def test_deploy_info_ok_if_schema_has_no_partner_solution_ids(self):
+  def test_deploy_info_ok_if_schema_has_no_partner_product_ids(self):
     schema = config_helper.Schema.load_yaml("""
         x-google-marketplace:
           schemaVersion: v2
@@ -71,4 +71,4 @@ class ValidateAppResourceTest(unittest.TestCase):
         properties: {}
         """)
     validate_deploy_info_annotation(
-        '{"partner_id": "partner-a", "solution_id": "solution-a"}', schema)
+        '{"partner_id": "partner-a", "product_id": "solution-a"}', schema)

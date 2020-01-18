@@ -1,4 +1,23 @@
-# Managed Updates (Alpha)
+# Managed Updates
+
+****** DEPRECATED ******
+
+Application Manager is now beta. The information in this guide is now in the
+resources below. If you were part of the Managed Updates Alpha, you must update
+your images and re-submit them to GCP Marketplace.
+
+Use the following resources for building your application:
+
+* If you already have a Kubernetes application on GCP Marketplace, read the
+[checklist to support managed updates](https://cloud.google.com/marketplace/docs/partners/kubernetes-solutions/support-managed-updates)
+for your GCP Marketplace listing.
+
+* [Read the updated guide to create your deployer schema](schema.md).
+
+* Read the overview of
+[selling Kubernetes applications on GCP Marketplace](https://cloud.google.com/marketplace/docs/partners/kubernetes-solutions/).
+
+****** DEPRECATED ******
 
 ## Overview
 
@@ -100,9 +119,9 @@ to the same **release** must be tagged with that release version, in addition to
 A summary of the requirements is below.
 
 - (_NEW_) Each of your images has both `1.0` (track) and `1.0.1` (release) tags.
-- There must be a primary application image:
-  `gcr.io/your-project/your-company/your-app`. Note that the name of the primary
-  image is the prefix for all other images.
+- Your app likely has a primary application image:
+  `gcr.io/your-project/your-company/your-app`.
+  Note that all other images are prefixed with this name.
 - There must be a deployer image:
   `gcr.io/your-project/your-company/your-app/deployer`
 - You can add other images that the application needs:

@@ -84,7 +84,7 @@ steps:
   - marketplace/deployer_helm_base/Dockerfile
   - .
 
-- id: Build deployer_helm onbuild
+- id: &BuildHelmOnbuild Build deployer_helm onbuild
   name: gcr.io/cloud-builders/docker
   waitFor:
   - *BuildHelm
@@ -114,7 +114,7 @@ steps:
   - marketplace/deployer_helm_tiller_base/Dockerfile
   - .
 
-- id: Build deployer_helm_tiller onbuild
+- id: &BuildHelmTillerOnbuild Build deployer_helm_tiller onbuild
   name: gcr.io/cloud-builders/docker
   waitFor:
   - *BuildHelmTiller
@@ -164,8 +164,13 @@ steps:
 - id: Verify
   name: gcr.io/$PROJECT_ID/k8s/dev:sha_$COMMIT_SHA
   waitFor:
-  - *BuildDev
   - *InitializeCredentials
+  - *BuildDev
+  - *BuildEnvsubst
+  - *BuildHelm
+  - *BuildHelmOnbuild
+  - *BuildHelmTiller
+  - *BuildHelmTillerOnbuild
   env:
   - 'KUBE_CONFIG=/workspace/.kube'
   - 'GCLOUD_CONFIG=/workspace/.config/gcloud'
@@ -175,7 +180,7 @@ steps:
   - MARKETPLACE_TOOLS_TAG=testing-sha_$COMMIT_SHA
   args:
   - make
-  - -j4
+  - -j10
   - --output-sync
   - tests/integration
 

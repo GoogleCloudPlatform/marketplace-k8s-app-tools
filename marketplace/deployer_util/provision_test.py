@@ -377,3 +377,141 @@ class ProvisionTest(unittest.TestCase):
                                              'app-name-1',
                                              {'some-key': 'some-value'},
                                              'app-name-deployer-sa'))
+
+  def generate_schema_v1(self):
+    return config_helper.Schema.load_yaml("""
+        properties:
+          name:
+            type: string
+            x-google-marketplace:
+              type: NAME
+          namespace:
+            type: string
+            x-google-marketplace:
+              type: NAMESPACE
+          simple:
+            type: string
+          serviceAccount:
+            type: string
+            x-google-marketplace:
+              type: SERVICE_ACCOUNT
+          storageClass:
+            type: string
+            x-google-marketplace:
+              type: STORAGE_CLASS
+              storageClass:
+                type: SSD
+          password:
+            type: string
+            x-google-marketplace:
+              type: GENERATED_PASSWORD
+              generatedPassword:
+                length: 8
+                includeSymbols: false
+                base64: false
+          tslCert:
+            type: string
+            x-google-marketplace:
+              type: TLS_CERTIFICATE
+      """.format("{}"))
+
+  def generate_schema_v2(self, is_kalm):
+    return config_helper.Schema.load_yaml("""
+        x-google-marketplace:
+          # v2 required fields
+          schemaVersion: v2
+          applicationApiVersion: v1beta1
+          publishedVersion: 0.0.1
+          publishedVersionMetadata:
+            releaseNote: Initial release
+            recommended: True
+          images: {}
+
+          managedUpdates:
+            kalmSupported: {}
+
+          deployerServiceAccount:
+            roles:
+            - type: Role
+              rulesType: CUSTOM
+              rules:
+              - apiGroups: ['apps/v1']
+                resources: ['Deployment']
+                verbs: ['*']
+        properties:
+          name:
+            type: string
+            x-google-marketplace:
+              type: NAME
+          namespace:
+            type: string
+            x-google-marketplace:
+              type: NAMESPACE
+          simple:
+            type: string
+          serviceAccount:
+            type: string
+            x-google-marketplace:
+              type: SERVICE_ACCOUNT
+              serviceAccount:
+                roles:
+                - type: ClusterRole
+                  rulesType: CUSTOM
+                  rules:
+                  - apiGroups: ['apps/v1']
+                    resources: ['Deployment']
+                    verbs: ['*']
+                - type: Role
+                  rulesType: CUSTOM
+                  rules:
+                  - apiGroups: ['apps/v1']
+                    resources: ['Deployment']
+                    verbs: ['*']
+                - type: ClusterRole
+                  rulesType: PREDEFINED
+                  rulesFromRoleName: rolename
+                - type: Role
+                  rulesType: PREDEFINED
+                  rulesFromRoleName: rolename
+          storageClass:
+            type: string
+            x-google-marketplace:
+              type: STORAGE_CLASS
+              storageClass:
+                type: SSD
+          password:
+            type: string
+            x-google-marketplace:
+              type: GENERATED_PASSWORD
+              generatedPassword:
+                length: 8
+                includeSymbols: false
+                base64: false
+          tslCert:
+            type: string
+            x-google-marketplace:
+              type: TLS_CERTIFICATE
+      """.format("{}", is_kalm))
+
+  def run_test_process(self, schema):
+    values = {"name": "app-1", "namespace": "mynamespace"}
+    deployer_image = 'gcr.io/cloud-marketplace/partner/solution/deployer:latest'
+    deployer_entrypoint = "deployer_entrypoint"
+    version_repo = "1.0.0"
+    image_pull_secret = "image_pull_secret"
+    deployer_service_account_name = "deployer_service_account_name"
+    provision.process(schema, values, deployer_image, deployer_entrypoint,
+                      version_repo, image_pull_secret,
+                      deployer_service_account_name)
+
+  def test_process_schema_v1(self):
+    schema = self.generate_schema_v1()
+    self.run_test_process(schema)
+
+  def test_process_schema_v2(self):
+    schema = self.generate_schema_v2(is_kalm=False)
+    self.run_test_process(schema)
+
+  def test_process_schema_v2_kalm(self):
+    schema = self.generate_schema_v2(is_kalm=True)
+    self.run_test_process(schema)

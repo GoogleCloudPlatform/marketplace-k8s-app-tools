@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
 import tempfile
 import unittest
 
@@ -599,6 +600,9 @@ class ConfigHelperTest(unittest.TestCase):
                   - apiGroups: ['apps/v1']
                     resources: ['Deployment']
                     verbs: ['*']
+                  - apiGroups: ['']
+                    resources: ['Pods']
+                    verbs: ['*']
                   - apiGroups: ['apps/v1']
                     resources: ['StatefulSet']
                     verbs: ['*']
@@ -624,6 +628,11 @@ class ConfigHelperTest(unittest.TestCase):
         {
             'apiGroups': ['apps/v1'],
             'resources': ['Deployment'],
+            'verbs': ['*']
+        },
+        {
+            'apiGroups': [''],
+            'resources': ['Pods'],
             'verbs': ['*']
         },
         {
@@ -736,10 +745,9 @@ class ConfigHelperTest(unittest.TestCase):
                     rulesType: CUSTOM
           """)
 
-  def test_service_account_custom_empty_apiGroups(self):
-    with self.assertRaisesRegexp(
-        config_helper.InvalidSchema,
-        r'^Missing or empty apiGroups in rules. Did you mean'):
+  def test_service_account_custom_missing_apiGroups(self):
+    with self.assertRaisesRegexp(config_helper.InvalidSchema,
+                                 r'^Missing apiGroups in rules. Did you mean'):
       config_helper.Schema.load_yaml("""
           properties:
             sa:
@@ -751,8 +759,7 @@ class ConfigHelperTest(unittest.TestCase):
                   - type: Role
                     rulesType: CUSTOM
                     rules:
-                    - apiGroups: ['']
-                      resources: ['Pods']
+                    - resources: ['Pods']
                       verbs: ['*']
           """)
 
@@ -1280,6 +1287,25 @@ class ConfigHelperTest(unittest.TestCase):
             form:
             - widget: help
             """).validate())
+
+  def test_read_values_to_dict(self):
+    dirname = tempfile.mkdtemp()
+    with open(os.path.join(dirname, "file1"), "w") as stream:
+      stream.write("value1")
+    with open(os.path.join(dirname, "file2"), "w") as stream:
+      stream.write("2")
+
+    schema = """
+    properties:
+      key1:
+        type: string
+      key2:
+        type: number
+    """
+    expected_values = {"file1": u"value1", "file2": u"2"}
+    actual_values = config_helper._read_values_to_dict(
+        dirname, config_helper.Schema.load_yaml(schema))
+    self.assertEqual(actual_values, expected_values)
 
 
 if __name__ == 'main':

@@ -22,7 +22,8 @@ import log_util as log
 
 from argparse import ArgumentParser
 from resources import find_application_resource
-from resources import set_resource_ownership
+from resources import set_app_resource_ownership
+from resources import set_service_account_resource_ownership
 from yaml_util import load_resources_yaml
 from yaml_util import parse_resources_yaml
 
@@ -55,6 +56,7 @@ _CLUSTER_SCOPED_KINDS = [
     "StorageClass",
     "VolumeAttachment",
 ]
+_DEPLOYER_OWNED_KINDS = ["Role", "RoleBinding"]
 
 
 def main():
@@ -67,6 +69,16 @@ def main():
       "--app_api_version",
       help="The apiVersion of the Application CRD",
       required=True)
+  parser.add_argument(
+      "--deployer_name",
+      help="The name of the deployer service account instance. "
+      "If deployer_uid is also set, the deployer service account is set "
+      "as the owner of namespaced deployer components.")
+  parser.add_argument(
+      "--deployer_uid",
+      help="The uid of the deployer service account instance. "
+      "If deployer_name is also set, the deployer service account is set "
+      "as the owner of namespaced deployer components.")
   parser.add_argument(
       "--manifests",
       help="The folder containing the manifest templates, "
@@ -111,7 +123,9 @@ def main():
         included_kinds,
         app_name=args.app_name,
         app_uid=args.app_uid,
-        app_api_version=args.app_api_version)
+        app_api_version=args.app_api_version,
+        deployer_name=args.deployer_name,
+        deployer_uid=args.deployer_uid)
     sys.stdout.flush()
   else:
     with open(args.dest, "w") as outfile:
@@ -121,30 +135,53 @@ def main():
           included_kinds,
           app_name=args.app_name,
           app_uid=args.app_uid,
-          app_api_version=args.app_api_version)
+          app_api_version=args.app_api_version,
+          deployer_name=args.deployer_name,
+          deployer_uid=args.deployer_uid)
 
 
-def dump(outfile, resources, included_kinds, app_name, app_uid,
-         app_api_version):
-  to_be_dumped = []
-  for resource in resources:
+def dump(outfile, resources, included_kinds, app_name, app_uid, app_api_version,
+         deployer_name, deployer_uid):
+
+  def maybe_assign_ownership(resource):
     if resource["kind"] in _CLUSTER_SCOPED_KINDS:
       # Cluster-scoped resources cannot be owned by a namespaced resource:
       # https://kubernetes.io/docs/concepts/workloads/controllers/garbage-collection/#owners-and-dependents
       log.info("Application '{:s}' does not own cluster-scoped '{:s}/{:s}'",
                app_name, resource["kind"], resource["metadata"]["name"])
-      continue
+
     if included_kinds is None or resource["kind"] in included_kinds:
       log.info("Application '{:s}' owns '{:s}/{:s}'", app_name,
                resource["kind"], resource["metadata"]["name"])
       resource = copy.deepcopy(resource)
-      set_resource_ownership(
+      set_app_resource_ownership(
           app_uid=app_uid,
           app_name=app_name,
           app_api_version=app_api_version,
           resource=resource)
-    to_be_dumped.append(resource)
+
+    if deployer_name and deployer_uid and should_be_deployer_owned(resource):
+      log.info("ServiceAccount '{:s}' owns '{:s}/{:s}'", deployer_name,
+               resource["kind"], resource["metadata"]["name"])
+      resource = copy.deepcopy(resource)
+      set_service_account_resource_ownership(
+          account_uid=deployer_uid,
+          account_name=deployer_name,
+          resource=resource)
+
+    return resource
+
+  to_be_dumped = [maybe_assign_ownership(resource) for resource in resources]
   yaml.safe_dump_all(to_be_dumped, outfile, default_flow_style=False, indent=2)
+
+
+def should_be_deployer_owned(resource):
+  if not resource["kind"] in _DEPLOYER_OWNED_KINDS:
+    return False
+  if resource.get("metadata", {}).get("labels", {}).get(
+      "app.kubernetes.io/component") != "deployer.marketplace.cloud.google.com":
+    return False
+  return True
 
 
 if __name__ == "__main__":

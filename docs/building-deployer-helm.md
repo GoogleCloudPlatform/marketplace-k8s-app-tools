@@ -64,6 +64,11 @@ Use the following content:
 ```yaml
 applicationApiVersion: v1beta1
 
+x-google-marketplace:
+  # IMPORTANT: These IDs must match your listing ID in Marketplace.
+  partnerId: partner
+  solutionId: wordpress
+
 properties:
   name:
     type: string
@@ -85,6 +90,10 @@ In the main chart's `templates` directory, add `application.yaml`
 with the following content. This manifest describes the application
 and is used in the UI.
 
+It's important to note that `partner_id` and `product_id` must match
+the values declared in the schema, `partnerId` and `solutionId`
+respectively, which must also match your listing ID in Marketplace.
+
 ```yaml
 apiVersion: app.k8s.io/v1beta1
 kind: Application
@@ -93,6 +102,8 @@ metadata:
   namespace: "{{ .Release.Namespace }}"
   labels:
     app.kubernetes.io/name: "{{ .Release.Name }}"
+  annotations:
+    marketplace.cloud.google.com/deploy-info: '{"partner_id": "partner", "product_id": "wordpress", "partner_name": "Partner"}'
 spec:
   descriptor:
     type: Wordpress
@@ -601,10 +612,10 @@ Marketplace will copy and republishin into the public
 visible to the end users. As an example, let's assume your staging
 repo is `gcr.io/your-company/wordpress`.
 
-For each solution, there are always __at least__ one deployer image
-and one primary application image. These two have predefined names:
-`deployer` and `wordpress`. For this example, let's
-say your application uses an additional image called `mariadb`.
+For each solution, there is always one deployer image with the
+predefined name `deployer`. There is usually a primary application
+image named `wordpress` in this case. For this example, let's say
+your application uses an additional image called `mariadb`.
 
 Each track of your application is associated with a track tag, which
 should be the same name. If you don't know what a track is, see the
