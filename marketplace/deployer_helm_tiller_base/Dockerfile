@@ -14,7 +14,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN pip3 install \
       wheel \
       pyOpenSSL \
-      pyyaml
+      pyyaml \
+      six
 
 RUN mkdir -p /opt/kubectl/1.13 \
     && wget -q -O /opt/kubectl/1.13/kubectl \
