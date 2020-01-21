@@ -64,8 +64,8 @@ which declares the parameters for provisioning the app.
 
 ## Publishing a new version
 
-A new app version is submitted by pushing the corresponding deployer image to the
-staging repo.
+A new app version is created by pushing the corresponding deployer image to the
+staging repo and updating the Marketplace draft.
 
 ### Tagging your images
 

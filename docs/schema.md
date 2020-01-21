@@ -167,7 +167,7 @@ Here is an example `images` section:
 ```yaml
 x-google-marketplace:
   images:
-    '':  # Primary image has no name and is required.
+    '':  # Primary image has no name.
     proxy: {}
       properties:
         imageRepo:
@@ -259,7 +259,7 @@ In `v1`, images are declared inside the `properties` section, as follows:
 
 ```yaml
 properties:
-  mainImageName:  # A primary image is required.
+  mainImageName:
     type: string
     default: gcr.io/your-project/your-company/your-app:1.0.1
     x-google-marketplace:
@@ -280,9 +280,9 @@ The `default` values specify the images' names, and are required.
 
 Note that the images share a common prefix
 `gcr.io/your-project/your-company/your-app`, which is set externally to the
-`schema.yaml` file, when you onboard your app for publishing. A primary image for
-your app is required; its repository must exactly match the common prefix of the
-images.
+`schema.yaml` file, when you onboard your app for publishing. If your app
+contains a primary image, its repository must exactly match the common prefix
+of the images.
 
 The two declared properties, `mainImageName` and `proxyImageName`, receive the
 final republished images when end users deploy the app.
@@ -863,25 +863,6 @@ Supported types:
 If this section is not specified, users see a warning when deploying the app to
 an Istio-enabled environment. The [`ISTIO_ENABLED`](#type-istio_enabled) type
 indicates whether Istio is enabled on the cluster.
-
-### gcp
-
-Use this property to indicate GCP-specific app requirements.
-
-You can can specify [OAuth scopes](https://developers.google.com/identity/protocols/googlescopes)
-required by your app. The UI requires existing clusters to have the specified
-scopes in order to be selected, and also includes the specified scopes in cluster
-creation. Note that the "https://www.googleapis.com/auth/devstorage.read_only" (or
-other storage-reading scope) is required by default for pulling images from GCR.
-
-```yaml
-x-google-marketplace:
-  clusterConstraints:
-    gcp:
-      nodes:
-        requiredOauthScopes:
-        - https://www.googleapis.com/auth/cloud-platform.read-only
-```
 
 ## form
 
