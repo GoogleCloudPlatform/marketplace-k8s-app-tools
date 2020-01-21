@@ -33,12 +33,14 @@ APP_OWNER_REF = {
 
 
 class ResourcesTest(unittest.TestCase):
+
   def test_resource_existing_app_ownerref_matching_uid_updates_existing(self):
     resource = {'metadata': {'ownerReferences': [{'uid': APP_UID}]}}
 
     set_resource_ownership(APP_UID, APP_NAME, APP_API_VERSION, 'Application',
                            resource)
-    self.assertCountEqual(resource['metadata']['ownerReferences'], [APP_OWNER_REF])
+    self.assertCountEqual(resource['metadata']['ownerReferences'],
+                          [APP_OWNER_REF])
 
   def test_resource_existing_ownerref_different_uid_adds_ownerref(self):
     resource = {'metadata': {'ownerReferences': [{'uid': OTHER_UID}]}}
@@ -55,7 +57,8 @@ class ResourcesTest(unittest.TestCase):
     set_resource_ownership(APP_UID, APP_NAME, APP_API_VERSION, 'Application',
                            resource)
 
-    self.assertCountEqual(resource['metadata']['ownerReferences'], [APP_OWNER_REF])
+    self.assertCountEqual(resource['metadata']['ownerReferences'],
+                          [APP_OWNER_REF])
 
   def test_app_resource_ownership(self):
     resource = {'metadata': {'ownerReferences': []}}
@@ -63,7 +66,7 @@ class ResourcesTest(unittest.TestCase):
     set_app_resource_ownership(APP_UID, APP_NAME, APP_API_VERSION, resource)
 
     self.assertCountEqual(resource['metadata']['ownerReferences'],
-                                 [APP_OWNER_REF])
+                          [APP_OWNER_REF])
 
   def test_service_account_resource_ownership(self):
     resource = {'metadata': {'ownerReferences': []}}
@@ -120,7 +123,7 @@ class ResourcesTest(unittest.TestCase):
         },
     ]
     self.assertRaisesRegex(Exception, r'.*does not include an Application.*',
-                            lambda: find_application_resource(resources))
+                           lambda: find_application_resource(resources))
 
   def test_find_application_resource_multiple_ones_exist(self):
     resources = [
@@ -134,4 +137,4 @@ class ResourcesTest(unittest.TestCase):
         },
     ]
     self.assertRaisesRegex(Exception, r'.*multiple Applications.*',
-                            lambda: find_application_resource(resources))
+                           lambda: find_application_resource(resources))

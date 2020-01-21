@@ -919,8 +919,8 @@ class ConfigHelperTest(unittest.TestCase):
               type: IMAGE
         """)
     self.assertRaisesRegex(config_helper.InvalidSchema,
-                            r'.*x-google-marketplace.type=IMAGE.*',
-                            lambda: schema.validate())
+                           r'.*x-google-marketplace.type=IMAGE.*',
+                           lambda: schema.validate())
 
   def test_v2_fields(self):
     schema = config_helper.Schema.load_yaml("""
