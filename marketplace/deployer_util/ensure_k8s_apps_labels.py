@@ -18,7 +18,7 @@ import yaml
 import copy
 
 from argparse import ArgumentParser
-from .yaml_util import load_resources_yaml
+from yaml_util import load_resources_yaml
 
 _K8S_APP_LABEL_KEY = 'app.kubernetes.io/name'
 

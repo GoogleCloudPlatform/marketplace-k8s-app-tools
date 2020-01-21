@@ -18,7 +18,7 @@ import sys
 
 from argparse import ArgumentParser
 
-from . import config_helper
+import config_helper
 
 _PROG_HELP = """
 Parses the provided schema file and prints all x-google-marketplace

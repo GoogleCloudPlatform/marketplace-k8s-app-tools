@@ -18,7 +18,7 @@ import sys
 
 from argparse import ArgumentParser
 
-from . import schema_values_common
+import schema_values_common
 
 _PROG_HELP = """
 Print the published version declared in the schema.

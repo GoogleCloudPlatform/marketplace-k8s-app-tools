@@ -18,7 +18,7 @@ import subprocess
 import sys
 from argparse import ArgumentParser
 
-from . import schema_values_common
+import schema_values_common
 
 _PROG_HELP = """
 Runs a specified command within an environment with env variables

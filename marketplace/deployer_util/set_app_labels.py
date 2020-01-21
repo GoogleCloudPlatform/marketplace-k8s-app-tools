@@ -20,8 +20,8 @@ from argparse import ArgumentParser
 
 import yaml
 
-from .yaml_util import load_resources_yaml
-from .yaml_util import parse_resources_yaml
+from yaml_util import load_resources_yaml
+from yaml_util import parse_resources_yaml
 
 _PROG_HELP = """
 Sets the app.kubernetes.io labels on resources.
