@@ -18,6 +18,7 @@ import subprocess
 
 import six
 
+
 class CommandException(Exception):
 
   def __init__(self, exitcode, message):
