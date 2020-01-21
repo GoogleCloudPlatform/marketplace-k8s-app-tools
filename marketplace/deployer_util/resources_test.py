@@ -38,14 +38,14 @@ class ResourcesTest(unittest.TestCase):
 
     set_resource_ownership(APP_UID, APP_NAME, APP_API_VERSION, 'Application',
                            resource)
-    self.assertEqual(resource['metadata']['ownerReferences'], [APP_OWNER_REF])
+    self.assertCountEqual(resource['metadata']['ownerReferences'], [APP_OWNER_REF])
 
   def test_resource_existing_ownerref_different_uid_adds_ownerref(self):
     resource = {'metadata': {'ownerReferences': [{'uid': OTHER_UID}]}}
 
     set_resource_ownership(APP_UID, APP_NAME, APP_API_VERSION, 'Application',
                            resource)
-    self.assertEqual(resource['metadata']['ownerReferences'], [{
+    self.assertCountEqual(resource['metadata']['ownerReferences'], [{
         'uid': OTHER_UID
     }, APP_OWNER_REF])
 
@@ -55,14 +55,14 @@ class ResourcesTest(unittest.TestCase):
     set_resource_ownership(APP_UID, APP_NAME, APP_API_VERSION, 'Application',
                            resource)
 
-    self.assertEqual(resource['metadata']['ownerReferences'], [APP_OWNER_REF])
+    self.assertCountEqual(resource['metadata']['ownerReferences'], [APP_OWNER_REF])
 
   def test_app_resource_ownership(self):
     resource = {'metadata': {'ownerReferences': []}}
 
     set_app_resource_ownership(APP_UID, APP_NAME, APP_API_VERSION, resource)
 
-    self.assertEqual(resource['metadata']['ownerReferences'],
+    self.assertCountEqual(resource['metadata']['ownerReferences'],
                                  [APP_OWNER_REF])
 
   def test_service_account_resource_ownership(self):
@@ -71,7 +71,7 @@ class ResourcesTest(unittest.TestCase):
     set_service_account_resource_ownership(
         '11111111-2222-3333-4444-555555555555', 'test-sa', resource)
 
-    self.assertEqual(resource['metadata']['ownerReferences'], [{
+    self.assertCountEqual(resource['metadata']['ownerReferences'], [{
         'apiVersion': 'v1',
         'kind': 'ServiceAccount',
         'blockOwnerDeletion': True,
