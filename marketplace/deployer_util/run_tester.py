@@ -15,7 +15,7 @@
 # limitations under the License.
 
 import time
-from . import log_util as log
+import log_util as log
 
 from argparse import ArgumentParser
 from bash_util import Command

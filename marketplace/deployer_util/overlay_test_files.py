@@ -16,7 +16,7 @@
 
 import os
 
-from .yaml_util import overlay_yaml_file
+from yaml_util import overlay_yaml_file
 from argparse import ArgumentParser
 ''' Copy all the files from the test manifest into final manifest.
     The values.yaml file is merged instead of overwriten '''
