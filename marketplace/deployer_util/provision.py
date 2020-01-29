@@ -275,6 +275,12 @@ def provision_deployer(schema, app_name, namespace, deployer_image,
       'app.kubernetes.io/component': 'deployer.marketplace.cloud.google.com',
       'marketplace.cloud.google.com/deployer': 'Main',
   }
+  resources_requests = {
+      'requests': {
+          'memory': '100Mi',
+          'cpu': '100m'
+      }
+  }
 
   if schema.is_v2():
     config = make_v2_config(schema, deployer_image, namespace, app_name, labels,
@@ -292,12 +298,7 @@ def provision_deployer(schema, app_name, namespace, deployer_image,
                 'subPath': 'values.yaml',
                 'readOnly': True,
             },],
-            'resources': {
-                'requests': {
-                    'memory': '100Mi',
-                    'cpu': '100m'
-                }
-            },
+            'resources': resources_requests,
         },],
         'restartPolicy':
             'Never',
@@ -321,12 +322,7 @@ def provision_deployer(schema, app_name, namespace, deployer_image,
                 'name': 'config-volume',
                 'mountPath': '/data/values',
             },],
-            'resources': {
-                'requests': {
-                    'memory': '100Mi',
-                    'cpu': '100m'
-                }
-            },
+            'resources': resources_requests,
         },],
         'restartPolicy':
             'Never',
