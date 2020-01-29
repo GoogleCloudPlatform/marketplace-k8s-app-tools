@@ -275,6 +275,7 @@ def provision_deployer(schema, app_name, namespace, deployer_image,
       'app.kubernetes.io/component': 'deployer.marketplace.cloud.google.com',
       'marketplace.cloud.google.com/deployer': 'Main',
   }
+  resources_requests = {'requests': {'memory': '100Mi', 'cpu': '100m'}}
 
   if schema.is_v2():
     config = make_v2_config(schema, deployer_image, namespace, app_name, labels,
@@ -283,18 +284,16 @@ def provision_deployer(schema, app_name, namespace, deployer_image,
         'serviceAccountName':
             deployer_service_account_name,
         'containers': [{
-            'name':
-                'deployer',
-            'image':
-                deployer_image,
-            'imagePullPolicy':
-                'Always',
+            'name': 'deployer',
+            'image': deployer_image,
+            'imagePullPolicy': 'Always',
             'volumeMounts': [{
                 'name': 'config-volume',
                 'mountPath': '/data/values.yaml',
                 'subPath': 'values.yaml',
                 'readOnly': True,
             },],
+            'resources': resources_requests,
         },],
         'restartPolicy':
             'Never',
@@ -311,16 +310,14 @@ def provision_deployer(schema, app_name, namespace, deployer_image,
         'serviceAccountName':
             deployer_service_account_name,
         'containers': [{
-            'name':
-                'deployer',
-            'image':
-                deployer_image,
-            'imagePullPolicy':
-                'Always',
+            'name': 'deployer',
+            'image': deployer_image,
+            'imagePullPolicy': 'Always',
             'volumeMounts': [{
                 'name': 'config-volume',
                 'mountPath': '/data/values',
             },],
+            'resources': resources_requests,
         },],
         'restartPolicy':
             'Never',
