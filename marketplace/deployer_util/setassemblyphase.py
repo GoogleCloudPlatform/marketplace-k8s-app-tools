@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 #
 # Copyright 2018 Google LLC
 #
@@ -51,5 +51,5 @@ if len(apps) > 1:
 
 apps[0]['spec']['assemblyPhase'] = args.status
 
-with open(args.manifest, "w") as outfile:
+with open(args.manifest, "w", encoding='utf-8') as outfile:
   yaml.safe_dump_all(resources, outfile, default_flow_style=False, indent=2)

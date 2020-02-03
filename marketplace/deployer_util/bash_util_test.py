@@ -27,5 +27,6 @@ class BashUtilTest(unittest.TestCase):
     with self.assertRaises(CommandException) as context:
       Command('cat nonexistentfile')
     self.assertEqual(context.exception.exitcode, 1)
-    self.assertEqual(context.exception.message,
-                     'cat: nonexistentfile: No such file or directory\n')
+    self.assertEqual(
+        str(context.exception),
+        'cat: nonexistentfile: No such file or directory\n')

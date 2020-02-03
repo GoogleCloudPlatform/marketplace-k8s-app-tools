@@ -1,6 +1,6 @@
 FROM gcr.io/google-appengine/python
 
-RUN pip install \
+RUN pip3 install \
       futures \
       google-cloud-storage \
       pyflakes \

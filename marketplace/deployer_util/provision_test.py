@@ -1,3 +1,4 @@
+# Copyright 2018 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,8 +15,7 @@
 import unittest
 
 import provision
-from provision import dns1123_name
-from provision import limit_name
+from provision import dns1123_name, limit_name
 
 import config_helper
 
@@ -44,10 +44,7 @@ class ProvisionTest(unittest.TestCase):
 
   def assertModifiedName(self, text, expected):
     self.assertEqual(text[:-5], expected)
-    self.assertRegexpMatches(text[-5:], r'-[a-f0-9]{4}')
-
-  def assertListElementsEqual(self, list1, list2):
-    return self.assertEqual(sorted(list1), sorted(list2))
+    self.assertRegex(text[-5:], r'-[a-f0-9]{4}')
 
   def test_deployer_image_inject(self):
     schema = config_helper.Schema.load_yaml('''
@@ -59,7 +56,7 @@ class ProvisionTest(unittest.TestCase):
     ''')
     values = {}
     deployer_image = 'gcr.io/cloud-marketplace/partner/solution/deployer:latest'
-    self.assertEquals(
+    self.assertEqual(
         provision.inject_deployer_image_properties(values, schema,
                                                    deployer_image),
         {"deployer_image": deployer_image})
@@ -99,7 +96,7 @@ class ProvisionTest(unittest.TestCase):
           simple:
             type: string
       """)
-    self.assertEquals(
+    self.assertEqual(
         [
             # The default namespace rolebinding should be created
             {
@@ -168,7 +165,7 @@ class ProvisionTest(unittest.TestCase):
           simple:
             type: string
       """)
-    self.assertListElementsEqual(
+    self.assertCountEqual(
         [
             {
                 'apiVersion':
@@ -323,7 +320,7 @@ class ProvisionTest(unittest.TestCase):
           simple:
             type: string
       """)
-    self.assertListElementsEqual(
+    self.assertCountEqual(
         [
             # The default namespace rolebinding should also be created
             {

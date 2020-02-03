@@ -16,6 +16,8 @@ import json
 import shlex
 import subprocess
 
+import six
+
 
 class CommandException(Exception):
 
@@ -46,6 +48,8 @@ class Command:
 
   def _run(self):
     self._output, error_message = self._process.communicate()
+    self._output = six.ensure_str(self._output, 'utf-8')
+    error_message = six.ensure_str(error_message, 'utf-8')
     self._exitcode = self._process.returncode
     if self._print_result:
       print("result: " + str((self._exitcode, self._output, error_message)))

@@ -21,17 +21,17 @@ from validate_app_resource import validate_deploy_info_annotation
 class ValidateAppResourceTest(unittest.TestCase):
 
   def test_deploy_info_must_be_json(self):
-    self.assertRaisesRegexp(
+    self.assertRaisesRegex(
         Exception, r'.*must be valid JSON.*',
         lambda: validate_deploy_info_annotation('invalid json'))
 
   def test_deploy_info_must_contain_partner_id(self):
-    self.assertRaisesRegexp(
+    self.assertRaisesRegex(
         Exception, r'.*must contain a partner_id.*',
         lambda: validate_deploy_info_annotation('{"product_id": "solution"}'))
 
   def test_deploy_info_must_contain_product_id(self):
-    self.assertRaisesRegexp(
+    self.assertRaisesRegex(
         Exception, r'.*must contain a product_id.*',
         lambda: validate_deploy_info_annotation('{"partner_id": "partner"}'))
 
@@ -48,11 +48,11 @@ class ValidateAppResourceTest(unittest.TestCase):
           images: {}
         properties: {}
         """)
-    self.assertRaisesRegexp(
+    self.assertRaisesRegex(
         Exception, r'Partner or solution ID values.*schema.*not consistent',
         lambda: validate_deploy_info_annotation(
             '{"partner_id": "partner-a", "product_id": "solution-b"}', schema))
-    self.assertRaisesRegexp(
+    self.assertRaisesRegex(
         Exception, r'Partner or solution ID values.*schema.*not consistent',
         lambda: validate_deploy_info_annotation(
             '{"partner_id": "partner-b", "product_id": "solution-a"}', schema))

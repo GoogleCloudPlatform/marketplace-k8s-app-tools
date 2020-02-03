@@ -188,7 +188,7 @@ class ExpandConfigTest(unittest.TestCase):
     result = expand_config.expand({'s1': 'test'}, schema)
     self.assertEqual({
         's1': 'test',
-        's1.encoded': 'dGVzdA==',
+        's1.encoded': b'dGVzdA==',
     }, result)
 
   def test_generate_certificate(self):
@@ -219,12 +219,16 @@ class ExpandConfigTest(unittest.TestCase):
         """)
     result = expand_config.expand({}, schema)
 
-    cert_json = json.loads(result['c1'])
     self.assertIsNotNone(result['c1'])
-    self.assertEqual(result['c1.Base64Key'],
-                     base64.b64encode(cert_json['private_key']))
-    self.assertEqual(result['c1.Base64Crt'],
-                     base64.b64encode(cert_json['certificate']))
+    cert_json = json.loads(result['c1'])
+    self.assertEqual(
+        result['c1.Base64Key'],
+        base64.b64encode(
+            cert_json['private_key'].encode('ascii')).decode('ascii'))
+    self.assertEqual(
+        result['c1.Base64Crt'],
+        base64.b64encode(
+            cert_json['certificate'].encode('ascii')).decode('ascii'))
 
     key = OpenSSL.crypto.load_privatekey(
         OpenSSL.crypto.FILETYPE_PEM, base64.b64decode(result['c1.Base64Key']))
@@ -236,7 +240,7 @@ class ExpandConfigTest(unittest.TestCase):
     self.assertEqual(cert.get_subject(), cert.get_issuer())
     self.assertEqual(cert.get_subject().OU, 'GCP Marketplace K8s App Tools')
     self.assertEqual(cert.get_subject().CN, 'Temporary Certificate')
-    self.assertEqual(cert.get_signature_algorithm(), 'sha256WithRSAEncryption')
+    self.assertEqual(cert.get_signature_algorithm(), b'sha256WithRSAEncryption')
     self.assertFalse(cert.has_expired())
 
   def test_generate_properties_for_certificate(self):
@@ -267,6 +271,7 @@ class ExpandConfigTest(unittest.TestCase):
         """)
     result = expand_config.expand(
         {'c1': '{"private_key": "key", "certificate": "vrt"}'}, schema)
+
     self.assertEqual(
         {
             'c1': '{"private_key": "key", "certificate": "vrt"}',

@@ -1,4 +1,4 @@
-FROM launcher.gcr.io/google/debian9
+FROM marketplace.gcr.io/google/python
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     bash \
@@ -8,13 +8,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     jq \
     procps \
-    python \
-    python-openssl \
-    python-pip \
-    python-setuptools \
-    python-yaml \
     wget \
     && rm -rf /var/lib/apt/lists/*
+
+RUN pip3 install \
+      wheel \
+      pyOpenSSL \
+      pyyaml \
+      six
 
 RUN mkdir -p /opt/kubectl/1.13 \
     && wget -q -O /opt/kubectl/1.13/kubectl \

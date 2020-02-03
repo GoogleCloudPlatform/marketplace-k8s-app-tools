@@ -1,3 +1,4 @@
+# Copyright 2018 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -33,23 +34,20 @@ APP_OWNER_REF = {
 
 class ResourcesTest(unittest.TestCase):
 
-  def assertListElementsEqual(self, list1, list2):
-    return self.assertEqual(sorted(list1), sorted(list2))
-
   def test_resource_existing_app_ownerref_matching_uid_updates_existing(self):
     resource = {'metadata': {'ownerReferences': [{'uid': APP_UID}]}}
 
     set_resource_ownership(APP_UID, APP_NAME, APP_API_VERSION, 'Application',
                            resource)
-    self.assertListElementsEqual(resource['metadata']['ownerReferences'],
-                                 [APP_OWNER_REF])
+    self.assertCountEqual(resource['metadata']['ownerReferences'],
+                          [APP_OWNER_REF])
 
   def test_resource_existing_ownerref_different_uid_adds_ownerref(self):
     resource = {'metadata': {'ownerReferences': [{'uid': OTHER_UID}]}}
 
     set_resource_ownership(APP_UID, APP_NAME, APP_API_VERSION, 'Application',
                            resource)
-    self.assertListElementsEqual(resource['metadata']['ownerReferences'], [{
+    self.assertCountEqual(resource['metadata']['ownerReferences'], [{
         'uid': OTHER_UID
     }, APP_OWNER_REF])
 
@@ -59,16 +57,16 @@ class ResourcesTest(unittest.TestCase):
     set_resource_ownership(APP_UID, APP_NAME, APP_API_VERSION, 'Application',
                            resource)
 
-    self.assertListElementsEqual(resource['metadata']['ownerReferences'],
-                                 [APP_OWNER_REF])
+    self.assertCountEqual(resource['metadata']['ownerReferences'],
+                          [APP_OWNER_REF])
 
   def test_app_resource_ownership(self):
     resource = {'metadata': {'ownerReferences': []}}
 
     set_app_resource_ownership(APP_UID, APP_NAME, APP_API_VERSION, resource)
 
-    self.assertListElementsEqual(resource['metadata']['ownerReferences'],
-                                 [APP_OWNER_REF])
+    self.assertCountEqual(resource['metadata']['ownerReferences'],
+                          [APP_OWNER_REF])
 
   def test_service_account_resource_ownership(self):
     resource = {'metadata': {'ownerReferences': []}}
@@ -76,7 +74,7 @@ class ResourcesTest(unittest.TestCase):
     set_service_account_resource_ownership(
         '11111111-2222-3333-4444-555555555555', 'test-sa', resource)
 
-    self.assertListElementsEqual(resource['metadata']['ownerReferences'], [{
+    self.assertCountEqual(resource['metadata']['ownerReferences'], [{
         'apiVersion': 'v1',
         'kind': 'ServiceAccount',
         'blockOwnerDeletion': True,
@@ -124,8 +122,8 @@ class ResourcesTest(unittest.TestCase):
             'kind': 'Job',
         },
     ]
-    self.assertRaisesRegexp(Exception, r'.*does not include an Application.*',
-                            lambda: find_application_resource(resources))
+    self.assertRaisesRegex(Exception, r'.*does not include an Application.*',
+                           lambda: find_application_resource(resources))
 
   def test_find_application_resource_multiple_ones_exist(self):
     resources = [
@@ -138,5 +136,5 @@ class ResourcesTest(unittest.TestCase):
             'kind': 'Application',
         },
     ]
-    self.assertRaisesRegexp(Exception, r'.*multiple Applications.*',
-                            lambda: find_application_resource(resources))
+    self.assertRaisesRegex(Exception, r'.*multiple Applications.*',
+                           lambda: find_application_resource(resources))

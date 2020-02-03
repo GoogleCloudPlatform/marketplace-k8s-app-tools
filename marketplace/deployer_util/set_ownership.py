@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 #
 # Copyright 2018 Google LLC
 #
@@ -109,7 +109,7 @@ def main():
 
   if not args.noapp:
     app = find_application_resource(resources)
-    kinds = map(lambda x: x["kind"], app["spec"].get("componentKinds", []))
+    kinds = [x["kind"] for x in app["spec"].get("componentKinds", [])]
 
     excluded_kinds = ["PersistentVolumeClaim", "Application"]
     included_kinds = [kind for kind in kinds if kind not in excluded_kinds]
@@ -128,7 +128,7 @@ def main():
         deployer_uid=args.deployer_uid)
     sys.stdout.flush()
   else:
-    with open(args.dest, "w") as outfile:
+    with open(args.dest, "w", encoding='utf-8') as outfile:
       dump(
           outfile,
           resources,
