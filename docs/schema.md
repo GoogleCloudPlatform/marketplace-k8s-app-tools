@@ -839,6 +839,11 @@ x-google-marketplace:
           minimumNodeCount: 3
 ```
 
+In the UI, if `resources` are specified, existing clusters will be checked
+for sufficient available resources, and new clusters will be created with
+the required amount of resources (higher than the stated requirement, as
+not all cluster resources are available for workload use).
+
 ### istio
 
 Use this section to indicate compatibility between the app and the Istio
