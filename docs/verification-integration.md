@@ -41,7 +41,7 @@ examples of `/data-test` for different deployers:
 
 The `/data-test/schema.yaml` file should be used to:
 
-* Declare properties needed for tests, which are not already declared in `/data/schema.yaml`. One 
+* Declare properties needed for tests, which are not already declared in `/data/schema.yaml`. One
 common example is the image for the Tester Pod.
 * Declare default values for the properties in `/data/schema.yaml` that do not include default values.
 The Verification system will use the default values to run the app. Refer to [mpdev](https://github.com/GoogleCloudPlatform/marketplace-k8s-app-tools/blob/master/docs/mpdev-references.md#smoke-test-an-application)
@@ -112,7 +112,7 @@ Here's a summary of what happens when you run Verification:
 
 This session covers the most common errors when running `mpdev verify`.
 
-### No value for required property: <propertyName>
+### No value for required property: \<propertyName\>
 
 This indicates that no value was provided for the property at installation time. Since the property is required, the installtion cannot proceed. To solve this make sure that the property has a default value in either /data/schema.yaml or /data-test/schema.yaml. Example:
 
