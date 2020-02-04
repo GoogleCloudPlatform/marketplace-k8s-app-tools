@@ -114,7 +114,7 @@ This session covers the most common errors when running `mpdev verify`.
 
 ### No value for required property: \<propertyName\>
 
-This indicates that no value was provided for the property at installation time. Since the property is required, the installtion cannot proceed. To solve this make sure that the property has a default value in either /data/schema.yaml or /data-test/schema.yaml. Example:
+This indicates that no value was provided for the property at installation time. Since the property is required, the installation cannot proceed. To solve this make sure that the property has a default value in either /data/schema.yaml or /data-test/schema.yaml. Example of setting a default value to a property:
 
 ```
 properties:
