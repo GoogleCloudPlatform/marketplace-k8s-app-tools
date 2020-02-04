@@ -144,6 +144,7 @@ tests/py: $(PYTHON_TEST_TARGETS)
 .PHONY: $(PYTHON_TEST_TARGETS)
 $(PYTHON_TEST_TARGETS): %.__pytest__: .build/tests/py
 	$(info === Running tests in directory $* ===)
+  # The coverage tool requires write access to the tested directories
 	@docker run --rm \
 	  -v $(PWD):/data \
 	  --entrypoint runtests.sh \
