@@ -109,7 +109,7 @@ def main():
 
   if not args.noapp:
     app = find_application_resource(resources)
-    kinds = [x["kind"] for x in app["spec"].get("componentKinds", [])]
+    kinds = set([x["kind"] for x in app["spec"].get("componentKinds", [])])
 
     excluded_kinds = ["PersistentVolumeClaim", "Application"]
     included_kinds = [kind for kind in kinds if kind not in excluded_kinds]
