@@ -712,6 +712,6 @@ similar to the install command.
 
 See [this section](building-deployer.md#publishing-a-new-version).
 
-## Part 5: Integration testing
+## Part 5: Add verification integration
 
-TODO: Details about our integration tests.
+Follow [instructions](verification-integration.md) to integrate the application with our verification system.
