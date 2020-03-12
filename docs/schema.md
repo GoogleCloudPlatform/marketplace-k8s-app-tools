@@ -892,8 +892,8 @@ Note that for `resource` entries with GPU requests:
 
 In the UI, if a GPU request is specified, existing clusters will be checked for
 sufficient compatible GPUs (workload availability is not checked). Due to the
-complexity of creating a cluster with GPUs, assisted clustre creation will be
-disabled, and users will be informed of the GPU requirements and directed to the
+complexity of requesting GPU quota, assisted cluster creation will be disabled,
+and users will be informed of the GPU requirements and directed to the
 [Kubernetes Engine GPU guide](https://cloud.google.com/kubernetes-engine/docs/how-to/gpus).
 
 ### istio
