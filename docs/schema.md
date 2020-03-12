@@ -865,11 +865,23 @@ x-google-marketplace:
 The following specifies that at least one node in the cluster should have at
 least two Nvidia GPUs (with platform `nvidia-tesla-k80` or `nvidia-tesla-k100`):
 
+```yaml
+x-google-marketplace:
+  clusterConstraints:
+    resources:
+    - requests:
+        gpu:
+          nvidia.com/gpu:
+            limits: 2
+            platforms:
+            - nvidia-tesla-k80
+            - nvidia-tesla-k100
+```
+
 Currently only Nvidia platforms are supported (requests entry key
 `nvidia.com/gpus`). See the
 [Compute Engine GPU guide](https://cloud.google.com/compute/docs/gpus)
 for a full list of available GPU platforms.
-
 
 Note that for `resource` entries with GPU requests:
 
