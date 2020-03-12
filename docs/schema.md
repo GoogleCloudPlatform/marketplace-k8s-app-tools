@@ -816,15 +816,18 @@ x-google-marketplace:
 
 Each entry under `resources` is roughly equivalent to a workload in the app.
 
-* `affinity` defines the relationship between the nodes and the replicas.
+*   `requests` defines the desired resource allocations, and is required for each
+    entry.
 
-    * `simpleNodeAffinity` is an affinity definition. It has two types:
+*   `affinity` defines the relationship between the nodes and the replicas.
 
-        * `REQUIRE_ONE_NODE_PER_REPLICA`: The number of nodes must be at least
-          the same as the number of replicas, so that each replica is scheduled
-          on a different node.
-        * `REQUIRE_MINIMUM_NODE_COUNT`: The minimum number of nodes must be
-          specified separately, in `minimumNodeCount`. For example:
+    *   `simpleNodeAffinity` is an affinity definition. It has two types:
+
+        *   `REQUIRE_ONE_NODE_PER_REPLICA`: The number of nodes must be at
+            least the same as the number of replicas, so that each replica is
+            scheduled on a different node.
+        *   `REQUIRE_MINIMUM_NODE_COUNT`: The minimum number of nodes must be
+            specified separately, in `minimumNodeCount`. For example:
 
 ```yaml
 x-google-marketplace:
@@ -843,6 +846,43 @@ In the UI, if `resources` are specified, existing clusters will be checked
 for sufficient available resources, and new clusters will be created with
 the required amount of resources (higher than the stated requirement, as
 not all cluster resources are available for workload use).
+
+#### GPUs
+
+An app may request at least one node with one or more GPUs with a supported,
+compatible platform. For instance, the following specifies that at least one
+Nvidia GPU must exist in the cluster:
+
+```yaml
+x-google-marketplace:
+  clusterConstraints:
+    resources:
+    - requests:
+        gpu:
+          nvidia.com/gpu: {}
+```
+
+The following specifies that at least one node in the cluster should have at
+least two Nvidia GPUs (with platform `nvidia-tesla-k80` or `nvidia-tesla-k100`):
+
+Currently only Nvidia platforms are supported (requests entry key
+`nvidia.com/gpus`). See the
+[Compute Engine GPU guide](https://cloud.google.com/compute/docs/gpus)
+for a full list of available GPU platforms.
+
+
+Note that for `resource` entries with GPU requests:
+
+*   `resources` may contain at most one entry with GPU requests
+*   `affinity` and `replicas` are ignored
+    * `cpu` and `memory` may be defined in the same entry, but must be
+      defined in a separate entry if `affinity` or `replicas` is desired
+
+In the UI, if a GPU request is specified, existing clusters will be checked for
+sufficient compatible GPUs (workload availability is not checked). Due to the
+complexity of creating a cluster with GPUs, assisted clustre creation will be
+disabled, and users will be informed of the GPU requirements and directed to the
+[Kubernetes Engine GPU guide](https://cloud.google.com/kubernetes-engine/docs/how-to/gpus).
 
 ### istio
 
