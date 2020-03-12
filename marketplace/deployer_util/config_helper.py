@@ -325,10 +325,7 @@ class SchemaClusterConstraints:
       if not isinstance(resources, list):
         raise InvalidSchema('clusterConstraints.resources must be a list')
       self._resources = [SchemaResourceConstraints(r) for r in resources]
-      if len(
-          list(
-              filter(lambda x: x.requests and x.requests.gpu,
-                     self._resources))) > 1:
+      if len(list(filter(lambda x: x.requests.gpu, self._resources))) > 1:
         raise InvalidSchema('At most one request may include GPUs')
 
     self._istio = _maybe_get_and_apply(dictionary, 'istio',
