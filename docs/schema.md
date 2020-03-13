@@ -816,21 +816,21 @@ x-google-marketplace:
 
 Each entry under `resources` is roughly equivalent to a workload in the app.
 
-*   `requests` defines the desired resource allocations, and is required for each
+* `requests` defines the desired resource allocations, and is required for each
     entry.
 
-*   `replicas` is required for each entry (unless GPU requests are defined;
+* `replicas` is required for each entry (unless GPU requests are defined;
     [see GPUs](#gpus) for more details)
 
-*   `affinity` defines the relationship between the nodes and the replicas.
+* `affinity` defines the relationship between the nodes and the replicas.
 
-    *   `simpleNodeAffinity` is an affinity definition. It has two types:
+    * `simpleNodeAffinity` is an affinity definition. It has two types:
 
-        *   `REQUIRE_ONE_NODE_PER_REPLICA`: The number of nodes must be at
-            least the same as the number of replicas, so that each replica is
-            scheduled on a different node.
-        *   `REQUIRE_MINIMUM_NODE_COUNT`: The minimum number of nodes must be
-            specified separately, in `minimumNodeCount`. For example:
+        * `REQUIRE_ONE_NODE_PER_REPLICA`: The number of nodes must be at
+          least the same as the number of replicas, so that each replica is
+          scheduled on a different node.
+        * `REQUIRE_MINIMUM_NODE_COUNT`: The minimum number of nodes must be
+          specified separately, in `minimumNodeCount`. For example:
 
 ```yaml
 x-google-marketplace:
@@ -888,9 +888,9 @@ for a full list of available GPU platforms.
 
 Note that for `resource` entries with GPU requests:
 
-*   `resources` may contain at most one entry with GPU requests
-*   `affinity` and `replicas` are ignored
-*   no other request types (e.g. `cpu`) can be defined in the same entry
+* `resources` may contain at most one entry with GPU requests
+* `affinity` and `replicas` are ignored
+* no other request types (e.g. `cpu`) can be defined in the same entry
 
 In the UI, if a GPU request is specified, existing clusters will be checked for
 sufficient compatible GPUs (workload availability is not checked). Due to the
