@@ -353,6 +353,7 @@ class SchemaResourceConstraints:
   """Accesses a single resource's constraints."""
 
   def __init__(self, dictionary):
+    # TODO(#483): Require replicas for non-GPU constraints
     self._replicas = dictionary.get('replicas', None)
     self._affinity = _maybe_get_and_apply(
         dictionary, 'affinity', lambda v: SchemaResourceConstraintAffinity(v))
@@ -427,11 +428,17 @@ class SchemaResourceConstraintRequests:
 
     rawGpu = dictionary.get('gpu', None)
     if rawGpu != None:
+      if not isinstance(rawGpu, dict):
+        raise InvalidSchema(
+            'requests.gpu in clusterConstraints.resources must be a map')
       if not rawGpu.keys():
         raise InvalidSchema('GPU requests map must contain one or more entries')
+      if self._cpu or self._memory:
+        raise InvalidSchema(
+            'constraints with GPU requests must not specify cpu or memory')
       for key in rawGpu.keys():
         if key not in _GPU_PROVIDER_KEYS:
-          raise InvalidSchema('Unrecognized GPU provider %s', key)
+          raise InvalidSchema('Unsupported GPU provider %s', key)
       self._gpu = {
           key: SchemaGpuResourceRequest(value)
           for (key, value) in rawGpu.items()

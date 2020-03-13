@@ -1045,7 +1045,6 @@ class ConfigHelperTest(unittest.TestCase):
                   type: REQUIRE_MINIMUM_NODE_COUNT
                   minimumNodeCount: 4
             - requests:
-                cpu: 200m
                 gpu:
                   nvidia.com/gpu:
                     limits: 2
@@ -1072,7 +1071,6 @@ class ConfigHelperTest(unittest.TestCase):
     self.assertEqual(
         resources[1].affinity.simple_node_affinity.minimum_node_count, 4)
 
-    self.assertEqual(resources[2].requests.cpu, '200m')
     self.assertEqual(len(resources[2].requests.gpu), 1)
     self.assertEqual(resources[2].requests.gpu['nvidia.com/gpu'].limits, 2)
     self.assertEqual(resources[2].requests.gpu['nvidia.com/gpu'].platforms,
@@ -1119,6 +1117,23 @@ class ConfigHelperTest(unittest.TestCase):
               resources:
               - replicas: 2
                 requests: {}
+          """)
+
+  def test_resource_constraints_gpu_and_other_requests_invalid(self):
+    with self.assertRaisesRegex(config_helper.InvalidSchema,
+                                'must not specify cpu'):
+      config_helper.Schema.load_yaml("""
+          applicationApiVersion: v1beta1
+          properties:
+            simple:
+              type: string
+          x-google-marketplace:
+            clusterConstraints:
+              resources:
+              - requests:
+                  cpu: 200m
+                  gpu:
+                    nvidia.com/gpu: {}
           """)
 
   def test_resource_constraints_multiple_gpu_constraints_invalid(self):
@@ -1178,6 +1193,20 @@ class ConfigHelperTest(unittest.TestCase):
                 replicas: 2
           """)
 
+  def test_resource_constraints_gpu_not_map_invalid(self):
+    with self.assertRaisesRegex(config_helper.InvalidSchema, 'must be a map'):
+      config_helper.Schema.load_yaml("""
+          applicationApiVersion: v1beta1
+          properties:
+            simple:
+              type: string
+          x-google-marketplace:
+            clusterConstraints:
+              resources:
+              - requests:
+                  gpu: []
+          """)
+
   def test_resource_constraints_gpu_empty_requests_invalid(self):
     with self.assertRaisesRegex(config_helper.InvalidSchema,
                                 'GPU requests map must contain'):
@@ -1195,7 +1224,7 @@ class ConfigHelperTest(unittest.TestCase):
 
   def test_resource_constraints_gpu_unrecognized_provider_invalid(self):
     with self.assertRaisesRegex(config_helper.InvalidSchema,
-                                'Unrecognized GPU provider'):
+                                'Unsupported GPU provider'):
       config_helper.Schema.load_yaml("""
           applicationApiVersion: v1beta1
           properties:
