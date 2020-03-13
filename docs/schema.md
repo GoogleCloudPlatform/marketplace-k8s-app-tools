@@ -819,6 +819,9 @@ Each entry under `resources` is roughly equivalent to a workload in the app.
 *   `requests` defines the desired resource allocations, and is required for each
     entry.
 
+*   `replicas` is required for each entry (unless GPU requests are defined;
+    [see GPUs](#gpus) for more details)
+
 *   `affinity` defines the relationship between the nodes and the replicas.
 
     *   `simpleNodeAffinity` is an affinity definition. It has two types:
@@ -887,8 +890,7 @@ Note that for `resource` entries with GPU requests:
 
 *   `resources` may contain at most one entry with GPU requests
 *   `affinity` and `replicas` are ignored
-    * `cpu` and `memory` may be defined in the same entry, but must be
-      defined in a separate entry if `affinity` or `replicas` is desired
+*   no other request types (e.g. `cpu`) can be defined in the same entry
 
 In the UI, if a GPU request is specified, existing clusters will be checked for
 sufficient compatible GPUs (workload availability is not checked). Due to the
