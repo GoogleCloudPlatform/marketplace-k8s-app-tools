@@ -325,6 +325,8 @@ class SchemaClusterConstraints:
       if not isinstance(resources, list):
         raise InvalidSchema('clusterConstraints.resources must be a list')
       self._resources = [SchemaResourceConstraints(r) for r in resources]
+      if len(list(filter(lambda x: x.requests.gpu, self._resources))) > 1:
+        raise InvalidSchema('At most one request may include GPUs')
 
     self._istio = _maybe_get_and_apply(dictionary, 'istio',
                                        lambda v: SchemaIstio(v))
@@ -351,11 +353,19 @@ class SchemaResourceConstraints:
   """Accesses a single resource's constraints."""
 
   def __init__(self, dictionary):
+    # TODO(#483): Require replicas for non-GPU constraints
     self._replicas = dictionary.get('replicas', None)
     self._affinity = _maybe_get_and_apply(
         dictionary, 'affinity', lambda v: SchemaResourceConstraintAffinity(v))
-    self._requests = _maybe_get_and_apply(
-        dictionary, 'requests', lambda v: SchemaResourceConstraintRequests(v))
+    self._requests = _must_get_and_apply(
+        dictionary, 'requests', lambda v: SchemaResourceConstraintRequests(v),
+        'Each item in clusterConstraints.resources must specify requests')
+
+    if self._requests.gpu:
+      if self._affinity:
+        raise InvalidSchema('Affinity unsupported for GPU resource constraints')
+      if self._replicas:
+        raise InvalidSchema('Replicas unsupported for GPU resource constraints')
 
   @property
   def replicas(self):
@@ -405,12 +415,39 @@ class SchemaSimpleNodeAffinity:
     return self._minimum_node_count
 
 
+_GPU_PROVIDER_KEYS = ['nvidia.com/gpu']
+
+
 class SchemaResourceConstraintRequests:
   """Accesses a single resource's requests."""
 
   def __init__(self, dictionary):
     self._cpu = dictionary.get('cpu', None)
     self._memory = dictionary.get('memory', None)
+    self._gpu = None
+
+    rawGpu = dictionary.get('gpu', None)
+    if rawGpu != None:
+      if not isinstance(rawGpu, dict):
+        raise InvalidSchema(
+            'requests.gpu in clusterConstraints.resources must be a map')
+      if not rawGpu.keys():
+        raise InvalidSchema('GPU requests map must contain one or more entries')
+      if self._cpu or self._memory:
+        raise InvalidSchema(
+            'constraints with GPU requests must not specify cpu or memory')
+      for key in rawGpu.keys():
+        if key not in _GPU_PROVIDER_KEYS:
+          raise InvalidSchema('Unsupported GPU provider %s', key)
+      self._gpu = {
+          key: SchemaGpuResourceRequest(value)
+          for (key, value) in rawGpu.items()
+      }
+
+    if not self._cpu and not self._memory and not self._gpu:
+      raise InvalidSchema(
+          'Requests in clusterConstraints.resources must specify '
+          'at least one of cpu, memory, or gpu')
 
   @property
   def cpu(self):
@@ -419,6 +456,26 @@ class SchemaResourceConstraintRequests:
   @property
   def memory(self):
     return self._memory
+
+  @property
+  def gpu(self):
+    return self._gpu
+
+
+class SchemaGpuResourceRequest:
+  """Accesses a single GPU request."""
+
+  def __init__(self, dictionary):
+    self._limits = dictionary.get('limits', None)
+    self._platforms = dictionary.get('platforms', None)
+
+  @property
+  def limits(self):
+    return self._limits
+
+  @property
+  def platforms(self):
+    return self._platforms
 
 
 _ISTIO_TYPE_OPTIONAL = "OPTIONAL"
