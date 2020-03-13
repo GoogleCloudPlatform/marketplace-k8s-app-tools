@@ -1038,15 +1038,25 @@ class ConfigHelperTest(unittest.TestCase):
                 simpleNodeAffinity:
                   type: REQUIRE_ONE_NODE_PER_REPLICA
             - replicas: 5
+              requests:
+                cpu: 50m
               affinity:
                 simpleNodeAffinity:
                   type: REQUIRE_MINIMUM_NODE_COUNT
                   minimumNodeCount: 4
+            - requests:
+                gpu:
+                  nvidia.com/gpu:
+                    limits: 2
+                    platforms:
+                    - nvidia-tesla-k80
+                    - nvidia-tesla-k100
         """)
     schema.validate()
     resources = schema.x_google_marketplace.cluster_constraints.resources
     self.assertTrue(isinstance(resources, list))
-    self.assertEqual(len(resources), 2)
+    self.assertEqual(len(resources), 3)
+
     self.assertEqual(resources[0].replicas, 3)
     self.assertEqual(resources[0].requests.cpu, '100m')
     self.assertEqual(resources[0].requests.memory, '512Gi')
@@ -1055,11 +1065,178 @@ class ConfigHelperTest(unittest.TestCase):
     self.assertIsNone(
         resources[0].affinity.simple_node_affinity.minimum_node_count)
     self.assertEqual(resources[1].replicas, 5)
-    self.assertIsNone(resources[1].requests)
+    self.assertEqual(resources[1].requests.cpu, '50m')
     self.assertEqual(resources[1].affinity.simple_node_affinity.affinity_type,
                      'REQUIRE_MINIMUM_NODE_COUNT')
     self.assertEqual(
         resources[1].affinity.simple_node_affinity.minimum_node_count, 4)
+
+    self.assertEqual(len(resources[2].requests.gpu), 1)
+    self.assertEqual(resources[2].requests.gpu['nvidia.com/gpu'].limits, 2)
+    self.assertEqual(resources[2].requests.gpu['nvidia.com/gpu'].platforms,
+                     ['nvidia-tesla-k80', 'nvidia-tesla-k100'])
+
+  def test_resource_constraints_resources_not_list_invalid(self):
+    with self.assertRaisesRegex(config_helper.InvalidSchema,
+                                'resources must be a list'):
+      config_helper.Schema.load_yaml("""
+          applicationApiVersion: v1beta1
+          properties:
+            simple:
+              type: string
+          x-google-marketplace:
+            clusterConstraints:
+              resources:
+                replicas: 2
+          """)
+
+  def test_resource_constraints_missing_requests_invalid(self):
+    with self.assertRaisesRegex(config_helper.InvalidSchema,
+                                'must specify requests'):
+      config_helper.Schema.load_yaml("""
+          applicationApiVersion: v1beta1
+          properties:
+            simple:
+              type: string
+          x-google-marketplace:
+            clusterConstraints:
+              resources:
+              - replicas: 2
+          """)
+
+  def test_resource_constraints_empty_requests_invalid(self):
+    with self.assertRaisesRegex(config_helper.InvalidSchema,
+                                'must specify at least one of cpu'):
+      config_helper.Schema.load_yaml("""
+          applicationApiVersion: v1beta1
+          properties:
+            simple:
+              type: string
+          x-google-marketplace:
+            clusterConstraints:
+              resources:
+              - replicas: 2
+                requests: {}
+          """)
+
+  def test_resource_constraints_gpu_and_other_requests_invalid(self):
+    with self.assertRaisesRegex(config_helper.InvalidSchema,
+                                'must not specify cpu'):
+      config_helper.Schema.load_yaml("""
+          applicationApiVersion: v1beta1
+          properties:
+            simple:
+              type: string
+          x-google-marketplace:
+            clusterConstraints:
+              resources:
+              - requests:
+                  cpu: 200m
+                  gpu:
+                    nvidia.com/gpu: {}
+          """)
+
+  def test_resource_constraints_multiple_gpu_constraints_invalid(self):
+    with self.assertRaisesRegex(config_helper.InvalidSchema,
+                                'one request may include GPUs'):
+      config_helper.Schema.load_yaml("""
+          applicationApiVersion: v1beta1
+          properties:
+            simple:
+              type: string
+          x-google-marketplace:
+            clusterConstraints:
+              resources:
+              - requests:
+                  gpu:
+                    nvidia.com/gpu:
+                      limits: 2
+              - requests:
+                  gpu:
+                    nvidia.com/gpu: {}
+          """)
+
+  def test_resource_constraints_gpu_affinity_invalid(self):
+    with self.assertRaisesRegex(config_helper.InvalidSchema,
+                                'Affinity unsupported for GPU'):
+      config_helper.Schema.load_yaml("""
+          applicationApiVersion: v1beta1
+          properties:
+            simple:
+              type: string
+          x-google-marketplace:
+            clusterConstraints:
+              resources:
+              - requests:
+                  gpu:
+                    nvidia.com/gpu: {}
+                affinity:
+                  simpleNodeAffinity:
+                    type: REQUIRE_MINIMUM_NODE_COUNT
+                    minimumNodeCount: 2
+          """)
+
+  def test_resource_constraints_gpu_replicas_invalid(self):
+    with self.assertRaisesRegex(config_helper.InvalidSchema,
+                                'Replicas unsupported for GPU'):
+      config_helper.Schema.load_yaml("""
+          applicationApiVersion: v1beta1
+          properties:
+            simple:
+              type: string
+          x-google-marketplace:
+            clusterConstraints:
+              resources:
+              - requests:
+                  gpu:
+                    nvidia.com/gpu: {}
+                replicas: 2
+          """)
+
+  def test_resource_constraints_gpu_not_map_invalid(self):
+    with self.assertRaisesRegex(config_helper.InvalidSchema, 'must be a map'):
+      config_helper.Schema.load_yaml("""
+          applicationApiVersion: v1beta1
+          properties:
+            simple:
+              type: string
+          x-google-marketplace:
+            clusterConstraints:
+              resources:
+              - requests:
+                  gpu: []
+          """)
+
+  def test_resource_constraints_gpu_empty_requests_invalid(self):
+    with self.assertRaisesRegex(config_helper.InvalidSchema,
+                                'GPU requests map must contain'):
+      config_helper.Schema.load_yaml("""
+          applicationApiVersion: v1beta1
+          properties:
+            simple:
+              type: string
+          x-google-marketplace:
+            clusterConstraints:
+              resources:
+              - requests:
+                  gpu: {}
+          """)
+
+  def test_resource_constraints_gpu_unrecognized_provider_invalid(self):
+    with self.assertRaisesRegex(config_helper.InvalidSchema,
+                                'Unsupported GPU provider'):
+      config_helper.Schema.load_yaml("""
+          applicationApiVersion: v1beta1
+          properties:
+            simple:
+              type: string
+          x-google-marketplace:
+            clusterConstraints:
+              resources:
+              - requests:
+                  gpu:
+                    amd.com/gpu: {}
+          """)
 
   def test_istio_valid_type(self):
     schema = config_helper.Schema.load_yaml("""
