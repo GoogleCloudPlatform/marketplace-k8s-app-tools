@@ -826,9 +826,9 @@ Each entry under `resources` is roughly equivalent to a workload in the app.
 
     * `simpleNodeAffinity` is an affinity definition. It has two types:
 
-        * `REQUIRE_ONE_NODE_PER_REPLICA`: The number of nodes must be at
-          least the same as the number of replicas, so that each replica is
-          scheduled on a different node.
+        * `REQUIRE_ONE_NODE_PER_REPLICA`: The number of nodes must be at least
+          the same as the number of replicas, so that each replica is scheduled
+          on a different node.
         * `REQUIRE_MINIMUM_NODE_COUNT`: The minimum number of nodes must be
           specified separately, in `minimumNodeCount`. For example:
 
