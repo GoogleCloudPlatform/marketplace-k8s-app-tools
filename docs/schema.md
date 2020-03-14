@@ -816,6 +816,12 @@ x-google-marketplace:
 
 Each entry under `resources` is roughly equivalent to a workload in the app.
 
+* `requests` defines the desired resource allocations, and is required for each
+    entry.
+
+* `replicas` is required for each entry (unless GPU requests are defined;
+    [see GPUs](#gpus) for more details)
+
 * `affinity` defines the relationship between the nodes and the replicas.
 
     * `simpleNodeAffinity` is an affinity definition. It has two types:
@@ -843,6 +849,54 @@ In the UI, if `resources` are specified, existing clusters will be checked
 for sufficient available resources, and new clusters will be created with
 the required amount of resources (higher than the stated requirement, as
 not all cluster resources are available for workload use).
+
+#### GPUs
+
+An app may request at least one node with one or more GPUs with a supported,
+compatible platform. For instance, the following specifies that at least one
+Nvidia GPU must exist in the cluster:
+
+```yaml
+x-google-marketplace:
+  clusterConstraints:
+    resources:
+    - requests:
+        gpu:
+          nvidia.com/gpu: {}
+```
+
+The following specifies that at least one node in the cluster should have at
+least two Nvidia GPUs (with platform `nvidia-tesla-k80` or `nvidia-tesla-k100`):
+
+```yaml
+x-google-marketplace:
+  clusterConstraints:
+    resources:
+    - requests:
+        gpu:
+          nvidia.com/gpu:
+            limits: 2
+            platforms:
+            - nvidia-tesla-k80
+            - nvidia-tesla-k100
+```
+
+Currently only Nvidia platforms are supported (requests entry key
+`nvidia.com/gpus`). See the
+[Compute Engine GPU guide](https://cloud.google.com/compute/docs/gpus)
+for a full list of available GPU platforms.
+
+Note that for `resource` entries with GPU requests:
+
+* `resources` may contain at most one entry with GPU requests
+* `affinity` and `replicas` are ignored
+* no other request types (e.g. `cpu`) can be defined in the same entry
+
+In the UI, if a GPU request is specified, existing clusters will be checked for
+sufficient compatible GPUs (workload availability is not checked). Due to the
+complexity of requesting GPU quota, assisted cluster creation will be disabled,
+and users will be informed of the GPU requirements and directed to the
+[Kubernetes Engine GPU guide](https://cloud.google.com/kubernetes-engine/docs/how-to/gpus).
 
 ### istio
 
