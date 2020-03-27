@@ -24,7 +24,7 @@ The format of `schema.yaml` follows a subset of JSON schema specifications, and
 supports Google Cloud Marketplace-specific extensions.
 
 There are currently two versions of the schema. You can choose to follow either
-the `v1` or `v2` specifications for your `schema.yaml` file, but it's recommended
+the `v1` or `v2` specifications for your `schema.yaml` file, but we recommend
 that you use the `v2` specification, as this will soon be required for all new apps.
 
 This is a basic example of a `schema.yaml` file. This schema declares two standard
@@ -126,6 +126,11 @@ A list of release types, which can be one or more of the following:
 - `Security`. We recommend using `Security` only if the update addresses a
   critical security issue. In the Google Cloud Console, security updates are
   displayed more prominently than other types of updates.
+
+#### `recommended`
+
+A boolean that indicates whether the update is recommended, such as for a
+security update. If `true`, users are encouraged to update as soon as possible.
 
 ### Image declaration and parameterization
 

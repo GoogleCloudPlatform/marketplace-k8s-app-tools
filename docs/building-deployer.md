@@ -1,7 +1,7 @@
 # Building an application deployer image
 
 This guide covers the steps to build a deployer container image for the Kubernetes
-applications that you distribute on Google Cloud Platform (Google Cloud) Marketplace.
+applications that you distribute on Google Cloud Marketplace.
 The deployer image packages your application's configuration and runs
 when users deploy your application to their clusters.
 
@@ -99,7 +99,7 @@ Marketplace users. Users get the images from Marketplace's public Container
 Registry repo.
 
 The deployer image and all of the referenced app images will be copied
-into the final Marketplace's public Container Registry repo. This means that
+into Marketplace's public Container Registry repo. This means that
 images will have new names, and potentially also new tags.
 
 The deployer image does not, and **must not**, have the knowledge of how the
