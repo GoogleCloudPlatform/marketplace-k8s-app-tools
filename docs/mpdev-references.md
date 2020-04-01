@@ -45,7 +45,7 @@ mpdev doctor
 ### Install an application
 
 This command is mostly equivalent to installing an application
-from Marketplace UI.
+from the Marketplace UI.
 
 ```shell
 mpdev install \
@@ -119,38 +119,11 @@ Properties in `/data-test/schema.yaml` will override properties in
 `/data/schema.yaml`. This can also be used to overwrite existing default
 values for verification.
 
-### Publish a release's metadata
-
-If you want to support managed updates (beta) for your app, your app must
-store information about itself in a Cloud Storage bucket. This Cloud Storage
-bucket is created and maintained automatically for your app when it is
-released through GCP Marketplace. However, to test your app during
-development, you must use the `mpdev publish` command to manually publish
-information about the release to your Cloud Storage bucket.
-
-Upload your container images to your Container Registry repository. Then, run
-this command to publish the information for the release:
-
-```sh
-mpdev publish \
-  --deployer_image=gcr.io/your-project/your-company/your-app/deployer:[VERSION] \
-  --gcs_repo=gs://your-bucket/your-company/your-app/[TRACK]
-
-```
-
-You can now install the application at this version:
-
-```sh
-mpdev install \
-  --version_meta_file=gs://your-bucket/your-company/your-app/[TRACK]/[VERSION].yaml \
-  --parameters='{"name": "installation-1", "namespace": "test"}'
-```
-
 ## Installing a published Marketplace app
 
 `mpdev` is intended for developing your application prior to publishing to
-GCP Marketplace, but it can also be used to deploy a published Marketplace
-app, as described in the following steps.
+Google Cloud Marketplace, but it can also be used to deploy a published
+Marketplace app, as described in the following sections.
 
 ### Locate the desired deployer image
 

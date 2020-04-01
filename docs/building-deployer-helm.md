@@ -493,10 +493,10 @@ The application manifest drives the deployed application UI:
 
 ![Deployer application UI](images/deployed-application.png)
 
-### Application version
+### Application API version
 
 As of this writing, we use `v1beta1`. If you change the version
-if the application resource, you __must__ update the schema as well.
+of the application resource, you __must__ update the schema as well.
 
 ```yaml
 # schema.yaml

@@ -1,6 +1,7 @@
 # Creating a deployer schema
 
-You need a `schema.yaml` file when you [build your deployer](building-deployer.md).
+You need a `schema.yaml` file when you
+[build your deployer](building-deployer.md).
 
 The schema file provides the following:
 - Information about the current release, such as its release version, release
@@ -14,7 +15,6 @@ The schema file provides the following:
   how they are rendered in the deployment configuration UI.
 - Cluster constraints and requirements, such as the minimum required version of
   Kubernetes.
-- Other metadata, such as support for managed updates.
 
 ## Overview
 
@@ -24,11 +24,8 @@ The format of `schema.yaml` follows a subset of JSON schema specifications, and
 supports Google Cloud Marketplace-specific extensions.
 
 There are currently two versions of the schema. You can choose to follow either
-the `v1` or `v2` specifications for your `schema.yaml` file, but it's recommended
+the `v1` or `v2` specifications for your `schema.yaml` file, but we recommend
 that you use the `v2` specification, as this will soon be required for all new apps.
-If you want to
-[support managed updates for your app](https://cloud.google.com/marketplace/docs/partners/kubernetes-solutions/support-managed-updates),
-then you must follow the `v2` specification.
 
 This is a basic example of a `schema.yaml` file. This schema declares two standard
 parameters that users must specify when deploying the app: the name of the
@@ -80,12 +77,6 @@ x-google-marketplace:
     # fixes a critical issue.
     recommended: true
 
-  # This MUST be specified to indicate that the deployer supports managed updates.
-  # Note that this could be left out or kalmSupported set to false, in
-  # which case the deployer uses schema v2 but does not support updates.
-  managedUpdates:
-    kalmSupported: true
-
   # Image declaration is required here. Refer to the Images section below.
   images: {}
 
@@ -97,8 +88,7 @@ properties: {}
 
 ### (Required) `schemaVersion`
 
-The version of the schema. If you want to
-[support managed updates for your app](https://cloud.google.com/marketplace/docs/partners/kubernetes-solutions/support-managed-updates), the value must be `v2`.
+The version of the schema. The value must be `v2`.
 
 ### (Required) `applicationApiVersion`
 
@@ -109,13 +99,12 @@ be `v1beta1` or newer.
 
 The
 [release version of the app](building-deployer.md#tagging-your-deployer-image),
-as a string. This must match the release tag on all your app images. For example,
-`'1.0.5'`.
+as a string. This must match the release tag on all your app images. For example, `'1.0.5'`.
 
 ### `publishedVersionMetadata`
 
-Information about the version, shown to users in the GCP Console when they
-view their Kubernetes workloads.
+Information about the version, shown to users in the Google Cloud Console
+when they view their Kubernetes workloads.
 
 #### `releaseNote`
 
@@ -142,16 +131,6 @@ A list of release types, which can be one or more of the following:
 
 A boolean that indicates whether the update is recommended, such as for a
 security update. If `true`, users are encouraged to update as soon as possible.
-
-### `managedUpdates`
-
-Used to indicate that your deployer supports managed updates. If
-you omit this section, users must manually update their installations.
-
-#### `kalmSupported`
-
-If you want to support managed updates for your app, set this to
-`true`.
 
 ### Image declaration and parameterization
 

@@ -1,13 +1,14 @@
 # Building an application deployer image
 
 This guide covers the steps to build a deployer container image for the Kubernetes
-applications that you distribute on Google Cloud Platform (GCP) Marketplace.
+applications that you distribute on Google Cloud Marketplace.
 The deployer image packages your application's configuration and runs
 when users deploy your application to their clusters.
 
 ## Prerequisites
 
-* You must be a GCP Marketplace partner. [Read the overview of distributing Kubernetes applications on GCP Marketplace](https://cloud.google.com/marketplace/docs/partners/kubernetes-solutions/).
+* You must be a Google Cloud Marketplace partner.
+  [Read the overview of distributing Kubernetes applications on Google Cloud Marketplace](https://cloud.google.com/marketplace/docs/partners/kubernetes-solutions/).
 
 ## About the deployer image
 
@@ -20,7 +21,7 @@ The deployer image is a Docker container image that has these characteristics:
 - The file system contains metadata files that define various aspects
   of deploying the application. One important purpose of the metadata is to
   is to define the UI for users who are deploying the application from the
-  GCP Console.
+  Google Cloud Console.
 
 - It can be executed as a standalone
   [`Job`](https://kubernetes.io/docs/concepts/workloads/controllers/jobs-run-to-completion/).
@@ -93,16 +94,16 @@ A snapshot of the images and tags looks like this:
 
 ### Copying of images into Marketplace public repo
 
-NOTE: Deployer and app images in the staging repo are never visible to the
-end users of Marketplace. In fact, they will _not_ have access to these
-staging repos. End users use the images from Marketplace's public GCR repo.
+NOTE: Deployer and app images in your staging repo are never visible to
+Marketplace users. Users get the images from Marketplace's public Container
+Registry repo.
 
 The deployer image and all of the referenced app images will be copied
-into the final Marketplace's public GCR repo. This means that images will have
-new names, and potentially also new tags.
+into Marketplace's public Container Registry repo. This means that
+images will have new names, and potentially also new tags.
 
-The deployer does _not_, and **should not**, have the knowledge of how the
-re-published images should be named or tagged. This is because at deployment time,
-full names of the app images are passed to the deployer as input parameters.
-This is the reason why we require that all app images used by the deployer
-**must** be parameterized in `schema.yaml`.
+The deployer image does not, and **must not**, have the knowledge of how the
+re-published images should be named or tagged. This is because at deployment
+time, full names of the app images are passed to the deployer as input
+parameters. This is the reason why we require that all app images used by the
+deployer **must** be parameterized in `schema.yaml`.
