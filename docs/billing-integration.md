@@ -138,7 +138,6 @@ data:
     # "instance_time" metric every minute.There are three different 
     # units for a metric which are second, minute and hour. 
     # Use the appropriate metric below as needed.
-
     # For seconds - this will report a value of ‘60’ seconds, every 60 seconds.
     #    sources:
     #    - name: instance_time_heartbeat
