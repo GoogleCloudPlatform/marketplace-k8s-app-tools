@@ -135,7 +135,37 @@ data:
     # itself. The currently-supported source is 'heartbeat', which
     # sends a defined value to a metric at a defined interval. In
     # this example, the heartbeat sends a 60-second value through the
-    # "instance_time" metric every minute.
+    # "instance_time" metric every minute.There are three different 
+    # units for a metric which are second, minute and hour. 
+    # Use the appropriate metric below as needed.
+
+    #For seconds - this will report a value of ‘60’ seconds, every 60 seconds.
+    #    sources:
+    #    - name: instance_time_heartbeat
+    #      heartbeat:
+    #        metric: instance_time
+    #        intervalSeconds: 60
+    #        value:
+    #          int64Value: 60
+
+    #For minutes - this will report a value of ‘1’ minute, every 60 seconds.
+    #    sources:
+    #    - name: instance_time_heartbeat
+    #      heartbeat:
+    #        metric: instance_time
+    #        intervalSeconds: 60
+    #        value:
+    #          int64Value: 1
+
+    #For Hours - this will report a value of ‘1’ hour, every hour.
+    #    sources:
+    #    - name: instance_time_heartbeat
+    #      heartbeat:
+    #        metric: instance_time
+    #        intervalSeconds: 3600
+    #        value:
+    #          int64Value: 1
+    
     sources:
     - name: instance_time_heartbeat
       heartbeat:
