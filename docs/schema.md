@@ -147,21 +147,20 @@ Here is an example `images` section:
 x-google-marketplace:
   images:
     '':  # Primary image has no name.
-    proxy: {}
       properties:
         imageRepo:
           type: REPO_WITH_REGISTRY
         imageTag:
           type: TAG
-    init:
+    proxy:
       properties:
-        imageInitFull:
+        imageProxyFull:
           type: FULL
-        imageInitRegistry:
+        imageProxyRegistry:
           type: REGISTRY
-        imageInitRepo:
+        imageProxyRepo:
           type: REPO_WITHOUT_REGISTRY
-        imageInitTag:
+        imageProxyTag:
           type: TAG
 ```
 
