@@ -187,7 +187,7 @@ def generate_v1_properties_for_image(prop, value, result):
     parts = value.split(':', 1)
     if len(parts) != 2:
       raise InvalidProperty(
-          'Property {} has a value that does not contain a colon'.format(
+          'Property {} has value that does not contain a colon: {}'.format(
               prop.name, value))
     before_value, after_value = parts
     result[before_name] = before_value
@@ -197,13 +197,13 @@ def generate_v1_properties_for_image(prop, value, result):
     parts = value.split(':', 1)
     if len(parts) != 2:
       raise InvalidProperty(
-          'Property {} has a value that does not contain a tag'.format(
+          'Property {} has value that does not contain a tag: {}'.format(
               prop.name, value))
     nontag_value, tag_value = parts
     parts = nontag_value.split('/', 1)
     if len(parts) != 2:
       raise InvalidProperty(
-          'Property {} has a value that does not include a registry'.format(
+          'Property {} has value that does not include a registry: {}'.format(
               prop.name, value))
     reg_value, repo_value = parts
     result[reg_name] = reg_value

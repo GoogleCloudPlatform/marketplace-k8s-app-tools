@@ -6,7 +6,8 @@ include common.Makefile
 include gcloud.Makefile
 include marketplace.Makefile
 
-TEST_ID := $(shell cat /dev/urandom | tr -dc 'a-z0-9' | head -c 8)
+# Use python instead of `/dev/urandom` and `tr` for OSX compatibility.
+TEST_ID := $(shell python -c 'import random, string; print("".join([random.choice(string.ascii_lowercase + string.digits) for _ in range(8)]))')
 
 .tests/marketplace/deployer/helm_tiller_onbuild:
 	mkdir -p "$@"
