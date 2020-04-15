@@ -410,7 +410,7 @@ class ProvisionTest(unittest.TestCase):
             type: string
             x-google-marketplace:
               type: TLS_CERTIFICATE
-      """.format("{}"))
+      """)
 
   def generate_schema_v2(self, is_kalm):
     return config_helper.Schema.load_yaml("""
@@ -422,7 +422,7 @@ class ProvisionTest(unittest.TestCase):
           publishedVersionMetadata:
             releaseNote: Initial release
             recommended: True
-          images: {}
+          images: {{}}
 
           managedUpdates:
             kalmSupported: {}
@@ -488,7 +488,7 @@ class ProvisionTest(unittest.TestCase):
             type: string
             x-google-marketplace:
               type: TLS_CERTIFICATE
-      """.format("{}", is_kalm))
+      """.format(is_kalm))
 
   def run_test_process(self, schema):
     values = {"name": "app-1", "namespace": "mynamespace"}
