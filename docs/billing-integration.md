@@ -146,7 +146,7 @@ data:
     # where the unit is minute, the correct value should be 1.
     #
     # NOTE: 'intervalSeconds' should not be too short to avoid excessive
-    # reporing; it should not be too long to avoid missing events in case of
+    # reporting; it should not be too long to avoid missing events in case of
     # unexpected restarts. The recommended value is 1 minute, or 60 seconds.
     sources:
     - name: instance_time_heartbeat
