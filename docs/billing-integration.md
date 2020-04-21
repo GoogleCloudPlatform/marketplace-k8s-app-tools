@@ -130,12 +130,24 @@ data:
         serviceName: my-application.mp-my-company.appspot.com
         consumerId: $AGENT_CONSUMER_ID  # From the reporting secret.
 
-
     # The sources section lists metric data sources run by the agent
-    # itself. The currently-supported source is 'heartbeat', which
-    # sends a defined value to a metric at a defined interval. In
-    # this example, the heartbeat sends a 60-second value through the
-    # "instance_time" metric every minute.
+    # itself. The currently supported source is 'heartbeat', which
+    # sends a defined value to a metric at a defined interval. In the
+    # following example, the heartbeat sends a 60-second value (defined by
+    # 'int64Value') through the "instance_time" metric every minute
+    # (defined by 'intervalSeconds'); this is assuming that the metric
+    # configured in service control has 'seconds' as its unit.
+    #
+    # IMPORTANT: The unit of the metric is specified in the backend, not here,
+    # so care must be taken to ensure that the reported value and the unit match.
+    # For example, if the unit is defined to be minutes in the backend, a report
+    # value of 60 will mean 60 minutes, which means, for the same configuration,
+    # we accidentally inflate the reported usage by 60 times! In this case,
+    # where the unit is minute, the correct value should be 1.
+    #
+    # NOTE: 'intervalSeconds' should not be too short to avoid excessive
+    # reporting; it should not be too long to avoid missing events in case of
+    # unexpected restarts. The recommended value is 1 minute, or 60 seconds.
     sources:
     - name: instance_time_heartbeat
       heartbeat:
