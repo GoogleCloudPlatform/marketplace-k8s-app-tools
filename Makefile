@@ -11,7 +11,7 @@ lint/py: .build/tests/py
 	  -v $(PWD):/data:ro \
 	  --entrypoint python3 \
 	  tests/py \
-	  -m yapf --style chromium --recursive --diff \
+	  -m yapf --style yapf --recursive --diff \
 	  --exclude "data/vendor/" \
 	  --parallel \
 	  "/data" \
