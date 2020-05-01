@@ -17,23 +17,15 @@ RUN pip3 install \
       pyyaml \
       six
 
-RUN mkdir -p /opt/kubectl/1.13 \
-    && wget -q -O /opt/kubectl/1.13/kubectl \
-        https://storage.googleapis.com/kubernetes-release/release/v1.13.12/bin/linux/amd64/kubectl \
-    && chmod 755 /opt/kubectl/1.13/kubectl
-RUN mkdir -p /opt/kubectl/1.14 \
-    && wget -q -O /opt/kubectl/1.14/kubectl \
-        https://storage.googleapis.com/kubernetes-release/release/v1.14.8/bin/linux/amd64/kubectl \
-    && chmod 755 /opt/kubectl/1.14/kubectl
-RUN mkdir -p /opt/kubectl/1.15 \
-    && wget -q -O /opt/kubectl/1.15/kubectl \
-        https://storage.googleapis.com/kubernetes-release/release/v1.15.5/bin/linux/amd64/kubectl \
-    && chmod 755 /opt/kubectl/1.15/kubectl
-RUN mkdir -p /opt/kubectl/1.16 \
-    && wget -q -O /opt/kubectl/1.16/kubectl \
-        https://storage.googleapis.com/kubernetes-release/release/v1.16.2/bin/linux/amd64/kubectl \
-    && chmod 755 /opt/kubectl/1.16/kubectl
-RUN ln -s /opt/kubectl/1.14 /opt/kubectl/default
+RUN for full_version in 1.13.12 1.14.8 1.15.11 1.16.9 1.17.5 1.18.2;  \
+     do \
+        version=${full_version%.*} \
+        && mkdir -p /opt/kubectl/$version \
+        && wget -q -O /opt/kubectl/$version/kubectl \
+            https://storage.googleapis.com/kubernetes-release/release/v$full_version/bin/linux/amd64/kubectl \
+        && chmod 755 /opt/kubectl/$version/kubectl; \
+     done;
+RUN ln -s /opt/kubectl/1.16 /opt/kubectl/default
 
 RUN mkdir -p /bin/helm-downloaded \
     && wget -q -O /bin/helm-downloaded/helm.tar.gz \
