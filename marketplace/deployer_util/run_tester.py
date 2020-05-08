@@ -31,7 +31,7 @@ def main():
   parser = ArgumentParser(description=_PROG_HELP)
   parser.add_argument('--namespace')
   parser.add_argument('--manifest')
-  parser.add_argument('--timeout', type=int, default=300)
+  parser.add_argument('--timeout', type=int, default=1000)
   args = parser.parse_args()
 
   try:

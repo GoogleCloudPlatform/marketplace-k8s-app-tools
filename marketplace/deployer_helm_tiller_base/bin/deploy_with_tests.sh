@@ -34,7 +34,7 @@ patch_assembly_phase.sh --status="Success"
 wait_for_ready.py \
   --name $NAME \
   --namespace $NAMESPACE \
-  --timeout 300
+  --timeout ${WAIT_FOR_READY_TIMEOUT:-1000}
 
 helm tiller run "$NAMESPACE" -- helm test "$NAME"
 

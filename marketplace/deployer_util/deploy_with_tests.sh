@@ -94,7 +94,7 @@ patch_assembly_phase.sh --status="Success"
 wait_for_ready.py \
   --name $NAME \
   --namespace $NAMESPACE \
-  --timeout ${WAIT_FOR_READY_TIMEOUT:-300}
+  --timeout ${WAIT_FOR_READY_TIMEOUT:-1000}
 
 tester_manifest="/data/tester.yaml"
 if [[ -e "$tester_manifest" ]]; then
@@ -103,7 +103,7 @@ if [[ -e "$tester_manifest" ]]; then
   run_tester.py \
     --namespace $NAMESPACE \
     --manifest $tester_manifest \
-    --timeout ${TESTER_TIMEOUT:-300}
+    --timeout ${TESTER_TIMEOUT:-1000}
 else
   echo "$LOG_SMOKE_TEST No tester manifest found at $tester_manifest."
 fi

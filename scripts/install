@@ -39,6 +39,10 @@ case $i in
     image_pull_secret="${i#*=}"
     shift
     ;;
+  --wait_timeout=*)
+    wait_timeout="${i#*=}"
+    shift
+    ;;
   *)
     >&2 echo "Unrecognized flag: $i"
     exit 1
@@ -70,6 +74,8 @@ fi
 # Extract schema and values files.
 docker run \
     -i \
+    -e "WAIT_FOR_READY_TIMEOUT=$wait_timeout" \
+    -e "TESTER_TIMEOUT=$wait_timeout" \
     --entrypoint=/bin/bash \
     --rm "${deployer}" \
     -c 'cat /data/schema.yaml' \
