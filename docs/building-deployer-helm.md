@@ -119,13 +119,13 @@ spec:
       app.kubernetes.io/name: "{{ .Release.Name }}"
   addOwnerRef: true
   componentKinds:
-  - group: v1
+  - group: ''
     kind: PersistentVolumeClaim
-  - group: v1
+  - group: ''
     kind: Secret
-  - group: v1
+  - group: ''
     kind: Service
-  - group: apps/v1
+  - group: apps
     kind: Deployment
 ```
 
