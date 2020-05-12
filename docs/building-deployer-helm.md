@@ -385,7 +385,7 @@ file should then look like this:
 ```yaml
  # Under the x-google-marketplace parent attirbute
   images:
-    '':
+    wordpress:
       properties:
         wordpress.image.registry:
           type: REGISTRY
