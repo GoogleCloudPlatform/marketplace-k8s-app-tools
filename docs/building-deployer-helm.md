@@ -68,7 +68,7 @@ x-google-marketplace:
   applicationApiVersion: v1beta1
   # The published version is required and MUST match the tag
   # of the deployer image
-  publishedVersion: '6.0.0'
+  publishedVersion: '9.0.3'
   publishedVersionMetadata:
     releaseNote: >-
       A first release.
@@ -113,7 +113,7 @@ metadata:
 spec:
   descriptor:
     type: Wordpress
-    version: '6.0.0'
+    version: '9.0.3'
   selector:
     matchLabels:
       app.kubernetes.io/name: "{{ .Release.Name }}"
@@ -312,8 +312,9 @@ requires that charts __must not__ create k8s service accounts or
 RBAC resources.
 
 Modify your charts' `values.yaml` to disable service account and RBAC
-resource creation. (Note that the wordpress example does not create a service account and this step is not required for all charts). If you created the recommended wrapper chart, you
-can easily add override values to do this.
+resource creation. (Note that the wordpress example does not create a service
+account and this step is not required for all charts). If you created the
+recommended wrapper chart, you can easily add override values to do this.
 
 There should be a service account value that the charts take. The
 service account is specified under `podSpec` attribute of workload
@@ -610,22 +611,22 @@ general
 [onboarding guide](https://cloud.google.com/marketplace/docs/partners/kubernetes-solutions/set-up-environment#product-identifiers).
 See [this section](building-deployer.md#publishing-a-new-version)
 for more information about tags. Let's say your application has a
-track named `v6.0.0`.
+track named `9.0`.
 
 Your GCR repo should have the following images:
 
 ```text
-gcr.io/your-company/wordpress:v6.0.0
+gcr.io/your-company/wordpress/wordpress:9.0.3
 # The deployer excludes the patch version in SemVer
-gcr.io/your-company/wordpress/deployer:v6.0
-gcr.io/your-company/wordpress/mariadb:v6.0.0
+gcr.io/your-company/wordpress/deployer:9.0
+gcr.io/your-company/wordpress/mariadb:9.0.3
 ```
 
 Then your schema should look similar to the following:
 
 ```yaml
   images:
-    '':
+    wordpress:
       properties:
         wordpress.image.registry:
           type: REGISTRY
@@ -645,15 +646,15 @@ Then your schema should look similar to the following:
 
 The properties of each image in `images` are used by Marketplace to
 parameterize the images in `values.yaml` for your chart. The name of
-the primary image in `schema.yaml` is typically `''` such that 
-marketplace looks for the image at `gcr.io/your-company/wordpress`. 
+the primary image in `schema.yaml` is `wordpress` such that
+marketplace looks for the image at `gcr.io/your-company/wordpress/wordpress`.
 The second image name is `mariadb` such that marketplace determines
 the image is `gcr.io/your-company/wordpress/mariadb`
 
 #### CI/CD
 
 Note that all these images share the same registry
-(`gcr.io/your-company/wordpress`) and the same tag (`6.0.0`).
+(`gcr.io/your-company/wordpress`) and the same tag (`9.0.3`).
 To facilitate CI/CD, where you have separate repos and tags
 for testing and staging, assuming that you build your deployer
 image using the `onbuild` variation of the base deployer,
@@ -673,8 +674,8 @@ The docker build command for the deployer image looks like this:
 ```shell
 docker build \
   --build-arg REGISTRY=gcr.io/your-company/wordpress \
-  --build-arg TAG=6.0.0 \
-  --tag gcr.io/your-company/wordpress/deployer:6.0 .
+  --build-arg TAG=9.0.3 \
+  --tag gcr.io/your-company/wordpress/deployer:9.0 .
 ```
 
 ### Running a verification
@@ -687,7 +688,7 @@ Use the following command:
 
 ```shell
 mpdev /scripts/verify \
-  --deployer=gcr.io/your-company/wordpress/deployer:6.0
+  --deployer=gcr.io/your-company/wordpress/deployer:9.0
 ```
 
 This script will create a new test namespace, deploy the app,
