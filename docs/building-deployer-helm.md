@@ -611,7 +611,7 @@ general
 [onboarding guide](https://cloud.google.com/marketplace/docs/partners/kubernetes-solutions/set-up-environment#product-identifiers).
 See [this section](building-deployer.md#publishing-a-new-version)
 for more information about tags. Let's say your application has a
-track named `9.0`.
+track named `9.0`, and that the current release for this track is `9.0.3`.
 
 Your GCR repo should have the following images:
 
