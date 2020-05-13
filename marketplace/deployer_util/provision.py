@@ -407,7 +407,7 @@ def make_deployer_rolebindings(schema, namespace, app_name, labels, sa_name):
           'labels': labels,
       },
       'rules': [{
-          'apiGroups': ['apiextensions.k8s.io/v1beta1'],
+          'apiGroups': ['*'],
           'resources': ['Application'],
           'verbs': ['*'],
       }],
