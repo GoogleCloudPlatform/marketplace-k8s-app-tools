@@ -136,7 +136,7 @@ class ProvisionTest(unittest.TestCase):
                     },
                 },
                 'rules': [{
-                    'apiGroups': ['*'],
+                    'apiGroups': ['app.k8s.io'],
                     'resources': ['applications'],
                     'verbs': ['*'],
                 }],
@@ -402,7 +402,7 @@ class ProvisionTest(unittest.TestCase):
                     },
                 },
                 'rules': [{
-                    'apiGroups': ['*'],
+                    'apiGroups': ['app.k8s.io'],
                     'resources': ['applications'],
                     'verbs': ['*'],
                 }],
