@@ -408,7 +408,7 @@ def make_deployer_rolebindings(schema, namespace, app_name, labels, sa_name):
       },
       'rules': [{
           'apiGroups': ['*'],
-          'resources': ['Application'],
+          'resources': ['applications'],
           'verbs': ['*'],
       }],
   }, {

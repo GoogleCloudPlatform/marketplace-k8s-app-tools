@@ -137,7 +137,7 @@ class ProvisionTest(unittest.TestCase):
                 },
                 'rules': [{
                     'apiGroups': ['*'],
-                    'resources': ['Application'],
+                    'resources': ['applications'],
                     'verbs': ['*'],
                 }],
             },
@@ -403,7 +403,7 @@ class ProvisionTest(unittest.TestCase):
                 },
                 'rules': [{
                     'apiGroups': ['*'],
-                    'resources': ['Application'],
+                    'resources': ['applications'],
                     'verbs': ['*'],
                 }],
             },
