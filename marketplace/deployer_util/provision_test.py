@@ -98,14 +98,14 @@ class ProvisionTest(unittest.TestCase):
       """)
     self.assertEqual(
         [
-            # The default namespace role/rolebindings should be created
+            # The default namespace rolebinding should be created
             {
                 'apiVersion':
                     'rbac.authorization.k8s.io/v1',
                 'kind':
                     'RoleBinding',
                 'metadata': {
-                    'name': 'app-name-1-deployer-admin-rb',
+                    'name': 'app-name-1-deployer-rb',
                     'namespace': 'namespace-1',
                     'labels': {
                         'some-key': 'some-value'
@@ -115,49 +115,7 @@ class ProvisionTest(unittest.TestCase):
                     'apiGroup': 'rbac.authorization.k8s.io',
                     # Note: predefined ones are actually cluster roles.
                     'kind': 'ClusterRole',
-                    'name': 'admin',
-                },
-                'subjects': [{
-                    'kind': 'ServiceAccount',
-                    'name': 'app-name-deployer-sa',
-                    'namespace': 'namespace-1',
-                }],
-            },
-            {
-                'apiVersion':
-                    'rbac.authorization.k8s.io/v1',
-                'kind':
-                    'Role',
-                'metadata': {
-                    'name': 'app-name-1-deployer-app-edit-r',
-                    'namespace': 'namespace-1',
-                    'labels': {
-                        'some-key': 'some-value'
-                    },
-                },
-                'rules': [{
-                    'apiGroups': ['app.k8s.io'],
-                    'resources': ['applications'],
-                    'verbs': ['*'],
-                }],
-            },
-            {
-                'apiVersion':
-                    'rbac.authorization.k8s.io/v1',
-                'kind':
-                    'RoleBinding',
-                'metadata': {
-                    'name': 'app-name-1-deployer-app-edit-rb',
-                    'namespace': 'namespace-1',
-                    'labels': {
-                        'some-key': 'some-value'
-                    },
-                },
-                'roleRef': {
-                    'apiGroup': 'rbac.authorization.k8s.io',
-                    # Note: predefined ones are actually cluster roles.
-                    'kind': 'Role',
-                    'name': 'app-name-1-deployer-app-edit-r',
+                    'name': 'cluster-admin',
                 },
                 'subjects': [{
                     'kind': 'ServiceAccount',
@@ -364,14 +322,14 @@ class ProvisionTest(unittest.TestCase):
       """)
     self.assertCountEqual(
         [
-            # The default namespace role/rolebindings should also be created
+            # The default namespace rolebinding should also be created
             {
                 'apiVersion':
                     'rbac.authorization.k8s.io/v1',
                 'kind':
                     'RoleBinding',
                 'metadata': {
-                    'name': 'app-name-1-deployer-admin-rb',
+                    'name': 'app-name-1-deployer-rb',
                     'namespace': 'namespace-1',
                     'labels': {
                         'some-key': 'some-value'
@@ -381,49 +339,7 @@ class ProvisionTest(unittest.TestCase):
                     'apiGroup': 'rbac.authorization.k8s.io',
                     # Note: predefined ones are actually cluster roles.
                     'kind': 'ClusterRole',
-                    'name': 'admin',
-                },
-                'subjects': [{
-                    'kind': 'ServiceAccount',
-                    'name': 'app-name-deployer-sa',
-                    'namespace': 'namespace-1',
-                }],
-            },
-            {
-                'apiVersion':
-                    'rbac.authorization.k8s.io/v1',
-                'kind':
-                    'Role',
-                'metadata': {
-                    'name': 'app-name-1-deployer-app-edit-r',
-                    'namespace': 'namespace-1',
-                    'labels': {
-                        'some-key': 'some-value'
-                    },
-                },
-                'rules': [{
-                    'apiGroups': ['app.k8s.io'],
-                    'resources': ['applications'],
-                    'verbs': ['*'],
-                }],
-            },
-            {
-                'apiVersion':
-                    'rbac.authorization.k8s.io/v1',
-                'kind':
-                    'RoleBinding',
-                'metadata': {
-                    'name': 'app-name-1-deployer-app-edit-rb',
-                    'namespace': 'namespace-1',
-                    'labels': {
-                        'some-key': 'some-value'
-                    },
-                },
-                'roleRef': {
-                    'apiGroup': 'rbac.authorization.k8s.io',
-                    # Note: predefined ones are actually cluster roles.
-                    'kind': 'Role',
-                    'name': 'app-name-1-deployer-app-edit-r',
+                    'name': 'cluster-admin',
                 },
                 'subjects': [{
                     'kind': 'ServiceAccount',
