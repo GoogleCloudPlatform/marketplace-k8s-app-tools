@@ -119,11 +119,7 @@ function print_summary() {
 
   echo
   echo "=== VERIFICATION STATUS ==="
-  if [[ "$1" = "PASSED" ]]; then
-    echo "PASSED"
-  else
-    echo "FAILED"
-  fi
+  echo "$1"
 }
 
 # If any command returns with non-zero exit code, set -e will cause the script
@@ -131,7 +127,7 @@ function print_summary() {
 handle_failure() {
   code=$?
   clean_resources
-  print_summary
+  print_summary "FAILED"
   exit $code
 }
 trap "handle_failure" EXIT
