@@ -267,9 +267,15 @@ def provision_deployer(schema, app_name, namespace, deployer_image,
                        deployer_entrypoint, app_params,
                        deployer_service_account_name, image_pull_secret):
   """Provisions resources to run the deployer."""
-  labels = {
+  dependents_labels = {
       'app.kubernetes.io/component': 'deployer.marketplace.cloud.google.com',
       'marketplace.cloud.google.com/deployer': 'Dependent',
+  }
+  dependents_rbac_labels = {
+      'app.kubernetes.io/component':
+          'deployer-rbac.marketplace.cloud.google.com',
+      'marketplace.cloud.google.com/deployer':
+          'Dependent',
   }
   job_labels = {
       'app.kubernetes.io/component': 'deployer.marketplace.cloud.google.com',
@@ -278,8 +284,8 @@ def provision_deployer(schema, app_name, namespace, deployer_image,
   resources_requests = {'requests': {'memory': '100Mi', 'cpu': '100m'}}
 
   if schema.is_v2():
-    config = make_v2_config(schema, deployer_image, namespace, app_name, labels,
-                            app_params)
+    config = make_v2_config(schema, deployer_image, namespace, app_name,
+                            dependents_labels, app_params)
     pod_spec = {
         'serviceAccountName':
             deployer_service_account_name,
@@ -305,7 +311,8 @@ def provision_deployer(schema, app_name, namespace, deployer_image,
         },]
     }
   else:
-    config = make_v1_config(schema, namespace, app_name, labels, app_params)
+    config = make_v1_config(schema, namespace, app_name, dependents_labels,
+                            app_params)
     pod_spec = {
         'serviceAccountName':
             deployer_service_account_name,
@@ -338,7 +345,7 @@ def provision_deployer(schema, app_name, namespace, deployer_image,
       'metadata': {
           'name': deployer_service_account_name,
           'namespace': namespace,
-          'labels': labels,
+          'labels': dependents_labels,
       },
   }
   if image_pull_secret:
@@ -355,7 +362,7 @@ def provision_deployer(schema, app_name, namespace, deployer_image,
           'metadata': {
               'name': "{}-deployer".format(app_name),
               'namespace': namespace,
-              'labels': job_labels,
+              'labels': dependents_labels,
           },
           'spec': {
               'template': {
@@ -370,7 +377,8 @@ def provision_deployer(schema, app_name, namespace, deployer_image,
           },
       },
   ]
-  manifests += make_deployer_rolebindings(schema, namespace, app_name, labels,
+  manifests += make_deployer_rolebindings(schema, namespace, app_name,
+                                          dependents_rbac_labels,
                                           deployer_service_account_name)
   return manifests
 
