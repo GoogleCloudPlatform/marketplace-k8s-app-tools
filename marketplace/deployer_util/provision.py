@@ -362,7 +362,7 @@ def provision_deployer(schema, app_name, namespace, deployer_image,
           'metadata': {
               'name': "{}-deployer".format(app_name),
               'namespace': namespace,
-              'labels': dependents_labels,
+              'labels': job_labels,
           },
           'spec': {
               'template': {
