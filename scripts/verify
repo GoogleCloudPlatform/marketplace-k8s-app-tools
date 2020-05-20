@@ -120,7 +120,7 @@ function print_summary() {
   echo
   echo "=== VERIFICATION STATUS ==="
   echo "$1"
-  echo "====================="
+  echo "==========================="
 }
 
 # If any command returns with non-zero exit code, set -e will cause the script
