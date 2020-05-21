@@ -150,16 +150,8 @@ def dump(outfile, resources, included_kinds, app_name, app_uid, app_api_version,
       log.info("Application '{:s}' does not own cluster-scoped '{:s}/{:s}'",
                app_name, resource["kind"], resource["metadata"]["name"])
 
-    if included_kinds is None or resource["kind"] in included_kinds:
-      log.info("Application '{:s}' owns '{:s}/{:s}'", app_name,
-               resource["kind"], resource["metadata"]["name"])
-      resource = copy.deepcopy(resource)
-      set_app_resource_ownership(
-          app_uid=app_uid,
-          app_name=app_name,
-          app_api_version=app_api_version,
-          resource=resource)
-
+    # Deployer-owned resources should not be owned by the Application, as
+    # they should be deleted with the deployer service account (not the app).
     if deployer_name and deployer_uid and should_be_deployer_owned(resource):
       log.info("ServiceAccount '{:s}' owns '{:s}/{:s}'", deployer_name,
                resource["kind"], resource["metadata"]["name"])
@@ -167,6 +159,15 @@ def dump(outfile, resources, included_kinds, app_name, app_uid, app_api_version,
       set_service_account_resource_ownership(
           account_uid=deployer_uid,
           account_name=deployer_name,
+          resource=resource)
+    elif included_kinds is None or resource["kind"] in included_kinds:
+      log.info("Application '{:s}' owns '{:s}/{:s}'", app_name,
+               resource["kind"], resource["metadata"]["name"])
+      resource = copy.deepcopy(resource)
+      set_app_resource_ownership(
+          app_uid=app_uid,
+          app_name=app_name,
+          app_api_version=app_api_version,
           resource=resource)
 
     return resource
