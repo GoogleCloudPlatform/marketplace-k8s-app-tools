@@ -30,7 +30,7 @@ format/py: .build/tests/py
 	  -v $(PWD):/data \
 	  --entrypoint python3 \
 	  tests/py \
-	  -m yapf --style chromium --recursive --in-place \
+	  -m yapf --style yapf --recursive --in-place \
 	  --exclude "data/vendor/" \
 	  --verbose --parallel \
 	  "/data"
