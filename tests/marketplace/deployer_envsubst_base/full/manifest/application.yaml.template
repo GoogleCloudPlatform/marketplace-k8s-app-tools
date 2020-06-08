@@ -77,13 +77,13 @@ spec:
     matchLabels:
       app.kubernetes.io/name: "$name"
   componentKinds:
-  - group: apps/v1beta2
+  - group: apps
     kind: Deployment
-  - group: batch/v1
+  - group: batch
     kind: Job
-  - group: v1
+  - group: ''
     kind: PersistentVolumeClaim
-  - group: v1
+  - group: ''
     kind: Secret
-  - group: v1
+  - group: ''
     kind: Service

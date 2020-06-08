@@ -56,4 +56,8 @@ for manifest_template_file in "$data_dir"/manifest/*; do
   cat "$manifest_template_file" \
     | /bin/config_env.py envsubst "${env_vars}" \
     > "$manifest_dir/$manifest_file"
+
+  ensure_k8s_apps_labels.py \
+  --manifest "$manifest_dir/$manifest_file" \
+  --appname "$NAME"
 done
