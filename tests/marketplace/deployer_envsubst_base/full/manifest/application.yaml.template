@@ -77,9 +77,9 @@ spec:
     matchLabels:
       app.kubernetes.io/name: "$name"
   componentKinds:
-  - group: ''
+  - group: apps
     kind: Deployment
-  - group: ''
+  - group: batch
     kind: Job
   - group: ''
     kind: PersistentVolumeClaim
