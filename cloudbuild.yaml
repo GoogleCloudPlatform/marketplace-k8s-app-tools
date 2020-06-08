@@ -70,6 +70,22 @@ steps:
   - marketplace/deployer_envsubst_base/Dockerfile
   - .
 
+- id: &BuildEnvsubstOnBuild Build deployer_envsubst onbuild
+  name: gcr.io/cloud-builders/docker
+  waitFor:
+  - *BuildEnvsubst
+  args:
+  - build
+  - --build-arg
+  - FROM=gcr.io/$PROJECT_ID/k8s/deployer_envsubst:sha_$COMMIT_SHA
+  - --tag
+  - gcr.io/$PROJECT_ID/k8s/deployer_envsubst/onbuild:sha_$COMMIT_SHA
+  - --tag
+  - gcr.io/$PROJECT_ID/k8s/deployer_envsubst/onbuild:sha_$SHORT_SHA
+  - --file
+  - marketplace/deployer_envsubst_base/onbuild/Dockerfile
+  - .
+
 - id: &BuildHelm Build deployer_helm
   name: gcr.io/cloud-builders/docker
   waitFor:
@@ -167,6 +183,7 @@ steps:
   - *InitializeCredentials
   - *BuildDev
   - *BuildEnvsubst
+  - *BuildEnvsubstOnBuild
   - *BuildHelm
   - *BuildHelmOnbuild
   - *BuildHelmTiller
@@ -189,6 +206,8 @@ images:
   - gcr.io/$PROJECT_ID/k8s/dev:sha_$SHORT_SHA
   - gcr.io/$PROJECT_ID/k8s/deployer_envsubst:sha_$COMMIT_SHA
   - gcr.io/$PROJECT_ID/k8s/deployer_envsubst:sha_$SHORT_SHA
+  - gcr.io/$PROJECT_ID/k8s/deployer_envsubst/onbuild:sha_$COMMIT_SHA
+  - gcr.io/$PROJECT_ID/k8s/deployer_envsubst/onbuild:sha_$SHORT_SHA
   - gcr.io/$PROJECT_ID/k8s/deployer_helm:sha_$COMMIT_SHA
   - gcr.io/$PROJECT_ID/k8s/deployer_helm:sha_$SHORT_SHA
   - gcr.io/$PROJECT_ID/k8s/deployer_helm/onbuild:sha_$COMMIT_SHA
