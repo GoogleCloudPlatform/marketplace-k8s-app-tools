@@ -37,7 +37,6 @@ options:
   machineType: 'N1_HIGHCPU_8'
 
 substitutions:
-  _CLUSTER_NAME: null
   _CLUSTER_LOCATION: null
 
 steps:
@@ -171,13 +170,17 @@ steps:
   args:
   - -exc
   - |
-    gcloud container clusters get-credentials '${_CLUSTER_NAME}' --zone '${_CLUSTER_LOCATION}' --project '$PROJECT_ID'
+    # Use the 'c-$BUILD_ID' as the cluster name as it must start with a letter,
+    # and have a max length of 40 chars (BUILD_ID is 37). Then install App CRD.
+    gcloud container clusters create 'c-$BUILD_ID' --zone '${_CLUSTER_LOCATION}' --project '$PROJECT_ID' --labels=creation-timestamp=`date +%s`
+    gcloud container clusters get-credentials 'c-$BUILD_ID' --zone '${_CLUSTER_LOCATION}' --project '$PROJECT_ID'
+    kubectl apply -f "https://raw.githubusercontent.com/GoogleCloudPlatform/marketplace-k8s-app-tools/master/crd/app-crd.yaml"
     mkdir -p /workspace/.kube/
     cp -r $$HOME/.kube/ /workspace/
     mkdir -p /workspace/.config/gcloud/
     cp -r $$HOME/.config/gcloud/ /workspace/.config/
 
-- id: Verify
+- id: &Verify Verify
   name: gcr.io/$PROJECT_ID/k8s/dev:sha_$COMMIT_SHA
   waitFor:
   - *InitializeCredentials
@@ -200,6 +203,16 @@ steps:
   - -j10
   - --output-sync
   - tests/integration
+
+- id: Cleanup
+  name: gcr.io/cloud-builders/gcloud
+  waitFor:
+  - *Verify
+  entrypoint: bash
+  args:
+  - -exc
+  - |
+    gcloud container clusters delete 'c-$BUILD_ID' --zone '${_CLUSTER_LOCATION}' --project '$PROJECT_ID' --quiet
 
 images:
   - gcr.io/$PROJECT_ID/k8s/dev:sha_$COMMIT_SHA
