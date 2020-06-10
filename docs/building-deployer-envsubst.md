@@ -90,7 +90,7 @@ spec:
 This describes the application and is used in the GKE Applications UI.
 
 It's important to note that partner_id and product_id must match the values 
-declared in the schema, partnerId and solutionId respectively, which must also 
+declared in the schema, `partnerId` and `solutionId` respectively, which must also 
 match your listing ID in Marketplace.
 
 ### Add the nginx manifest
@@ -102,7 +102,7 @@ In the `manifest` directory add `manifests.yaml.template`, which contains a
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: my-nginx
+  name: $name-server
 spec:
   selector:
     matchLabels:
@@ -165,7 +165,7 @@ Create a new namespace to cleanly deploy your app:
 ```shell
 kubectl create namespace test-ns
 
-mpdev /scripts/install \
+mpdev install \
   --deployer=$REGISTRY/$APP_NAME/deployer \
   --parameters='{"name": "test-deployment", "namespace": "test-ns", "replicas": 3 }'
 ```
