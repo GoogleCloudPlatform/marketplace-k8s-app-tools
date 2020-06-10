@@ -50,6 +50,8 @@ properties:
       type: NAMESPACE
   replicas:
     type: integer
+    title: Nginx Replica Count
+    description: The number of nginx replicas to deploy
 
 required:
 - name
@@ -57,6 +59,13 @@ required:
 - replicas
 ```
 
+The `name` and `namespace` properties are required for all applications, and
+require the `x-google-marketplace.type` fields as shown above. The `replicas`
+property is application specific and in this demo will define how many nginx
+replicas to deploy. The `title` and `description` fields under the `replicas`
+property are presented in the Google Cloud Marketplace UI when users configure
+their deployment. The user will also be able to specify the `name` of the
+application and the `namespace` where the k8s application will be deployed.
 
 ### Add an application descriptor
 
@@ -81,7 +90,8 @@ spec:
     matchLabels:
       app.kubernetes.io/name: "$name"
   componentKinds:
-  - group: ''
+  # The group is determined from the apiVersion: $GROUP_NAME/$VERSION
+  - group: apps
     kind: Deployment
   - group: ''
     kind: Service
@@ -106,15 +116,17 @@ metadata:
 spec:
   selector:
     matchLabels:
-      run: my-nginx
+      run: $name-app
+  # Replicas was a property defined in schema.yaml. Its value will be
+  # substituted into $replicas
   replicas: $replicas
   template:
     metadata:
       labels:
-        run: my-nginx
+        run: $name-app
     spec:
       containers:
-      - name: my-nginx
+      - name: nginx-container
         image: nginx
         ports:
         - containerPort: 80
@@ -122,15 +134,15 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: my-nginx
+  name: $name-service
   labels:
-    run: my-nginx
+    run: $name-app
 spec:
   ports:
   - port: 80
     protocol: TCP
   selector:
-    run: my-nginx
+    run: $name-app
 ```
 
 ### Build your deployer container
@@ -151,8 +163,14 @@ export APP_NAME=nginx
 docker build --tag $REGISTRY/$APP_NAME/deployer .
 ```
 
-Push your built container to the remote GCR so that your app running in your GKE
-cluster can access the image:
+When running `docker build`, the `deployer_envsubst/onbuild` docker container
+copies the `schema.yaml` file and `manifest` directory using the `ONBUILD`
+[keyword](https://docs.docker.com/engine/reference/builder/#onbuild). The
+deployer container, when executed will use `envsubst` and apply the templates
+in the `manifest` directory to deploy your nginx application.
+
+Push your deployer container to the remote GCR so that your app running in your
+GKE cluster can access the image:
 
 ```dockerfile
 docker push $REGISTRY/$APP_NAME/deployer
@@ -199,7 +217,16 @@ images will be supplied via these properties.
 
 In the `schema.yaml` file, the images should look like this:
 ```yaml
-# Under the x-google-marketplace parent attribute  
+x-google-marketplace:
+  schemaVersion: v2
+
+  applicationApiVersion: v1beta1
+  # The published version is required and MUST match the tag
+  # of the deployer image
+  publishedVersion: '0.1.1'
+  publishedVersionMetadata:
+    releaseNote: >-
+      A first release.
   images:
     nginx:
       properties:
@@ -224,3 +251,11 @@ of any vulnerability or malicious code.
 
 Note that end users never see or need access to these default
 image names.
+
+
+## Parts 3 to 5
+
+The instructions in parts 3 to 5 are not specific to the envsubst deployer.
+See the
+[sections](building-deployer-helm.md#part-3-crafting-application-manifest)
+in the helm deployer guide
