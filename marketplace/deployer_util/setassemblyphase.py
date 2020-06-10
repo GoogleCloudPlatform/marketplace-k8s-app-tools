@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 #
 # Copyright 2018 Google LLC
 #
@@ -43,13 +43,19 @@ for r in load_resources_yaml(args.manifest):
 apps = [r for r in resources if r['kind'] == "Application"]
 
 if len(apps) == 0:
-  raise Exception("Set of resources in {:s} does not include one of "
-                  "Application kind".format(args.manifest))
+  raise Exception(
+      "Set of resources in {:s} does not include one of "
+      "Application kind. See {:s} for how to add to a "
+      "helm-based deployer. See {:s} for an envsubst example.".format(
+          args.manifest,
+          "https://github.com/GoogleCloudPlatform/marketplace-k8s-app-tools/blob/master/docs/building-deployer-helm.md",
+          "https://github.com/GoogleCloudPlatform/marketplace-k8s-app-tools/blob/master/docs/building-deployer-envsubst.md"
+      ))
 if len(apps) > 1:
   raise Exception("Set of resources in {:s} includes more than one of "
                   "Application kind".format(args.manifest))
 
 apps[0]['spec']['assemblyPhase'] = args.status
 
-with open(args.manifest, "w") as outfile:
+with open(args.manifest, "w", encoding='utf-8') as outfile:
   yaml.safe_dump_all(resources, outfile, default_flow_style=False, indent=2)

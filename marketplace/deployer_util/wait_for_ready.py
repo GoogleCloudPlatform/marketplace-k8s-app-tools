@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 #
 # Copyright 2018 Google LLC
 #
@@ -27,7 +27,7 @@ def main():
   parser = ArgumentParser(description=_PROG_HELP)
   parser.add_argument('--name')
   parser.add_argument('--namespace')
-  parser.add_argument('--timeout')
+  parser.add_argument('--timeout', type=float)
   args = parser.parse_args()
 
   log.info("Wait {} seconds for the application '{}' to get into ready state",

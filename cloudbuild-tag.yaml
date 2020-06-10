@@ -68,6 +68,8 @@ steps:
       docker push gcr.io/$PROJECT_ID/k8s/deployer_helm_tiller/onbuild:latest
       docker tag gcr.io/$PROJECT_ID/k8s/deployer_envsubst:$TAG_NAME gcr.io/$PROJECT_ID/k8s/deployer_envsubst:latest
       docker push gcr.io/$PROJECT_ID/k8s/deployer_envsubst:latest
+      docker tag gcr.io/$PROJECT_ID/k8s/deployer_envsubst/onbuild:$TAG_NAME gcr.io/$PROJECT_ID/k8s/deployer_envsubst/onbuild:latest
+      docker push gcr.io/$PROJECT_ID/k8s/deployer_envsubst/onbuild:latest
     else
       echo "Not tagging latest"
     fi
@@ -96,6 +98,7 @@ images:
 - gcr.io/$PROJECT_ID/k8s/deployer_helm_tiller:$TAG_NAME
 - gcr.io/$PROJECT_ID/k8s/deployer_helm_tiller/onbuild:$TAG_NAME
 - gcr.io/$PROJECT_ID/k8s/deployer_envsubst:$TAG_NAME
+- gcr.io/$PROJECT_ID/k8s/deployer_envsubst/onbuild:$TAG_NAME
 
 artifacts:
   objects:

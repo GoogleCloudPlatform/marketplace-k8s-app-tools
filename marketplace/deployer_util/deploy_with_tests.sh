@@ -76,6 +76,8 @@ create_manifests.sh --mode="test"
   --manifests "/data/manifest-expanded" \
   --dest "/data/resources.yaml"
 
+validate_app_resource.py --manifests "/data/resources.yaml"
+
 separate_tester_resources.py \
   --app_uid "$app_uid" \
   --app_name "$NAME" \

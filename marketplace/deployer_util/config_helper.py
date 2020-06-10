@@ -1,5 +1,3 @@
-#!/usr/bin/env python2
-#
 # Copyright 2018 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,6 +21,11 @@ import sys
 import yaml
 
 NAME_RE = re.compile(r'[a-zA-z0-9_\.\-]+$')
+# Suggested from https://semver.org
+SEMVER_RE = re.compile(r'^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)'
+                       '(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)'
+                       '(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?'
+                       '(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$')
 
 XGOOGLE = 'x-google-marketplace'
 XTYPE_NAME = 'NAME'
@@ -38,8 +41,11 @@ XTYPE_APPLICATION_UID = 'APPLICATION_UID'
 XTYPE_ISTIO_ENABLED = 'ISTIO_ENABLED'
 XTYPE_INGRESS_AVAILABLE = 'INGRESS_AVAILABLE'
 XTYPE_TLS_CERTIFICATE = 'TLS_CERTIFICATE'
+XTYPE_MASKED_FIELD = 'MASKED_FIELD'
 
 WIDGET_TYPES = ['help']
+
+_OAUTH_SCOPE_PREFIX = 'https://www.googleapis.com/auth/'
 
 
 class InvalidName(Exception):
@@ -58,7 +64,7 @@ def load_values(values_file, values_dir, schema):
   if values_file == '-':
     return yaml.safe_load(sys.stdin.read())
   if values_file and os.path.isfile(values_file):
-    with open(values_file, 'r') as f:
+    with open(values_file, 'r', encoding='utf-8') as f:
       return yaml.safe_load(f.read())
   return _read_values_to_dict(values_dir, schema)
 
@@ -74,14 +80,14 @@ def _read_values_to_dict(values_dir, schema):
     if not NAME_RE.match(filename):
       raise InvalidName('Invalid config parameter name: {}'.format(filename))
     file_path = os.path.join(values_dir, filename)
-    with open(file_path, "r") as f:
-      data = f.read().decode('utf-8')
+    with open(file_path, "r", encoding='utf-8') as f:
+      data = f.read()
       result[filename] = data
 
   # Data read in as strings. Convert them to proper types defined in schema.
   result = {
       k: schema.properties[k].str_to_type(v) if k in schema.properties else v
-      for k, v in result.iteritems()
+      for k, v in result.items()
   }
   return result
 
@@ -92,12 +98,12 @@ class Schema:
   @staticmethod
   def load_yaml_file(filepath):
     with io.open(filepath, 'r') as f:
-      d = yaml.load(f)
+      d = yaml.safe_load(f)
       return Schema(d)
 
   @staticmethod
   def load_yaml(yaml_str):
-    return Schema(yaml.load(yaml_str))
+    return Schema(yaml.safe_load(yaml_str))
 
   def __init__(self, dictionary):
     self._x_google_marketplace = _maybe_get_and_apply(
@@ -107,7 +113,7 @@ class Schema:
     self._required = dictionary.get('required', [])
     self._properties = {
         k: SchemaProperty(k, v, k in self._required)
-        for k, v in dictionary.get('properties', {}).iteritems()
+        for k, v in dictionary.get('properties', {}).items()
     }
 
     self._app_api_version = dictionary.get(
@@ -146,6 +152,14 @@ class Schema:
       if 'description' not in item:
         raise InvalidSchema('form items must have a description.')
 
+    if is_v2:
+      for _, p in self._properties.items():
+        if p.xtype == XTYPE_IMAGE:
+          raise InvalidSchema(
+              'No properties should have x-google-marketplace.type=IMAGE in '
+              'schema v2. Images must be declared in the top level '
+              'x-google-marketplace.images')
+
   @property
   def x_google_marketplace(self):
     return self._x_google_marketplace
@@ -170,7 +184,7 @@ class Schema:
 
   def properties_matching(self, definition):
     return [
-        v for k, v in self._properties.iteritems()
+        v for k, v in self._properties.items()
         if v.matches_definition(definition)
     ]
 
@@ -192,6 +206,8 @@ class SchemaXGoogleMarketplace:
     self._app_api_version = None
     self._published_version = None
     self._published_version_meta = None
+    self._partner_id = None
+    self._solution_id = None
     self._images = None
     self._cluster_constraints = None
     self._deployer_service_account = None
@@ -200,6 +216,14 @@ class SchemaXGoogleMarketplace:
     if self._schema_version not in _SCHEMA_VERSIONS:
       raise InvalidSchema('Invalid schema version {}'.format(
           self._schema_version))
+
+    self._partner_id = dictionary.get('partnerId', None)
+    self._solution_id = dictionary.get('solutionId', None)
+    if self._partner_id or self._solution_id:
+      if not self._partner_id or not self._solution_id:
+        raise InvalidSchema(
+            'x-google-marketplace.partnerId and x-google-marketplace.solutionId'
+            ' must be specified or missing together')
 
     if 'clusterConstraints' in dictionary:
       self._cluster_constraints = SchemaClusterConstraints(
@@ -214,6 +238,10 @@ class SchemaXGoogleMarketplace:
     self._published_version = _must_get(
         dictionary, 'publishedVersion',
         'x-google-marketplace.publishedVersion is required')
+    if not SEMVER_RE.match(self._published_version):
+      raise InvalidSchema(
+          'Invalid schema publishedVersion "{}"; must be semver including patch version'
+          .format(self._published_version))
     self._published_version_meta = _must_get_and_apply(
         dictionary, 'publishedVersionMetadata', lambda v: SchemaVersionMeta(v),
         'x-google-marketplace.publishedVersionMetadata is required')
@@ -223,7 +251,7 @@ class SchemaXGoogleMarketplace:
 
     images = _must_get(dictionary, 'images',
                        'x-google-marketplace.images is required')
-    self._images = {k: SchemaImage(k, v) for k, v in images.iteritems()}
+    self._images = {k: SchemaImage(k, v) for k, v in images.items()}
 
     if 'deployerServiceAccount' in dictionary:
       self._deployer_service_account = SchemaXServiceAccount(
@@ -247,6 +275,14 @@ class SchemaXGoogleMarketplace:
   @property
   def published_version_meta(self):
     return self._published_version_meta
+
+  @property
+  def partner_id(self):
+    return self._partner_id
+
+  @property
+  def solution_id(self):
+    return self._solution_id
 
   @property
   def images(self):
@@ -282,15 +318,19 @@ class SchemaClusterConstraints:
     self._k8s_version = dictionary.get('k8sVersion', None)
     self._resources = None
     self._istio = None
+    self._gcp = None
 
     if 'resources' in dictionary:
       resources = dictionary['resources']
       if not isinstance(resources, list):
         raise InvalidSchema('clusterConstraints.resources must be a list')
       self._resources = [SchemaResourceConstraints(r) for r in resources]
+      if len(list(filter(lambda x: x.requests.gpu, self._resources))) > 1:
+        raise InvalidSchema('At most one request may include GPUs')
 
-    if 'istio' in dictionary:
-      self._istio = SchemaIstio(dictionary['istio'])
+    self._istio = _maybe_get_and_apply(dictionary, 'istio',
+                                       lambda v: SchemaIstio(v))
+    self._gcp = _maybe_get_and_apply(dictionary, 'gcp', lambda v: SchemaGcp(v))
 
   @property
   def k8s_version(self):
@@ -304,16 +344,28 @@ class SchemaClusterConstraints:
   def istio(self):
     return self._istio
 
+  @property
+  def gcp(self):
+    return self._gcp
+
 
 class SchemaResourceConstraints:
   """Accesses a single resource's constraints."""
 
   def __init__(self, dictionary):
+    # TODO(#483): Require replicas for non-GPU constraints
     self._replicas = dictionary.get('replicas', None)
     self._affinity = _maybe_get_and_apply(
         dictionary, 'affinity', lambda v: SchemaResourceConstraintAffinity(v))
-    self._requests = _maybe_get_and_apply(
-        dictionary, 'requests', lambda v: SchemaResourceConstraintRequests(v))
+    self._requests = _must_get_and_apply(
+        dictionary, 'requests', lambda v: SchemaResourceConstraintRequests(v),
+        'Each item in clusterConstraints.resources must specify requests')
+
+    if self._requests.gpu:
+      if self._affinity:
+        raise InvalidSchema('Affinity unsupported for GPU resource constraints')
+      if self._replicas:
+        raise InvalidSchema('Replicas unsupported for GPU resource constraints')
 
   @property
   def replicas(self):
@@ -363,12 +415,39 @@ class SchemaSimpleNodeAffinity:
     return self._minimum_node_count
 
 
+_GPU_PROVIDER_KEYS = ['nvidia.com/gpu']
+
+
 class SchemaResourceConstraintRequests:
   """Accesses a single resource's requests."""
 
   def __init__(self, dictionary):
-    self.cpu = dictionary.get('cpu', None)
-    self.memory = dictionary.get('memory', None)
+    self._cpu = dictionary.get('cpu', None)
+    self._memory = dictionary.get('memory', None)
+    self._gpu = None
+
+    rawGpu = dictionary.get('gpu', None)
+    if rawGpu != None:
+      if not isinstance(rawGpu, dict):
+        raise InvalidSchema(
+            'requests.gpu in clusterConstraints.resources must be a map')
+      if not rawGpu.keys():
+        raise InvalidSchema('GPU requests map must contain one or more entries')
+      if self._cpu or self._memory:
+        raise InvalidSchema(
+            'constraints with GPU requests must not specify cpu or memory')
+      for key in rawGpu.keys():
+        if key not in _GPU_PROVIDER_KEYS:
+          raise InvalidSchema('Unsupported GPU provider %s', key)
+      self._gpu = {
+          key: SchemaGpuResourceRequest(value)
+          for (key, value) in rawGpu.items()
+      }
+
+    if not self._cpu and not self._memory and not self._gpu:
+      raise InvalidSchema(
+          'Requests in clusterConstraints.resources must specify '
+          'at least one of cpu, memory, or gpu')
 
   @property
   def cpu(self):
@@ -377,6 +456,26 @@ class SchemaResourceConstraintRequests:
   @property
   def memory(self):
     return self._memory
+
+  @property
+  def gpu(self):
+    return self._gpu
+
+
+class SchemaGpuResourceRequest:
+  """Accesses a single GPU request."""
+
+  def __init__(self, dictionary):
+    self._limits = dictionary.get('limits', None)
+    self._platforms = dictionary.get('platforms', None)
+
+  @property
+  def limits(self):
+    return self._limits
+
+  @property
+  def platforms(self):
+    return self._platforms
 
 
 _ISTIO_TYPE_OPTIONAL = "OPTIONAL"
@@ -399,6 +498,36 @@ class SchemaIstio:
     return self._type
 
 
+class SchemaGcp:
+  """Accesses top level GCP constraints."""
+
+  def __init__(self, dictionary):
+    self._nodes = _maybe_get_and_apply(dictionary, 'nodes',
+                                       lambda v: SchemaNodes(v))
+
+  @property
+  def nodes(self):
+    return self._nodes
+
+
+class SchemaNodes:
+  """Accesses GKE cluster node constraints."""
+
+  def __init__(self, dictionary):
+    self._required_oauth_scopes = dictionary.get('requiredOauthScopes', [])
+    if not isinstance(self._required_oauth_scopes, list):
+      raise InvalidSchema('nodes.requiredOauthScopes must be a list')
+    for scope in self._required_oauth_scopes:
+      if not scope.startswith(_OAUTH_SCOPE_PREFIX):
+        raise InvalidSchema(
+            'OAuth scope references must be fully-qualified (start with {})'
+            .format(_OAUTH_SCOPE_PREFIX))
+
+  @property
+  def required_oauth_scopes(self):
+    return self._required_oauth_scopes
+
+
 class SchemaImage:
   """Accesses an image definition."""
 
@@ -406,7 +535,7 @@ class SchemaImage:
     self._name = name
     self._properties = {
         k: SchemaImageProjectionProperty(k, v)
-        for k, v in dictionary.get('properties', {}).iteritems()
+        for k, v in dictionary.get('properties', {}).items()
     }
 
   @property
@@ -520,7 +649,8 @@ class SchemaProperty:
       xt = _must_get(self._x, 'type',
                      'Property {} has {} without a type'.format(name, XGOOGLE))
 
-      if xt in (XTYPE_NAME, XTYPE_NAMESPACE, XTYPE_DEPLOYER_IMAGE):
+      if xt in (XTYPE_NAME, XTYPE_NAMESPACE, XTYPE_DEPLOYER_IMAGE,
+                XTYPE_MASKED_FIELD):
         _property_must_have_type(self, str)
       elif xt in (XTYPE_ISTIO_ENABLED, XTYPE_INGRESS_AVAILABLE):
         _property_must_have_type(self, bool)
@@ -643,7 +773,7 @@ class SchemaProperty:
     """
 
     def _matches(dictionary, subdict):
-      for k, sv in subdict.iteritems():
+      for k, sv in subdict.items():
         v = dictionary.get(k, None)
         if isinstance(v, dict):
           if not _matches(v, sv):
@@ -654,7 +784,7 @@ class SchemaProperty:
       return True
 
     return _matches(
-        dict(list(self._d.iteritems()) + [('name', self._name)]), definition)
+        dict(list(self._d.items()) + [('name', self._name)]), definition)
 
   def __eq__(self, other):
     if not isinstance(other, SchemaProperty):
@@ -715,7 +845,7 @@ class SchemaXImage:
     return self._split_by_colon
 
   @property
-  def _split_to_registry_repo_tag(self):
+  def split_to_registry_repo_tag(self):
     """Return 3-tuple, or None"""
     return self._split_to_registry_repo_tag
 
@@ -729,6 +859,32 @@ class SchemaXServiceAccount:
 
   def __init__(self, dictionary):
     self._roles = dictionary.get('roles', [])
+    for role in self._roles:
+      if role.get('rulesType') == 'PREDEFINED':
+        if role.get('rules'):
+          raise InvalidSchema('rules can only be used with rulesType CUSTOM')
+        if not role.get('rulesFromRoleName'):
+          raise InvalidSchema('Missing rulesFromRoleName for PREDEFINED role')
+      elif role.get('rulesType') == 'CUSTOM':
+        if role.get('rulesFromRoleName'):
+          raise InvalidSchema(
+              'rulesFromRoleName can only be used with rulesType PREDEFINED')
+        if not role.get('rules'):
+          raise InvalidSchema('Missing rules for CUSTOM role')
+        for rule in role.get('rules', []):
+          if rule.get('nonResourceURLs'):
+            raise InvalidSchema(
+                'Only attributes for resourceRules are supported in rules')
+          if not rule.get('apiGroups'):
+            raise InvalidSchema("Missing apiGroups in rules. "
+                                "Did you mean [\"\"] (only core APIs)"
+                                "or [\"*\"] (all)?")
+          if not [x for x in rule.get('resources', []) if x]:
+            raise InvalidSchema('Missing or empty resources in rules.')
+          if not [x for x in rule.get('verbs', []) if x]:
+            raise InvalidSchema('Missing or empty verbs in rules.')
+      else:
+        raise InvalidSchema('rulesType must be one of PREDEFINED or CUSTOM')
 
   def custom_role_rules(self):
     """Returns a list of rules for custom Roles."""
@@ -838,7 +994,7 @@ def _must_contain(value, valid_list, error_msg):
   """Validates that value in valid_list, or raises InvalidSchema."""
   if value not in valid_list:
     raise InvalidSchema("{}. Must be one of {}".format(error_msg,
-                                                       ', '.join(_ISTIO_TYPES)))
+                                                       ', '.join(valid_list)))
 
 
 def _property_must_have_type(prop, expected_type):

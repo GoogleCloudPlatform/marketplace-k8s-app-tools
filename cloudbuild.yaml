@@ -69,6 +69,22 @@ steps:
   - marketplace/deployer_envsubst_base/Dockerfile
   - .
 
+- id: &BuildEnvsubstOnBuild Build deployer_envsubst onbuild
+  name: gcr.io/cloud-builders/docker
+  waitFor:
+  - *BuildEnvsubst
+  args:
+  - build
+  - --build-arg
+  - FROM=gcr.io/$PROJECT_ID/k8s/deployer_envsubst:sha_$COMMIT_SHA
+  - --tag
+  - gcr.io/$PROJECT_ID/k8s/deployer_envsubst/onbuild:sha_$COMMIT_SHA
+  - --tag
+  - gcr.io/$PROJECT_ID/k8s/deployer_envsubst/onbuild:sha_$SHORT_SHA
+  - --file
+  - marketplace/deployer_envsubst_base/onbuild/Dockerfile
+  - .
+
 - id: &BuildHelm Build deployer_helm
   name: gcr.io/cloud-builders/docker
   waitFor:
@@ -83,7 +99,7 @@ steps:
   - marketplace/deployer_helm_base/Dockerfile
   - .
 
-- id: Build deployer_helm onbuild
+- id: &BuildHelmOnbuild Build deployer_helm onbuild
   name: gcr.io/cloud-builders/docker
   waitFor:
   - *BuildHelm
@@ -113,7 +129,7 @@ steps:
   - marketplace/deployer_helm_tiller_base/Dockerfile
   - .
 
-- id: Build deployer_helm_tiller onbuild
+- id: &BuildHelmTillerOnbuild Build deployer_helm_tiller onbuild
   name: gcr.io/cloud-builders/docker
   waitFor:
   - *BuildHelmTiller
@@ -167,8 +183,14 @@ steps:
 - id: &Verify Verify
   name: gcr.io/$PROJECT_ID/k8s/dev:sha_$COMMIT_SHA
   waitFor:
-  - *BuildDev
   - *InitializeCredentials
+  - *BuildDev
+  - *BuildEnvsubst
+  - *BuildEnvsubstOnBuild
+  - *BuildHelm
+  - *BuildHelmOnbuild
+  - *BuildHelmTiller
+  - *BuildHelmTillerOnbuild
   env:
   - 'KUBE_CONFIG=/workspace/.kube'
   - 'GCLOUD_CONFIG=/workspace/.config/gcloud'
@@ -178,7 +200,7 @@ steps:
   - MARKETPLACE_TOOLS_TAG=testing-sha_$COMMIT_SHA
   args:
   - make
-  - -j4
+  - -j10
   - --output-sync
   - tests/integration
 
@@ -197,6 +219,8 @@ images:
   - gcr.io/$PROJECT_ID/k8s/dev:sha_$SHORT_SHA
   - gcr.io/$PROJECT_ID/k8s/deployer_envsubst:sha_$COMMIT_SHA
   - gcr.io/$PROJECT_ID/k8s/deployer_envsubst:sha_$SHORT_SHA
+  - gcr.io/$PROJECT_ID/k8s/deployer_envsubst/onbuild:sha_$COMMIT_SHA
+  - gcr.io/$PROJECT_ID/k8s/deployer_envsubst/onbuild:sha_$SHORT_SHA
   - gcr.io/$PROJECT_ID/k8s/deployer_helm:sha_$COMMIT_SHA
   - gcr.io/$PROJECT_ID/k8s/deployer_helm:sha_$SHORT_SHA
   - gcr.io/$PROJECT_ID/k8s/deployer_helm/onbuild:sha_$COMMIT_SHA

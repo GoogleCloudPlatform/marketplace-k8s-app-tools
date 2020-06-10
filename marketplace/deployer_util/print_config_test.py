@@ -31,11 +31,11 @@ class PrintConfigTest(unittest.TestCase):
           propertyString:
             type: string
         """)
-    with tempfile.NamedTemporaryFile('w') as f:
+    with tempfile.NamedTemporaryFile('w', encoding='utf-8') as f:
       f.write("""
               propertyInt: 3
               propertyString: abc
-              """.encode('utf_8'))
+              """)
       f.flush()
 
       values = config_helper.load_values(f.name, '/non/existence/dir', schema)
@@ -61,8 +61,8 @@ class PrintConfigTest(unittest.TestCase):
         'dotted.dotted.dotted.propertyString': 'triple_nested',
     }
     actual = print_config.output_yaml(values)
-    self.assertEquals(
-        yaml.load(actual), {
+    self.assertEqual(
+        yaml.safe_load(actual), {
             'propertyInt': 1,
             'propertyString': 'unnested',
             'dotted': {

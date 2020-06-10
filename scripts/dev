@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -eo pipefail
+set -euo pipefail
 
 # KUBE_CONFIG can point to a kubeconfig file or
 # the standard kubectl config directory.
@@ -29,9 +29,14 @@ if [[ -e "${GCLOUD_CONFIG}" ]]; then
   # Note: readlink -f doesn't work on non-GNU so we would fallback to python in that case.
   canonical_gcloud_config="$( \
     readlink -f "${GCLOUD_CONFIG}" 2> /dev/null \
-    || python -c 'import os,sys;print(os.path.realpath(sys.argv[1]))' "${GCLOUD_CONFIG}" \
+    || python3 -c 'import os,sys;print(os.path.realpath(sys.argv[1]))' "${GCLOUD_CONFIG}" \
   )"
   gcloud_original_path=(--env "GCLOUD_ORIGINAL_PATH=${canonical_gcloud_config}")
+fi
+
+terminal_docker_param="-t"
+if [[ -t 0 ]]; then
+  terminal_docker_param="-it"
 fi
 
 docker run \
@@ -41,6 +46,6 @@ docker run \
   ${gcloud_mount[*]} \
   ${gcloud_original_path[*]} \
   ${EXTRA_DOCKER_PARAMS[*]} \
-  --rm \
+  "${terminal_docker_param}" --rm \
   "${MARKETPLACE_TOOLS_IMAGE}:${MARKETPLACE_TOOLS_TAG}" \
   "$@"

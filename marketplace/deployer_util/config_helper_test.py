@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
 import tempfile
 import unittest
 
@@ -78,6 +79,12 @@ properties:
         generatedProperties:
           base64EncodedPrivateKey: keyEncoded
           base64EncodedCertificate: crtEncoded
+  customSecret:
+    title: Secret needed by the app.
+    description: User-entered text to be masked in the UI.
+    type: string
+    x-google-marketplace:
+      type: MASKED_FIELD
 required:
 - propertyString
 - propertyPassword
@@ -90,8 +97,8 @@ form:
 class ConfigHelperTest(unittest.TestCase):
 
   def test_load_yaml_file(self):
-    with tempfile.NamedTemporaryFile('w') as f:
-      f.write(SCHEMA.encode('utf_8'))
+    with tempfile.NamedTemporaryFile('w', encoding='utf-8') as f:
+      f.write(SCHEMA)
       f.flush()
 
       schema = config_helper.Schema.load_yaml_file(f.name)
@@ -115,9 +122,8 @@ class ConfigHelperTest(unittest.TestCase):
                   - propertyB
                   - propertyC
                   """
-    self.assertRaisesRegexp(config_helper.InvalidSchema,
-                            r'propertyB, propertyC', load_and_validate,
-                            schema_yaml)
+    self.assertRaisesRegex(config_helper.InvalidSchema, r'propertyB, propertyC',
+                           load_and_validate, schema_yaml)
 
   def test_types_and_defaults(self):
     schema = config_helper.Schema.load_yaml(SCHEMA)
@@ -129,7 +135,7 @@ class ConfigHelperTest(unittest.TestCase):
             'propertyNumberWithDefault', 'propertyBoolean',
             'propertyBooleanWithDefault', 'propertyImage',
             'propertyDeployerImage', 'propertyPassword', 'applicationUid',
-            'istioEnabled', 'ingressAvailable', 'certificate'
+            'istioEnabled', 'ingressAvailable', 'certificate', 'customSecret'
         }, set(schema.properties))
     self.assertEqual(str, schema.properties['propertyString'].type)
     self.assertIsNone(schema.properties['propertyString'].default)
@@ -173,6 +179,7 @@ class ConfigHelperTest(unittest.TestCase):
                      schema.properties['ingressAvailable'].xtype)
     self.assertEqual(str, schema.properties['certificate'].type)
     self.assertEqual('TLS_CERTIFICATE', schema.properties['certificate'].xtype)
+    self.assertEqual('MASKED_FIELD', schema.properties['customSecret'].xtype)
 
   def test_invalid_names(self):
     self.assertRaises(
@@ -190,7 +197,7 @@ class ConfigHelperTest(unittest.TestCase):
         """)
 
   def test_invalid_property_types(self):
-    self.assertRaisesRegexp(
+    self.assertRaisesRegex(
         config_helper.InvalidSchema, r'.*must be of type string$',
         lambda: config_helper.Schema.load_yaml("""
             properties:
@@ -199,7 +206,7 @@ class ConfigHelperTest(unittest.TestCase):
                 x-google-marketplace:
                   type: NAME
             """))
-    self.assertRaisesRegexp(
+    self.assertRaisesRegex(
         config_helper.InvalidSchema, r'.*must be of type string$',
         lambda: config_helper.Schema.load_yaml("""
             properties:
@@ -208,7 +215,7 @@ class ConfigHelperTest(unittest.TestCase):
                 x-google-marketplace:
                   type: NAMESPACE
             """))
-    self.assertRaisesRegexp(
+    self.assertRaisesRegex(
         config_helper.InvalidSchema, r'.*must be of type string$',
         lambda: config_helper.Schema.load_yaml("""
             properties:
@@ -217,7 +224,7 @@ class ConfigHelperTest(unittest.TestCase):
                 x-google-marketplace:
                   type: DEPLOYER_IMAGE
             """))
-    self.assertRaisesRegexp(
+    self.assertRaisesRegex(
         config_helper.InvalidSchema, r'.*must be of type string$',
         lambda: config_helper.Schema.load_yaml("""
             properties:
@@ -226,7 +233,7 @@ class ConfigHelperTest(unittest.TestCase):
                 x-google-marketplace:
                   type: APPLICATION_UID
             """))
-    self.assertRaisesRegexp(
+    self.assertRaisesRegex(
         config_helper.InvalidSchema, r'.*must be of type boolean$',
         lambda: config_helper.Schema.load_yaml("""
             properties:
@@ -235,7 +242,7 @@ class ConfigHelperTest(unittest.TestCase):
                 x-google-marketplace:
                   type: ISTIO_ENABLED
             """))
-    self.assertRaisesRegexp(
+    self.assertRaisesRegex(
         config_helper.InvalidSchema, r'.*must be of type boolean$',
         lambda: config_helper.Schema.load_yaml("""
             properties:
@@ -314,7 +321,7 @@ class ConfigHelperTest(unittest.TestCase):
                      schema.properties['u'].application_uid.application_create)
 
   def test_image_default_missing(self):
-    self.assertRaisesRegexp(
+    self.assertRaisesRegex(
         config_helper.InvalidSchema, r'.*default image value must be specified',
         lambda: config_helper.Schema.load_yaml("""
         properties:
@@ -325,7 +332,7 @@ class ConfigHelperTest(unittest.TestCase):
         """))
 
   def test_image_default_missing_repo(self):
-    self.assertRaisesRegexp(
+    self.assertRaisesRegex(
         config_helper.InvalidSchema,
         r'.*default image value must state registry',
         lambda: config_helper.Schema.load_yaml("""
@@ -338,7 +345,7 @@ class ConfigHelperTest(unittest.TestCase):
         """))
 
   def test_image_default_missing_tag_or_digest(self):
-    self.assertRaisesRegexp(
+    self.assertRaisesRegex(
         config_helper.InvalidSchema,
         r'.*default image value is missing a tag or digest',
         lambda: config_helper.Schema.load_yaml("""
@@ -361,7 +368,7 @@ class ConfigHelperTest(unittest.TestCase):
         """)
     self.assertIsNotNone(schema.properties['i'].image)
     self.assertIsNone(schema.properties['i'].image.split_by_colon)
-    self.assertIsNone(schema.properties['i'].image._split_to_registry_repo_tag)
+    self.assertIsNone(schema.properties['i'].image.split_to_registry_repo_tag)
 
   def test_image_type_splitbycolon(self):
     schema = config_helper.Schema.load_yaml("""
@@ -592,6 +599,9 @@ class ConfigHelperTest(unittest.TestCase):
                   - apiGroups: ['apps/v1']
                     resources: ['Deployment']
                     verbs: ['*']
+                  - apiGroups: ['']
+                    resources: ['Pods']
+                    verbs: ['*']
                   - apiGroups: ['apps/v1']
                     resources: ['StatefulSet']
                     verbs: ['*']
@@ -620,11 +630,174 @@ class ConfigHelperTest(unittest.TestCase):
             'verbs': ['*']
         },
         {
+            'apiGroups': [''],
+            'resources': ['Pods'],
+            'verbs': ['*']
+        },
+        {
             'apiGroups': ['apps/v1'],
             'resources': ['StatefulSet'],
             'verbs': ['*']
         },
     ]], sa.custom_role_rules())
+
+  def test_service_account_missing_rulesType(self):
+    with self.assertRaisesRegex(
+        config_helper.InvalidSchema,
+        'rulesType must be one of PREDEFINED or CUSTOM'):
+      config_helper.Schema.load_yaml("""
+          properties:
+            sa:
+              type: string
+              x-google-marketplace:
+                type: SERVICE_ACCOUNT
+                serviceAccount:
+                  roles:
+                  - type: Role
+                    rulesFromRoleName: view
+          """)
+
+  def test_service_account_predefined_rules(self):
+    with self.assertRaisesRegex(config_helper.InvalidSchema,
+                                'rules can only be used with rulesType CUSTOM'):
+      config_helper.Schema.load_yaml("""
+          properties:
+            sa:
+              type: string
+              x-google-marketplace:
+                type: SERVICE_ACCOUNT
+                serviceAccount:
+                  roles:
+                  - type: Role
+                    rulesType: PREDEFINED
+                    rules:
+                    - apiGroups: ['']
+                      resources: ['Deployment']
+                      verbs: ['*']
+          """)
+
+  def test_service_account_predefined_missing_rulesFromRoleName(self):
+    with self.assertRaisesRegex(
+        config_helper.InvalidSchema,
+        'Missing rulesFromRoleName for PREDEFINED role'):
+      config_helper.Schema.load_yaml("""
+          properties:
+            sa:
+              type: string
+              x-google-marketplace:
+                type: SERVICE_ACCOUNT
+                serviceAccount:
+                  roles:
+                  - type: Role
+                    rulesType: PREDEFINED
+          """)
+
+  def test_service_account_custom_rulesFromRoleName(self):
+    with self.assertRaisesRegex(
+        config_helper.InvalidSchema,
+        'rulesFromRoleName can only be used with rulesType PREDEFINED'):
+      config_helper.Schema.load_yaml("""
+          properties:
+            sa:
+              type: string
+              x-google-marketplace:
+                type: SERVICE_ACCOUNT
+                serviceAccount:
+                  roles:
+                  - type: Role
+                    rulesType: CUSTOM
+                    rulesFromRoleName: edit
+          """)
+
+  def test_service_account_custom_nonResourceAttributes(self):
+    with self.assertRaisesRegex(
+        config_helper.InvalidSchema,
+        'Only attributes for resourceRules are supported in rules'):
+      config_helper.Schema.load_yaml("""
+          properties:
+            sa:
+              type: string
+              x-google-marketplace:
+                type: SERVICE_ACCOUNT
+                serviceAccount:
+                  roles:
+                  - type: Role
+                    rulesType: CUSTOM
+                    rules:
+                    - nonResourceURLs: ['/version', '/healthz']
+                      verbs: ["get"]
+          """)
+
+  def test_service_account_custom_missingRules(self):
+    with self.assertRaisesRegex(config_helper.InvalidSchema,
+                                'Missing rules for CUSTOM role'):
+      config_helper.Schema.load_yaml("""
+          properties:
+            sa:
+              type: string
+              x-google-marketplace:
+                type: SERVICE_ACCOUNT
+                serviceAccount:
+                  roles:
+                  - type: Role
+                    rulesType: CUSTOM
+          """)
+
+  def test_service_account_custom_missing_apiGroups(self):
+    with self.assertRaisesRegex(config_helper.InvalidSchema,
+                                r'^Missing apiGroups in rules. Did you mean'):
+      config_helper.Schema.load_yaml("""
+          properties:
+            sa:
+              type: string
+              x-google-marketplace:
+                type: SERVICE_ACCOUNT
+                serviceAccount:
+                  roles:
+                  - type: Role
+                    rulesType: CUSTOM
+                    rules:
+                    - resources: ['Pods']
+                      verbs: ['*']
+          """)
+
+  def test_service_account_custom_empty_resources(self):
+    with self.assertRaisesRegex(config_helper.InvalidSchema,
+                                'Missing or empty resources in rules'):
+      config_helper.Schema.load_yaml("""
+          properties:
+            sa:
+              type: string
+              x-google-marketplace:
+                type: SERVICE_ACCOUNT
+                serviceAccount:
+                  roles:
+                  - type: Role
+                    rulesType: CUSTOM
+                    rules:
+                    - apiGroups: ['v1']
+                      resources: ['']
+                      verbs: ['*']
+          """)
+
+  def test_service_account_custom_empty_verbs(self):
+    with self.assertRaisesRegex(config_helper.InvalidSchema,
+                                'Missing or empty verbs in rules'):
+      config_helper.Schema.load_yaml("""
+          properties:
+            sa:
+              type: string
+              x-google-marketplace:
+                type: SERVICE_ACCOUNT
+                serviceAccount:
+                  roles:
+                  - type: Role
+                    rulesType: CUSTOM
+                    rules:
+                    - apiGroups: ['v1']
+                      resources: ['Pods']
+                      verbs: ['']
+          """)
 
   def test_storage_class(self):
     schema = config_helper.Schema.load_yaml("""
@@ -675,6 +848,81 @@ class ConfigHelperTest(unittest.TestCase):
                   type: UNKNOWN
             """))
 
+  def test_partner_and_solution_ids(self):
+    schema_yaml = """
+        x-google-marketplace:
+          schemaVersion: v2
+          partnerId: partner-a
+          applicationApiVersion: v1beta1
+          publishedVersion: 6.5.130-metadata
+          publishedVersionMetadata:
+            releaseNote: Bug fixes
+          images: {}
+        properties: {}
+        """
+    self.assertRaisesRegex(
+        config_helper.InvalidSchema,
+        r'x-google-marketplace.partnerId and x-google-marketplace.solutionId.*',
+        lambda: config_helper.Schema.load_yaml(schema_yaml))
+
+    schema_yaml = """
+        x-google-marketplace:
+          schemaVersion: v2
+          solutionId: solution-a
+          applicationApiVersion: v1beta1
+          publishedVersion: 6.5.130-metadata
+          publishedVersionMetadata:
+            releaseNote: Bug fixes
+          images: {}
+        properties: {}
+        """
+    self.assertRaisesRegex(
+        config_helper.InvalidSchema,
+        r'x-google-marketplace.partnerId and x-google-marketplace.solutionId.*',
+        lambda: config_helper.Schema.load_yaml(schema_yaml))
+
+    schema_yaml = """
+        x-google-marketplace:
+          schemaVersion: v2
+          partnerId: partner-a
+          solutionId: solution-a
+          applicationApiVersion: v1beta1
+          publishedVersion: 6.5.130-metadata
+          publishedVersionMetadata:
+            releaseNote: Bug fixes
+          images: {}
+        properties: {}
+        """
+    schema = config_helper.Schema.load_yaml(schema_yaml)
+    self.assertEqual('partner-a', schema.x_google_marketplace.partner_id)
+    self.assertEqual('solution-a', schema.x_google_marketplace.solution_id)
+
+  def test_image_properties_are_not_allowed_in_v2(self):
+    schema = config_helper.Schema.load_yaml("""
+        x-google-marketplace:
+          schemaVersion: v2
+
+          applicationApiVersion: v1beta1
+
+          publishedVersion: 6.5.130-metadata
+          publishedVersionMetadata:
+            releaseNote: Bug fixes
+          images:
+            main:
+              properties:
+                main.image:
+                  type: FULL
+        properties:
+          image:
+            type: string
+            default: gcr.io/a/b:1.0
+            x-google-marketplace:
+              type: IMAGE
+        """)
+    self.assertRaisesRegex(config_helper.InvalidSchema,
+                           r'.*x-google-marketplace.type=IMAGE.*',
+                           lambda: schema.validate())
+
   def test_v2_fields(self):
     schema = config_helper.Schema.load_yaml("""
         x-google-marketplace:
@@ -682,7 +930,7 @@ class ConfigHelperTest(unittest.TestCase):
 
           applicationApiVersion: v1beta1
 
-          publishedVersion: 6.5.130
+          publishedVersion: 6.5.130-metadata
           publishedVersionMetadata:
             releaseNote: Bug fixes
             releaseTypes:
@@ -711,7 +959,8 @@ class ConfigHelperTest(unittest.TestCase):
     self.assertTrue(schema.x_google_marketplace.is_v2())
     self.assertEqual(schema.x_google_marketplace.app_api_version, 'v1beta1')
 
-    self.assertEqual(schema.x_google_marketplace.published_version, '6.5.130')
+    self.assertEqual(schema.x_google_marketplace.published_version,
+                     '6.5.130-metadata')
     version_meta = schema.x_google_marketplace.published_version_meta
     self.assertEqual(version_meta.release_note, 'Bug fixes')
     self.assertListEqual(version_meta.release_types, ['BUG_FIX'])
@@ -736,6 +985,27 @@ class ConfigHelperTest(unittest.TestCase):
 
     self.assertEqual(schema.x_google_marketplace.managed_updates.kalm_supported,
                      True)
+
+  def test_publishedVersion_semver(self):
+    with self.assertRaisesRegex(config_helper.InvalidSchema,
+                                'Invalid schema publishedVersion "6.5"'):
+      config_helper.Schema.load_yaml("""
+          x-google-marketplace:
+            schemaVersion: v2
+            applicationApiVersion: v1beta1
+
+            publishedVersion: '6.5'
+            publishedVersionMetadata:
+              releaseNote: Bug fixes
+            images:
+              main:
+                properties:
+                  main.image:
+                    type: FULL
+          properties:
+            simple:
+              type: string
+          """)
 
   def test_k8s_version_constraint(self):
     schema = config_helper.Schema.load_yaml("""
@@ -768,15 +1038,25 @@ class ConfigHelperTest(unittest.TestCase):
                 simpleNodeAffinity:
                   type: REQUIRE_ONE_NODE_PER_REPLICA
             - replicas: 5
+              requests:
+                cpu: 50m
               affinity:
                 simpleNodeAffinity:
                   type: REQUIRE_MINIMUM_NODE_COUNT
                   minimumNodeCount: 4
+            - requests:
+                gpu:
+                  nvidia.com/gpu:
+                    limits: 2
+                    platforms:
+                    - nvidia-tesla-k80
+                    - nvidia-tesla-k100
         """)
     schema.validate()
     resources = schema.x_google_marketplace.cluster_constraints.resources
     self.assertTrue(isinstance(resources, list))
-    self.assertEqual(len(resources), 2)
+    self.assertEqual(len(resources), 3)
+
     self.assertEqual(resources[0].replicas, 3)
     self.assertEqual(resources[0].requests.cpu, '100m')
     self.assertEqual(resources[0].requests.memory, '512Gi')
@@ -785,11 +1065,178 @@ class ConfigHelperTest(unittest.TestCase):
     self.assertIsNone(
         resources[0].affinity.simple_node_affinity.minimum_node_count)
     self.assertEqual(resources[1].replicas, 5)
-    self.assertIsNone(resources[1].requests)
+    self.assertEqual(resources[1].requests.cpu, '50m')
     self.assertEqual(resources[1].affinity.simple_node_affinity.affinity_type,
                      'REQUIRE_MINIMUM_NODE_COUNT')
     self.assertEqual(
         resources[1].affinity.simple_node_affinity.minimum_node_count, 4)
+
+    self.assertEqual(len(resources[2].requests.gpu), 1)
+    self.assertEqual(resources[2].requests.gpu['nvidia.com/gpu'].limits, 2)
+    self.assertEqual(resources[2].requests.gpu['nvidia.com/gpu'].platforms,
+                     ['nvidia-tesla-k80', 'nvidia-tesla-k100'])
+
+  def test_resource_constraints_resources_not_list_invalid(self):
+    with self.assertRaisesRegex(config_helper.InvalidSchema,
+                                'resources must be a list'):
+      config_helper.Schema.load_yaml("""
+          applicationApiVersion: v1beta1
+          properties:
+            simple:
+              type: string
+          x-google-marketplace:
+            clusterConstraints:
+              resources:
+                replicas: 2
+          """)
+
+  def test_resource_constraints_missing_requests_invalid(self):
+    with self.assertRaisesRegex(config_helper.InvalidSchema,
+                                'must specify requests'):
+      config_helper.Schema.load_yaml("""
+          applicationApiVersion: v1beta1
+          properties:
+            simple:
+              type: string
+          x-google-marketplace:
+            clusterConstraints:
+              resources:
+              - replicas: 2
+          """)
+
+  def test_resource_constraints_empty_requests_invalid(self):
+    with self.assertRaisesRegex(config_helper.InvalidSchema,
+                                'must specify at least one of cpu'):
+      config_helper.Schema.load_yaml("""
+          applicationApiVersion: v1beta1
+          properties:
+            simple:
+              type: string
+          x-google-marketplace:
+            clusterConstraints:
+              resources:
+              - replicas: 2
+                requests: {}
+          """)
+
+  def test_resource_constraints_gpu_and_other_requests_invalid(self):
+    with self.assertRaisesRegex(config_helper.InvalidSchema,
+                                'must not specify cpu'):
+      config_helper.Schema.load_yaml("""
+          applicationApiVersion: v1beta1
+          properties:
+            simple:
+              type: string
+          x-google-marketplace:
+            clusterConstraints:
+              resources:
+              - requests:
+                  cpu: 200m
+                  gpu:
+                    nvidia.com/gpu: {}
+          """)
+
+  def test_resource_constraints_multiple_gpu_constraints_invalid(self):
+    with self.assertRaisesRegex(config_helper.InvalidSchema,
+                                'one request may include GPUs'):
+      config_helper.Schema.load_yaml("""
+          applicationApiVersion: v1beta1
+          properties:
+            simple:
+              type: string
+          x-google-marketplace:
+            clusterConstraints:
+              resources:
+              - requests:
+                  gpu:
+                    nvidia.com/gpu:
+                      limits: 2
+              - requests:
+                  gpu:
+                    nvidia.com/gpu: {}
+          """)
+
+  def test_resource_constraints_gpu_affinity_invalid(self):
+    with self.assertRaisesRegex(config_helper.InvalidSchema,
+                                'Affinity unsupported for GPU'):
+      config_helper.Schema.load_yaml("""
+          applicationApiVersion: v1beta1
+          properties:
+            simple:
+              type: string
+          x-google-marketplace:
+            clusterConstraints:
+              resources:
+              - requests:
+                  gpu:
+                    nvidia.com/gpu: {}
+                affinity:
+                  simpleNodeAffinity:
+                    type: REQUIRE_MINIMUM_NODE_COUNT
+                    minimumNodeCount: 2
+          """)
+
+  def test_resource_constraints_gpu_replicas_invalid(self):
+    with self.assertRaisesRegex(config_helper.InvalidSchema,
+                                'Replicas unsupported for GPU'):
+      config_helper.Schema.load_yaml("""
+          applicationApiVersion: v1beta1
+          properties:
+            simple:
+              type: string
+          x-google-marketplace:
+            clusterConstraints:
+              resources:
+              - requests:
+                  gpu:
+                    nvidia.com/gpu: {}
+                replicas: 2
+          """)
+
+  def test_resource_constraints_gpu_not_map_invalid(self):
+    with self.assertRaisesRegex(config_helper.InvalidSchema, 'must be a map'):
+      config_helper.Schema.load_yaml("""
+          applicationApiVersion: v1beta1
+          properties:
+            simple:
+              type: string
+          x-google-marketplace:
+            clusterConstraints:
+              resources:
+              - requests:
+                  gpu: []
+          """)
+
+  def test_resource_constraints_gpu_empty_requests_invalid(self):
+    with self.assertRaisesRegex(config_helper.InvalidSchema,
+                                'GPU requests map must contain'):
+      config_helper.Schema.load_yaml("""
+          applicationApiVersion: v1beta1
+          properties:
+            simple:
+              type: string
+          x-google-marketplace:
+            clusterConstraints:
+              resources:
+              - requests:
+                  gpu: {}
+          """)
+
+  def test_resource_constraints_gpu_unrecognized_provider_invalid(self):
+    with self.assertRaisesRegex(config_helper.InvalidSchema,
+                                'Unsupported GPU provider'):
+      config_helper.Schema.load_yaml("""
+          applicationApiVersion: v1beta1
+          properties:
+            simple:
+              type: string
+          x-google-marketplace:
+            clusterConstraints:
+              resources:
+              - requests:
+                  gpu:
+                    amd.com/gpu: {}
+          """)
 
   def test_istio_valid_type(self):
     schema = config_helper.Schema.load_yaml("""
@@ -807,8 +1254,8 @@ class ConfigHelperTest(unittest.TestCase):
                      "OPTIONAL")
 
   def test_istio_invalid_type(self):
-    with self.assertRaisesRegexp(config_helper.InvalidSchema,
-                                 "Invalid type of istio constraint"):
+    with self.assertRaisesRegex(config_helper.InvalidSchema,
+                                "Invalid type of istio constraint"):
       config_helper.Schema.load_yaml("""
           applicationApiVersion: v1beta1
           properties:
@@ -819,6 +1266,42 @@ class ConfigHelperTest(unittest.TestCase):
               istio:
                 type: INVALID_TYPE
           """)
+
+  def test_required_oauth_scopes_valid(self):
+    schema = config_helper.Schema.load_yaml("""
+      applicationApiVersion: v1beta1
+      properties:
+        simple:
+          type: string
+      x-google-marketplace:
+        clusterConstraints:
+          gcp:
+            nodes:
+              requiredOauthScopes:
+              - https://www.googleapis.com/auth/cloud-platform
+      """)
+    schema.validate()
+    self.assertEqual(
+        schema.x_google_marketplace.cluster_constraints.gcp.nodes
+        .required_oauth_scopes,
+        ["https://www.googleapis.com/auth/cloud-platform"])
+
+  def test_required_oauth_scopes_invalid_scope(self):
+    with self.assertRaisesRegex(
+        config_helper.InvalidSchema,
+        "OAuth scope references must be fully-qualified"):
+      config_helper.Schema.load_yaml("""
+        applicationApiVersion: v1beta1
+        properties:
+          simple:
+            type: string
+        x-google-marketplace:
+          clusterConstraints:
+            gcp:
+              nodes:
+                requiredOauthScopes:
+                - cloud-platform
+        """)
 
   def test_deployer_service_account(self):
     schema = config_helper.Schema.load_yaml("""
@@ -932,7 +1415,7 @@ class ConfigHelperTest(unittest.TestCase):
     self.assertEqual(schema.app_api_version, 'v1beta1')
 
   def test_validate_missing_app_api_version(self):
-    self.assertRaisesRegexp(
+    self.assertRaisesRegex(
         config_helper.InvalidSchema, 'applicationApiVersion',
         lambda: config_helper.Schema.load_yaml("""
             properties:
@@ -941,7 +1424,7 @@ class ConfigHelperTest(unittest.TestCase):
             """).validate())
 
   def test_validate_bad_form_too_many_items(self):
-    self.assertRaisesRegexp(
+    self.assertRaisesRegex(
         config_helper.InvalidSchema, 'form',
         lambda: config_helper.Schema.load_yaml("""
             applicationApiVersion: v1beta1
@@ -953,7 +1436,7 @@ class ConfigHelperTest(unittest.TestCase):
             """).validate())
 
   def test_validate_bad_form_missing_type(self):
-    self.assertRaisesRegexp(
+    self.assertRaisesRegex(
         config_helper.InvalidSchema, 'form',
         lambda: config_helper.Schema.load_yaml("""
             applicationApiVersion: v1beta1
@@ -962,7 +1445,7 @@ class ConfigHelperTest(unittest.TestCase):
             """).validate())
 
   def test_validate_bad_form_unrecognized_type(self):
-    self.assertRaisesRegexp(
+    self.assertRaisesRegex(
         config_helper.InvalidSchema, 'form',
         lambda: config_helper.Schema.load_yaml("""
             applicationApiVersion: v1beta1
@@ -972,13 +1455,32 @@ class ConfigHelperTest(unittest.TestCase):
             """).validate())
 
   def test_validate_bad_form_missing_description(self):
-    self.assertRaisesRegexp(
+    self.assertRaisesRegex(
         config_helper.InvalidSchema, 'form',
         lambda: config_helper.Schema.load_yaml("""
             applicationApiVersion: v1beta1
             form:
             - widget: help
             """).validate())
+
+  def test_read_values_to_dict(self):
+    dirname = tempfile.mkdtemp()
+    with open(os.path.join(dirname, "file1"), "w") as stream:
+      stream.write("value1")
+    with open(os.path.join(dirname, "file2"), "w") as stream:
+      stream.write("2")
+
+    schema = """
+    properties:
+      key1:
+        type: string
+      key2:
+        type: number
+    """
+    expected_values = {"file1": u"value1", "file2": u"2"}
+    actual_values = config_helper._read_values_to_dict(
+        dirname, config_helper.Schema.load_yaml(schema))
+    self.assertEqual(actual_values, expected_values)
 
 
 if __name__ == 'main':

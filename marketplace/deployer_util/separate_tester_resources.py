@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 # Copyright 2018 Google LLC
 #
@@ -20,7 +20,7 @@ import yaml
 from argparse import ArgumentParser
 from constants import GOOGLE_CLOUD_TEST
 from dict_util import deep_get
-from resources import set_resource_ownership
+from resources import set_app_resource_ownership
 from yaml_util import load_resources_yaml
 
 _PROG_HELP = "Separate the tester job from resources manifest into a different manifest"
@@ -30,9 +30,9 @@ def main():
 
   parser = ArgumentParser(description=_PROG_HELP)
   parser.add_argument(
-      "--app_name", required=True, help="the name of the applictation instance")
+      "--app_name", required=True, help="the name of the application instance")
   parser.add_argument(
-      "--app_uid", required=True, help="the uid of the applictation instance")
+      "--app_uid", required=True, help="the uid of the application instance")
   parser.add_argument(
       "--app_api_version",
       required=True,
@@ -64,7 +64,7 @@ def main():
     if deep_get(resource, 'metadata', 'annotations',
                 GOOGLE_CLOUD_TEST) == 'test':
       print("INFO Tester resource: {}".format(full_name))
-      set_resource_ownership(
+      set_app_resource_ownership(
           app_uid=args.app_uid,
           app_name=args.app_name,
           app_api_version=args.app_api_version,
@@ -75,11 +75,11 @@ def main():
       nontest_resources.append(resource)
 
   if nontest_resources:
-    with open(args.out_manifests, "w") as outfile:
+    with open(args.out_manifests, "w", encoding='utf-8') as outfile:
       yaml.safe_dump_all(nontest_resources, outfile, default_flow_style=False)
 
   if test_resources:
-    with open(args.out_test_manifests, "a") as test_outfile:
+    with open(args.out_test_manifests, "a", encoding='utf-8') as test_outfile:
       yaml.safe_dump_all(test_resources, test_outfile, default_flow_style=False)
 
 
