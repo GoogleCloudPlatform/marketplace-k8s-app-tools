@@ -89,7 +89,7 @@ spec:
 
 This describes the application and is used in the GKE Applications UI.
 
-It's important to note that partner_id and product_id must match the values 
+It's important to note that `partner_id` and `product_id` must match the values 
 declared in the schema, `partnerId` and `solutionId` respectively, which must also 
 match your listing ID in Marketplace.
 
