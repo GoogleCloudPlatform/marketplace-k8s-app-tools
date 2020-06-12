@@ -45,11 +45,10 @@ RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add - && \
 
 RUN mkdir -p /bin/helm-downloaded \
      && wget -q -O /bin/helm-downloaded/helm.tar.gz \
-        https://storage.googleapis.com/kubernetes-helm/helm-v2.10.0-linux-amd64.tar.gz \
+        https://get.helm.sh/helm-v3.2.2-linux-amd64.tar.gz \
      && tar -zxvf /bin/helm-downloaded/helm.tar.gz -C /bin/helm-downloaded \
      && mv /bin/helm-downloaded/linux-amd64/helm /bin/ \
-     && rm -rf /bin/helm-downloaded \
-     && helm init --client-only
+     && rm -rf /bin/helm-downloaded
 
 RUN gcloud auth configure-docker
 

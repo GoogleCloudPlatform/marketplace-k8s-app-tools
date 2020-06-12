@@ -154,9 +154,8 @@ steps:
   - -exc
   - |
     mkdir charts-tgz/
-    helm init --client-only
     helm package marketplace/charts/marketplace-integration/ \
-        --version "0.0.0+sha.$COMMIT_SHA" \
+        --version "0.0.0" \
         --destination charts-tgz/
 
     gsutil cp gs://$PROJECT_ID-charts/index.yaml index.yaml

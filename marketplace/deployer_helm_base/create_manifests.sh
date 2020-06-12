@@ -87,8 +87,7 @@ echo "==================="
 # Run helm expansion.
 for chart in "$data_dir/extracted"/*; do
   chart_manifest_file=$(basename "$chart" | sed 's/.tar.gz$//').yaml
-  helm template "$chart/chart" \
-    --name="$NAME" \
+  helm template "$NAME" "$chart/chart" \
     --namespace="$NAMESPACE" \
     --values=<(/bin/print_config.py --output=yaml) \
     > "$manifest_dir/$chart_manifest_file"

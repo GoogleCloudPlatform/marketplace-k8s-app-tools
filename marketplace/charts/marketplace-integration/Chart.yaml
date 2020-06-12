@@ -8,3 +8,4 @@ maintainers:
 - email: cloud-marketplace-tools@google.com
   name: Marketplace Tools
 name: marketplace-integration
+version: 1.0.0

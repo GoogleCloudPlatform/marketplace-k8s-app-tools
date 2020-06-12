@@ -45,7 +45,6 @@ steps:
   - -ceux
   - |
     mkdir charts-tgz/
-    helm init --client-only
     helm package marketplace/charts/marketplace-integration/ \
         --version $TAG_NAME \
         --destination charts-tgz/
