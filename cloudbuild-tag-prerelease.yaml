@@ -24,6 +24,12 @@ steps:
     docker pull gcr.io/$_STAGING_PROJECT_ID/k8s/deployer_helm/onbuild:sha_$COMMIT_SHA
     docker tag gcr.io/$_STAGING_PROJECT_ID/k8s/deployer_helm/onbuild:sha_$COMMIT_SHA gcr.io/$PROJECT_ID/k8s/deployer_helm/onbuild:$TAG_NAME
 
+    docker pull gcr.io/$_STAGING_PROJECT_ID/k8s/deployer_helmv2:sha_$COMMIT_SHA
+    docker tag gcr.io/$_STAGING_PROJECT_ID/k8s/deployer_helmv2:sha_$COMMIT_SHA gcr.io/$PROJECT_ID/k8s/deployer_helmv2:$TAG_NAME
+
+    docker pull gcr.io/$_STAGING_PROJECT_ID/k8s/deployer_helmv2/onbuild:sha_$COMMIT_SHA
+    docker tag gcr.io/$_STAGING_PROJECT_ID/k8s/deployer_helmv2/onbuild:sha_$COMMIT_SHA gcr.io/$PROJECT_ID/k8s/deployer_helmv2/onbuild:$TAG_NAME
+
     docker pull gcr.io/$_STAGING_PROJECT_ID/k8s/deployer_helm_tiller:sha_$COMMIT_SHA
     docker tag gcr.io/$_STAGING_PROJECT_ID/k8s/deployer_helm_tiller:sha_$COMMIT_SHA gcr.io/$PROJECT_ID/k8s/deployer_helm_tiller:$TAG_NAME
 
@@ -57,6 +63,8 @@ images:
 - gcr.io/$PROJECT_ID/k8s/dev:$TAG_NAME
 - gcr.io/$PROJECT_ID/k8s/deployer_helm:$TAG_NAME
 - gcr.io/$PROJECT_ID/k8s/deployer_helm/onbuild:$TAG_NAME
+- gcr.io/$PROJECT_ID/k8s/deployer_helmv2:$TAG_NAME
+- gcr.io/$PROJECT_ID/k8s/deployer_helmv2/onbuild:$TAG_NAME
 - gcr.io/$PROJECT_ID/k8s/deployer_helm_tiller:$TAG_NAME
 - gcr.io/$PROJECT_ID/k8s/deployer_helm_tiller/onbuild:$TAG_NAME
 - gcr.io/$PROJECT_ID/k8s/deployer_envsubst:$TAG_NAME
