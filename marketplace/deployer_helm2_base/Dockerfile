@@ -31,7 +31,7 @@ RUN mkdir -p /bin/helm-downloaded \
     && mv /bin/helm-downloaded/linux-amd64/helm /bin/ \
     && rm -rf /bin/helm-downloaded
 
-COPY marketplace/deployer_helmv2_base/* /bin/
+COPY marketplace/deployer_helm2_base/* /bin/
 COPY marketplace/deployer_util/* /bin/
 ARG VERSION
 RUN echo "$VERSION" > /version
