@@ -44,6 +44,9 @@ steps:
     docker pull gcr.io/$_STAGING_PROJECT_ID/k8s/deployer_envsubst:sha_$COMMIT_SHA
     docker tag gcr.io/$_STAGING_PROJECT_ID/k8s/deployer_envsubst:sha_$COMMIT_SHA gcr.io/$PROJECT_ID/k8s/deployer_envsubst:$TAG_NAME
 
+    docker pull gcr.io/$_STAGING_PROJECT_ID/k8s/deployer_envsubst/onbuild:sha_$COMMIT_SHA
+    docker tag gcr.io/$_STAGING_PROJECT_ID/k8s/deployer_envsubst/onbuild:sha_$COMMIT_SHA gcr.io/$PROJECT_ID/k8s/deployer_envsubst/onbuild:$TAG_NAME
+
 - id: &DetermineShouldTagLatest Determine if images should be tagged latest
   name: gcr.io/cloud-builders/gcloud
   waitFor:
