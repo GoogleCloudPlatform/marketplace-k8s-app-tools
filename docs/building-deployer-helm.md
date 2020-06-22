@@ -162,6 +162,11 @@ content:
 FROM gcr.io/cloud-marketplace-tools/k8s/deployer_helm/onbuild
 ```
 
+**Note:** The helm deployer has been upgraded to use helm v3. The helm deployer
+only uses `helm template` functionality, but if your chart is incompatible
+with helm3, you can use the helm v2 deployer
+`gcr.io/cloud-marketplace-tools/k8s/deployer_helm2/onbuild` instead.
+
 Then you can build your container as follows:
 
 ```shell
@@ -186,7 +191,7 @@ Create a new namespace to cleanly deploy your app:
 ```shell
 kubectl create namespace test-ns
 
-mpdev /scripts/install \
+mpdev install \
   --deployer=$REGISTRY/$APP_NAME/deployer \
   --parameters='{"name": "test-deployment", "namespace": "test-ns"}'
 ```
