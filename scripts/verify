@@ -164,7 +164,6 @@ name_key="$(extract_schema_key.py \
 namespace_key="$(extract_schema_key.py \
     --schema_file=/data/schema.yaml \
     --type NAMESPACE)"
-fi
 set -e
 
 export NAME="apptest-$test_id"
