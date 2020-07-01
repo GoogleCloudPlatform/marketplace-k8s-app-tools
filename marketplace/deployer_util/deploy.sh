@@ -67,6 +67,7 @@ if [[ "${schema_errors}" ]]; then
   echo "WARNING: schema contains the following incompatibilities with the current deployer"
   echo "${schema_errors}"
   echo "-------------------------------"
+fi
 set -e
 
 create_manifests.sh
