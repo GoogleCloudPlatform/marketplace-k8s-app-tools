@@ -154,12 +154,18 @@ function random_string() {
 test_id="$(random_string)"
 
 # Extract keys for name and namespace.
+# This involves parsing and validating the schema.
+# The deployer will enforce a valid schema at its version,
+# so we suppress validation errors here. We will warn on them later.
+set +e
 name_key="$(extract_schema_key.py \
     --schema_file=/data/schema.yaml \
     --type NAME)"
 namespace_key="$(extract_schema_key.py \
     --schema_file=/data/schema.yaml \
     --type NAMESPACE)"
+fi
+set -e
 
 export NAME="apptest-$test_id"
 export NAMESPACE="apptest-$test_id"
