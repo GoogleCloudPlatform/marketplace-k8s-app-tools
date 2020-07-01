@@ -858,6 +858,7 @@ class SchemaXServiceAccount:
   """Accesses SERVICE_ACCOUNT property."""
 
   def __init__(self, dictionary):
+    self._permissionExplanation = dictionary.get('permissionExplanation', None)
     self._roles = dictionary.get('roles', [])
     for role in self._roles:
       if role.get('rulesType') == 'PREDEFINED':
