@@ -36,7 +36,6 @@ def main():
   args = parser.parse_args()
 
   schema = schema_values_common.load_schema(args)
-  schema.validate()
   if (schema.x_google_marketplace is None or
       not schema.x_google_marketplace.is_v2()):
     if args.empty_if_not_supported:
@@ -44,6 +43,8 @@ def main():
       sys.stderr.flush()
       return
     raise Exception('schema.yaml must be in v2 version')
+  if not schema.x_google_marketplace.published_version:
+    raise Exception('schema.yaml is missing x_google_marketplace.published_version')
 
   sys.stdout.write(schema.x_google_marketplace.published_version)
   sys.stdout.flush()
