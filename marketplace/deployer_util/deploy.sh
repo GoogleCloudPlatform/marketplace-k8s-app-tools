@@ -57,18 +57,7 @@ app_api_version=$(kubectl get "applications.app.k8s.io/$NAME" \
   --namespace="$NAMESPACE" \
   --output=jsonpath='{.apiVersion}')
 
-# The deployer will enforce a valid schema at its version.
-# The dev image (latest) may have new requirements, so we warn on
-# schema validation failures instead of failing.
-set +e
-schema_errors=$(/bin/expand_config.py --values_mode raw --app_uid "$app_uid" 2>&1)
-if [[ "${schema_errors}" ]]; then
-  echo "-------------------------------"
-  echo "WARNING: schema contains the following incompatibilities with the current deployer"
-  echo "${schema_errors}"
-  echo "-------------------------------"
-fi
-set -e
+bin/expand_config.py --values_mode raw --app_uid "$app_uid"
 
 create_manifests.sh
 

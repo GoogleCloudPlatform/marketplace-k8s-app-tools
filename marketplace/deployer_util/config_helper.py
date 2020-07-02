@@ -858,13 +858,6 @@ class SchemaXServiceAccount:
   """Accesses SERVICE_ACCOUNT property."""
 
   def __init__(self, dictionary):
-    self._description = dictionary.get('description', None)
-    if not self._description:
-      raise InvalidSchema(
-          'SERVICE_ACCOUNT property must have a description'
-          'indicating purpose and permission requirements; see docs:'
-          'https://github.com/GoogleCloudPlatform/marketplace-k8s-app-tools/blob/master/docs/schema.md#type-service_account'
-      )
     self._roles = dictionary.get('roles', [])
     for role in self._roles:
       if role.get('rulesType') == 'PREDEFINED':

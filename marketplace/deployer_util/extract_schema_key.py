@@ -40,7 +40,12 @@ def main():
       required=True)
   args = parser.parse_args()
 
-  schema = config_helper.Schema.load_yaml_file(args.schema_file)
+  try:
+    schema = config_helper.Schema.load_yaml_file(args.schema_file)
+  except InvalidSchema:
+    # No-op: suppress schema validation errors
+    pass
+
   sys.stdout.write('\n'.join(
       [k for k, v in schema.properties.items() if v.xtype == args.type]))
 
