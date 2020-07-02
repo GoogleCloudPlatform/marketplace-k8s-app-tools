@@ -44,7 +44,8 @@ def main():
       return
     raise Exception('schema.yaml must be in v2 version')
   if not schema.x_google_marketplace.published_version:
-    raise Exception('schema.yaml is missing x_google_marketplace.published_version')
+    raise Exception(
+        'schema.yaml is missing x_google_marketplace.published_version')
 
   sys.stdout.write(schema.x_google_marketplace.published_version)
   sys.stdout.flush()
