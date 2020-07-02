@@ -153,6 +153,7 @@ function random_string() {
 # Compose test id.
 test_id="$(random_string)"
 
+# Extract keys for name and namespace.
 name_key="$(extract_schema_key.py \
     --schema_file=/data/schema.yaml \
     --type NAME)"

@@ -57,7 +57,7 @@ app_api_version=$(kubectl get "applications.app.k8s.io/$NAME" \
   --namespace="$NAMESPACE" \
   --output=jsonpath='{.apiVersion}')
 
-bin/expand_config.py --values_mode raw --app_uid "$app_uid"
+/bin/expand_config.py --values_mode raw --app_uid "$app_uid"
 
 create_manifests.sh
 
