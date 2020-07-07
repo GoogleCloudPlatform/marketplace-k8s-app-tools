@@ -562,7 +562,7 @@ properties:
       serviceAccount:
         description: >
           Monitors cluster-wide app dependencies (such as x and y),
-          managing CoreOS application instances and their etcdclusters. (??)
+          managing CoreOS application instances and their etcdclusters.
         roles:
         - type: ClusterRole        # This is a cluster-wide ClusterRole
           rulesType: PREDEFINED
