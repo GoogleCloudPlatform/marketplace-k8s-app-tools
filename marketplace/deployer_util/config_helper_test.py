@@ -641,6 +641,26 @@ class ConfigHelperTest(unittest.TestCase):
         },
     ]], sa.custom_role_rules())
 
+  def test_service_account_missing_description_enforced_validate(self):
+    schema = config_helper.Schema.load_yaml("""
+        applicationApiVersion: v1beta1
+        properties:
+          sa:
+            type: string
+            description: unused property description
+            x-google-marketplace:
+              type: SERVICE_ACCOUNT
+              serviceAccount:
+                # required description goes here
+                roles:
+                - type: Role
+                  rulesType: PREDEFINED
+                  rulesFromRoleName: view
+        """)
+    with self.assertRaisesRegex(config_helper.InvalidSchema,
+                                'must have a `description`'):
+      schema.validate()
+
   def test_service_account_missing_rulesType(self):
     with self.assertRaisesRegex(
         config_helper.InvalidSchema,

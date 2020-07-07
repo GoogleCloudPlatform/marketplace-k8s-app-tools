@@ -160,6 +160,13 @@ class Schema:
               'schema v2. Images must be declared in the top level '
               'x-google-marketplace.images')
 
+    # Backward-incompatible validations that should only be enforced upon
+    # base deployer update (instead of immediately) should be added here
+    # instead of in class construction.
+    for _, p in self._properties.items():
+      if p.xtype == XTYPE_SERVICE_ACCOUNT:
+        p.service_account.validate()
+
   @property
   def x_google_marketplace(self):
     return self._x_google_marketplace
@@ -858,7 +865,7 @@ class SchemaXServiceAccount:
   """Accesses SERVICE_ACCOUNT property."""
 
   def __init__(self, dictionary):
-    self._permissionExplanation = dictionary.get('permissionExplanation', None)
+    self._description = dictionary.get('description', None)
     self._roles = dictionary.get('roles', [])
     for role in self._roles:
       if role.get('rulesType') == 'PREDEFINED':
@@ -918,6 +925,15 @@ class SchemaXServiceAccount:
         for role in self._roles
         if role['type'] == 'ClusterRole' and role['rulesType'] == 'PREDEFINED'
     ]
+
+  def validate(self):
+    """Performs non-init-time validations on the property."""
+    if not self._description:
+      raise InvalidSchema(
+          'SERVICE_ACCOUNT property must have a `description` '
+          'explaining purpose and permission requirements. See docs: '
+          'https://github.com/GoogleCloudPlatform/marketplace-k8s-app-tools/blob/master/docs/schema.md#type-service_account'
+      )
 
 
 class SchemaXStorageClass:

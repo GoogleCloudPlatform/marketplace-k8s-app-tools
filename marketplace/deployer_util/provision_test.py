@@ -142,6 +142,7 @@ class ProvisionTest(unittest.TestCase):
           images: {}
 
           deployerServiceAccount:
+            description: test permission explanation
             roles:
             - type: Role
               rulesType: CUSTOM
@@ -312,6 +313,7 @@ class ProvisionTest(unittest.TestCase):
           images: {}
 
           deployerServiceAccount:
+            description: test permission explanation
             roles:
             - type: ClusterRole
               rulesType: PREDEFINED
@@ -392,6 +394,7 @@ class ProvisionTest(unittest.TestCase):
             type: string
             x-google-marketplace:
               type: SERVICE_ACCOUNT
+              description: test permission explanation
           storageClass:
             type: string
             x-google-marketplace:
@@ -428,6 +431,7 @@ class ProvisionTest(unittest.TestCase):
             kalmSupported: {}
 
           deployerServiceAccount:
+            description: test permission explanation
             roles:
             - type: Role
               rulesType: CUSTOM
@@ -450,6 +454,7 @@ class ProvisionTest(unittest.TestCase):
             type: string
             x-google-marketplace:
               type: SERVICE_ACCOUNT
+              description: test permission explanation
               serviceAccount:
                 roles:
                 - type: ClusterRole
