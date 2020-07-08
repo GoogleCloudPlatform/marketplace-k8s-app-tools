@@ -164,6 +164,17 @@ namespace_key="$(extract_schema_key.py \
 export NAME="apptest-$test_id"
 export NAMESPACE="apptest-$test_id"
 
+# Validate the schema, outputting any errors as a warning.
+set +e
+validation_errors=$(/bin/validate_schema.py --values_mode raw 2>&1)
+if [[ -n "$validation_errors" ]]; then
+  echo "=== SCHEMA VALIDATION WARNING ==="
+  echo "WARNING: Schema is incompatible with the latest deployer, would fail with:"
+  echo "$validation_errors"
+  echo "=================================="
+fi
+set -e
+
 # Stitch in name and namespace parameters.
 parameters=$(echo "$parameters" \
   | jq ".\"$name_key\" = \"$NAME\" | .\"$namespace_key\" = \"$NAMESPACE\"")
