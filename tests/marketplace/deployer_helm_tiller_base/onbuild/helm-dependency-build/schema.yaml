@@ -28,7 +28,7 @@ properties:
         roles:
         - type: Role
           rulesType: PREDEFINED
-          rulesFromRoleName: admin
+          rulesFromRoleName: cluster-admin
 required:
 - name
 - namespace

@@ -31,7 +31,7 @@ properties:
         roles:
         - type: Role
           rulesType: PREDEFINED
-          rulesFromRoleName: admin
+          rulesFromRoleName: cluster-admin
   certificate:
     type: string
     x-google-marketplace:
