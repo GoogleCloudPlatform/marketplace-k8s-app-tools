@@ -14,27 +14,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import base64
-import json
-import os
 from argparse import ArgumentParser
 
-import yaml
-
-import config_helper
-import property_generator
 import schema_values_common
 
 _PROG_HELP = """
 Parses and validates the schema.
 """
 
+
 def main():
   parser = ArgumentParser(description=_PROG_HELP)
   schema_values_common.add_to_argument_parser(parser)
   args = parser.parse_args()
 
-  schema = schema_values_common.load_schema_and_validate(args)
+  schema_values_common.load_schema_and_validate(args)
+
 
 if __name__ == "__main__":
   main()

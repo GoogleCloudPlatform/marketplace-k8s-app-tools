@@ -60,9 +60,11 @@ def memoize(func):
 def load_schema(parsed_args):
   return config_helper.Schema.load_yaml_file(parsed_args.schema_file)
 
+
 @memoize
 def load_schema_and_validate(parsed_args):
   return config_helper.Schema.load_yaml_file(parsed_args.schema_file).validate()
+
 
 @memoize
 def load_values(parsed_args):
