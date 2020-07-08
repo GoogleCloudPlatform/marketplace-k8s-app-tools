@@ -111,6 +111,14 @@ function print_summary() {
     echo "$deployer_errors" >> "$error_summary_path"
   fi
 
+  if [[ -n "$validation_errors" ]]; then
+    echo "=== SCHEMA VALIDATION WARNING ==="
+    echo "WARNING: Schema is incompatible with the latest deployer, would fail with:"
+    echo
+    echo "$validation_errors"
+    echo "=================================="
+  fi
+
   if [[ -s "$error_summary_path" ]]; then
     echo "=== ERROR SUMMARY ==="
     cat "$error_summary_path"
@@ -167,12 +175,6 @@ export NAMESPACE="apptest-$test_id"
 # Validate the schema, outputting any errors as a warning.
 set +e
 validation_errors=$(/bin/validate_schema.py --values_mode raw 2>&1)
-if [[ -n "$validation_errors" ]]; then
-  echo "=== SCHEMA VALIDATION WARNING ==="
-  echo "WARNING: Schema is incompatible with the latest deployer, would fail with:"
-  echo "$validation_errors"
-  echo "=================================="
-fi
 set -e
 
 # Stitch in name and namespace parameters.
