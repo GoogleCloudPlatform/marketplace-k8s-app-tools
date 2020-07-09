@@ -123,7 +123,14 @@ class Schema:
     self._form = dictionary.get('form', [])
 
   def validate(self):
-    """Fully validates the schema, raising InvalidSchema if fails."""
+    """
+    Fully validates the schema, raising InvalidSchema if fails.
+
+    Intended for backward-incompatible validations that should only be
+    enforced upon base deployer update, as opposed to validations added
+    in class construction which are enforced immediately upon tools repo
+    release.
+    """
     bad_required_names = [
         x for x in self._required if x not in self._properties
     ]
@@ -160,9 +167,6 @@ class Schema:
               'schema v2. Images must be declared in the top level '
               'x-google-marketplace.images')
 
-    # Backward-incompatible validations that should only be enforced upon
-    # base deployer update (instead of immediately) should be added here
-    # instead of in class construction.
     for _, p in self._properties.items():
       if p.xtype == XTYPE_SERVICE_ACCOUNT:
         p.service_account.validate()
