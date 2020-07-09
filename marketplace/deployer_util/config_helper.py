@@ -931,7 +931,7 @@ class SchemaXServiceAccount:
     ]
 
   def validate(self):
-    """Performs non-init-time validations on the property."""
+    """Called by Schema.validate(); for backwards-incompatible checks."""
     if not self._description:
       raise InvalidSchema(
           'SERVICE_ACCOUNT property must have a `description` '
