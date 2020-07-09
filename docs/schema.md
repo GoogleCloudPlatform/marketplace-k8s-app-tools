@@ -547,7 +547,8 @@ All service accounts need to be defined as parameters in `schema.yaml`.
 
 If you add a Kubernetes `ServiceAccount` as a resource in your manifest, the
 deployment fails with an authentication error, because the deployer doesn't run
-with enough privileges to create a Service Account.
+with enough privileges to create a Service Account. When permissions involve
+modifying resources, custom roles are prefered over predefined roles.
 
 For example, the following `schema.yaml` snippet adds a Service Account with
 Cluster Roles:
@@ -559,23 +560,30 @@ properties:
     x-google-marketplace:
       type: SERVICE_ACCOUNT
       serviceAccount:
+        description: >
+          Monitors cluster-wide app dependencies (such as x and y),
+          managing CoreOS application instances and their etcdclusters.
         roles:
         - type: ClusterRole        # This is a cluster-wide ClusterRole
           rulesType: PREDEFINED
-          rulesFromRoleName: edit  # Use predefined role named "edit"
+          rulesFromRoleName: view  # Use predefined role named "view"
         - type: Role               # This is a namespaced Role
           rulesType: CUSTOM        # We specify our own custom RBAC rules
           rules:
-          - apiGroups: ['apps.kubernetes.io/v1alpha1']
+          - apiGroups: ['apps.kubernetes.io']
             resources: ['applications']
             verbs: ['*']
         - type: ClusterRole
           rulesType: CUSTOM
           rules:
-          - apiGroups: ['etcd.database.coreos.com/v1beta2']
+          - apiGroups: ['etcd.database.coreos.com']
             resources: ['etcdclusters']
             verbs: ['*']
 ```
+
+The `description` field (required) should indicate the service account's purpose
+and explain why it needs the requested permissions, particularly cluster-scoped
+permissions. It will be shown to users in the UI.
 
 #### type: STORAGE_CLASS
 

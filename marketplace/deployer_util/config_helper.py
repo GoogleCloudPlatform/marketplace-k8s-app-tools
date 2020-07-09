@@ -123,7 +123,14 @@ class Schema:
     self._form = dictionary.get('form', [])
 
   def validate(self):
-    """Fully validates the schema, raising InvalidSchema if fails."""
+    """
+    Fully validates the schema, raising InvalidSchema if fails.
+
+    Intended for backward-incompatible validations that should only be
+    enforced upon base deployer update, as opposed to validations added
+    in class construction which are enforced immediately upon tools repo
+    release.
+    """
     bad_required_names = [
         x for x in self._required if x not in self._properties
     ]
@@ -159,6 +166,10 @@ class Schema:
               'No properties should have x-google-marketplace.type=IMAGE in '
               'schema v2. Images must be declared in the top level '
               'x-google-marketplace.images')
+
+    for _, p in self._properties.items():
+      if p.xtype == XTYPE_SERVICE_ACCOUNT:
+        p.service_account.validate()
 
   @property
   def x_google_marketplace(self):
@@ -858,6 +869,7 @@ class SchemaXServiceAccount:
   """Accesses SERVICE_ACCOUNT property."""
 
   def __init__(self, dictionary):
+    self._description = dictionary.get('description', None)
     self._roles = dictionary.get('roles', [])
     for role in self._roles:
       if role.get('rulesType') == 'PREDEFINED':
@@ -917,6 +929,15 @@ class SchemaXServiceAccount:
         for role in self._roles
         if role['type'] == 'ClusterRole' and role['rulesType'] == 'PREDEFINED'
     ]
+
+  def validate(self):
+    """Called by Schema.validate(); for backwards-incompatible checks."""
+    if not self._description:
+      raise InvalidSchema(
+          'SERVICE_ACCOUNT property must have a `description` '
+          'explaining purpose and permission requirements. See docs: '
+          'https://github.com/GoogleCloudPlatform/marketplace-k8s-app-tools/blob/master/docs/schema.md#type-service_account'
+      )
 
 
 class SchemaXStorageClass:
