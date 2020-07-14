@@ -24,6 +24,10 @@ def set_service_account_resource_ownership(account_uid, account_name, resource):
   set_resource_ownership(account_uid, account_name, "v1", "ServiceAccount",
                          resource)
 
+def set_namespace_resource_ownership(namespace_uid, namespace_name, resource):
+  """ Set the namespace as owner of the resource"""
+  set_resource_ownership(namespace_uid, namespace_name, "v1", "Namespace",
+                         resource)
 
 def set_resource_ownership(owner_uid, owner_name, owner_api_version, owner_kind,
                            resource):

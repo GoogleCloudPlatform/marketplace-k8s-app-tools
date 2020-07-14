@@ -80,6 +80,16 @@ def main():
       "If deployer_name is also set, the deployer service account is set "
       "as the owner of namespaced deployer components.")
   parser.add_argument(
+      "--namespace",
+      help="The namespace containing the application. "
+      "If namespace_uid is also set, the namespace is set as the owner"
+      "of cluster-scoped resources (otherwise unowned).")
+    parser.add_argument(
+      "--namespace_uid",
+      help="The namespace containing the application. "
+      "If namespace is also set, the namespace is set as the owner"
+      "of cluster-scoped resources (otherwise unowned).")
+  parser.add_argument(
       "--manifests",
       help="The folder containing the manifest templates, "
       "or - to read from stdin",
@@ -121,6 +131,7 @@ def main():
         sys.stdout,
         resources,
         included_kinds,
+        namespace=args.namespace,
         app_name=args.app_name,
         app_uid=args.app_uid,
         app_api_version=args.app_api_version,
@@ -133,6 +144,7 @@ def main():
           outfile,
           resources,
           included_kinds,
+          namespace=args.namespace,
           app_name=args.app_name,
           app_uid=args.app_uid,
           app_api_version=args.app_api_version,
@@ -140,15 +152,23 @@ def main():
           deployer_uid=args.deployer_uid)
 
 
-def dump(outfile, resources, included_kinds, app_name, app_uid, app_api_version,
+def dump(outfile, resources, included_kinds, namespace, app_name, app_uid, app_api_version,
          deployer_name, deployer_uid):
 
   def maybe_assign_ownership(resource):
     if resource["kind"] in _CLUSTER_SCOPED_KINDS:
       # Cluster-scoped resources cannot be owned by a namespaced resource:
       # https://kubernetes.io/docs/concepts/workloads/controllers/garbage-collection/#owners-and-dependents
-      log.info("Application '{:s}' does not own cluster-scoped '{:s}/{:s}'",
-               app_name, resource["kind"], resource["metadata"]["name"])
+      # Set the namespace as owner if provided, otherwise leave unowned.
+      if namespace and namespace_uid:
+        log.info("Namespace '{:s}' owns '{:s}/{:s}'", namespace,resource["kind"], resource["metadata"]["name"])
+        set_namespace_resource_ownership(
+            namespace_uid=namespace_uid,
+            namespace_name=namespace,
+            resource=resource)
+      elif:
+        log.info("Application '{:s}' does not own cluster-scoped '{:s}/{:s}'",
+                 app_name, resource["kind"], resource["metadata"]["name"])
 
     # Deployer-owned resources should not be owned by the Application, as
     # they should be deleted with the deployer service account (not the app).
