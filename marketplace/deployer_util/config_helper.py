@@ -936,8 +936,8 @@ class SchemaXServiceAccount:
     """Called by Schema.validate(); for backwards-incompatible checks."""
     if not self._description:
       raise InvalidSchema(
-          'SERVICE_ACCOUNT with cluster-scoped permissions must '
-          'have a `description` permission requirements. See docs: '
+          'SERVICE_ACCOUNT must have a `description` '
+          'explaining purpose and permission requirements. See docs: '
           'https://github.com/GoogleCloudPlatform/marketplace-k8s-app-tools/blob/master/docs/schema.md#type-service_account'
       )
 
