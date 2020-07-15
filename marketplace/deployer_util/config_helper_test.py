@@ -653,6 +653,26 @@ class ConfigHelperTest(unittest.TestCase):
               serviceAccount:
                 # required description goes here
                 roles:
+                - type: ClusterRole
+                  rulesType: PREDEFINED
+                  rulesFromRoleName: view
+        """)
+    with self.assertRaisesRegex(config_helper.InvalidSchema,
+                                'must have a `description`'):
+      schema.validate()
+
+  def test_service_account_missing_description_allowed_if_namespaced(self):
+    schema = config_helper.Schema.load_yaml("""
+        applicationApiVersion: v1beta1
+        properties:
+          sa:
+            type: string
+            description: unused property description
+            x-google-marketplace:
+              type: SERVICE_ACCOUNT
+              serviceAccount:
+                # Optional description would go here
+                roles:
                 - type: Role
                   rulesType: PREDEFINED
                   rulesFromRoleName: view
