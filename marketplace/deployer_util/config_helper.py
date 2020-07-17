@@ -166,6 +166,8 @@ class Schema:
               'No properties should have x-google-marketplace.type=IMAGE in '
               'schema v2. Images must be declared in the top level '
               'x-google-marketplace.images')
+      if self._x_google_marketplace._deployer_service_account:
+        self._x_google_marketplace._deployer_service_account.validate()
 
     for _, p in self._properties.items():
       if p.xtype == XTYPE_SERVICE_ACCOUNT:
@@ -934,7 +936,7 @@ class SchemaXServiceAccount:
     """Called by Schema.validate(); for backwards-incompatible checks."""
     if not self._description:
       raise InvalidSchema(
-          'SERVICE_ACCOUNT property must have a `description` '
+          'SERVICE_ACCOUNT must have a `description` '
           'explaining purpose and permission requirements. See docs: '
           'https://github.com/GoogleCloudPlatform/marketplace-k8s-app-tools/blob/master/docs/schema.md#type-service_account'
       )
