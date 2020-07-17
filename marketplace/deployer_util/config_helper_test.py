@@ -676,11 +676,11 @@ class ConfigHelperTest(unittest.TestCase):
           images: {}
 
           deployerServiceAccount:
-                # Optional description would go here
-                roles:
-                - type: Role
-                  rulesType: PREDEFINED
-                  rulesFromRoleName: view
+            # Optional description would go here
+            roles:
+            - type: Role
+              rulesType: PREDEFINED
+              rulesFromRoleName: view
         properties:
           simple:
             type: string
