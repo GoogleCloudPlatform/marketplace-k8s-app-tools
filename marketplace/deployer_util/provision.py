@@ -389,25 +389,55 @@ def make_deployer_rolebindings(schema, namespace, app_name, labels, sa_name):
       'name': sa_name,
       'namespace': namespace,
   }]
-  default_rolebinding = {
+  app_edit_role_name = '{}-deployer-app-edit-r'.format(app_name)
+  default_role_and_rolebindings = [{
       'apiVersion': 'rbac.authorization.k8s.io/v1',
       'kind': 'RoleBinding',
       'metadata': {
-          'name': '{}-deployer-rb'.format(app_name),
+          'name': '{}-deployer-admin-rb'.format(app_name),
           'namespace': namespace,
           'labels': labels,
       },
       'roleRef': {
           'apiGroup': 'rbac.authorization.k8s.io',
           'kind': 'ClusterRole',
-          'name': 'cluster-admin',
+          'name': 'admin',
       },
       'subjects': subjects,
-  }
+  }, {
+      'apiVersion':
+          'rbac.authorization.k8s.io/v1',
+      'kind':
+          'Role',
+      'metadata': {
+          'name': app_edit_role_name,
+          'namespace': namespace,
+          'labels': labels,
+      },
+      'rules': [{
+          'apiGroups': ['app.k8s.io'],
+          'resources': ['applications'],
+          'verbs': ['*'],
+      }],
+  }, {
+      'apiVersion': 'rbac.authorization.k8s.io/v1',
+      'kind': 'RoleBinding',
+      'metadata': {
+          'name': '{}-deployer-app-edit-rb'.format(app_name),
+          'namespace': namespace,
+          'labels': labels,
+      },
+      'roleRef': {
+          'apiGroup': 'rbac.authorization.k8s.io',
+          'kind': 'Role',
+          'name': app_edit_role_name,
+      },
+      'subjects': subjects,
+  }]
 
   if not schema.is_v2(
   ) or not schema.x_google_marketplace.deployer_service_account:
-    return [default_rolebinding]
+    return default_role_and_rolebindings
 
   roles_and_rolebindings = []
   deployer_service_account = schema.x_google_marketplace.deployer_service_account
@@ -415,7 +445,7 @@ def make_deployer_rolebindings(schema, namespace, app_name, labels, sa_name):
   # Set the default rolebinding if no namespace roles are defined
   if not deployer_service_account.custom_role_rules(
   ) and not deployer_service_account.predefined_roles():
-    roles_and_rolebindings.append(default_rolebinding)
+    roles_and_rolebindings.extend(default_role_and_rolebindings)
 
   for i, rules in enumerate(deployer_service_account.custom_role_rules()):
     role_name = '{}-deployer-r{}'.format(app_name, i)
