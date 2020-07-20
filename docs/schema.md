@@ -798,6 +798,18 @@ x-google-marketplace:
           type: REQUIRE_ONE_NODE_PER_REPLICA
 ```
 
+You can also define restrictions for the version of the cluster. For example, if the application
+requires that the cluster runs k8s version greater than or equal to 1.13.7, use:
+
+```yaml
+x-google-marketplace:
+  clusterConstraints:
+    k8sVersion: >=1.13.7
+```
+
+Any SemVer expression is accepted; however, it is recommended that the constraints are kept to a
+minimum, so the application is deployable over a wider range of clusters.
+
 ### resources
 
 Each entry under `resources` is roughly equivalent to a workload in the app.
