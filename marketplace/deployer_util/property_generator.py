@@ -24,7 +24,7 @@ def generate_password(config):
   """Generate password value for SchemaXPassword config."""
   pw = GeneratePassword(config.length, config.include_symbols)
   if config.base64:
-    pw = base64.b64encode(pw)
+    pw = base64.b64encode(pw.encode('utf-8')).decode()
   return pw
 
 
@@ -47,7 +47,9 @@ def generate_tls_certificate():
 
   return json.dumps({
       'private_key':
-          OpenSSL.crypto.dump_privatekey(OpenSSL.crypto.FILETYPE_PEM, key),
+          OpenSSL.crypto.dump_privatekey(OpenSSL.crypto.FILETYPE_PEM,
+                                         key).decode('ascii'),
       'certificate':
-          OpenSSL.crypto.dump_certificate(OpenSSL.crypto.FILETYPE_PEM, cert)
+          OpenSSL.crypto.dump_certificate(OpenSSL.crypto.FILETYPE_PEM,
+                                          cert).decode('ascii')
   })

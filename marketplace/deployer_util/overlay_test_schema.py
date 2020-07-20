@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 #
 # Copyright 2018 Google LLC
 #
@@ -63,7 +63,7 @@ def main():
     output_schema['properties'][prop] = test_schema['properties'][prop]
 
   for output in args.output:
-    with open(output, 'w') as f:
+    with open(output, 'w', encoding='utf-8') as f:
       yaml.dump(output_schema, f)
 
 

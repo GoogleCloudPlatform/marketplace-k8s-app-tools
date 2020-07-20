@@ -111,11 +111,24 @@ function print_summary() {
     echo "$deployer_errors" >> "$error_summary_path"
   fi
 
+  if [[ -n "$validation_errors" ]]; then
+    echo "=== SCHEMA VALIDATION WARNING ==="
+    echo "WARNING: Schema is incompatible with the latest deployer, would fail with:"
+    echo
+    echo "$validation_errors"
+    echo "=================================="
+  fi
+
   if [[ -s "$error_summary_path" ]]; then
     echo "=== ERROR SUMMARY ==="
     cat "$error_summary_path"
     echo "====================="
   fi
+
+  echo
+  echo "=== VERIFICATION STATUS ==="
+  echo "$1"
+  echo "==========================="
 }
 
 # If any command returns with non-zero exit code, set -e will cause the script
@@ -123,7 +136,7 @@ function print_summary() {
 handle_failure() {
   code=$?
   clean_resources
-  print_summary
+  print_summary "FAILED"
   exit $code
 }
 trap "handle_failure" EXIT
@@ -159,9 +172,14 @@ namespace_key="$(extract_schema_key.py \
 export NAME="apptest-$test_id"
 export NAMESPACE="apptest-$test_id"
 
+# Validate the schema, outputting any errors as a warning.
+set +e
+validation_errors=$(/bin/validate_schema.py --values_mode raw 2>&1)
+set -e
+
 # Stitch in name and namespace parameters.
 parameters=$(echo "$parameters" \
-  | jq ".$name_key = \"$NAME\" | .$namespace_key = \"$NAMESPACE\"")
+  | jq ".\"$name_key\" = \"$NAME\" | .\"$namespace_key\" = \"$NAMESPACE\"")
 
 echo "INFO Parameters: $parameters"
 
@@ -188,7 +206,7 @@ if [[ "$istio" = "enabled" ]]; then
   # Stitch in ISTIO_ENABLED parameter if applicable.
   if [[ -n $istio_enabled_key ]]; then
     parameters=$(echo "$parameters" \
-      | jq ".$istio_enabled_key = true")
+      | jq ".\"$istio_enabled_key\" = true")
   fi
 fi
 
@@ -199,14 +217,14 @@ reporting_secret_key="$(extract_schema_key.py \
 
 # Stitch in fake REPORTING_SECRET parameter if applicable.
 if [[ -n "$reporting_secret_key" ]]; then
-  if [[ "$(echo "$parameters" | jq ".$reporting_secret_key")" == "null" ]]; then
+  if [[ "$(echo "$parameters" | jq ".\"$reporting_secret_key\"")" == "null" ]]; then
     reporting_secret_name="fake-reporting-secret-$(random_string)"
     echo "Creating fake reporting secret $reporting_secret_name"
     cat "/data/fake-reporting-secret-manifest.yaml" \
       | env -i "SECRET_NAME=$reporting_secret_name" envsubst \
       | kubectl apply -f - --namespace="$NAMESPACE"
     parameters=$(echo "$parameters" \
-      | jq ".$reporting_secret_key = \"$reporting_secret_name\"")
+      | jq ".\"$reporting_secret_key\" = \"$reporting_secret_name\"")
   fi
 fi
 
@@ -284,4 +302,4 @@ echo "INFO Wait for service accounts to be deleted."
 trap - EXIT
 
 clean_resources
-print_summary
+print_summary "PASSED"

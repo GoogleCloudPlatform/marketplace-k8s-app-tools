@@ -63,6 +63,8 @@ app_uid=$(kubectl get "applications.app.k8s.io/$NAME" \
 app_api_version=$(kubectl get "applications.app.k8s.io/$NAME" \
   --namespace="$NAMESPACE" \
   --output=jsonpath='{.apiVersion}')
+namespace_uid=$(kubectl get "namespaces/$NAMESPACE" \
+  --output=jsonpath='{.metadata.uid}')
 
 /bin/expand_config.py --values_mode raw --app_uid "$app_uid"
 
@@ -73,8 +75,12 @@ create_manifests.sh --mode="test"
   --app_name "$NAME" \
   --app_uid "$app_uid" \
   --app_api_version "$app_api_version" \
+  --namespace "$NAMESPACE" \
+  --namespace_uid "$namespace_uid" \
   --manifests "/data/manifest-expanded" \
   --dest "/data/resources.yaml"
+
+validate_app_resource.py --manifests "/data/resources.yaml"
 
 separate_tester_resources.py \
   --app_uid "$app_uid" \

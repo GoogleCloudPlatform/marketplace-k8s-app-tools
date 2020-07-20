@@ -24,6 +24,10 @@ properties:
     x-google-marketplace:
       type: SERVICE_ACCOUNT
       serviceAccount:
+        description: >
+          (Sample for how to configure a) service account
+          that the application uses to instantiate resources
+          post-deployment.
         roles:
         - type: Role
           rulesType: PREDEFINED

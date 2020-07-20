@@ -6,7 +6,8 @@ include common.Makefile
 include gcloud.Makefile
 include marketplace.Makefile
 
-TEST_ID := $(shell cat /dev/urandom | tr -dc 'a-z0-9' | head -c 8)
+# Use python instead of `/dev/urandom` and `tr` for OSX compatibility.
+TEST_ID := $(shell python -c 'import random, string; print("".join([random.choice(string.ascii_lowercase + string.digits) for _ in range(8)]))')
 
 .tests/marketplace/deployer/helm_tiller_onbuild:
 	mkdir -p "$@"
@@ -144,17 +145,19 @@ tests/py: $(PYTHON_TEST_TARGETS)
 .PHONY: $(PYTHON_TEST_TARGETS)
 $(PYTHON_TEST_TARGETS): %.__pytest__: .build/tests/py
 	$(info === Running tests in directory $* ===)
+  # The coverage tool requires write access to the tested directories
 	@docker run --rm \
-	  -v $(PWD):/data:ro \
-	  --entrypoint python2 \
+	  -v $(PWD):/data \
+	  --entrypoint runtests.sh \
 	  tests/py \
-	  -m unittest discover -s "/data/$*" -p "*_test.py"
+	  "$*"
 
 .build/tests: | .build
 	mkdir -p "$@"
 
 
-.build/tests/py: tests/py/Dockerfile | .build/tests
+.build/tests/py: tests/py/Dockerfile \
+                 tests/py/runtests.sh | .build/tests
 	$(call print_target)
 	docker build -t tests/py tests/py
 	@touch "$@"

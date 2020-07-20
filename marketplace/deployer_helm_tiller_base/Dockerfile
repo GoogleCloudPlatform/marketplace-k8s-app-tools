@@ -1,4 +1,4 @@
-FROM launcher.gcr.io/google/debian9
+FROM marketplace.gcr.io/google/python
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     bash \
@@ -8,17 +8,24 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     jq \
     procps \
-    python \
-    python-openssl \
-    python-pip \
-    python-setuptools \
-    python-yaml \
     wget \
     && rm -rf /var/lib/apt/lists/*
 
-RUN wget -q -O /bin/kubectl \
-        https://storage.googleapis.com/kubernetes-release/release/v1.13.2/bin/linux/amd64/kubectl \
-    && chmod 755 /bin/kubectl
+RUN pip3 install \
+      wheel \
+      pyOpenSSL \
+      pyyaml \
+      six
+
+RUN for full_version in 1.13.12 1.14.8 1.15.11 1.16.9 1.17.5 1.18.2;  \
+     do \
+        version=${full_version%.*} \
+        && mkdir -p /opt/kubectl/$version \
+        && wget -q -O /opt/kubectl/$version/kubectl \
+            https://storage.googleapis.com/kubernetes-release/release/v$full_version/bin/linux/amd64/kubectl \
+        && chmod 755 /opt/kubectl/$version/kubectl; \
+     done;
+RUN ln -s /opt/kubectl/1.16 /opt/kubectl/default
 
 RUN mkdir -p /bin/helm-downloaded \
     && wget -q -O /bin/helm-downloaded/helm.tar.gz \

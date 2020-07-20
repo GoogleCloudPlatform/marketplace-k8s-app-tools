@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 #
 # Copyright 2018 Google LLC
 #
@@ -68,4 +68,4 @@ def _run_command(command):
   '''Internal wrapper for subprocess module.'''
   logging.info('Running command: {}'.format(' '.join(command)))
 
-  return subprocess.check_output(command)
+  return subprocess.check_output(command).decode('utf-8')

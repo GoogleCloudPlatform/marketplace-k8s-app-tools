@@ -1,15 +1,13 @@
-FROM python
+FROM gcr.io/google-appengine/python
 
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-        python-openssl \
-        python-pip \
-        python-setuptools \
-        python-yaml \
-    && rm -rf /var/lib/apt/lists/*
+RUN pip3 install \
+      futures \
+      google-cloud-storage \
+      pyflakes \
+      pyOpenSSL \
+      pyyaml \
+      wheel \
+      yapf \
+      coverage
 
-RUN pip2 install wheel \
-    && pip2 install google-cloud-storage
-
-# Install lint tools.
-RUN pip2 install futures pyflakes yapf
+COPY runtests.sh /bin/

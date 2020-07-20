@@ -9,16 +9,16 @@ include tests.Makefile
 lint/py: .build/tests/py
 	@docker run --rm \
 	  -v $(PWD):/data:ro \
-	  --entrypoint python2 \
+	  --entrypoint python3 \
 	  tests/py \
-	  -m yapf --style chromium --recursive --diff \
+	  -m yapf --style yapf --recursive --diff \
 	  --exclude "data/vendor/" \
 	  --parallel \
 	  "/data" \
 	  || (echo ">>> Linting failed. Run 'make format/py' to fix your code."; exit 1)
 	@docker run --rm \
 	  -v $(PWD):/data:ro \
-	  --entrypoint python2 \
+	  --entrypoint python3 \
 	  tests/py \
 	  -m pyflakes "/data"
 	@$(call print_notice,No lint errors found.)
@@ -28,9 +28,9 @@ lint/py: .build/tests/py
 format/py: .build/tests/py
 	@docker run --rm \
 	  -v $(PWD):/data \
-	  --entrypoint python2 \
+	  --entrypoint python3 \
 	  tests/py \
-	  -m yapf --style chromium --recursive --in-place \
+	  -m yapf --style yapf --recursive --in-place \
 	  --exclude "data/vendor/" \
 	  --verbose --parallel \
 	  "/data"

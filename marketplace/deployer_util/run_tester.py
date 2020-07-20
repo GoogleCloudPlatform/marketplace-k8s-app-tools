@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 #
 # Copyright 2018 Google LLC
 #
@@ -14,6 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import sys
 import time
 import log_util as log
 
@@ -49,6 +50,7 @@ def main():
 
   resources = load_resources_yaml(args.manifest)
 
+  test_failed = False
   for resource_def in resources:
     full_name = "{}/{}".format(resource_def['kind'],
                                deep_get(resource_def, 'metadata', 'name'))
@@ -81,6 +83,7 @@ def main():
       if result == "Failed":
         print_tester_logs(full_name, args.namespace)
         log.error("{} Tester '{}' failed.", LOG_SMOKE_TEST, full_name)
+        test_failed = True
         break
 
       if result == "Succeeded":
@@ -91,9 +94,13 @@ def main():
       if time.time() - start_time > tester_timeout:
         print_tester_logs(full_name, args.namespace)
         log.error("{} Tester '{}' timeout.", LOG_SMOKE_TEST, full_name)
+        test_failed = True
         break
 
       time.sleep(poll_interval)
+
+  if test_failed:
+    sys.exit("At least 1 test failed or timed out.")
 
 
 def print_tester_logs(full_name, namespace):

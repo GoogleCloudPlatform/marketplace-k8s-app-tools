@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 #
 # Copyright 2018 Google LLC
 #
@@ -35,12 +35,12 @@ def main():
 
   values = schema_values_common.load_values(args)
   # Convert values to strings to pass to subprocess.
-  values = {k: str(v) for k, v in values.iteritems()}
+  values = {k: str(v) for k, v in values.items()}
 
   # Default env vars should NOT be passed on to the new environment.
   default_vars = [
-      v.split('=')[0] for v in subprocess.check_output(
-          ['env -0'], env={}, shell=True).split('\0') if v
+      v.decode('utf-8').split('=')[0] for v in subprocess.check_output(
+          ['env -0'], env={}, shell=True).split(b'\0') if v
   ]
   command = (['/usr/bin/env'] + ['--unset={}'.format(v) for v in default_vars] +
              [args.command] + args.arguments)
@@ -50,12 +50,12 @@ def main():
       stdin=subprocess.PIPE,
       stdout=subprocess.PIPE,
       stderr=subprocess.PIPE)
-  stdoutdata, stderrdata = p.communicate(input=sys.stdin.read())
+  stdoutdata, stderrdata = p.communicate(input=sys.stdin.buffer.read())
   if stdoutdata:
-    sys.stdout.write(stdoutdata)
+    sys.stdout.buffer.write(stdoutdata)
     sys.stdout.flush()
   if stderrdata:
-    sys.stderr.write(stderrdata)
+    sys.stderr.buffer.write(stderrdata)
     sys.stderr.flush()
   sys.exit(p.returncode)
 

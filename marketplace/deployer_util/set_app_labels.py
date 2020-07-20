@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 #
 # Copyright 2018 Google LLC
 #
@@ -41,10 +41,10 @@ def main():
       "or - to write to stdout",
       required=True)
   parser.add_argument(
-      "--name", help="The name of the applictation instance", required=True)
+      "--name", help="The name of the application instance", required=True)
   parser.add_argument(
       "--namespace",
-      help="The namespace where the applictation is installed",
+      help="The namespace where the application is installed",
       required=True)
   args = parser.parse_args()
 
@@ -72,7 +72,7 @@ def main():
     write_resources(resources, sys.stdout)
     sys.stdout.flush()
   else:
-    with open(args.dest, "w") as outfile:
+    with open(args.dest, "w", encoding='utf-8') as outfile:
       write_resources(resources, outfile)
 
 

@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-#
+#!/usr/bin/env python3
 # Copyright 2018 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,5 +27,5 @@ def _fallback_serializer(obj):
 
 
 content = sys.stdin.read()
-for loaded in yaml.load_all(content):
+for loaded in yaml.safe_load_all(content):
   print(json.dumps(loaded, default=_fallback_serializer))

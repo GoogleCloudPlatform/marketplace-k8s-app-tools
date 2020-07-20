@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 #
 # Copyright 2018 Google LLC
 #
@@ -50,9 +50,8 @@ def main():
   manifest = args.manifest
   app_name = args.application_name
   resources = load_resources_yaml(manifest)
-  resources = map(lambda r: ensure_resource_has_app_label(r, app_name),
-                  resources)
-  with open(manifest, "w") as out:
+  resources = [ensure_resource_has_app_label(r, app_name) for r in resources]
+  with open(manifest, "w", encoding='utf-8') as out:
     yaml.dump_all(resources, out, default_flow_style=False, explicit_start=True)
 
 

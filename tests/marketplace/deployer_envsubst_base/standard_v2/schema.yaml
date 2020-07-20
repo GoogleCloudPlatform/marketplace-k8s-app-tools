@@ -3,6 +3,9 @@ x-google-marketplace:
 
   applicationApiVersion: v1beta1
 
+  partnerId: partner
+  solutionId: wordpress
+
   publishedVersion: 0.0.1
   publishedVersionMetadata:
     releaseNote: Initial release
@@ -11,6 +14,8 @@ x-google-marketplace:
   images: {}
 
   deployerServiceAccount:
+    description: >
+      Creates CustomResourceDefinitions used by the app
     roles:
     - type: ClusterRole
       rulesType: CUSTOM
@@ -31,4 +36,3 @@ properties:
 required:
 - name
 - namespace
-
