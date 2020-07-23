@@ -676,7 +676,7 @@ class ConfigHelperTest(unittest.TestCase):
           images: {}
 
           deployerServiceAccount:
-            # Optional description would go here
+            # required description goes here
             roles:
             - type: Role
               rulesType: PREDEFINED
@@ -688,6 +688,64 @@ class ConfigHelperTest(unittest.TestCase):
     with self.assertRaisesRegex(config_helper.InvalidSchema,
                                 'must have a `description`'):
       schema.validate()
+
+  def test_deployer_service_account_escalated_permissions_enforced_validate(
+      self):
+    schema = config_helper.Schema.load_yaml("""
+        x-google-marketplace:
+          schemaVersion: v2
+
+          applicationApiVersion: v1beta1
+
+          publishedVersion: 6.5.130-metadata
+          publishedVersionMetadata:
+            releaseNote: Bug fixes
+            recommended: true
+
+          images: {}
+
+          deployerServiceAccount:
+            description: >
+              Asks for vague cluster-scoped permissions which is disallowed
+            roles:
+            - type: ClusterRole
+              rulesType: PREDEFINED
+              rulesFromRoleName: edit
+        properties:
+          simple:
+            type: string
+        """)
+    with self.assertRaisesRegex(config_helper.InvalidSchema,
+                                'Disallowed deployerServiceAccount role'):
+      schema.validate()
+
+  def test_deployer_service_account_no_escalated_permissions_allowed_validate(
+      self):
+    schema = config_helper.Schema.load_yaml("""
+        x-google-marketplace:
+          schemaVersion: v2
+
+          applicationApiVersion: v1beta1
+
+          publishedVersion: 6.5.130-metadata
+          publishedVersionMetadata:
+            releaseNote: Bug fixes
+            recommended: true
+
+          images: {}
+
+          deployerServiceAccount:
+            description: >
+              Asks for vague namespaced permissions which is allowed
+            roles:
+            - type: Role
+              rulesType: PREDEFINED
+              rulesFromRoleName: edit
+        properties:
+          simple:
+            type: string
+        """)
+    schema.validate()
 
   def test_service_account_missing_rulesType(self):
     with self.assertRaisesRegex(

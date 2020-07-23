@@ -168,6 +168,14 @@ class Schema:
               'x-google-marketplace.images')
       if self._x_google_marketplace._deployer_service_account:
         self._x_google_marketplace._deployer_service_account.validate()
+        # Move to validate() once enforced on SERVICE_ACCOUNT properties as well.
+        if self._x_google_marketplace._deployer_service_account.has_discouraged_cluster_scoped_permissions(
+        ):
+          raise InvalidSchema(
+              'Disallowed deployerServiceAccount role(s): '
+              'For `ClusterRole` roles, only the "view" predefined role is '
+              'allowed. Instead, use a "CUSTOM" role with specific "apiGroups" '
+              'and/or "resources".')
 
     for _, p in self._properties.items():
       if p.xtype == XTYPE_SERVICE_ACCOUNT:
@@ -940,6 +948,25 @@ class SchemaXServiceAccount:
           'explaining purpose and permission requirements. See docs: '
           'https://github.com/GoogleCloudPlatform/marketplace-k8s-app-tools/blob/master/docs/schema.md#type-service_account'
       )
+
+  def has_discouraged_cluster_scoped_permissions(self):
+    """Returns true if the service account has discouraged permissions."""
+    # Consider all predefined roles except `view`.
+    if len(
+        list(
+            filter(lambda roleName: not roleName == 'view',
+                   self.predefined_cluster_roles()))) > 0:
+      return True
+    # Consider apiGroups=['*'] + resources=['*'] + verbs=[<write>],
+    # which is essentially `cluster-admin`.
+    for role in self.custom_cluster_role_rules():
+      for rule in role['rules']:
+        write_verbs = set(
+            ['*', 'create', 'update', 'patch', 'delete',
+             'deletecollection']).intersection(set(rule['verbs']))
+        if '*' in rule['apiGroups'] and '*' in rule['resources'] and write_verbs:
+          return True
+    return False
 
 
 class SchemaXStorageClass:
