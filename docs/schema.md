@@ -909,6 +909,46 @@ If this section is not specified, users see a warning when deploying the app to
 an Istio-enabled environment. The [`ISTIO_ENABLED`](#type-istio_enabled) type
 indicates whether Istio is enabled on the cluster.
 
+---
+
+## deployerServiceAccount
+
+Nested under `x-google-marketplace` in schema V2, this can be used for
+specifying custom roles for the deployer service account, including
+cluster-scoped permissions. The deployer is granted `cluster-admin` in the
+deployment namespace unless one or more roles with type `Role` are defined.
+This property follows the exact same interface as the `x-google-marketplace`
+`SERVICE_ACCOUNT` property type.
+
+In accordance with the principle of least privilege, predefined
+`cluster-admin`, `admin`, and `edit` are not supported as cluster-scoped
+(`type: ClusterRole`) roles; `CUSTOM` roles defining specific rules must be
+used instead.
+
+The `description` field (required) should explain why the app needs the
+requested permissions, particularly cluster-scoped permissions. It may be
+shown to users in the UI.
+
+Example:
+
+```yaml
+properties:
+  # Property definitions...
+required:
+  # Required properties...
+x-google-marketplace:
+  deployerServiceAccount:
+    description: >
+      Creates app resources, including the MyAppCustomResource CRD.
+    roles:
+    - type: ClusterRole
+      rulesType: CUSTOM
+      rules:
+      - apiGroups: ['apiextensions.k8s.io']
+        resources: ['customresourcedefinitions']
+        verbs: ['*']
+```
+
 ## form
 
 ### help widget
