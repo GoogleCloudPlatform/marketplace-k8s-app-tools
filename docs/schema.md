@@ -916,7 +916,7 @@ indicates whether Istio is enabled on the cluster.
 Nested under `x-google-marketplace` in schema V2, this can be used for
 specifying custom roles for the deployer service account, including
 cluster-scoped permissions. The deployer is granted `cluster-admin` in the
-deployment namespace unless one or more roles with type `Role` are defined.
+deployment **namespace** unless one or more roles with type `Role` are defined.
 This property follows the exact same interface as the `x-google-marketplace`
 `SERVICE_ACCOUNT` property type.
 
