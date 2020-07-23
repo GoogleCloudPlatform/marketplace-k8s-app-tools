@@ -169,13 +169,13 @@ class Schema:
       if self._x_google_marketplace._deployer_service_account:
         self._x_google_marketplace._deployer_service_account.validate()
         # Move to validate() once enforced on SERVICE_ACCOUNT properties as well.
-        if self._x_google_marketplace._deployer_service_account.has_discouraged_cluster_scoped_permissions(
-        ):
+        if (self._x_google_marketplace._deployer_service_account
+            .has_discouraged_cluster_scoped_permissions()):
           raise InvalidSchema(
               'Disallowed deployerServiceAccount role(s): '
               'For `ClusterRole` roles, only the "view" predefined role is '
-              'allowed. Instead, use a "CUSTOM" role with specific "apiGroups" '
-              'and/or "resources".')
+              'allowed. Instead, use a "CUSTOM" role with specific '
+              '"apiGroups" and/or "resources".')
 
     for _, p in self._properties.items():
       if p.xtype == XTYPE_SERVICE_ACCOUNT:
