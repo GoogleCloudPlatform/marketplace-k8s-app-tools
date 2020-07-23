@@ -689,7 +689,7 @@ class ConfigHelperTest(unittest.TestCase):
                                 'must have a `description`'):
       schema.validate()
 
-  def test_deployer_service_account_escalated_permissions_enforced_validate(
+  def test_deployer_service_account_cluster_scoped_write_predefined_role_enforced_validate(
       self):
     schema = config_helper.Schema.load_yaml("""
         x-google-marketplace:
@@ -711,6 +711,39 @@ class ConfigHelperTest(unittest.TestCase):
             - type: ClusterRole
               rulesType: PREDEFINED
               rulesFromRoleName: edit
+        properties:
+          simple:
+            type: string
+        """)
+    with self.assertRaisesRegex(config_helper.InvalidSchema,
+                                'Disallowed deployerServiceAccount role'):
+      schema.validate()
+
+  def test_deployer_service_account_cluster_scoped_mock_cluster_admin_role_enforced_validate(
+      self):
+    schema = config_helper.Schema.load_yaml("""
+        x-google-marketplace:
+          schemaVersion: v2
+
+          applicationApiVersion: v1beta1
+
+          publishedVersion: 6.5.130-metadata
+          publishedVersionMetadata:
+            releaseNote: Bug fixes
+            recommended: true
+
+          images: {}
+
+          deployerServiceAccount:
+            description: >
+              Asks for vague cluster-scoped permissions which is disallowed
+            roles:
+            - type: ClusterRole
+              rulesType: CUSTOM
+              rules:
+              - apiGroups: ['*']
+                resources: ['*']
+                verbs: ['*']
         properties:
           simple:
             type: string

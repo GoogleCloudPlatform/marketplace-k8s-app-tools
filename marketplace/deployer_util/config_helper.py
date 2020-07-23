@@ -959,12 +959,13 @@ class SchemaXServiceAccount:
       return True
     # Consider apiGroups=['*'] + resources=['*'] + verbs=[<write>],
     # which is essentially `cluster-admin`.
-    for role in self.custom_cluster_role_rules():
-      for rule in role['rules']:
+    for rules in self.custom_cluster_role_rules():
+      for rule in rules:
         write_verbs = set(
             ['*', 'create', 'update', 'patch', 'delete',
-             'deletecollection']).intersection(set(rule['verbs']))
-        if '*' in rule['apiGroups'] and '*' in rule['resources'] and write_verbs:
+             'deletecollection']).intersection(set(rule.get('verbs')))
+        if '*' in rule.get('apiGroups') and '*' in rule.get(
+            'resources') and write_verbs:
           return True
     return False
 
