@@ -340,6 +340,7 @@ class SchemaClusterConstraints:
     self._resources = None
     self._istio = None
     self._gcp = None
+    self._assisted_cluster_creation = None
 
     if 'resources' in dictionary:
       resources = dictionary['resources']
@@ -352,6 +353,11 @@ class SchemaClusterConstraints:
     self._istio = _maybe_get_and_apply(dictionary, 'istio',
                                        lambda v: SchemaIstio(v))
     self._gcp = _maybe_get_and_apply(dictionary, 'gcp', lambda v: SchemaGcp(v))
+    self._assisted_cluster_creation = _maybe_get_and_apply(dictionary,
+                                                           'assistedClusterCreation',
+                                                           lambda
+                                                               v: SchemaAssistedClusterCreation(
+                                                               v))
 
   @property
   def k8s_version(self):
@@ -369,6 +375,9 @@ class SchemaClusterConstraints:
   def gcp(self):
     return self._gcp
 
+  @property
+  def assistedClusterCreation(self):
+    return self._assisted_cluster_creation
 
 class SchemaResourceConstraints:
   """Accesses a single resource's constraints."""
@@ -529,6 +538,91 @@ class SchemaGcp:
   @property
   def nodes(self):
     return self._nodes
+
+
+class SchemaAssistedClusterCreation:
+  """Accesses top level AssistedClusterCreation constraints."""
+
+  _ASSISTED_CC_TYPE_DISABLED = "DISABLED"
+  _ASSISTED_CC_TYPE_STRICT = "STRICT"
+  _ASSISTED_CC_TYPES = [
+      _ASSISTED_CC_TYPE_DISABLED, _ASSISTED_CC_TYPE_STRICT
+  ]
+
+  def __init__(self, dictionary):
+    self._type = None
+    self._creation_guidance = None
+    self._gke = None
+
+    self._type = dictionary.get('type', None)
+    _must_contain(self._type, self._ASSISTED_CC_TYPES,
+                  "Invalid type of AssistedClusterCreation")
+    self._creation_guidance = dictionary.get('creationGuidance', "")
+    self._gke = _maybe_get_and_apply(dictionary, 'gke', lambda v: SchemaGke(v))
+
+    if self._type == self._ASSISTED_CC_TYPE_DISABLED and not self._creation_guidance:
+      raise InvalidSchema(
+          'assistedClusterCreation.creationGuidance must be specified when '
+          'assistedClusterCreation.type is DISABLED')
+    if self._type == self._ASSISTED_CC_TYPE_STRICT and not self._gke:
+      raise InvalidSchema(
+          'assistedClusterCreation.gke must be specified when '
+          'assistedClusterCreation.type is STRICT'
+      )
+
+  @property
+  def type(self):
+    return self._type
+
+  @property
+  def creation_guidance(self):
+    return self._creation_guidance
+
+  @property
+  def gke(self):
+    return self._gke
+
+
+class SchemaGke:
+
+  def __init__(self, dictionary):
+    self._node_pool = None
+    node_pool = dictionary['nodePool']
+    if not isinstance(node_pool, list):
+      raise InvalidSchema('gke.nodePool must be a list')
+    self._node_pool = [SchemaNodePoolDetails(r) for r in node_pool]
+    if len(self._node_pool) != 1:
+      raise InvalidSchema(
+          'gke.nodePool supports exactly one nodePool')
+
+  @property
+  def node_pool(self):
+    return self._node_pool
+
+
+class SchemaNodePoolDetails:
+
+  def __init__(self, dictionary):
+    self._num_nodes = _must_get(
+        dictionary, 'numNodes',
+        'NodePoolDetails must have numNodes property')
+    self._machine_type = _must_get(
+        dictionary, 'machineType',
+        'NodePoolDetails must have machineType property')
+    if "custom-" in self._machine_type:
+      splits = re.split("-", self._machine_type)
+      cores = int(splits[-2])
+      if cores != 1 and cores % 2 != 0:
+        raise InvalidSchema(
+            'Number of cores for machineType could either be 1 or an even number')
+
+  @property
+  def num_nodes(self):
+    return self._num_nodes
+
+  @property
+  def machine_type(self):
+    return self._machine_type
 
 
 class SchemaNodes:

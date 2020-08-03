@@ -1377,6 +1377,122 @@ class ConfigHelperTest(unittest.TestCase):
                     amd.com/gpu: {}
           """)
 
+  def test_assisted_cluster_creation_disabled(self):
+    schema = config_helper.Schema.load_yaml("""
+        applicationApiVersion: v1beta1
+        x-google-marketplace:
+          clusterConstraints:
+            assistedClusterCreation:
+              type: DISABLED
+              creationGuidance: "Please use existing cluster with GPU."
+        """)
+    schema.validate()
+    assistedClusterCreation = schema.x_google_marketplace.cluster_constraints.assistedClusterCreation
+
+    self.assertEqual(assistedClusterCreation.type, "DISABLED")
+    self.assertEqual(assistedClusterCreation._creation_guidance,
+                     'Please use existing cluster with GPU.')
+
+  def test_assisted_cluster_creation_strict_custom_vm(self):
+    schema = config_helper.Schema.load_yaml("""
+        applicationApiVersion: v1beta1
+        x-google-marketplace:
+          clusterConstraints:
+            assistedClusterCreation:
+              type: STRICT
+              gke:
+                nodePool:
+                - numNodes: 2
+                  machineType: custom-2-12288
+        """)
+    schema.validate()
+    assistedClusterCreation = schema.x_google_marketplace.cluster_constraints.assistedClusterCreation
+
+    self.assertEqual(assistedClusterCreation.type, "STRICT")
+    node_pool = assistedClusterCreation.gke.node_pool
+    self.assertTrue(isinstance(node_pool, list))
+    self.assertEqual(len(node_pool), 1)
+
+    self.assertEqual(node_pool[0].num_nodes, 2)
+    self.assertEqual(node_pool[0].machine_type, 'custom-2-12288')
+
+  def test_assisted_cluster_creation_strict_standard_vm(self):
+    schema = config_helper.Schema.load_yaml("""
+          applicationApiVersion: v1beta1
+          x-google-marketplace:
+            clusterConstraints:
+              assistedClusterCreation:
+                type: STRICT
+                gke:
+                  nodePool:
+                  - numNodes: 1
+                    machineType: n1-standard-1
+          """)
+    schema.validate()
+    assistedClusterCreation = schema.x_google_marketplace.cluster_constraints.assistedClusterCreation
+
+    self.assertEqual(assistedClusterCreation.type, "STRICT")
+    node_pool = assistedClusterCreation.gke.node_pool
+    self.assertTrue(isinstance(node_pool, list))
+    self.assertEqual(len(node_pool), 1)
+
+    self.assertEqual(node_pool[0].num_nodes, 1)
+    self.assertEqual(node_pool[0].machine_type, 'n1-standard-1')
+
+  def test_assisted_cluster_creation_disabled_missing_guidance(self):
+    with self.assertRaisesRegex(config_helper.InvalidSchema,
+                                'assistedClusterCreation.creationGuidance must be specified when assistedClusterCreation.type is DISABLED'):
+      config_helper.Schema.load_yaml("""
+          applicationApiVersion: v1beta1
+          x-google-marketplace:
+            clusterConstraints:
+              assistedClusterCreation:
+                type: DISABLED
+          """)
+
+  def test_assisted_cluster_creation_strict_missing_gke(self):
+    with self.assertRaisesRegex(config_helper.InvalidSchema,
+                                'assistedClusterCreation.gke must be specified when assistedClusterCreation.type is STRICT'):
+      config_helper.Schema.load_yaml("""
+          applicationApiVersion: v1beta1
+          x-google-marketplace:
+            clusterConstraints:
+              assistedClusterCreation:
+                type: STRICT
+          """)
+
+  def test_assisted_cluster_creation_strict_too_many_nodepool(self):
+    with self.assertRaisesRegex(config_helper.InvalidSchema,
+                                'gke.nodePool supports exactly one nodePool'):
+      config_helper.Schema.load_yaml("""
+          applicationApiVersion: v1beta1
+          x-google-marketplace:
+            clusterConstraints:
+              assistedClusterCreation:
+                type: STRICT
+                gke:
+                  nodePool:
+                  - numNodes: 2
+                    machineType: n1-standard-1
+                  - numNodes: 4
+                    machineType: n2-standard-2
+          """)
+
+  def test_assisted_cluster_creation_strict_custom_vm_odd_cpu(self):
+    with self.assertRaisesRegex(config_helper.InvalidSchema,
+                                'Number of cores for machineType could either be 1 or an even number'):
+      config_helper.Schema.load_yaml("""
+          applicationApiVersion: v1beta1
+          x-google-marketplace:
+            clusterConstraints:
+              assistedClusterCreation:
+                type: STRICT
+                gke:
+                  nodePool:
+                  - numNodes: 2
+                    machineType: n2-custom-3-1224
+          """)
+
   def test_istio_valid_type(self):
     schema = config_helper.Schema.load_yaml("""
         applicationApiVersion: v1beta1
