@@ -1440,8 +1440,10 @@ class ConfigHelperTest(unittest.TestCase):
     self.assertEqual(node_pool[0].machine_type, 'n1-standard-1')
 
   def test_assisted_cluster_creation_disabled_missing_guidance(self):
-    with self.assertRaisesRegex(config_helper.InvalidSchema,
-                                'assistedClusterCreation.creationGuidance must be specified when assistedClusterCreation.type is DISABLED'):
+    with self.assertRaisesRegex(
+        config_helper.InvalidSchema,
+        'assistedClusterCreation.creationGuidance must be specified when assistedClusterCreation.type is DISABLED'
+    ):
       config_helper.Schema.load_yaml("""
           applicationApiVersion: v1beta1
           x-google-marketplace:
@@ -1451,8 +1453,10 @@ class ConfigHelperTest(unittest.TestCase):
           """)
 
   def test_assisted_cluster_creation_strict_missing_gke(self):
-    with self.assertRaisesRegex(config_helper.InvalidSchema,
-                                'assistedClusterCreation.gke must be specified when assistedClusterCreation.type is STRICT'):
+    with self.assertRaisesRegex(
+        config_helper.InvalidSchema,
+        'assistedClusterCreation.gke must be specified when assistedClusterCreation.type is STRICT'
+    ):
       config_helper.Schema.load_yaml("""
           applicationApiVersion: v1beta1
           x-google-marketplace:
@@ -1479,8 +1483,9 @@ class ConfigHelperTest(unittest.TestCase):
           """)
 
   def test_assisted_cluster_creation_strict_custom_vm_odd_cpu(self):
-    with self.assertRaisesRegex(config_helper.InvalidSchema,
-                                'Number of cores for machineType could either be 1 or an even number'):
+    with self.assertRaisesRegex(
+        config_helper.InvalidSchema,
+        'Number of cores for machineType could either be 1 or an even number'):
       config_helper.Schema.load_yaml("""
           applicationApiVersion: v1beta1
           x-google-marketplace:
