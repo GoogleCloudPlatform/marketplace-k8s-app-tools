@@ -554,7 +554,7 @@ class SchemaAssistedClusterCreation:
     self._type = dictionary.get('type', None)
     _must_contain(self._type, self._ASSISTED_CC_TYPES,
                   "Invalid type of AssistedClusterCreation")
-    self._creation_guidance = dictionary.get('creationGuidance', "")
+    self._creation_guidance = dictionary.get('creationGuidance')
     self._gke = _maybe_get_and_apply(dictionary, 'gke', lambda v: SchemaGke(v))
 
     if self._type == self._ASSISTED_CC_TYPE_DISABLED and not self._creation_guidance:
@@ -604,6 +604,10 @@ class SchemaNodePoolDetails:
         'NodePoolDetails must have machineType property')
     if "custom-" in self._machine_type:
       splits = re.split("-", self._machine_type)
+      if len(splits) < 3:
+        raise InvalidSchema(
+            'Custom machine types should be specified using following convention: '
+            'custom-[NUMBER_OF_CPUS]-[NUMBER_OF_MB]')
       cores = int(splits[-2])
       if cores != 1 and cores % 2 != 0:
         raise InvalidSchema(
