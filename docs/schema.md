@@ -949,7 +949,7 @@ Supported types:
 
 Use `creationGuidance` to specify instructions which will explain to end-user how they should create a cluster that will be compatible with the app. `creationGuidance` is required if constraint type is set as `DISABLED`.
 
-For instance, the following specifies that a new cluster can not be created as part of deployment and customer must select an existing cluster with GPU.
+For instance, the following specifies that a new cluster cannot be automatically created as part of deployment and the user should either select an existing cluster with Ubuntu node image or manually create one.
 
 ```yaml
 properties:
