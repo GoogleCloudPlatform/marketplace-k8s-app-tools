@@ -923,7 +923,9 @@ indicates whether Istio is enabled on the cluster.
 
 ### assistedClusterCreation
 
-Use `assistedClusterCreation` to specify constraints for cluster creation as part of app deployment. These constraints determine whether a new cluster creation is allowed as part of deployment; and if yes, what are the node constraints.
+Use `assistedClusterCreation` to specify constraints for cluster creation as part of app deployment. These constraints determine whether a new cluster creation is allowed as part of deployment, and allow declaration of a specific node configuration for creation.
+
+`assistedClusterCreation` is optional if cluster creation is enabled. You can use it to specify a specific node configuration, but otherwise one will be generated according to defaults or specified `clusterConstraints`, if declared. The node config defined here will override the one suggested by `clusterConstraints`.
 
 ```yaml
 properties:
@@ -945,7 +947,7 @@ Supported types:
 - `DISABLED`: The app doesn't support creating a new cluster as part of app deployment. User must select a pre-existing cluster.
 - `STRICT`: The app specified strict requirements for number of nodes and machine type which should be used if creating a new cluster as part of app deployment. 
 
-Use `creationGuidance` to specify instructions which will explain to end-user how they should create a cluster that will be compatible with the app.
+Use `creationGuidance` to specify instructions which will explain to end-user how they should create a cluster that will be compatible with the app. `creationGuidance` is required if constraint type is set as `DISABLED`.
 
 For instance, the following specifies that a new cluster can not be created as part of deployment and customer must select an existing cluster with GPU.
 
@@ -958,7 +960,7 @@ x-google-marketplace:
   clusterConstraints:
     assistedClusterCreation:
       type: DISABLED
-      creationGuidance: "Please use existing cluster with GPU."
+      creationGuidance: "Create a cluster with Ubuntu as the node image type."
 ```
 
 
@@ -981,7 +983,7 @@ x-google-marketplace:
 `numNodes` is number of nodes to be created in each of the cluster's zones.
 `machineType` is the type of machine to use for nodes. It can either be a [predefined machine type](https://cloud.google.com/compute/docs/machine-types#general_purpose)  or [custom machine type](https://cloud.google.com/compute/docs/machine-types#custom_machine_types).
 
-Only `gke` clusters are supported at the moment.
+Only `gke` clusters and a single `nodePool` definition are supported at the moment.
 
 ---
 
