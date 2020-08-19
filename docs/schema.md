@@ -921,6 +921,68 @@ If this section is not specified, users see a warning when deploying the app to
 an Istio-enabled environment. The [`ISTIO_ENABLED`](#type-istio_enabled) type
 indicates whether Istio is enabled on the cluster.
 
+### assistedClusterCreation
+
+Use `assistedClusterCreation` to specify constraints for cluster creation as part of app deployment. These constraints determine whether a new cluster creation is allowed as part of deployment; and if yes, what are the node constraints.
+
+```yaml
+properties:
+  # Property definitions...
+required:
+  # Required properties...
+x-google-marketplace:
+  clusterConstraints:
+    assistedClusterCreation:
+      type: DISABLED | STRICT
+      creationGuidance: #string
+      gke:
+        nodePool:
+        - numNodes: #integer
+          machineType: #string
+```
+
+Supported types:
+- `DISABLED`: The app doesn't support creating a new cluster as part of app deployment. User must select a pre-existing cluster.
+- `STRICT`: The app specified strict requirements for number of nodes and machine type which should be used if creating a new cluster as part of app deployment. 
+
+Use `creationGuidance` to specify instructions which will explain to end-user how they should create a cluster that will be compatible with the app.
+
+For instance, the following specifies that a new cluster can not be created as part of deployment and customer must select an existing cluster with GPU.
+
+```yaml
+properties:
+  # Property definitions...
+required:
+  # Required properties...
+x-google-marketplace:
+  clusterConstraints:
+    assistedClusterCreation:
+      type: DISABLED
+      creationGuidance: "Please use existing cluster with GPU."
+```
+
+
+The following specifies that if a new cluster was to be created as part of deployment, it should be a new `gke` cluster with a `nodePool` containing 2 nodes of custom machine-type `custom-2-12288`.
+
+```yaml
+properties:
+  # Property definitions...
+required:
+  # Required properties...
+x-google-marketplace:
+  clusterConstraints:
+    assistedClusterCreation:
+      type: STRICT
+      gke:
+        nodePool:
+        - numNodes: 2
+          machineType: custom-2-12288
+```
+`numNodes` is number of nodes to be created in each of the cluster's zones.
+`machineType` is the type of machine to use for nodes. It can either be a [predefined machine type](https://cloud.google.com/compute/docs/machine-types#general_purpose)  or [custom machine type](https://cloud.google.com/compute/docs/machine-types#custom_machine_types).
+
+Only `gke` clusters are supported at the moment.
+
 ---
 
 ## deployerServiceAccount
