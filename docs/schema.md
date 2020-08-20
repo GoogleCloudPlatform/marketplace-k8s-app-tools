@@ -921,6 +921,70 @@ If this section is not specified, users see a warning when deploying the app to
 an Istio-enabled environment. The [`ISTIO_ENABLED`](#type-istio_enabled) type
 indicates whether Istio is enabled on the cluster.
 
+### assistedClusterCreation
+
+Use `assistedClusterCreation` to specify constraints for cluster creation as part of app deployment. These constraints determine whether a new cluster creation is allowed as part of deployment, and allow declaration of a specific node configuration for creation.
+
+`assistedClusterCreation` is optional if cluster creation is enabled. You can use it to specify a specific node configuration, but otherwise one will be generated according to defaults or specified `clusterConstraints`, if declared. The node config defined here will override the one suggested by `clusterConstraints`.
+
+```yaml
+properties:
+  # Property definitions...
+required:
+  # Required properties...
+x-google-marketplace:
+  clusterConstraints:
+    assistedClusterCreation:
+      type: DISABLED | STRICT
+      creationGuidance: #string
+      gke:
+        nodePool:
+        - numNodes: #integer
+          machineType: #string
+```
+
+Supported types:
+- `DISABLED`: The app doesn't support creating a new cluster as part of app deployment. User must select a pre-existing cluster.
+- `STRICT`: The app specified strict requirements for number of nodes and machine type which should be used if creating a new cluster as part of app deployment. 
+
+Use `creationGuidance` to specify instructions which will explain to end-user how they should create a cluster that will be compatible with the app. `creationGuidance` is required if constraint type is set as `DISABLED`.
+
+For instance, the following specifies that a new cluster cannot be automatically created as part of deployment and the user should either select an existing cluster with Ubuntu node image or manually create one.
+
+```yaml
+properties:
+  # Property definitions...
+required:
+  # Required properties...
+x-google-marketplace:
+  clusterConstraints:
+    assistedClusterCreation:
+      type: DISABLED
+      creationGuidance: "Create a cluster with Ubuntu as the node image type."
+```
+
+
+The following specifies that if a new cluster was to be created as part of deployment, it should be a new `gke` cluster with a `nodePool` containing 2 nodes of custom machine-type `custom-2-12288`.
+
+```yaml
+properties:
+  # Property definitions...
+required:
+  # Required properties...
+x-google-marketplace:
+  clusterConstraints:
+    assistedClusterCreation:
+      type: STRICT
+      gke:
+        nodePool:
+        - numNodes: 2
+          machineType: custom-2-12288
+```
+`numNodes` is number of nodes to be created in each of the cluster's zones.
+`machineType` is the type of machine to use for nodes. It can either be a [predefined machine type](https://cloud.google.com/compute/docs/machine-types#general_purpose)  or [custom machine type](https://cloud.google.com/compute/docs/machine-types#custom_machine_types).
+
+Only `gke` clusters and a single `nodePool` definition are supported at the moment.
+
 ---
 
 ## deployerServiceAccount
