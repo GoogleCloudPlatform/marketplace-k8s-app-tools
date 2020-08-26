@@ -116,7 +116,7 @@ function print_summary() {
     echo "WARNING: Schema is incompatible with the latest deployer, would fail with:"
     echo
     echo "$validation_errors"
-    echo "=================================="
+    echo "======== END OF WARNING ========="
   fi
 
   if [[ -s "$error_summary_path" ]]; then
