@@ -62,7 +62,7 @@ def load_schema(parsed_args):
 
 
 def load_schema_and_validate(parsed_args):
-  return load_schema(parsed_args.schema_file).validate()
+  return load_schema(parsed_args).validate()
 
 
 @memoize
