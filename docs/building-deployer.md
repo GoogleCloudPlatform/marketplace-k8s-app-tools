@@ -19,7 +19,7 @@ application uses at runtime.
 The deployer image is a Docker container image that has these characteristics:
 
 - The file system contains metadata files that define various aspects
-  of deploying the application. One important purpose of the metadata is to
+  of deploying the application. One important purpose of the metadata
   is to define the UI for users who are deploying the application from the
   Google Cloud Console.
 
