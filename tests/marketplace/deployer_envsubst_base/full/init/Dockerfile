@@ -1,4 +1,4 @@
-FROM launcher.gcr.io/google/debian9
+FROM marketplace.gcr.io/google/debian10
 
 COPY metering.php.tmpl /
 COPY agent-config.yaml /
