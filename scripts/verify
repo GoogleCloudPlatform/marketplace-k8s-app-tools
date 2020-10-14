@@ -57,6 +57,22 @@ done
 
 error_summary_path="$(mktemp)"
 
+function delete_apiservices() {
+  # Remove apiservices that are unavailable or attached to $NAMESPACE
+  # Namespaces cannot be deleted if there are any unavailable apiservices
+  # See: https://github.com/kubernetes/kubernetes/issues/60807 and
+  # NamespaceDeletionDiscoveryFailure
+  mapfile -t services < <({
+    kubectl get apiservices | grep False | awk '{print $1}'
+    kubectl get apiservices -o json |
+      jq -r --arg namespace $NAMESPACE '.items[] | select(.spec.service.namespace == $namespace) | .metadata.name'
+  } | sort | uniq)
+  if ((${#services[@]})); then
+    echo "INFO Deleting APIServices " "${services[@]}"
+    kubectl delete apiservices "${services[@]}"
+  fi
+}
+
 function delete_namespace() {
   if [[ -z "$namespace_deleted" ]]; then
     echo "INFO Collecting events for namespace \"$NAMESPACE\""
@@ -71,6 +87,8 @@ function delete_namespace() {
       deployer_errors="$(echo "$deployer_logs" | /scripts/filter_deployer_logs.py)"
     fi
 
+    delete_apiservices
+    
     echo "INFO Deleting namespace \"$NAMESPACE\""
     kubectl get all --namespace "$NAMESPACE" --output=yaml
     kubectl delete namespace "$NAMESPACE"
