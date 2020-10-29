@@ -165,6 +165,14 @@ docker run \
     --rm "${deployer}" \
     -c 'cat /data/schema.yaml' \
 > /data/schema.yaml
+
+# If parameters is a gcs file, use the content of the file instead
+if [[ "$parameters" = "gs://"* ]]; then
+  echo "Using parameters from $parameters"
+  parameters="$(gsutil cat $parameters)"
+  echo "$parameters"
+fi
+
 echo "$parameters" \
   | json2yaml \
 > /data/values.yaml
