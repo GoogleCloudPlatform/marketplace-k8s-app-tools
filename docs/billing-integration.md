@@ -82,6 +82,9 @@ data:
     # Metric names should match verbatim the identifiers created
     # during pricing setup.
     metrics:
+    # The app must send usage reports to the agent for this metric
+    # since it is not an instance time metric (which the agent can
+    # track and report itself).
     - name: requests
       type: int
 
@@ -94,9 +97,35 @@ data:
       # The aggregation section indicates that reports that the agent
       # receives for this metric should be aggregated for a specified
       # period of time prior to being sent to the reporting endpoint.
+      # This is independent from how often the app reports usage to
+      # the agent.
       aggregation:
         bufferSeconds: 60
 
+    # The reporting unit which the app should use to report usage to
+    # the agent should align with the metric unit in the backend
+    # service config (set from the "reporting unit" in the portal).
+    #
+    # For unit/time metrics, the reporting metric should likely be
+    # more granular than the pricing metric, since usage should be
+    # reported frequently
+    # e.g. metric may be reported in MiBy/min but priced in GiBy/day
+    #
+    # If the reporting metric is not more granular than the pricing
+    # metric (which is recommended), a float type is likely needed
+    # in order to provide sufficient precision.
+    - name: test_app_data_miby_min
+      type: int
+
+      endpoints:
+      - name: on_disk
+      - name: servicecontrol
+
+      aggregation:
+        bufferSeconds: 60
+
+    # The agent is able to automatically send instance time usage
+    # reports, configured in the "source" section.
     - name: instance_time
       type: int
       endpoints:
@@ -137,6 +166,11 @@ data:
     # 'int64Value') through the "instance_time" metric every minute
     # (defined by 'intervalSeconds'); this is assuming that the metric
     # configured in service control has 'seconds' as its unit.
+    #
+    # This section is only a convenience for reporting instance
+    # time; for any other metric, the app must send usage reports to
+    # the agent itself. Only use it for pure instance time metrics
+    # (e.g. seconds, not MiBy per second), otherwise omit it.
     #
     # IMPORTANT: The unit of the metric is specified in the backend, not here,
     # so care must be taken to ensure that the reported value and the unit match.
