@@ -95,10 +95,9 @@ data:
       - name: on_disk
       - name: servicecontrol
 
-      # The aggregation section indicates that reports that the agent
-      # receives for this metric should be aggregated for a specified
-      # period of time prior to being sent to the reporting endpoint
-      # (e.g Google Service Control).
+      # Metrics reported by the application are aggregated by the
+      # agent for a specified period of time and sent to the
+      # reporting endpoint (e.g. Google Service Control)
       aggregation:
         bufferSeconds: 60
 
