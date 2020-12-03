@@ -17,7 +17,7 @@ RUN pip3 install \
       pyyaml \
       six
 
-RUN for full_version in 1.13.12 1.14.8 1.15.11 1.16.9 1.17.5 1.18.2;  \
+RUN for full_version in 1.15.12 1.16.15 1.17.14 1.18.12;  \
      do \
         version=${full_version%.*} \
         && mkdir -p /opt/kubectl/$version \
@@ -25,7 +25,7 @@ RUN for full_version in 1.13.12 1.14.8 1.15.11 1.16.9 1.17.5 1.18.2;  \
             https://storage.googleapis.com/kubernetes-release/release/v$full_version/bin/linux/amd64/kubectl \
         && chmod 755 /opt/kubectl/$version/kubectl; \
      done;
-RUN ln -s /opt/kubectl/1.16 /opt/kubectl/default
+RUN ln -s /opt/kubectl/1.17 /opt/kubectl/default
 
 RUN mkdir -p /bin/helm-downloaded \
     && wget -q -O /bin/helm-downloaded/helm.tar.gz \
