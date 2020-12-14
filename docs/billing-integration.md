@@ -113,7 +113,7 @@ data:
     # e.g. metric may be reported in MiBy/min but priced in GiBy/day
     #
     # If the reporting metric is not more granular than the pricing
-    # metric (which is recommended), a float type is likely needed
+    # metric (which is recommended), a double type is likely needed
     # in order to provide sufficient precision.
     - name: test_app_data_miby_min
       type: int
