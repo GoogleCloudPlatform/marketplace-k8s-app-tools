@@ -112,9 +112,9 @@ data:
     # reported frequently
     # e.g. metric may be reported in MiBy/min but priced in GiBy/day
     #
-    # If the reporting metric is not more granular than the pricing
-    # metric (which is recommended), a double type is likely needed
-    # in order to provide sufficient precision.
+    # The reporting metric is recommended to be more granular than
+    # the pricing metric. If it is not, a double type is likely
+    # needed to provide sufficient precision.
     - name: test_app_data_miby_min
       type: int
 
