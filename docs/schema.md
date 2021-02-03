@@ -804,7 +804,7 @@ requires that the cluster runs k8s version greater than or equal to 1.13.7, use:
 ```yaml
 x-google-marketplace:
   clusterConstraints:
-    k8sVersion: >=1.13.7
+    k8sVersion: ">=1.13.7"
 ```
 
 Any SemVer expression is accepted; however, it is recommended that the constraints are kept to a
