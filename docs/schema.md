@@ -1,4 +1,4 @@
-# Creating a deployer schema
+ # Creating a deployer schema
 
 You need a `schema.yaml` file when you
 [build your deployer](building-deployer.md).
