@@ -593,7 +593,6 @@ The `description` field (required) should indicate the service account's purpose
 and explain why it needs the requested permissions, particularly cluster-scoped
 permissions. It may be shown to users in the UI.
 
-
 #### type: STORAGE_CLASS
 
 All Storage Classes need to be defined as parameters in `schema.yaml`.
