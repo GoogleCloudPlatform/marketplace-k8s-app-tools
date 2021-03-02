@@ -114,7 +114,7 @@ deployer **must** be parameterized in `schema.yaml`.
 
 Solutions that include [CRDs](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/)
 templates as part of the deployment need to add extra permissions to the deployer
-service account in the schema.yaml file. Example:
+service account in the `schema.yaml` file. Example:
 
 ```
 x-google-marketplace:
