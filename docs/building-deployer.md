@@ -133,4 +133,10 @@ x-google-marketplace:
             - '*'
 ```
 
+For CRDs in particular, ensure that your CRD will be instantiated before any
+CR instances. You can achieve this by defining your CRD above your CR in the
+same `---`-separated file
+([example](/tests/marketplace/deployer_envsubst_base/standard_v2/manifest/crontab-crd.yaml).
+If using helm, you can define the CRD in its own simple subchart instead.
+
 See more about deployerServiceAccount at [schema.md](schema.md#deployerserviceaccount)
