@@ -22,6 +22,8 @@ apiVersion: "stable.example.com/v1"
 kind: CronTab
 metadata:
   name: $name
+  labels:
+    app.kubernetes.io/name: $name
 spec:
   cronSpec: "* * * * */5"
   image: my-awesome-cron-image
