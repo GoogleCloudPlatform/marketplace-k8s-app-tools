@@ -1,0 +1,7 @@
+# This example CRD is taken from the k8s docs:
+# https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/custom-resource-definitions/
+apiVersion: v1
+appVersion: "1.0"
+description: A Helm subchart for installing a CRD
+name: crd-subchart
+version: 0.1.0
