@@ -1,0 +1,54 @@
+x-google-marketplace:
+  schemaVersion: v2
+
+  applicationApiVersion: v1beta1
+
+  partnerId: partner
+  solutionId: wordpress
+
+  publishedVersion: 0.0.1
+  publishedVersionMetadata:
+    releaseNote: Initial release
+    recommended: true
+
+  images: {}
+
+properties:
+  name:
+    type: string
+    x-google-marketplace:
+      type: NAME
+  namespace:
+    type: string
+    x-google-marketplace:
+      type: NAMESPACE
+  application_uid:
+    type: string
+    x-google-marketplace:
+      type: APPLICATION_UID
+      applicationUid:
+        generatedProperties:
+          createApplicationBoolean: global.application.create
+  marketplace-integration.image:
+    type: string
+    x-google-marketplace:
+      type: DEPLOYER_IMAGE
+  marketplace-integration.service_account:
+    type: string
+    x-google-marketplace:
+      type: SERVICE_ACCOUNT
+      serviceAccount:
+        description: >
+          (Sample for how to configure a) service account
+          that the application uses to instantiate resources
+          post-deployment.
+        roles:
+        - type: Role
+          rulesType: PREDEFINED
+          rulesFromRoleName: cluster-admin
+required:
+- name
+- namespace
+- application_uid
+- marketplace-integration.image
+- marketplace-integration.service_account
