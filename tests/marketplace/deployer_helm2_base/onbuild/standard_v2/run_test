@@ -1,0 +1,31 @@
+#!/bin/bash
+
+set -eox pipefail
+
+test_name="$(dirname "$0" | cut -d/ -f2-)"
+test_directory=$(mktemp --dry-run)
+cp -r $(dirname "$0") "$test_directory"
+cd "$test_directory"
+
+image="$REGISTRY/$test_name/deployer:$MARKETPLACE_TOOLS_TAG-$TEST_ID"
+
+docker build \
+    --build-arg "MARKETPLACE_TOOLS_TAG=$MARKETPLACE_TOOLS_TAG" \
+    --tag "$image" \
+    .
+
+docker push "$image"
+
+docker run \
+    "gcr.io/cloud-marketplace-tools/k8s/dev:$MARKETPLACE_TOOLS_TAG" \
+    cat /scripts/dev \
+  > dev
+chmod a+x dev
+
+# Runs diagnostic tool to make sure your environment is properly setup.
+./dev doctor
+
+app_parameters="{}"
+./dev \
+  /scripts/verify \
+      --deployer="$image"

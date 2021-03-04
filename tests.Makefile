@@ -13,7 +13,7 @@ TEST_ID := $(shell python -c 'import random, string; print("".join([random.choic
 	mkdir -p "$@"
 
 .tests/marketplace/deployer/helm_onbuild/standard_v2: \
-		.build/marketplace/deployer/helm2_onbuild \
+		.build/marketplace/deployer/helm_onbuild \
 		.build/marketplace/dev \
 		.build/var/MARKETPLACE_TOOLS_TAG \
 		.build/var/REGISTRY \
@@ -30,6 +30,28 @@ TEST_ID := $(shell python -c 'import random, string; print("".join([random.choic
 .PHONY: tests/marketplace/deployer/helm_onbuild
 tests/marketplace/deployer/helm_onbuild: \
 		.tests/marketplace/deployer/helm_onbuild/standard_v2
+
+.tests/marketplace/deployer/helm2_onbuild:
+	mkdir -p "$@"
+
+.tests/marketplace/deployer/helm2_onbuild/standard_v2: \
+		.build/marketplace/deployer/helm2_onbuild \
+		.build/marketplace/dev \
+		.build/var/MARKETPLACE_TOOLS_TAG \
+		.build/var/REGISTRY \
+		$(shell find tests/marketplace/deployer_helm2_base/onbuild/standard_v2 -type f) \
+		tests.Makefile \
+		| .tests/marketplace/deployer/helm2_onbuild
+	$(call print_target)
+	TEST_ID=$(TEST_ID) \
+	REGISTRY=$(REGISTRY) \
+	MARKETPLACE_TOOLS_TAG=$(MARKETPLACE_TOOLS_TAG) \
+		./tests/marketplace/deployer_helm2_base/onbuild/standard_v2/run_test
+	@touch "$@"
+
+.PHONY: tests/marketplace/deployer/helm2_onbuild
+tests/marketplace/deployer/helm2_onbuild: \
+		.tests/marketplace/deployer/helm2_onbuild/standard_v2
 
 .tests/marketplace/deployer/helm_tiller_onbuild:
 	mkdir -p "$@"
@@ -147,6 +169,7 @@ tests/marketplace/deployer/envsubst: \
 tests/integration: \
 		tests/marketplace/deployer/envsubst \
 		tests/marketplace/deployer/helm_tiller_onbuild \
+		tests/marketplace/deployer/helm2_onbuild \
 		tests/marketplace/deployer/helm_onbuild
 
 
