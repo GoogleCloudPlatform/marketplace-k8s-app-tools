@@ -44,6 +44,9 @@ spec:
     shortNames:
     - ct
 ---
+# Cut CR creation flakiness by increasing the buffer for CRD creation to occur
+# with this empty file.
+---
 apiVersion: "stable.example.com/v1"
 kind: CronTab
 metadata:
