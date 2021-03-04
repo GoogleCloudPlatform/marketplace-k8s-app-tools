@@ -26,11 +26,6 @@ from yaml_util import load_resources_yaml
 _HELM_HOOK_KEY = 'helm.sh/hook'
 _HOOK_SUCCESS = 'test-success'
 _HOOK_FAILURE = 'test-failure'
-# Replaces `test-success`: https://helm.sh/docs/topics/v2_v3_migration/
-_HOOK_TEST = 'test'
-# Marketplace deps: marketplace/charts/marketplace-integration/templates
-_HOOK_POST_DELETE = 'post-delete'
-_HOOK_POST_INSTALL = 'post-install'
 
 
 def main():
@@ -51,10 +46,6 @@ def main():
     if helm_hook is None:
       filtered_resources.append(resource)
     elif helm_hook == _HOOK_SUCCESS:
-    # elif helm_hook ==_HOOK_POST_DELETE or helm_hook == _HOOK_POST_INSTALL:
-    #   filtered_resources.append(resource)
-    #   # continue "Set of resources does not include an Application"
-    # elif helm_hook == _HOOK_SUCCESS or helm_hook == _HOOK_TEST:
       if args.deploy_tests:
         annotations = deep_get(resource, "metadata", "annotations")
         del annotations[_HELM_HOOK_KEY]
@@ -63,8 +54,8 @@ def main():
     elif helm_hook == _HOOK_FAILURE:
       if args.deploy_tests:
         raise Exception("Helm hook {} is not supported".format(helm_hook))
-    # else:
-    #   raise Exception("Helm hook {} is not supported".format(helm_hook))
+    else:
+      raise Exception("Helm hook {} is not supported".format(helm_hook))
 
   with open(manifest, "w", encoding='utf-8') as out:
     yaml.dump_all(

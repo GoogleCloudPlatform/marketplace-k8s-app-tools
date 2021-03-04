@@ -3,7 +3,3 @@ appVersion: "1.0"
 description: A Minimal Helm 2 Chart
 name: minimal-helm-chart
 version: 0.1.0
-#dependencies:
-#- name: marketplace-integration
-#  version: 0.x
-#  repository: https://cloud-marketplace-tools.storage.googleapis.com/charts
