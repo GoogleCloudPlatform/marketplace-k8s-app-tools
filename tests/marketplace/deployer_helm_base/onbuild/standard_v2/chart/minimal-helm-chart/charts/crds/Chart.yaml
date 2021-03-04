@@ -1,0 +1,6 @@
+apiVersion: v2
+description: >
+  A chart for the parent's CRDs, as recommended by Helm:
+  https://helm.sh/docs/chart_best_practices/custom_resource_definitions/
+name: crd-chart
+version: 0.1.0
