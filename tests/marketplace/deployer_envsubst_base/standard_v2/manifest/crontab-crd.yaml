@@ -1,5 +1,8 @@
-# The CRD is defined in the same file above CR instances
-# to ensure the CRD is instantiated before the instances.
+# Note: Envsubst can only support creation of a CRD.
+#
+# If you also need the deployer to create a CR instance,
+# use Helm and create the CRD in a subchart. Example at:
+# /tests/marketplace/deployer_envsubst_base/standard_v2 
 #
 # This example CRD is taken from the k8s docs:
 # https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/custom-resource-definitions/
@@ -43,23 +46,3 @@ spec:
     # shortNames allow shorter string to match your resource on the CLI
     shortNames:
     - ct
----
-# Cut CR creation flakiness by increasing the buffer for CRD creation to occur
-# with this empty file.
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: crd-creation-time-buffer-namespace-0
----
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: crd-creation-time-buffer-namespace-1
----
-apiVersion: "stable.example.com/v1"
-kind: CronTab
-metadata:
-  name: my-crontab
-spec:
-  cronSpec: "* * * * */5"
-  image: my-awesome-cron-image
