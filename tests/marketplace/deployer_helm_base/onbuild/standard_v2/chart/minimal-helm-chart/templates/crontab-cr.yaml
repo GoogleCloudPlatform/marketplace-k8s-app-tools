@@ -1,0 +1,12 @@
+# The CronTab CRD is defined in charts/cards as reccomended in Helm 3
+# https://helm.sh/docs/chart_best_practices/custom_resource_definitions/
+#
+# This example CR is taken from the k8s docs:
+# https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/custom-resource-definitions/
+# apiVersion: "stable.example.com/v1"
+# kind: CronTab
+# metadata:
+#   name: {{ .Release.Name }}
+# spec:
+#   cronSpec: "* * * * */5"
+#   image: my-awesome-cron-image
