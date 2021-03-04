@@ -1,0 +1,14 @@
+# The CronTab CRD is defined in a subchart to ensure it exists
+# before the CR is instantiated.
+#
+# If CRs are only instantiated by the app itself
+# (i.e. are not included in deployer manifests)
+# then the CR does not need to be in a subchart.
+# (example: /tests/marketplace/deployer_envsubst_base/standard_v2)
+apiVersion: "stable.example.com/v1"
+kind: CronTab
+metadata:
+  name: my-crontab
+spec:
+  cronSpec: "* * * * */5"
+  image: my-awesome-cron-image
