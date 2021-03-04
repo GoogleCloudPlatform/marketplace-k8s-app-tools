@@ -2,3 +2,13 @@ dependencies:
 - name: marketplace-integration
   version: 0.x
   repository: https://cloud-marketplace-tools.storage.googleapis.com/charts
+  # Declare the CRD subchart as a dependency to
+  # ensure it is executed first.
+  # https://helm.sh/docs/helm/helm_dependency
+  #
+  # Helm3 is not supported so only Method 2 is viable:
+  # # Declare the CRD subchart as a dependency to
+  # https://helm.sh/docs/chart_best_practices/custom_resource_definitions/
+- name: crd-subchart
+  version: 0.x
+  repository: "file://../charts/crd-subchart"
