@@ -110,11 +110,12 @@ deployer **must** be parameterized in `schema.yaml`.
 
 ### Specific Scenarios
 
-#### Installing CustomResourceDefinitions (CRD)
+#### Installing Cluster-Scoped Resources
 
-Solutions that include [CRDs](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/)
-templates as part of the deployment need to add extra permissions to the deployer
-service account in the `schema.yaml` file. Example:
+Solutions that include cluster-scoped (i.e. non-namespaced) resources
+in deployment templates need to add extra permissions to the deployer
+service account in the `schema.yaml` file. Example to install a
+[CustomResourceDefinition]((https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/)):
 
 ```
 x-google-marketplace:
@@ -133,9 +134,20 @@ x-google-marketplace:
             - '*'
 ```
 
-For CRDs in particular, ensure that your CRD will be instantiated before any
-CR instances. You can achieve this by defining your CRD above your CR in the
-same `---`-separated file
-([example](/tests/marketplace/deployer_envsubst_base/standard_v2/manifest/crontab-crd.yaml).
+See more about deployerServiceAccount in [**Creating a deployer schema**](schema.md#deployerserviceaccount)
 
-See more about deployerServiceAccount at [schema.md](schema.md#deployerserviceaccount)
+#### Installing Custom Resources (CRs)
+
+If you need to create a CustomResource (CR), i.e. an instance of a given
+[CRD](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/),
+as a part of deployment, you **must use Helm**. This is because a subchart
+is needed to create the CRD _before_ the CR is instantiated in the parent
+chart. Ensure that you still grant the `deployerServiceAccount` the needed
+permissions to create the cluster-scoped CRD resource.
+
+See this [test app](/tests/marketplace/deployer_envsubst_base/standard_v2/manifest/crontab-crd.yaml)
+for an example.
+
+If you only need to create the CRD in app manifests (e.g., your app creates
+CRs during its lifetime after initialization), then you may use either
+Envsubst or Helm.
