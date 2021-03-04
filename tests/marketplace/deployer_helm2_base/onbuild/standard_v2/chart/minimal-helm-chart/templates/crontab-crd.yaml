@@ -1,4 +1,5 @@
-# Note that Helm 3 is needed to create a CRD *and* CR with the deployer.
+# Note that this approach does NOT support also creating an
+# instance of this custom resource.
 #
 # This example CRD is taken from the k8s docs:
 # https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/custom-resource-definitions/
