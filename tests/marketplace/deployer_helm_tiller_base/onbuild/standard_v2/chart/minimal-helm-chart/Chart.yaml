@@ -3,3 +3,10 @@ appVersion: "1.0"
 description: A Minimal Helm Chart
 name: minimal-helm-chart
 version: 0.1.0
+# Declare the CRD subchart as a dependency to
+# ensure it is executed first.
+# https://helm.sh/docs/helm/helm_dependency/
+dependencies:
+- name: crd-subchart
+  version: "0.1.0"
+  repository: "file://../crd-subchart"
