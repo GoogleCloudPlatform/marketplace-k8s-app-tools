@@ -505,8 +505,7 @@ class ProvisionTest(unittest.TestCase):
     storage_class_provisioner = None
     provision.process(schema, values, deployer_image, deployer_entrypoint,
                       version_repo, image_pull_secret,
-                      deployer_service_account_name,
-                      storage_class_provisioner)
+                      deployer_service_account_name, storage_class_provisioner)
 
   def test_process_schema_v1(self):
     schema = self.generate_schema_v1()
@@ -523,68 +522,64 @@ class ProvisionTest(unittest.TestCase):
   def test_provision_storage_class_vsphere(self):
     schema = self.generate_schema_v1()
     prop = config_helper.SchemaProperty(
-      "storageClass", 
-      {
-        "type": "string",
-        "x-google-marketplace": {
-          "type": "STORAGE_CLASS",
-          "storageClass": {
-            "type": "SSD"
-          },
-        }
-      },
-      True
-    )
-    manifest = provision.provision_storage_class(schema, prop, "app-1", "mynamespace", "kubernetes.io/vsphere-volume")
-    self.assertEqual(manifest, 
-      ('mynamespace-app-1-storageclass', 
-        [{
-          'apiVersion': 'storage.k8s.io/v1', 
-          'kind': 'StorageClass', 
-          'metadata': {
-            'name': 'mynamespace-app-1-storageclass', 
+        "storageClass", {
+            "type": "string",
+            "x-google-marketplace": {
+                "type": "STORAGE_CLASS",
+                "storageClass": {
+                    "type": "SSD"
+                },
+            }
+        }, True)
+    manifest = provision.provision_storage_class(
+        schema, prop, "app-1", "mynamespace", "kubernetes.io/vsphere-volume")
+    self.assertEqual(manifest, ('mynamespace-app-1-storageclass', [{
+        'apiVersion': 'storage.k8s.io/v1',
+        'kind': 'StorageClass',
+        'metadata': {
+            'name': 'mynamespace-app-1-storageclass',
             'labels': {
-              'app.kubernetes.io/component': 'auto-provisioned.marketplace.cloud.google.com', 
-              'marketplace.cloud.google.com/auto-provisioned-for-property': 'storageClass'
-              }
-          }, 
-          'provisioner': 'kubernetes.io/vsphere-volume', 
-          'parameters': {
+                'app.kubernetes.io/component':
+                    'auto-provisioned.marketplace.cloud.google.com',
+                'marketplace.cloud.google.com/auto-provisioned-for-property':
+                    'storageClass'
+            }
+        },
+        'provisioner': 'kubernetes.io/vsphere-volume',
+        'parameters': {
             'diskformat': 'thin'
-          }
-        }]))
+        }
+    }]))
 
   def test_provision_storage_class_gce_pd(self):
     schema = self.generate_schema_v1()
     prop = config_helper.SchemaProperty(
-      "storageClass", 
-      {
-        "type": "string",
-        "x-google-marketplace": {
-          "type": "STORAGE_CLASS",
-          "storageClass": {
-            "type": "SSD"
-          },
-        }
-      },
-      True
-    )
-    manifest = provision.provision_storage_class(schema, prop, "app-1", "mynamespace", "kubernetes.io/gce-pd")
-    self.assertEqual(manifest, 
-      ('mynamespace-app-1-storageclass', 
-        [{
-          'apiVersion': 'storage.k8s.io/v1', 
-          'kind': 'StorageClass', 
-          'metadata': {
-            'name': 'mynamespace-app-1-storageclass', 
+        "storageClass", {
+            "type": "string",
+            "x-google-marketplace": {
+                "type": "STORAGE_CLASS",
+                "storageClass": {
+                    "type": "SSD"
+                },
+            }
+        }, True)
+    manifest = provision.provision_storage_class(schema, prop, "app-1",
+                                                 "mynamespace",
+                                                 "kubernetes.io/gce-pd")
+    self.assertEqual(manifest, ('mynamespace-app-1-storageclass', [{
+        'apiVersion': 'storage.k8s.io/v1',
+        'kind': 'StorageClass',
+        'metadata': {
+            'name': 'mynamespace-app-1-storageclass',
             'labels': {
-              'app.kubernetes.io/component': 'auto-provisioned.marketplace.cloud.google.com', 
-              'marketplace.cloud.google.com/auto-provisioned-for-property': 'storageClass'
-              }
-          }, 
-          'provisioner': 'kubernetes.io/gce-pd', 
-          'parameters': {
+                'app.kubernetes.io/component':
+                    'auto-provisioned.marketplace.cloud.google.com',
+                'marketplace.cloud.google.com/auto-provisioned-for-property':
+                    'storageClass'
+            }
+        },
+        'provisioner': 'kubernetes.io/gce-pd',
+        'parameters': {
             'type': 'pd-ssd'
-          }
-        }]))
-
+        }
+    }]))

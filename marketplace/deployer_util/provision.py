@@ -33,6 +33,7 @@ The manifests include the deployer-related resources.
 
 _DEFAULT_STORAGE_CLASS_PROVISIONER = 'kubernetes.io/gce-pd'
 
+
 def main():
   parser = ArgumentParser(description=_PROG_HELP)
   schema_values_common.add_to_argument_parser(parser)
@@ -59,7 +60,8 @@ def main():
 
 
 def process(schema, values, deployer_image, deployer_entrypoint, version_repo,
-            image_pull_secret, deployer_service_account_name, storage_class_provisioner):
+            image_pull_secret, deployer_service_account_name,
+            storage_class_provisioner):
   props = {}
   manifests = []
   app_name = get_name(schema, values)
@@ -96,7 +98,11 @@ def process(schema, values, deployer_image, deployer_entrypoint, version_repo,
       manifests += sa_manifests
     elif prop.storage_class:
       value, sc_manifests = provision_storage_class(
-          schema, prop, app_name=app_name, namespace=namespace, provisioner=storage_class_provisioner)
+          schema,
+          prop,
+          app_name=app_name,
+          namespace=namespace,
+          provisioner=storage_class_provisioner)
       props[prop.name] = value
       manifests += sc_manifests
     elif prop.xtype == config_helper.XTYPE_ISTIO_ENABLED:
@@ -666,13 +672,11 @@ def provision_storage_class(schema, prop, app_name, namespace, provisioner):
     provisioner = _DEFAULT_STORAGE_CLASS_PROVISIONER
 
   if provisioner == 'kubernetes.io/vsphere-volume':
-    parameters = {
-      'diskformat': 'thin'
-    }
+    parameters = {'diskformat': 'thin'}
   elif provisioner == 'kubernetes.io/gce-pd':
     if prop.storage_class.ssd:
       parameters = {
-        'type': 'pd-ssd',
+          'type': 'pd-ssd',
       }
     else:
       raise Exception('Do not know how to provision for property {}'.format(
