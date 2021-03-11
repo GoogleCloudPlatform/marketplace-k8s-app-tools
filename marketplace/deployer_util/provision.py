@@ -31,6 +31,7 @@ that need provisioning outside of the deployer to stdout.
 The manifests include the deployer-related resources.
 """
 
+_DEFAULT_STORAGE_CLASS_PROVISIONER = 'kubernetes.io/gce-pd'
 
 def main():
   parser = ArgumentParser(description=_PROG_HELP)
@@ -40,6 +41,7 @@ def main():
   parser.add_argument('--deployer_service_account_name', required=True)
   parser.add_argument('--version_repo', default=None)
   parser.add_argument('--image_pull_secret', default=None)
+  parser.add_argument('--storage_class_provisioner', default=None)
   args = parser.parse_args()
 
   schema = schema_values_common.load_schema(args)
@@ -51,12 +53,13 @@ def main():
       deployer_entrypoint=args.deployer_entrypoint,
       version_repo=args.version_repo,
       image_pull_secret=args.image_pull_secret,
-      deployer_service_account_name=args.deployer_service_account_name)
+      deployer_service_account_name=args.deployer_service_account_name,
+      storage_class_provisioner=args.storage_class_provisioner)
   print(yaml.safe_dump_all(manifests, default_flow_style=False, indent=2))
 
 
 def process(schema, values, deployer_image, deployer_entrypoint, version_repo,
-            image_pull_secret, deployer_service_account_name):
+            image_pull_secret, deployer_service_account_name, storage_class_provisioner):
   props = {}
   manifests = []
   app_name = get_name(schema, values)
@@ -93,7 +96,7 @@ def process(schema, values, deployer_image, deployer_entrypoint, version_repo,
       manifests += sa_manifests
     elif prop.storage_class:
       value, sc_manifests = provision_storage_class(
-          schema, prop, app_name=app_name, namespace=namespace)
+          schema, prop, app_name=app_name, namespace=namespace, provisioner=storage_class_provisioner)
       props[prop.name] = value
       manifests += sc_manifests
     elif prop.xtype == config_helper.XTYPE_ISTIO_ENABLED:
@@ -658,26 +661,34 @@ def provision_service_account(schema, prop, app_name, namespace,
   return sa_name, add_preprovisioned_labels(manifests, prop.name)
 
 
-def provision_storage_class(schema, prop, app_name, namespace):
-  if prop.storage_class.ssd:
-    sc_name = dns1123_name('{}-{}-{}'.format(namespace, app_name, prop.name))
-    manifests = [{
-        'apiVersion': 'storage.k8s.io/v1',
-        'kind': 'StorageClass',
-        'metadata': {
-            'name': sc_name,
-        },
-        # Some intelligence might go here to determine what
-        # provisioner and configuration to use here and below.
-        'provisioner': 'kubernetes.io/gce-pd',
-        'parameters': {
-            'type': 'pd-ssd',
-        }
-    }]
-    return sc_name, add_preprovisioned_labels(manifests, prop.name)
-  else:
-    raise Exception('Do not know how to provision for property {}'.format(
-        prop.name))
+def provision_storage_class(schema, prop, app_name, namespace, provisioner):
+  if not provisioner:
+    provisioner = _DEFAULT_STORAGE_CLASS_PROVISIONER
+
+  if provisioner == 'kubernetes.io/vsphere-volume':
+    parameters = {
+      'diskformat': 'thin'
+    }
+  elif provisioner == 'kubernetes.io/gce-pd':
+    if prop.storage_class.ssd:
+      parameters = {
+        'type': 'pd-ssd',
+      }
+    else:
+      raise Exception('Do not know how to provision for property {}'.format(
+          prop.name))
+
+  sc_name = dns1123_name('{}-{}-{}'.format(namespace, app_name, prop.name))
+  manifests = [{
+      'apiVersion': 'storage.k8s.io/v1',
+      'kind': 'StorageClass',
+      'metadata': {
+          'name': sc_name,
+      },
+      'provisioner': provisioner,
+      'parameters': parameters
+  }]
+  return sc_name, add_preprovisioned_labels(manifests, prop.name)
 
 
 def get_name(schema, values):
