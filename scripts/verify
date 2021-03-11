@@ -101,15 +101,14 @@ function delete_namespace() {
 }
 
 function clean_resources() {
-  # if [[ -z "$resources_cleaned" ]]; then
-  #   echo "INFO cleaning all resources."
-  #   delete_namespace
-  #   if [[ ! -z "$deployer_role_name" ]]; then
-  #     kubectl delete clusterrolebinding "$deployer_role_name"
-  #   fi
-  #   resources_cleaned="true"
-  # fi
-  echo 'no clean'
+  if [[ -z "$resources_cleaned" ]]; then
+    echo "INFO cleaning all resources."
+    delete_namespace
+    if [[ ! -z "$deployer_role_name" ]]; then
+      kubectl delete clusterrolebinding "$deployer_role_name"
+    fi
+    resources_cleaned="true"
+  fi
 }
 
 function clean_and_exit() {
@@ -304,32 +303,32 @@ done
 kubectl logs "jobs/$deployer_name" --namespace="$NAMESPACE" || echo "ERROR Failed to get logs for deployer $deployer_name"
 deployer_name=""
 
-# echo "INFO Stop the application"
-# kubectl delete "application/$NAME" \
-#     --namespace="$NAMESPACE" \
-#   || clean_and_exit "ERROR Failed to stop application"
+echo "INFO Stop the application"
+kubectl delete "application/$NAME" \
+    --namespace="$NAMESPACE" \
+  || clean_and_exit "ERROR Failed to stop application"
 
-# deletion_timeout=180
-# echo "INFO Wait for the applications to be deleted"
-# /scripts/wait_for_deletion.sh \
-#   --namespace="$NAMESPACE" \
-#   --kind=applications.app.k8s.io \
-#   --timeout="$deletion_timeout" \
-#   || clean_and_exit "ERROR Some applications were not deleted"
+deletion_timeout=180
+echo "INFO Wait for the applications to be deleted"
+/scripts/wait_for_deletion.sh \
+  --namespace="$NAMESPACE" \
+  --kind=applications.app.k8s.io \
+  --timeout="$deletion_timeout" \
+  || clean_and_exit "ERROR Some applications were not deleted"
 
-# echo "INFO Wait for standard resources were deleted."
-# /scripts/wait_for_deletion.sh \
-#   --namespace="$NAMESPACE" \
-#   --kind=all \
-#   --timeout="$deletion_timeout" \
-#   || clean_and_exit "ERROR Some resources were not deleted"
+echo "INFO Wait for standard resources were deleted."
+/scripts/wait_for_deletion.sh \
+  --namespace="$NAMESPACE" \
+  --kind=all \
+  --timeout="$deletion_timeout" \
+  || clean_and_exit "ERROR Some resources were not deleted"
 
-# echo "INFO Wait for service accounts to be deleted."
-# /scripts/wait_for_deletion.sh \
-#   --namespace="$NAMESPACE" \
-#   --kind=serviceaccounts,roles,rolebindings \
-#   --timeout="$deletion_timeout" \
-#   || clean_and_exit "ERROR Some service accounts or roles were not deleted"
+echo "INFO Wait for service accounts to be deleted."
+/scripts/wait_for_deletion.sh \
+  --namespace="$NAMESPACE" \
+  --kind=serviceaccounts,roles,rolebindings \
+  --timeout="$deletion_timeout" \
+  || clean_and_exit "ERROR Some service accounts or roles were not deleted"
 
 trap - EXIT
 
