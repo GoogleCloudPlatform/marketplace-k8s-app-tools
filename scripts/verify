@@ -308,7 +308,7 @@ kubectl delete "application/$NAME" \
     --namespace="$NAMESPACE" \
   || clean_and_exit "ERROR Failed to stop application"
 
-deletion_timeout=180
+deletion_timeout="$wait_timeout"
 echo "INFO Wait for the applications to be deleted"
 /scripts/wait_for_deletion.sh \
   --namespace="$NAMESPACE" \
