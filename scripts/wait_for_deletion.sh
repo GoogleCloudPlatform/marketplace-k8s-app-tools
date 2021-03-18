@@ -44,10 +44,13 @@ poll_interval=4
 while true; do
   # Everything under the namespace needs to be removed after app/uninstall
   echo "INFO Checking if $kind were deleted"
-  resources=$(kubectl get $kind \
-    --namespace="$namespace" \
-    -o=json \
-    | jq -r '.items[] | "\(.kind)/\(.metadata.name)"')
+  resources="$(
+    (kubectl get $kind \
+     --namespace="$namespace" \
+     -o=json \
+     | jq -r '.items[] | "\(.kind)/\(.metadata.name)"' \
+    ) \
+    || echo "Unexpected error. Will retry")"
 
   res_count=$(echo $resources | wc -w)
 
