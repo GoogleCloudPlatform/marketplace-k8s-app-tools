@@ -38,8 +38,9 @@ case $i in
 esac
 done
 
-start_time=$(date +%s)
-poll_interval=4
+declare -r start_time="$(date +%s)"
+declare -r poll_interval=4
+declare -r transient_error_msg="Unexpected error. Will retry."
 
 while true; do
   # Everything under the namespace needs to be removed after app/uninstall
@@ -50,7 +51,12 @@ while true; do
      -o=json \
      | jq -r '.items[] | "\(.kind)/\(.metadata.name)"' \
     ) \
-    || echo "Unexpected error. Will retry")"
+    || echo -n "$transient_error_msg")"
+
+  if [[ "$resources" == "$transient_error_msg" ]]; then
+    echo "INFO $resources"
+    continue
+  fi
 
   res_count=$(echo $resources | wc -w)
 
