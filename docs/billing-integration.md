@@ -286,7 +286,8 @@ For one-shot requests like this, the start and end times can be equal. For a rep
 
 ### Monitoring Status
 
-Your app can monitor the metering agent's status and modify its behavior if usage reports begin to fail. For example:
+Your app can monitor the metering agent's status and should modify its behavior if usage reports begin to fail. For example:
+
 ```shell
 curl 'http://localhost:4567/status'
 {
@@ -297,6 +298,18 @@ curl 'http://localhost:4567/status'
 ```
 
 The `currentFailureCount` value is the number of failures since the last successful report, and will be reset to 0 the next time a report is successfully sent. The `totalFailureCount` is the total number of failures since the agent started.
+
+Failures might indicate one of the following:
+
+*   The customer has canceled their subscription.
+*   The customer might have accidentally disabled the reporting channel.
+    For example, customers might inadvertently remove or misconfigure the
+    agent, or the network might prevent the agent from accessing Google's
+    reporting endpoint.
+
+**In these cases, Google does not receive usage data and customers are not billed.**
+
+In these scenarios, your app can stop itself, or disable functionality. If usage reports fail during the app's startup, we recommend that your app stop itself, so that your customers get immediate feedback and can resolve the issue.
 
 ### Monitoring Logs
 
