@@ -134,3 +134,15 @@ x-google-marketplace:
 ```
 
 See more about deployerServiceAccount at [schema.md](schema.md#deployerserviceaccount)
+
+## Environment variables
+
+These environment variables can be set in the deployer `Dockerfile` to modify some of its behaviors.
+
+```
+# Sets the maximum time to wait for resources to get ready (in seconds). If not set, 300 seconds is used as default.
+ENV WAIT_FOR_READY_TIMEOUT 600
+
+# Sets the maximum time to wait for the tester to finish (in seconds). If not set, 300 seconds is used as default.
+ENV TESTER_TIMEOUT 600
+```
