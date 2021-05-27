@@ -547,10 +547,18 @@ All service accounts need to be defined as parameters in `schema.yaml`.
 
 If you add a Kubernetes `ServiceAccount` as a resource in your manifest, the
 deployment fails with an authentication error, because the deployer doesn't run
-with enough privileges to create a Service Account. When permissions involve
-modifying resources, custom roles are prefered over predefined roles.
+with enough privileges to create a Service Account by default.
 
-For example, the following `schema.yaml` snippet adds a Service Account with
+When permissions involve modifying resources, custom roles are prefered over
+predefined roles. In accordance with the principle of least privilege, predefined
+`cluster-admin`, `admin`, and `edit` are not supported as cluster-scoped roles;
+`CUSTOM` roles defining specific rules must be used instead.
+
+If you only need to create cluster-scoped resources to initialize (vs. run)
+your app, specify these permissions in the
+[`deployerServiceAccount`](#deployerserviceaccount) field instead.
+
+The following `schema.yaml` example snippet adds a Service Account with
 Cluster Roles:
 
 ```yaml
@@ -804,7 +812,7 @@ requires that the cluster runs k8s version greater than or equal to 1.13.7, use:
 ```yaml
 x-google-marketplace:
   clusterConstraints:
-    k8sVersion: >=1.13.7
+    k8sVersion: ">=1.13.7"
 ```
 
 Any SemVer expression is accepted; however, it is recommended that the constraints are kept to a
