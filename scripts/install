@@ -156,7 +156,7 @@ echo "${parameters}" \
     --noapp \
     --app_name="${name}" \
     --app_uid="${app_uid}" \
-    --app_api_version="${app_version}" \
+    --app_api_version="app.k8s.io/${app_version}" \
     --deployer_name="${deployer_service_account_name}" \
     --deployer_uid="${deployer_uid}"
 
