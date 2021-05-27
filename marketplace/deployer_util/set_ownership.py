@@ -176,7 +176,7 @@ def dump(outfile, resources, included_kinds, namespace, namespace_uid, app_name,
 
     # Deployer-owned resources should not be owned by the Application, as
     # they should be deleted with the deployer service account (not the app).
-    if deployer_name and deployer_uid and should_be_deployer_owned(resource):
+    elif deployer_name and deployer_uid and should_be_deployer_owned(resource):
       log.info("ServiceAccount '{:s}' owns '{:s}/{:s}'", deployer_name,
                resource["kind"], resource["metadata"]["name"])
       resource = copy.deepcopy(resource)
