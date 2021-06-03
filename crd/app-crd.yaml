@@ -19,12 +19,13 @@ metadata:
     controller-tools.k8s.io: "1.0"
   name: applications.app.k8s.io
   annotations:
-    api-approved.kubernetes.io: https://github.com/GoogleCloudPlatform/marketplace-k8s-app-tools/pull/2
+    api-approved.kubernetes.io: unapproved, for Google Cloud Marketplace use only
 spec:
   group: app.k8s.io
   names:
     kind: Application
     plural: applications
+    shortNames: [apps]
   scope: Namespaced
   versions:
   - name: v1beta1
