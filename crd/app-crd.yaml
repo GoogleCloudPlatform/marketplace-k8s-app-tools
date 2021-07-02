@@ -636,6 +636,8 @@ spec:
                 type: integer
             type: object
         type: object
+    served: false
+    storage: false
 status:
   acceptedNames:
     kind: ""
