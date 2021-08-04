@@ -670,11 +670,12 @@ def provision_service_account(schema, prop, app_name, namespace,
 def provision_storage_class(schema, prop, app_name, namespace, provisioner):
   if not provisioner:
     provisioner = _DEFAULT_STORAGE_CLASS_PROVISIONER
-
   volume_binding_mode = 'Immediate'
   if provisioner == 'kubernetes.io/vsphere-volume':
     parameters = {'diskformat': 'thin'}
   elif provisioner == 'kubernetes.io/gce-pd':
+    # WaitForFirstConsumer is only available for gce-pd. See:
+    # https://kubernetes.io/docs/concepts/storage/storage-classes/#volume-binding-mode
     volume_binding_mode = 'WaitForFirstConsumer'
     if prop.storage_class.ssd:
       parameters = {
