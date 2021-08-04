@@ -44,6 +44,10 @@ case $i in
     image_pull_secret="${i#*=}"
     shift
     ;;
+  --storage_class_provisioner=*)
+    storage_class_provisioner="${i#*=}"
+    shift
+    ;;
   *)
     echo "Unrecognized flag: $i"
     exit 1
@@ -265,6 +269,7 @@ echo "INFO Initializes the deployer container which will deploy all the applicat
   --deployer="$deployer" \
   --parameters="$parameters" \
   --entrypoint='/bin/deploy_with_tests.sh' \
+  --storage_class_provisioner="$storage_class_provisioner" \
   || clean_and_exit "ERROR Failed to start deployer"
 
 echo "INFO wait for the deployer to succeed"
@@ -303,7 +308,7 @@ kubectl delete "application/$NAME" \
     --namespace="$NAMESPACE" \
   || clean_and_exit "ERROR Failed to stop application"
 
-deletion_timeout=180
+deletion_timeout="$wait_timeout"
 echo "INFO Wait for the applications to be deleted"
 /scripts/wait_for_deletion.sh \
   --namespace="$NAMESPACE" \

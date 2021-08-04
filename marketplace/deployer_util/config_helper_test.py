@@ -716,7 +716,7 @@ class ConfigHelperTest(unittest.TestCase):
             type: string
         """)
     with self.assertRaisesRegex(config_helper.InvalidSchema,
-                                'Disallowed deployerServiceAccount role'):
+                                'Disallowed service account role'):
       schema.validate()
 
   def test_deployer_service_account_cluster_scoped_mock_cluster_admin_role_enforced_validate(
@@ -749,7 +749,7 @@ class ConfigHelperTest(unittest.TestCase):
             type: string
         """)
     with self.assertRaisesRegex(config_helper.InvalidSchema,
-                                'Disallowed deployerServiceAccount role'):
+                                'Disallowed service account role'):
       schema.validate()
 
   def test_deployer_service_account_no_escalated_permissions_allowed_validate(
@@ -937,6 +937,30 @@ class ConfigHelperTest(unittest.TestCase):
                       resources: ['Pods']
                       verbs: ['']
           """)
+
+  def test_service_account_cluster_scoped_disallowed_permissions_enforced_validate(
+      self):
+    schema = config_helper.Schema.load_yaml("""
+        applicationApiVersion: v1beta1
+        properties:
+          sa:
+            type: string
+            x-google-marketplace:
+              type: SERVICE_ACCOUNT
+              serviceAccount:
+                description: >
+                  Asks for vague cluster-scoped permissions which is disallowed
+                roles:
+                - type: ClusterRole
+                  rulesType: CUSTOM
+                  rules:
+                  - apiGroups: ['*']
+                    resources: ['*']
+                    verbs: ['*']
+        """)
+    with self.assertRaisesRegex(config_helper.InvalidSchema,
+                                'Disallowed service account role'):
+      schema.validate()
 
   def test_storage_class(self):
     schema = config_helper.Schema.load_yaml("""

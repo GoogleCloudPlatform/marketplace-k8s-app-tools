@@ -107,3 +107,30 @@ re-published images should be named or tagged. This is because at deployment
 time, full names of the app images are passed to the deployer as input
 parameters. This is the reason why we require that all app images used by the
 deployer **must** be parameterized in `schema.yaml`.
+
+### Specific Scenarios
+
+#### Installing CustomResourceDefinitions (CRD)
+
+Solutions that include [CRDs](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/)
+templates as part of the deployment need to add extra permissions to the deployer
+service account in the `schema.yaml` file. Example:
+
+```
+x-google-marketplace:
+  schemaVersion: v2
+  ...
+  deployerServiceAccount:
+    roles:
+      - type: ClusterRole
+        rulesType: CUSTOM
+        rules:
+          - apiGroups:
+            - 'apiextensions.k8s.io'
+            resources:
+            - 'customresourcedefinitions'
+            verbs:
+            - '*'
+```
+
+See more about deployerServiceAccount at [schema.md](schema.md#deployerserviceaccount)
