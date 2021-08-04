@@ -548,7 +548,8 @@ class ProvisionTest(unittest.TestCase):
         'provisioner': 'kubernetes.io/vsphere-volume',
         'parameters': {
             'diskformat': 'thin'
-        }
+        },
+        'volumeBindingMode': 'Immediate'
     }]))
 
   def test_provision_storage_class_gce_pd(self):
