@@ -675,7 +675,7 @@ def provision_storage_class(schema, prop, app_name, namespace, provisioner):
   if provisioner == 'kubernetes.io/vsphere-volume':
     parameters = {'diskformat': 'thin'}
   elif provisioner == 'kubernetes.io/gce-pd':
-    volume_binding_mode = 'WaitForConsumer'
+    volume_binding_mode = 'WaitForFirstConsumer'
     if prop.storage_class.ssd:
       parameters = {
           'type': 'pd-ssd',
