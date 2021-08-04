@@ -581,5 +581,6 @@ class ProvisionTest(unittest.TestCase):
         'provisioner': 'kubernetes.io/gce-pd',
         'parameters': {
             'type': 'pd-ssd'
-        }
+        },
+        'volumeBindingMode': 'WaitForFirstConsumer'
     }]))
