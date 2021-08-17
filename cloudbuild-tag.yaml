@@ -50,7 +50,7 @@ steps:
   - -ceux
   - echo "$(.cloudbuild/should_tag_latest.sh gcr.io/$PROJECT_ID/k8s/dev $TAG_NAME)" > should_tag_latest
 
-- id: Maybe tag images latest
+- id: &MaybeTagImagesLatest Maybe tag images latest
   name: gcr.io/cloud-builders/docker
   waitFor:
   - *DetermineShouldTagLatest
@@ -80,7 +80,7 @@ steps:
 - id: Publish Charts
   name: gcr.io/$PROJECT_ID/k8s/dev:$TAG_NAME
   waitFor:
-  - *PublishImages
+  - *MaybeTagImagesLatest
   entrypoint: bash
   args:
   - -ceux
