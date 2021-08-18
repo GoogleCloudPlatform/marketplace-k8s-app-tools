@@ -115,36 +115,6 @@ steps:
   - marketplace/deployer_helm_base/onbuild/Dockerfile
   - .
 
-- id: &BuildHelm2 Build deployer_helm2
-  name: gcr.io/cloud-builders/docker
-  waitFor:
-  - '-'
-  args:
-  - build
-  - --tag
-  - gcr.io/$PROJECT_ID/k8s/deployer_helm2:sha_$COMMIT_SHA
-  - --tag
-  - gcr.io/$PROJECT_ID/k8s/deployer_helm2:sha_$SHORT_SHA
-  - --file
-  - marketplace/deployer_helm2_base/Dockerfile
-  - .
-
-- id: &BuildHelm2Onbuild Build deployer_helm2 onbuild
-  name: gcr.io/cloud-builders/docker
-  waitFor:
-  - *BuildHelm2
-  args:
-  - build
-  - --build-arg
-  - FROM=gcr.io/$PROJECT_ID/k8s/deployer_helm2:sha_$COMMIT_SHA
-  - --tag
-  - gcr.io/$PROJECT_ID/k8s/deployer_helm2/onbuild:sha_$COMMIT_SHA
-  - --tag
-  - gcr.io/$PROJECT_ID/k8s/deployer_helm2/onbuild:sha_$SHORT_SHA
-  - --file
-  - marketplace/deployer_helm2_base/onbuild/Dockerfile
-  - .
-
 - id: &BuildMarketplaceIntegrationChart Build marketplace-integration Chart
   name: gcr.io/$PROJECT_ID/k8s/dev:sha_$COMMIT_SHA
   waitFor:
@@ -189,8 +159,6 @@ steps:
   - *BuildEnvsubstOnBuild
   - *BuildHelm
   - *BuildHelmOnbuild
-  - *BuildHelm2
-  - *BuildHelm2Onbuild
   env:
   - 'KUBE_CONFIG=/workspace/.kube'
   - 'GCLOUD_CONFIG=/workspace/.config/gcloud'
@@ -225,10 +193,6 @@ images:
   - gcr.io/$PROJECT_ID/k8s/deployer_helm:sha_$SHORT_SHA
   - gcr.io/$PROJECT_ID/k8s/deployer_helm/onbuild:sha_$COMMIT_SHA
   - gcr.io/$PROJECT_ID/k8s/deployer_helm/onbuild:sha_$SHORT_SHA
-  - gcr.io/$PROJECT_ID/k8s/deployer_helm2:sha_$COMMIT_SHA
-  - gcr.io/$PROJECT_ID/k8s/deployer_helm2:sha_$SHORT_SHA
-  - gcr.io/$PROJECT_ID/k8s/deployer_helm2/onbuild:sha_$COMMIT_SHA
-  - gcr.io/$PROJECT_ID/k8s/deployer_helm2/onbuild:sha_$SHORT_SHA
 
 artifacts:
   objects:
