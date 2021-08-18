@@ -67,14 +67,13 @@ x-google-marketplace:
       Initial release.
     # releaseTypes list is optional.
     # "Security" should only be used if this is an important update to patch
-    # an existing vulnerability, as such updates will display more prominently for users.
+    # an existing vulnerability.
     releaseTypes:
     - Feature
     - BugFix
     - Security
-    # If "recommended" is "true", users using older releases are encouraged
-    # to update as soon as possible. This is useful if, for example, this release
-    # fixes a critical issue.
+    # Setting "recommended" to "true" indicates that users are encouraged
+    # to update as soon as possible.
     recommended: true
 
   # Image declaration is required here. Refer to the Images section below.
@@ -103,8 +102,7 @@ as a string. This must match the release tag on all your app images. For example
 
 ### `publishedVersionMetadata`
 
-Information about the version, shown to users in the Google Cloud Console
-when they view their Kubernetes workloads.
+Information about the version.
 
 #### `releaseNote`
 
