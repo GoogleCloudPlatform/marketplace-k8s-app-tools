@@ -29,12 +29,6 @@ steps:
     docker pull gcr.io/$_STAGING_PROJECT_ID/k8s/deployer_helm/onbuild:sha_$COMMIT_SHA
     docker tag gcr.io/$_STAGING_PROJECT_ID/k8s/deployer_helm/onbuild:sha_$COMMIT_SHA gcr.io/$PROJECT_ID/k8s/deployer_helm/onbuild:$TAG_NAME
 
-    docker pull gcr.io/$_STAGING_PROJECT_ID/k8s/deployer_helm2:sha_$COMMIT_SHA
-    docker tag gcr.io/$_STAGING_PROJECT_ID/k8s/deployer_helm2:sha_$COMMIT_SHA gcr.io/$PROJECT_ID/k8s/deployer_helm2:$TAG_NAME
-
-    docker pull gcr.io/$_STAGING_PROJECT_ID/k8s/deployer_helm2/onbuild:sha_$COMMIT_SHA
-    docker tag gcr.io/$_STAGING_PROJECT_ID/k8s/deployer_helm2/onbuild:sha_$COMMIT_SHA gcr.io/$PROJECT_ID/k8s/deployer_helm2/onbuild:$TAG_NAME
-
     docker pull gcr.io/$_STAGING_PROJECT_ID/k8s/deployer_envsubst:sha_$COMMIT_SHA
     docker tag gcr.io/$_STAGING_PROJECT_ID/k8s/deployer_envsubst:sha_$COMMIT_SHA gcr.io/$PROJECT_ID/k8s/deployer_envsubst:$TAG_NAME
 
@@ -65,10 +59,6 @@ steps:
       docker push gcr.io/$PROJECT_ID/k8s/deployer_helm:latest
       docker tag gcr.io/$PROJECT_ID/k8s/deployer_helm/onbuild:$TAG_NAME gcr.io/$PROJECT_ID/k8s/deployer_helm/onbuild:latest
       docker push gcr.io/$PROJECT_ID/k8s/deployer_helm/onbuild:latest
-      docker tag gcr.io/$PROJECT_ID/k8s/deployer_helm2:$TAG_NAME gcr.io/$PROJECT_ID/k8s/deployer_helm2:latest
-      docker push gcr.io/$PROJECT_ID/k8s/deployer_helm2:latest
-      docker tag gcr.io/$PROJECT_ID/k8s/deployer_helm2/onbuild:$TAG_NAME gcr.io/$PROJECT_ID/k8s/deployer_helm2/onbuild:latest
-      docker push gcr.io/$PROJECT_ID/k8s/deployer_helm2/onbuild:latest
       docker tag gcr.io/$PROJECT_ID/k8s/deployer_envsubst:$TAG_NAME gcr.io/$PROJECT_ID/k8s/deployer_envsubst:latest
       docker push gcr.io/$PROJECT_ID/k8s/deployer_envsubst:latest
       docker tag gcr.io/$PROJECT_ID/k8s/deployer_envsubst/onbuild:$TAG_NAME gcr.io/$PROJECT_ID/k8s/deployer_envsubst/onbuild:latest
@@ -98,8 +88,6 @@ images:
 - gcr.io/$PROJECT_ID/k8s/dev:$TAG_NAME
 - gcr.io/$PROJECT_ID/k8s/deployer_helm:$TAG_NAME
 - gcr.io/$PROJECT_ID/k8s/deployer_helm/onbuild:$TAG_NAME
-- gcr.io/$PROJECT_ID/k8s/deployer_helm2:$TAG_NAME
-- gcr.io/$PROJECT_ID/k8s/deployer_helm2/onbuild:$TAG_NAME
 - gcr.io/$PROJECT_ID/k8s/deployer_envsubst:$TAG_NAME
 - gcr.io/$PROJECT_ID/k8s/deployer_envsubst/onbuild:$TAG_NAME
 
