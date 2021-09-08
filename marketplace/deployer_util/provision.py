@@ -684,6 +684,8 @@ def provision_storage_class(schema, prop, app_name, namespace, provisioner):
     else:
       raise Exception('Do not know how to provision for property {}'.format(
           prop.name))
+  elif provisioner == 'kubernetes.io/no-provisioner':
+    return 'local-shared', []
 
   sc_name = dns1123_name('{}-{}-{}'.format(namespace, app_name, prop.name))
   manifests = [{
