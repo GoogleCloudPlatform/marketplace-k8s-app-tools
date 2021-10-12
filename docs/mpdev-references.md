@@ -119,6 +119,39 @@ Properties in `/data-test/schema.yaml` will override properties in
 `/data/schema.yaml`. This can also be used to overwrite existing default
 values for verification.
 
+### Setting verify script timeouts
+
+The `verify` command can have its duration until timout value set by using
+the `--wait_timeout` option:
+
+```shell
+mpdev verify \
+  --deployer=<YOUR DEPLOYER IMAGE> \
+  --wait_timeout=<VALUE IN SECONDS>
+```
+
+When not explicitly set, the default `wait_timeout` value is 600 seconds.
+
+The during the `verify` script execution, 2 other variable values are
+also considered for timeout:
+
+`WAIT_FOR_READY_TIMEOUT`: How long to wait for the application to get into
+ready state before timeout. If not set, the default value of 300 seconds is
+used.
+
+`TESTER_TIMEOUT`: How long to wait for the process of deploying, running
+tester pods and waiting for them to finish execution before timeout.
+If not set, the default value of 300 seconds is used.
+
+These values can be set in the Dockerfile, like so:
+
+```txt
+ENV WAIT_FOR_READY_TIMEOUT <VALUE IN SECONDS>
+ENV TESTER_TIMEOUT <VALUE IN SECONDS>
+```
+
+The values of all these timeout settings are independent from each other.
+
 ## Installing a published Marketplace app
 
 `mpdev` is intended for developing your application prior to publishing to
