@@ -45,7 +45,7 @@ For information on using `mpdev` to test your application, read the
 
 ### Setting smoke test timeouts
 
-When running `mpdev verify` script there are timeout virables that can set
+When running `mpdev verify` script there are timeout variables that can set
 on the deployer image Dockerfile:
 
 `WAIT_FOR_READY_TIMEOUT`: How long to wait for the application to get into
