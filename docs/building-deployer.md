@@ -43,7 +43,7 @@ on your application.
 For information on using `mpdev` to test your application, read the
 [`mpdev` reference](mpdev-references.md).
 
-### Setting smoke test timeouts
+### Setting timeouts
 
 When running `mpdev verify` script there are timeout variables that can set
 on the deployer image Dockerfile:
