@@ -121,7 +121,7 @@ values for verification.
 
 ### Setting verify script timeouts
 
-The `verify` command can have its duration until timout value set by using
+The `verify` command can have its duration until timeout value set by using
 the `--wait_timeout` option:
 
 ```shell
@@ -132,25 +132,9 @@ mpdev verify \
 
 When not explicitly set, the default `wait_timeout` value is 600 seconds.
 
-The during the `verify` script execution, 2 other variable values are
-also considered for timeout:
-
-`WAIT_FOR_READY_TIMEOUT`: How long to wait for the application to get into
-ready state before timeout. If not set, the default value of 300 seconds is
-used.
-
-`TESTER_TIMEOUT`: How long to wait for the process of deploying, running
-tester pods and waiting for them to finish execution before timeout.
-If not set, the default value of 300 seconds is used.
-
-These values can be set in the Dockerfile, like so:
-
-```txt
-ENV WAIT_FOR_READY_TIMEOUT <VALUE IN SECONDS>
-ENV TESTER_TIMEOUT <VALUE IN SECONDS>
-```
-
-The values of all these timeout settings are independent from each other.
+This option controls the maximum duration the verification is allowed to run.
+The deployer container can still timeout in one of its steps based on its
+internal variables. See [building deployer reference](building-deployer.md).
 
 ## Installing a published Marketplace app
 
