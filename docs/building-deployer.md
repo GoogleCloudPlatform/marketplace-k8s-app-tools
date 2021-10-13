@@ -43,6 +43,26 @@ on your application.
 For information on using `mpdev` to test your application, read the
 [`mpdev` reference](mpdev-references.md).
 
+### Setting smoke test timeouts
+
+When running `mpdev verify` script there are timeout virables that can set
+on the deployer image Dockerfile:
+
+`WAIT_FOR_READY_TIMEOUT`: How long to wait for the application to get into
+ready state before timeout. If not set, the default value of 300 seconds is
+used.
+
+`TESTER_TIMEOUT`: How long to wait for the process of deploying, running
+tester pods and waiting for them to finish execution before timeout.
+If not set, the default value of 300 seconds is used.
+
+These values can be set in the Dockerfile, like so:
+
+```
+ENV WAIT_FOR_READY_TIMEOUT <VALUE IN SECONDS>
+ENV TESTER_TIMEOUT <VALUE IN SECONDS>
+```
+
 ## Building your deployer
 
 First, decide how you want to create your Kubernetes application manifests:
