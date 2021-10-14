@@ -119,6 +119,23 @@ Properties in `/data-test/schema.yaml` will override properties in
 `/data/schema.yaml`. This can also be used to overwrite existing default
 values for verification.
 
+### Setting verify script timeouts
+
+The `verify` command can have its duration until timeout value set by using
+the `--wait_timeout` option:
+
+```shell
+mpdev verify \
+  --deployer=<YOUR DEPLOYER IMAGE> \
+  --wait_timeout=<VALUE IN SECONDS>
+```
+
+When not explicitly set, the default `wait_timeout` value is 600 seconds.
+
+This option controls the maximum duration the verification is allowed to run.
+The deployer container can still timeout in one of its steps based on its
+internal variables. See [building deployer reference](building-deployer.md).
+
 ## Installing a published Marketplace app
 
 `mpdev` is intended for developing your application prior to publishing to
