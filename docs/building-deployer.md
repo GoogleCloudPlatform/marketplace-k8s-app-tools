@@ -46,16 +46,15 @@ For information on using `mpdev` to test your application, read the
 
 ### Setting timeouts
 
-When running `mpdev verify` script there are timeout variables that can set
-on the deployer image Dockerfile:
+When running `mpdev verify` script there are timeout variables that can set on
+the deployer image Dockerfile:
 
-`WAIT_FOR_READY_TIMEOUT`: How long to wait for the application to get into
-ready state before timeout. If not set, the default value of 300 seconds is
-used.
+`WAIT_FOR_READY_TIMEOUT`: How long to wait for the application to get into ready
+state before timeout. If not set, the default value of 300 seconds is used.
 
-`TESTER_TIMEOUT`: How long to wait for the process of deploying, running
-tester pods and waiting for them to finish execution before timeout.
-If not set, the default value of 300 seconds is used.
+`TESTER_TIMEOUT`: How long to wait for the process of deploying, running tester
+pods and waiting for them to finish execution before timeout. If not set, the
+default value of 300 seconds is used.
 
 These values can be set in the Dockerfile, like so:
 
@@ -159,8 +158,8 @@ See more about deployerServiceAccount at
 
 #### Creating CustomResources (CR) at deployment time
 
-Solutions that wish to create instances of a CR at deployment time should be
-aware of the following:
+Solutions that wish to create instances of a CR at deployment time (rather than
+having customers create them) should be aware of the following:
 
 *   The CR can only be created after the CRD is installed. Given we
     [don't yet support resource ordering](https://github.com/GoogleCloudPlatform/marketplace-k8s-app-tools/issues/553),
