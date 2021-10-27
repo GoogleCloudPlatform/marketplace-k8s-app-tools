@@ -108,8 +108,11 @@ previous deployer image carries the `1.4.33` tag, and *used* to carry the `1.4`
 tag. The app image carries both `1.4` and `1.4.34` tags. It is possible for the
 app image to remain the same across minor versions, in which case it will carry
 all three tags: `1.4`, `1.4.33`, and `1.4.34`. A snapshot of the images and tags
-looks like this: - deployer (new): `1.4`, `1.4.34` - deployer (old): `1.4.33` -
-app (old and new): `1.4`, `1.4.33`, `1.4.34`
+looks like this:
+
+-   deployer (new): `1.4`, `1.4.34`
+-   deployer (old): `1.4.33`
+-   app (old and new): `1.4`, `1.4.33`, `1.4.34`
 
 ### Copying of images into Marketplace public repo
 
