@@ -166,7 +166,8 @@ having customers create them) should be aware of the following:
 
 *   The CR can only be created after the CRD is installed. Given we
     [don't yet support resource ordering](https://github.com/GoogleCloudPlatform/marketplace-k8s-app-tools/issues/553),
-    this must be done as a post-deployment step.
+    this must be done as a post-deployment step (e.g. the Operator creates the
+    CR).
 *   [`componentKinds`](https://github.com/GoogleCloudPlatform/marketplace-k8s-app-tools/blob/f19f78d919b637f09bfd4de0170ec3cc6700fb85/docs/building-deployer-helm.md#application-components)
     should include the CRD, but not the CR (as it won't be installed when this
     section is evaluated).
