@@ -52,7 +52,11 @@ class Command:
     error_message = six.ensure_str(error_message, 'utf-8')
     self._exitcode = self._process.returncode
     if self._print_result:
-      print("result: " + str((self._exitcode, self._output, error_message)))
+      result = (f"result: {self._exitcode}\n"
+                f"{self._output}\n"
+                f"{error_message}\n")
+
+      print(result)
 
     if self._exitcode > 0:
       raise CommandException(self._exitcode, error_message)
