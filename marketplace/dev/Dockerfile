@@ -12,6 +12,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         curl \
         gettext \
         google-cloud-sdk \
+	google-cloud-sdk-gke-gcloud-auth-plugin \
         jq \
         make \
         software-properties-common \
