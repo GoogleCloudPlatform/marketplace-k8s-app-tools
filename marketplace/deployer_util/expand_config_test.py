@@ -203,11 +203,11 @@ class ExpandConfigTest(unittest.TestCase):
               image.digest: {type: DIGEST}
       """)
 
-    self.assertRaisesRegex(expand_config.InvalidProperty,
-                           'images.properties.type: DIGEST requires digest to '
-                           'be specified in image',
-                           lambda: expand_config.expand(
-                               {'__image_repo_prefix__': 'gcr.io/app'}, schema))
+    self.assertRaisesRegex(
+        expand_config.InvalidProperty,
+        'images.properties.type: DIGEST requires digest to '
+        'be specified in image', lambda: expand_config.expand(
+            {'__image_repo_prefix__': 'gcr.io/app'}, schema))
 
   def test_invalid_property_digest_and_tag(self):
     schema = config_helper.Schema.load_yaml("""
@@ -224,11 +224,11 @@ class ExpandConfigTest(unittest.TestCase):
               image.tag: {type: TAG}
       """)
 
-    self.assertRaisesRegex(expand_config.InvalidProperty,
-                           'Image "i1" cannot have images.properties.type: TAG '
-                           'and specify a digest',
-                           lambda: expand_config.expand(
-                               {'__image_repo_prefix__': 'gcr.io/app'}, schema))
+    self.assertRaisesRegex(
+        expand_config.InvalidProperty,
+        'Image "i1" cannot have images.properties.type: TAG '
+        'and specify a digest', lambda: expand_config.expand(
+            {'__image_repo_prefix__': 'gcr.io/app'}, schema))
 
   def test_deployer_image_in_v2(self):
     schema = config_helper.Schema.load_yaml("""

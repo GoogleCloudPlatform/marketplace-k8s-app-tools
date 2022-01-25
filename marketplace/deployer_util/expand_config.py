@@ -252,7 +252,8 @@ def generate_v2_image_properties(schema, values_dict, result):
         else:
           raise InvalidProperty('images.properties.type: {} requires digest '
                                 'to be specified in image "{}"'.format(
-              config_helper.IMAGE_PROJECTION_TYPE_DIGEST, img.name))
+                                    config_helper.IMAGE_PROJECTION_TYPE_DIGEST,
+                                    img.name))
       else:
         raise InvalidProperty(
             'Invalid type for images.properties.type: {}'.format(
