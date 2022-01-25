@@ -147,6 +147,89 @@ class ExpandConfigTest(unittest.TestCase):
             'image.i2.repo': 'app/i2',
         }, result)
 
+  def test_generate_properties_for_v2_images_by_digest(self):
+    schema = config_helper.Schema.load_yaml("""
+      x-google-marketplace:
+        schemaVersion: v2
+        applicationApiVersion: v1beta1
+        publishedVersion: '0.1.1'
+        publishedVersionMetadata:
+          releaseNote: Release note for 0.1.1
+        images:
+          "":
+            digest: sha256:abcde123
+            properties:
+              image.full: {type: FULL}
+              image.registry: {type: REGISTRY}
+              image.registry_repo: {type: REPO_WITH_REGISTRY}
+              image.repo: {type: REPO_WITHOUT_REGISTRY}
+              image.digest: {type: DIGEST}
+          i1:
+            digest: sha256:123456789
+            properties:
+              image.i1.full: {type: FULL}
+              image.i1.registry: {type: REGISTRY}
+              image.i1.registry_repo: {type: REPO_WITH_REGISTRY}
+              image.i1.repo: {type: REPO_WITHOUT_REGISTRY}
+              image.i1.digest: {type: DIGEST}
+      """)
+    result = expand_config.expand({'__image_repo_prefix__': 'gcr.io/app'},
+                                  schema)
+    self.assertEqual(
+        {
+            'image.full': 'gcr.io/app@sha256:abcde123',
+            'image.digest': 'sha256:abcde123',
+            'image.registry': 'gcr.io',
+            'image.registry_repo': 'gcr.io/app',
+            'image.repo': 'app',
+            'image.i1.full': 'gcr.io/app/i1@sha256:123456789',
+            'image.i1.digest': 'sha256:123456789',
+            'image.i1.registry': 'gcr.io',
+            'image.i1.registry_repo': 'gcr.io/app/i1',
+            'image.i1.repo': 'app/i1',
+        }, result)
+
+  def test_invalid_property_missing_digest(self):
+    schema = config_helper.Schema.load_yaml("""
+      x-google-marketplace:
+        schemaVersion: v2
+        applicationApiVersion: v1beta1
+        publishedVersion: '0.1.1'
+        publishedVersionMetadata:
+          releaseNote: Release note for 0.1.1
+        images:
+          "":
+            properties:
+              image.digest: {type: DIGEST}
+      """)
+
+    self.assertRaisesRegex(expand_config.InvalidProperty,
+                           'images.properties.type: DIGEST requires digest to '
+                           'be specified in image',
+                           lambda: expand_config.expand(
+                               {'__image_repo_prefix__': 'gcr.io/app'}, schema))
+
+  def test_invalid_property_digest_and_tag(self):
+    schema = config_helper.Schema.load_yaml("""
+      x-google-marketplace:
+        schemaVersion: v2
+        applicationApiVersion: v1beta1
+        publishedVersion: '0.1.1'
+        publishedVersionMetadata:
+          releaseNote: Release note for 0.1.1
+        images:
+          "i1":
+            digest: sha256:232121
+            properties:
+              image.tag: {type: TAG}
+      """)
+
+    self.assertRaisesRegex(expand_config.InvalidProperty,
+                           'Image "i1" cannot have images.properties.type: TAG '
+                           'and specify a digest',
+                           lambda: expand_config.expand(
+                               {'__image_repo_prefix__': 'gcr.io/app'}, schema))
+
   def test_deployer_image_in_v2(self):
     schema = config_helper.Schema.load_yaml("""
         x-google-marketplace:
