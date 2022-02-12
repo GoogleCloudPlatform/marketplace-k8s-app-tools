@@ -19,7 +19,6 @@ import os.path
 from argparse import ArgumentParser
 
 import log_util as log
-from constants import LOG_SMOKE_TEST
 from dict_util import deep_get
 from yaml_util import load_yaml
 
