@@ -303,7 +303,7 @@ done
 # Get the logs from the deployer before deleting the application. Set deployer name to empty so clean up doesn't try to get its logs again.
 (kubectl logs "jobs/$deployer_name" --namespace="$NAMESPACE" --tail 9999 || echo "ERROR Failed to get logs for deployer $deployer_name") > "/logs/deployer.log"
 cat "/logs/deployer.log" | awk '{print "DEPLOYER "$0}'
-cat "/logs/deployer.log" | grep '^SMOKE_TEST' > "/logs/tester.log"
+cat "/logs/deployer.log" | grep '^SMOKE_TEST' > "/logs/tester.log" || echo "Failed to find tester logs"
 
 deployer_name=""
 
