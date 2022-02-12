@@ -39,7 +39,7 @@ if [[ -t 0 ]]; then
   terminal_docker_param="-it"
 fi
 
-logdir="/usr/local/google/home/ruela/.mpdev_logs/$(date '+%Y%m%d-%H%M%S')"
+logdir="$HOME/ruela/.mpdev_logs/$(date '+%Y%m%d-%H%M%S')"
 mkdir -p "$logdir"
 echo "Logs stored in $logdir" | tee "$logdir/verify.log"
 
