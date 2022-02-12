@@ -43,8 +43,7 @@ def main():
         '''.format(args.namespace, args.manifest),
         print_call=True)
   except CommandException as ex:
-    log.error("Failed to apply tester job. Reason: {}",
-              ex.message)
+    log.error("Failed to apply tester job. Reason: {}", ex.message)
     return
 
   resources = load_resources_yaml(args.manifest)
