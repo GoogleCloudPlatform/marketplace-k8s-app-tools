@@ -74,7 +74,7 @@ if [[ "$mode" = "test" ]]; then
 
   overlay_test_files.py \
     --manifest "$data_dir/extracted" \
-    --test_manifest "$test_data_dir/extracted"
+    --test_manifest "$test_data_dir/extracted" | awk '{print "SMOKE_TEST "$0}'
 fi
 
 # Log information and, at the same time, catch errors early and separately.

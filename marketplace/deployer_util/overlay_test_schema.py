@@ -45,8 +45,8 @@ def main():
     test_schema = load_yaml(args.test_schema)
   else:
     log.info(
-        '{} Test schema file {} does not exist. '
-        'Using the original schema.', LOG_SMOKE_TEST, args.test_schema)
+        'Test schema file {} does not exist. '
+        'Using the original schema.', args.test_schema)
     test_schema = {}
 
   output_schema = load_yaml(args.original_schema)
