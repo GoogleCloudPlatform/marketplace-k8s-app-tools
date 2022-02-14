@@ -87,4 +87,6 @@ spec:
             configMap:
               name: gc-script
           restartPolicy: Never
+      activeDeadlineSeconds: 540s
+      ttlSecondsAfterFinished: 3600s
       backoffLimit: 2
