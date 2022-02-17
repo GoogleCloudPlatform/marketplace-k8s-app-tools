@@ -308,6 +308,13 @@ cat "/logs/deployer.log" | grep '^SMOKE_TEST' > "/logs/tester.log" || echo "Fail
 
 deployer_name=""
 
+resources_yaml="/logs/resources.yaml"
+kubectl get applications.app.k8s.io --namespace "$NAMESPACE" --output=yaml > "$resources_yaml"
+echo "---" >> "$resources_yaml"
+kubectl get all --namespace "$NAMESPACE" --output=yaml >> "$resources_yaml"
+echo "---" >> "$resources_yaml"
+kubectl get serviceaccounts,roles,rolebindings --namespace "$NAMESPACE" --output=yaml >> "$resources_yaml"
+
 echo "INFO Stop the application"
 kubectl delete "application/$NAME" \
     --namespace="$NAMESPACE" \
@@ -315,7 +322,6 @@ kubectl delete "application/$NAME" \
 
 deletion_timeout="$wait_timeout"
 
-kubectl get applications.app.k8s.io --namespace "$NAMESPACE" --output=yaml >> "/logs/resources.yaml"
 echo "INFO Wait for the applications to be deleted"
 /scripts/wait_for_deletion.sh \
   --namespace="$NAMESPACE" \
@@ -323,7 +329,6 @@ echo "INFO Wait for the applications to be deleted"
   --timeout="$deletion_timeout" \
   || clean_and_exit "ERROR Some applications were not deleted"
 
-kubectl get all --namespace "$NAMESPACE" --output=yaml >> "/logs/resources.yaml"
 echo "INFO Wait for standard resources were deleted."
 /scripts/wait_for_deletion.sh \
   --namespace="$NAMESPACE" \
@@ -331,7 +336,6 @@ echo "INFO Wait for standard resources were deleted."
   --timeout="$deletion_timeout" \
   || clean_and_exit "ERROR Some resources were not deleted"
 
-kubectl get serviceaccounts,roles,rolebindings --namespace "$NAMESPACE" --output=yaml >> "/logs/resources.yaml"
 echo "INFO Wait for service accounts to be deleted."
 /scripts/wait_for_deletion.sh \
   --namespace="$NAMESPACE" \
