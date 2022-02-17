@@ -123,18 +123,18 @@ values for verification.
 
 Logs from verify can be extensive, so they are separated in multiple files to facilitate troubleshooting
 
-- **resources.yaml:** Output of `kubectl get` for different kind of resources in the namespace. It should help visualize the footprint of the application after installation is complete.
+- `resources.yaml:` Output of `kubectl get` for different kind of resources in the namespace. It should help visualize the footprint of the application after installation is complete.
 
-- **resources_cleanup.yaml:** Output of `kubectl get` right before namespace deletion. At this point, the application should be uninstalled and all resources deleted, so the output is expected to be an empty list of resources in a normal verification. This helps identify resources not deleted when the application is uninstalled. It could also contain resources when verification fails before the uninstall step.
+- `resources_cleanup.yaml:` Output of `kubectl get` right before namespace deletion. At this point, the application should be uninstalled and all resources deleted, so the output is expected to be an empty list of resources in a normal verification. This helps identify resources not deleted when the application is uninstalled. It could also contain resources when verification fails before the uninstall step.
 
-- **tester.log:** Logs from the tester.
+- `tester.log:` Logs from the tester.
   - **Notice that** that old deployers might not have the changes necessary to generate this file. If it is empty, make sure you are using the latest deployer base image. Even in this case, tester logs will be found in the deployer logs.
 
-- **deployer.log:** Logs extracted from deployer. Deployer runs the tester container, so it also includes the tester logs.
+- `deployer.log:` Logs extracted from deployer. Deployer runs the tester container, so it also includes the tester logs.
 
-- **events.log:** contains all the namespace events collected before its deletion
+- `events.log:` contains all the namespace events collected before its deletion
 
-- **verify.log:** The entire output. It includes the events, deployer logs, tester logs and resources_cleanup.yaml. It does not include resources application resources, since this tends to be more verbose.
+- `verify.log:` The entire output. It includes the events, deployer logs, tester logs and resources_cleanup.yaml. It does not include resources application resources, since this tends to be more verbose.
 
 ### Setting verify script timeouts
 

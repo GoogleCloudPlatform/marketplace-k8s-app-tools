@@ -43,7 +43,8 @@ test_schema="/data-test/schema.yaml"
 overlay_test_schema.py \
   --test_schema "$test_schema" \
   --original_schema "/data/schema.yaml" \
-  --output "/data/schema.yaml" | awk '{print "SMOKE_TEST "$0}'
+  --output "/data/schema.yaml" \
+  | awk '{print "SMOKE_TEST "$0}'
 
 NAME="$(/bin/print_config.py \
     --xtype NAME \
@@ -106,7 +107,8 @@ if [[ -e "$tester_manifest" ]]; then
   run_tester.py \
     --namespace $NAMESPACE \
     --manifest $tester_manifest \
-    --timeout ${TESTER_TIMEOUT:-300} | awk '{print "SMOKE_TEST "$0}'
+    --timeout ${TESTER_TIMEOUT:-300} \
+    | awk '{print "SMOKE_TEST "$0}'
 else
   echo "SMOKE_TEST No tester manifest found at $tester_manifest."
 fi
