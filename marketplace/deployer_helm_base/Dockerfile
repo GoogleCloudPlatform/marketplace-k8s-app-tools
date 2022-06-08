@@ -1,4 +1,4 @@
-FROM marketplace.gcr.io/google/python
+FROM marketplace.gcr.io/google/debian11
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     bash \
@@ -6,6 +6,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     gettext \
     jq \
     wget \
+    python3 \
     && rm -rf /var/lib/apt/lists/*
 
 RUN pip3 install \
