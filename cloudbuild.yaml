@@ -165,7 +165,7 @@ steps:
   - MARKETPLACE_TOOLS_TAG=testing-sha_$COMMIT_SHA
   args:
   - make
-  - -j1
+  - -j10
   - --output-sync
   - tests/integration
 
