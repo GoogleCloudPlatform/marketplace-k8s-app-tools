@@ -46,8 +46,7 @@ RUN mkdir -p /bin/helm-downloaded \
         https://get.helm.sh/helm-v3.8.2-linux-amd64.tar.gz \
      && tar -zxvf /bin/helm-downloaded/helm.tar.gz -C /bin/helm-downloaded \
      && mv /bin/helm-downloaded/linux-amd64/helm /bin/ \
-     && rm -rf /bin/helm-downloaded \
-     && helm init --client-only
+     && rm -rf /bin/helm-downloaded
 
 RUN gcloud auth configure-docker
 
