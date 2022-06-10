@@ -13,3 +13,5 @@ spec:
     - ct
   versions:
     - name: v1
+      served: true
+      storage: true
