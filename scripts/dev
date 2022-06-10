@@ -7,6 +7,7 @@ set -euox pipefail
 KUBE_CONFIG=${KUBE_CONFIG:-$HOME/.kube/config}
 GCLOUD_CONFIG=${GCLOUD_CONFIG:-$HOME/.config/gcloud}
 EXTRA_DOCKER_PARAMS=${EXTRA_DOCKER_PARAMS:-}
+DOCKER_NETWORK=${DOCKER_NETWORK:-host}
 MARKETPLACE_TOOLS_TAG=${MARKETPLACE_TOOLS_TAG:-latest}
 MARKETPLACE_TOOLS_IMAGE=${MARKETPLACE_TOOLS_IMAGE:-gcr.io/cloud-marketplace-tools/k8s/dev}
 VERIFICATION_LOGS_PATH=${VERIFICATION_LOGS_PATH:-$HOME/.mpdev_logs/$(date '+%Y%m%d-%H%M%S')}
@@ -46,7 +47,7 @@ echo "Logs stored in $VERIFICATION_LOGS_PATH" | tee "$VERIFICATION_LOGS_PATH/ver
 docker run \
   --mount "type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock,readonly" \
   --mount "type=bind,source=$VERIFICATION_LOGS_PATH,target=/logs" \
-  --net=${DOCKER_NETWORK_OVERRIDE:-host} \
+  --net=${DOCKER_NETWORK} \
   ${kube_mount[*]} \
   ${gcloud_mount[*]} \
   ${gcloud_original_path[*]} \
