@@ -124,7 +124,6 @@ steps:
   - -exc
   - |
     mkdir charts-tgz/
-    helm init --client-only
     helm package marketplace/charts/marketplace-integration/ \
         --version "0.0.0+sha.$COMMIT_SHA" \
         --destination charts-tgz/
@@ -165,7 +164,7 @@ steps:
   - 'VERIFICATION_LOGS_PATH=/workspace/.mpdev_logs'
   # Use local Docker network named cloudbuild as described here:
   # https://cloud.google.com/cloud-build/docs/overview#build_configuration_and_build_steps
-  - 'EXTRA_DOCKER_PARAMS=--net cloudbuild'
+  - 'DOCKER_NETWORK=cloudbuild'
   - MARKETPLACE_TOOLS_TAG=testing-sha_$COMMIT_SHA
   args:
   - make
