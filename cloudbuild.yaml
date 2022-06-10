@@ -162,6 +162,9 @@ steps:
   - 'KUBE_CONFIG=/workspace/.kube'
   - 'GCLOUD_CONFIG=/workspace/.config/gcloud'
   - 'VERIFICATION_LOGS_PATH=/workspace/.mpdev_logs'
+  # Use local Docker network named cloudbuild as described here:
+  # https://cloud.google.com/cloud-build/docs/overview#build_configuration_and_build_steps
+  - 'DOCKER_NETWORK_OVERRIDE=cloudbuild'
   - MARKETPLACE_TOOLS_TAG=testing-sha_$COMMIT_SHA
   args:
   - make
