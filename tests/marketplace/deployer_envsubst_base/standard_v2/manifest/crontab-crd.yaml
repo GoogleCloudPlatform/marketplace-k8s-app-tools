@@ -4,7 +4,6 @@ metadata:
   name: crontabs.stable.example.com
 spec:
   group: stable.example.com
-  version: v1
   scope: Namespaced
   names:
     plural: crontabs
@@ -12,4 +11,5 @@ spec:
     kind: CronTab
     shortNames:
     - ct
-
+  versions:
+    - name: v1
