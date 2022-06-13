@@ -13,6 +13,8 @@ spec:
   scope: Namespaced
   versions:
   - name: v1alpha1
+    served: true
+    storage: true
     schema:
       openAPIV3Schema:
         type: object
@@ -199,6 +201,8 @@ spec:
   scope: Namespaced
   versions:
   - name: v1alpha1
+    served: true
+    storage: true
     schema:
       openAPIV3Schema:
         type: object
@@ -267,6 +271,8 @@ spec:
   scope: Namespaced
   versions:
   - name: v1alpha1
+    served: true
+    storage: true
     schema:
       openAPIV3Schema:
         type: object
