@@ -59,6 +59,8 @@ done
 [[ -z "$parameters" ]] && parameters="{}"
 [[ -z "$wait_timeout" ]] && wait_timeout=600
 
+# Ensure /logs dir exists in case this script was run outside of scripts/dev
+mkdir -p "/logs"
 error_summary_path="/logs/errors_summary.log"
 
 function delete_apiservices() {
