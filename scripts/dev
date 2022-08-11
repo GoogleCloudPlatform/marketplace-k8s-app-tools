@@ -45,6 +45,7 @@ mkdir -p "$VERIFICATION_LOGS_PATH"
 echo "Logs stored in $VERIFICATION_LOGS_PATH" | tee "$VERIFICATION_LOGS_PATH/verify.log"
 
 docker run \
+  --init \
   --mount "type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock,readonly" \
   --mount "type=bind,source=$VERIFICATION_LOGS_PATH,target=/logs" \
   --net=${DOCKER_NETWORK} \
