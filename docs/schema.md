@@ -700,7 +700,7 @@ deployer and template can use this signal to adapt the deployment accordingly.
 
 #### type: TLS_CERTIFICATE
 
-This property provides a generated SSL/TLS certificate for the Kubernetes manifest.
+This property provides a generated self-signed SSL/TLS certificate for the Kubernetes manifest.
 
 The example below shows the syntax used to declare a certificate:
 
