@@ -700,8 +700,7 @@ deployer and template can use this signal to adapt the deployment accordingly.
 
 #### type: TLS_CERTIFICATE
 
-This property provides an SSL/TLS certificate for the Kubernetes manifest. By
-default, a self-signed certificate is generated.
+This property provides a generated SSL/TLS certificate for the Kubernetes manifest.
 
 The example below shows the syntax used to declare a certificate:
 
@@ -721,16 +720,6 @@ where:
 
 * `base64EncodedPrivateKey` indicates the property that gets the private key.
 * `base64EncodedCertificate` indicates the property that gets the certificate.
-
-You can provide a custom certificate by overwriting the `certificate` property
-in the following JSON format:
-
-```json
-{
-  "private_key": "-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----",
-  "certificate": "-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----"
-}
-```
 
 If you're using a Helm chart, you can handle the certificate like this:
 
