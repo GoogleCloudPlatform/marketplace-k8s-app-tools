@@ -1,14 +1,16 @@
 #!/bin/bash
 
-set -euo pipefail
+set -euox pipefail
 
 # KUBE_CONFIG can point to a kubeconfig file or
 # the standard kubectl config directory.
 KUBE_CONFIG=${KUBE_CONFIG:-$HOME/.kube/config}
 GCLOUD_CONFIG=${GCLOUD_CONFIG:-$HOME/.config/gcloud}
 EXTRA_DOCKER_PARAMS=${EXTRA_DOCKER_PARAMS:-}
+DOCKER_NETWORK=${DOCKER_NETWORK:-host}
 MARKETPLACE_TOOLS_TAG=${MARKETPLACE_TOOLS_TAG:-latest}
 MARKETPLACE_TOOLS_IMAGE=${MARKETPLACE_TOOLS_IMAGE:-gcr.io/cloud-marketplace-tools/k8s/dev}
+VERIFICATION_LOGS_PATH=${VERIFICATION_LOGS_PATH:-$HOME/.mpdev_logs/$(date '+%Y%m%d-%H%M%S')}
 
 kube_mount=""
 if [[ -f "${KUBE_CONFIG}" ]]; then
@@ -39,13 +41,18 @@ if [[ -t 0 ]]; then
   terminal_docker_param="-it"
 fi
 
+mkdir -p "$VERIFICATION_LOGS_PATH"
+echo "Logs stored in $VERIFICATION_LOGS_PATH" | tee "$VERIFICATION_LOGS_PATH/verify.log"
+
 docker run \
+  --init \
   --mount "type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock,readonly" \
-  --net=host \
+  --mount "type=bind,source=$VERIFICATION_LOGS_PATH,target=/logs" \
+  --net=${DOCKER_NETWORK} \
   ${kube_mount[*]} \
   ${gcloud_mount[*]} \
   ${gcloud_original_path[*]} \
   ${EXTRA_DOCKER_PARAMS[*]} \
   "${terminal_docker_param}" --rm \
   "${MARKETPLACE_TOOLS_IMAGE}:${MARKETPLACE_TOOLS_TAG}" \
-  "$@"
+  "$@" 2>&1 | tee "$VERIFICATION_LOGS_PATH/verify.log"

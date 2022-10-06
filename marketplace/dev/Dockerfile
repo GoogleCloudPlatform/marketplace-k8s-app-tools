@@ -1,9 +1,4 @@
-FROM marketplace.gcr.io/google/python
-
-# Add the Cloud SDK distribution URI as a package source
-RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
-# Import the Google Cloud Platform public key
-RUN curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
+FROM marketplace.gcr.io/google/ubuntu2004
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
         apt-transport-https \
@@ -11,12 +6,20 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         ca-certificates \
         curl \
         gettext \
-        google-cloud-sdk \
         jq \
         make \
         software-properties-common \
         wget \
+        gnupg \
+        python3 \
+        python3-pip \
+        python-is-python3 \
      && rm -rf /var/lib/apt/lists/*
+
+RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list \
+     && curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key --keyring /usr/share/keyrings/cloud.google.gpg add - \
+     && apt-get -y update \
+     && apt-get install -y google-cloud-sdk google-cloud-sdk-gke-gcloud-auth-plugin
 
 RUN pip3 install \
       wheel \
@@ -24,7 +27,7 @@ RUN pip3 install \
       pyyaml \
       six
 
-RUN for full_version in 1.13.12 1.14.8 1.15.11 1.16.9 1.17.5 1.18.2;  \
+RUN for full_version in 1.21.12 1.22.8 1.23.7;  \
      do \
         version=${full_version%.*} \
         && mkdir -p /opt/kubectl/$version \
@@ -32,24 +35,19 @@ RUN for full_version in 1.13.12 1.14.8 1.15.11 1.16.9 1.17.5 1.18.2;  \
             https://storage.googleapis.com/kubernetes-release/release/v$full_version/bin/linux/amd64/kubectl \
         && chmod 755 /opt/kubectl/$version/kubectl; \
      done;
-RUN ln -s /opt/kubectl/1.16 /opt/kubectl/default
+RUN ln -s /opt/kubectl/1.22 /opt/kubectl/default
 
-RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add - && \
-    apt-key fingerprint 0EBFCD88 && \
-    add-apt-repository \
-       "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
-       xenial \
-       edge" && \
-    apt-get -y update && \
-    apt-get -y install docker-ce=17.12.0~ce-0~ubuntu
+RUN echo "deb [signed-by=/usr/share/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu focal edge" | tee /etc/apt/sources.list.d/docker.list \
+     && curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key --keyring /usr/share/keyrings/docker.gpg add - \
+     && apt-get -y update \
+     && apt-get -y install docker-ce=5:19.03.13~3-0~ubuntu-focal
 
 RUN mkdir -p /bin/helm-downloaded \
      && wget -q -O /bin/helm-downloaded/helm.tar.gz \
-        https://storage.googleapis.com/kubernetes-helm/helm-v2.10.0-linux-amd64.tar.gz \
+        https://get.helm.sh/helm-v3.9.0-linux-amd64.tar.gz \
      && tar -zxvf /bin/helm-downloaded/helm.tar.gz -C /bin/helm-downloaded \
      && mv /bin/helm-downloaded/linux-amd64/helm /bin/ \
-     && rm -rf /bin/helm-downloaded \
-     && helm init --client-only
+     && rm -rf /bin/helm-downloaded
 
 RUN gcloud auth configure-docker
 

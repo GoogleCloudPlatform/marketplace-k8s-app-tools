@@ -1,4 +1,31 @@
-application_api_version: v1beta1
+x-google-marketplace:
+  schemaVersion: v2
+
+  applicationApiVersion: v1beta1
+
+  partnerId: partner
+  solutionId: wordpress
+
+  publishedVersion: 0.0.1
+  publishedVersionMetadata:
+    releaseNote: Initial release
+    recommended: true
+
+  images: {}
+
+  deployerServiceAccount:
+    description: >
+      Creates all resources used to initialize the application,
+      including a new CustomResourceDefinition.
+    roles:
+    - type: ClusterRole
+      rulesType: CUSTOM
+      rules:
+      - apiGroups: ['apiextensions.k8s.io']
+        resources: ['customresourcedefinitions']
+        verbs: ['*']
+
+
 properties:
   name:
     type: string
@@ -12,6 +39,9 @@ properties:
     type: string
     x-google-marketplace:
       type: APPLICATION_UID
+      applicationUid:
+        generatedProperties:
+          createApplicationBoolean: global.application.create
   marketplace-integration.image:
     type: string
     x-google-marketplace:

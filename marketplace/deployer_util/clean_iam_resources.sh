@@ -28,4 +28,5 @@ set -eox pipefail
 kubectl delete --namespace="$NAMESPACE" \
   ServiceAccount \
   -l 'app.kubernetes.io/component'='deployer.marketplace.cloud.google.com','app.kubernetes.io/name'="$NAME" \
-  --ignore-not-found
+  --ignore-not-found \
+  --wait=false

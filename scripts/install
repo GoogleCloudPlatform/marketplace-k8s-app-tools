@@ -39,6 +39,10 @@ case $i in
     image_pull_secret="${i#*=}"
     shift
     ;;
+  --storage_class_provisioner=*)
+    storage_class_provisioner="${i#*=}"
+    shift
+    ;;
   *)
     >&2 echo "Unrecognized flag: $i"
     exit 1
@@ -140,6 +144,7 @@ echo "${parameters}" \
     --deployer_service_account_name="${deployer_service_account_name}" \
     --version_repo="${version_repo}" \
     --image_pull_secret="${image_pull_secret}" \
+    --storage_class_provisioner="${storage_class_provisioner}" \
   | set_app_labels.py \
     --manifests=- \
     --dest=- \
@@ -151,7 +156,7 @@ echo "${parameters}" \
     --noapp \
     --app_name="${name}" \
     --app_uid="${app_uid}" \
-    --app_api_version="${app_version}" \
+    --app_api_version="app.k8s.io/${app_version}" \
     --deployer_name="${deployer_service_account_name}" \
     --deployer_uid="${deployer_uid}"
 
