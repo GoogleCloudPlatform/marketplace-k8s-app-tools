@@ -17,7 +17,7 @@ RUN pip3 install \
       pyyaml \
       six
 
-RUN for full_version in 1.21.12 1.22.8 1.23.7;  \
+RUN for full_version in 1.22.12 1.24.3;  \
      do \
         version=${full_version%.*} \
         && mkdir -p /opt/kubectl/$version \
@@ -29,7 +29,7 @@ RUN ln -s /opt/kubectl/1.22 /opt/kubectl/default
 
 RUN mkdir -p /bin/helm-downloaded \
     && wget -q -O /bin/helm-downloaded/helm.tar.gz \
-        https://get.helm.sh/helm-v3.9.0-linux-amd64.tar.gz \
+        https://get.helm.sh/helm-v3.10.0-linux-amd64.tar.gz \
     && tar -zxvf /bin/helm-downloaded/helm.tar.gz -C /bin/helm-downloaded \
     && mv /bin/helm-downloaded/linux-amd64/helm /bin/ \
     && rm -rf /bin/helm-downloaded
