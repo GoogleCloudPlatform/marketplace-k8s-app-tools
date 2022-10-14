@@ -1049,13 +1049,12 @@ class SchemaXServiceAccount:
       return True
     # Consider apiGroups=['*'] + resources=['*'] + verbs=[<write>],
     # which is essentially `cluster-admin`.
+    # Allow if verbs are explicitly declared for applications which
+    # truly need those permissions.
     for rules in self.custom_cluster_role_rules():
       for rule in rules:
-        write_verbs = set(
-            ['*', 'create', 'update', 'patch', 'delete',
-             'deletecollection']).intersection(set(rule.get('verbs')))
         if '*' in rule.get('apiGroups') and '*' in rule.get(
-            'resources') and write_verbs:
+            'resources') and '*' in rule.get('verbs'):
           return True
     return False
 
