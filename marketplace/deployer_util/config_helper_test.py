@@ -752,6 +752,37 @@ class ConfigHelperTest(unittest.TestCase):
                                 'Disallowed service account role'):
       schema.validate()
 
+  def test_deployer_service_account_cluster_scoped_mock_cluster_admin_role_verbs_allowed_validate(
+      self):
+    schema = config_helper.Schema.load_yaml("""
+        x-google-marketplace:
+          schemaVersion: v2
+
+          applicationApiVersion: v1beta1
+
+          publishedVersion: 6.5.130-metadata
+          publishedVersionMetadata:
+            releaseNote: Bug fixes
+            recommended: true
+
+          images: {}
+
+          deployerServiceAccount:
+            description: >
+              Asks for write cluster-scoped permissions when actually needed
+            roles:
+            - type: ClusterRole
+              rulesType: CUSTOM
+              rules:
+              - apiGroups: ['*']
+                resources: ['*']
+                verbs: ['create','delete','deletecollection','get','list','patch','update','watch']
+        properties:
+          simple:
+            type: string
+        """)
+    schema.validate()
+
   def test_deployer_service_account_no_escalated_permissions_allowed_validate(
       self):
     schema = config_helper.Schema.load_yaml("""
