@@ -21,7 +21,6 @@ import log_util as log
 from argparse import ArgumentParser
 from bash_util import Command
 from bash_util import CommandException
-from constants import LOG_SMOKE_TEST
 from dict_util import deep_get
 from yaml_util import load_resources_yaml
 
@@ -44,8 +43,7 @@ def main():
         '''.format(args.namespace, args.manifest),
         print_call=True)
   except CommandException as ex:
-    log.error("{} Failed to apply tester job. Reason: {}", LOG_SMOKE_TEST,
-              ex.message)
+    log.error("Failed to apply tester job. Reason: {}", ex.message)
     return
 
   resources = load_resources_yaml(args.manifest)
@@ -82,18 +80,18 @@ def main():
 
       if result == "Failed":
         print_tester_logs(full_name, args.namespace)
-        log.error("{} Tester '{}' failed.", LOG_SMOKE_TEST, full_name)
+        log.error("Tester '{}' failed.", full_name)
         test_failed = True
         break
 
       if result == "Succeeded":
         print_tester_logs(full_name, args.namespace)
-        log.info("{} Tester '{}' succeeded.", LOG_SMOKE_TEST, full_name)
+        log.info("Tester '{}' succeeded.", full_name)
         break
 
       if time.time() - start_time > tester_timeout:
         print_tester_logs(full_name, args.namespace)
-        log.error("{} Tester '{}' timeout.", LOG_SMOKE_TEST, full_name)
+        log.error("Tester '{}' timeout.", full_name)
         test_failed = True
         break
 
@@ -111,7 +109,7 @@ def print_tester_logs(full_name, namespace):
         print_result=True)
   except CommandException as ex:
     log.error(str(ex))
-    log.error("{} failed to get the tester logs.", LOG_SMOKE_TEST)
+    log.error("Failed to get the tester logs.")
 
 
 if __name__ == "__main__":

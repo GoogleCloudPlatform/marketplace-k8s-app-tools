@@ -67,14 +67,13 @@ x-google-marketplace:
       Initial release.
     # releaseTypes list is optional.
     # "Security" should only be used if this is an important update to patch
-    # an existing vulnerability, as such updates will display more prominently for users.
+    # an existing vulnerability.
     releaseTypes:
     - Feature
     - BugFix
     - Security
-    # If "recommended" is "true", users using older releases are encouraged
-    # to update as soon as possible. This is useful if, for example, this release
-    # fixes a critical issue.
+    # Setting "recommended" to "true" indicates that users are encouraged
+    # to update as soon as possible.
     recommended: true
 
   # Image declaration is required here. Refer to the Images section below.
@@ -103,8 +102,7 @@ as a string. This must match the release tag on all your app images. For example
 
 ### `publishedVersionMetadata`
 
-Information about the version, shown to users in the Google Cloud Console
-when they view their Kubernetes workloads.
+Information about the version.
 
 #### `releaseNote`
 
@@ -547,10 +545,18 @@ All service accounts need to be defined as parameters in `schema.yaml`.
 
 If you add a Kubernetes `ServiceAccount` as a resource in your manifest, the
 deployment fails with an authentication error, because the deployer doesn't run
-with enough privileges to create a Service Account. When permissions involve
-modifying resources, custom roles are prefered over predefined roles.
+with enough privileges to create a Service Account by default.
 
-For example, the following `schema.yaml` snippet adds a Service Account with
+When permissions involve modifying resources, custom roles are prefered over
+predefined roles. In accordance with the principle of least privilege, predefined
+`cluster-admin`, `admin`, and `edit` are not supported as cluster-scoped roles;
+`CUSTOM` roles defining specific rules must be used instead.
+
+If you only need to create cluster-scoped resources to initialize (vs. run)
+your app, specify these permissions in the
+[`deployerServiceAccount`](#deployerserviceaccount) field instead.
+
+The following `schema.yaml` example snippet adds a Service Account with
 Cluster Roles:
 
 ```yaml
@@ -694,8 +700,7 @@ deployer and template can use this signal to adapt the deployment accordingly.
 
 #### type: TLS_CERTIFICATE
 
-This property provides an SSL/TLS certificate for the Kubernetes manifest. By
-default, a self-signed certificate is generated.
+This property provides a generated self-signed SSL/TLS certificate for the Kubernetes manifest.
 
 The example below shows the syntax used to declare a certificate:
 
@@ -715,16 +720,6 @@ where:
 
 * `base64EncodedPrivateKey` indicates the property that gets the private key.
 * `base64EncodedCertificate` indicates the property that gets the certificate.
-
-You can provide a custom certificate by overwriting the `certificate` property
-in the following JSON format:
-
-```json
-{
-  "private_key": "-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----",
-  "certificate": "-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----"
-}
-```
 
 If you're using a Helm chart, you can handle the certificate like this:
 
@@ -804,7 +799,7 @@ requires that the cluster runs k8s version greater than or equal to 1.13.7, use:
 ```yaml
 x-google-marketplace:
   clusterConstraints:
-    k8sVersion: >=1.13.7
+    k8sVersion: ">=1.13.7"
 ```
 
 Any SemVer expression is accepted; however, it is recommended that the constraints are kept to a

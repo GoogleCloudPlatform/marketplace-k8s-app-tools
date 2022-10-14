@@ -1,4 +1,4 @@
-FROM marketplace.gcr.io/google/python
+FROM marketplace.gcr.io/google/ubuntu2004
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     bash \
@@ -6,6 +6,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     gettext \
     jq \
     wget \
+    python3 \
+    python3-pip \
+    python-is-python3 \
     && rm -rf /var/lib/apt/lists/*
 
 RUN pip3 install \
@@ -14,7 +17,7 @@ RUN pip3 install \
       pyyaml \
       six
 
-RUN for full_version in 1.13.12 1.14.8 1.15.11 1.16.9 1.17.5 1.18.2;  \
+RUN for full_version in 1.22.12 1.24.3;  \
      do \
         version=${full_version%.*} \
         && mkdir -p /opt/kubectl/$version \
@@ -22,7 +25,7 @@ RUN for full_version in 1.13.12 1.14.8 1.15.11 1.16.9 1.17.5 1.18.2;  \
             https://storage.googleapis.com/kubernetes-release/release/v$full_version/bin/linux/amd64/kubectl \
         && chmod 755 /opt/kubectl/$version/kubectl; \
      done;
-RUN ln -s /opt/kubectl/1.16 /opt/kubectl/default
+RUN ln -s /opt/kubectl/1.22 /opt/kubectl/default
 
 COPY marketplace/deployer_envsubst_base/* /bin/
 COPY marketplace/deployer_util/* /bin/

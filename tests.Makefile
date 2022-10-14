@@ -9,62 +9,27 @@ include marketplace.Makefile
 # Use python instead of `/dev/urandom` and `tr` for OSX compatibility.
 TEST_ID := $(shell python -c 'import random, string; print("".join([random.choice(string.ascii_lowercase + string.digits) for _ in range(8)]))')
 
-.tests/marketplace/deployer/helm_tiller_onbuild:
+.tests/marketplace/deployer/helm_onbuild:
 	mkdir -p "$@"
 
-.tests/marketplace/deployer/helm_tiller_onbuild/helm-dependency-build: \
-		.build/marketplace/deployer/helm_tiller_onbuild \
+.tests/marketplace/deployer/helm_onbuild/standard_v2: \
+		.build/marketplace/deployer/helm_onbuild \
 		.build/marketplace/dev \
 		.build/var/MARKETPLACE_TOOLS_TAG \
 		.build/var/REGISTRY \
-		$(shell find tests/marketplace/deployer_helm_tiller_base/onbuild/helm-dependency-build -type f) \
+		$(shell find tests/marketplace/deployer_helm_base/onbuild/standard_v2 -type f) \
 		tests.Makefile \
-		| .tests/marketplace/deployer/helm_tiller_onbuild
+		| .tests/marketplace/deployer/helm_onbuild
 	$(call print_target)
 	TEST_ID=$(TEST_ID) \
 	REGISTRY=$(REGISTRY) \
 	MARKETPLACE_TOOLS_TAG=$(MARKETPLACE_TOOLS_TAG) \
-	  ./tests/marketplace/deployer_helm_tiller_base/onbuild/helm-dependency-build/run_test
+		./tests/marketplace/deployer_helm_base/onbuild/standard_v2/run_test
 	@touch "$@"
 
-
-.tests/marketplace/deployer/helm_tiller_onbuild/standard: \
-		.build/marketplace/deployer/helm_tiller_onbuild \
-		.build/marketplace/dev \
-		.build/var/MARKETPLACE_TOOLS_TAG \
-		.build/var/REGISTRY \
-		$(shell find tests/marketplace/deployer_helm_tiller_base/onbuild/standard -type f) \
-		tests.Makefile \
-		| .tests/marketplace/deployer/helm_tiller_onbuild
-	$(call print_target)
-	TEST_ID=$(TEST_ID) \
-	REGISTRY=$(REGISTRY) \
-	MARKETPLACE_TOOLS_TAG=$(MARKETPLACE_TOOLS_TAG) \
-	  ./tests/marketplace/deployer_helm_tiller_base/onbuild/standard/run_test
-	@touch "$@"
-
-
-.tests/marketplace/deployer/helm_tiller_onbuild/standard_v2: \
-		.build/marketplace/deployer/helm_tiller_onbuild \
-		.build/marketplace/dev \
-		.build/var/MARKETPLACE_TOOLS_TAG \
-		.build/var/REGISTRY \
-		$(shell find tests/marketplace/deployer_helm_tiller_base/onbuild/standard_v2 -type f) \
-		tests.Makefile \
-		| .tests/marketplace/deployer/helm_tiller_onbuild
-	$(call print_target)
-	TEST_ID=$(TEST_ID) \
-	REGISTRY=$(REGISTRY) \
-	MARKETPLACE_TOOLS_TAG=$(MARKETPLACE_TOOLS_TAG) \
-		./tests/marketplace/deployer_helm_tiller_base/onbuild/standard_v2/run_test
-	@touch "$@"
-
-
-.PHONY: tests/marketplace/deployer/helm_tiller_onbuild
-tests/marketplace/deployer/helm_tiller_onbuild: \
-		.tests/marketplace/deployer/helm_tiller_onbuild/helm-dependency-build \
-		.tests/marketplace/deployer/helm_tiller_onbuild/standard \
-		.tests/marketplace/deployer/helm_tiller_onbuild/standard_v2
+.PHONY: tests/marketplace/deployer/helm_onbuild
+tests/marketplace/deployer/helm_onbuild: \
+		.tests/marketplace/deployer/helm_onbuild/standard_v2
 
 .tests/marketplace/deployer/envsubst:
 	mkdir -p "$@"
@@ -124,7 +89,7 @@ tests/marketplace/deployer/envsubst: \
 .PHONY: tests/integration
 tests/integration: \
 		tests/marketplace/deployer/envsubst \
-		tests/marketplace/deployer/helm_tiller_onbuild
+		tests/marketplace/deployer/helm_onbuild
 
 
 

@@ -29,18 +29,6 @@ steps:
     docker pull gcr.io/$_STAGING_PROJECT_ID/k8s/deployer_helm/onbuild:sha_$COMMIT_SHA
     docker tag gcr.io/$_STAGING_PROJECT_ID/k8s/deployer_helm/onbuild:sha_$COMMIT_SHA gcr.io/$PROJECT_ID/k8s/deployer_helm/onbuild:$TAG_NAME
 
-    docker pull gcr.io/$_STAGING_PROJECT_ID/k8s/deployer_helm2:sha_$COMMIT_SHA
-    docker tag gcr.io/$_STAGING_PROJECT_ID/k8s/deployer_helm2:sha_$COMMIT_SHA gcr.io/$PROJECT_ID/k8s/deployer_helm2:$TAG_NAME
-
-    docker pull gcr.io/$_STAGING_PROJECT_ID/k8s/deployer_helm2/onbuild:sha_$COMMIT_SHA
-    docker tag gcr.io/$_STAGING_PROJECT_ID/k8s/deployer_helm2/onbuild:sha_$COMMIT_SHA gcr.io/$PROJECT_ID/k8s/deployer_helm2/onbuild:$TAG_NAME
-
-    docker pull gcr.io/$_STAGING_PROJECT_ID/k8s/deployer_helm_tiller:sha_$COMMIT_SHA
-    docker tag gcr.io/$_STAGING_PROJECT_ID/k8s/deployer_helm_tiller:sha_$COMMIT_SHA gcr.io/$PROJECT_ID/k8s/deployer_helm_tiller:$TAG_NAME
-
-    docker pull gcr.io/$_STAGING_PROJECT_ID/k8s/deployer_helm_tiller/onbuild:sha_$COMMIT_SHA
-    docker tag gcr.io/$_STAGING_PROJECT_ID/k8s/deployer_helm_tiller/onbuild:sha_$COMMIT_SHA gcr.io/$PROJECT_ID/k8s/deployer_helm_tiller/onbuild:$TAG_NAME
-
     docker pull gcr.io/$_STAGING_PROJECT_ID/k8s/deployer_envsubst:sha_$COMMIT_SHA
     docker tag gcr.io/$_STAGING_PROJECT_ID/k8s/deployer_envsubst:sha_$COMMIT_SHA gcr.io/$PROJECT_ID/k8s/deployer_envsubst:$TAG_NAME
 
@@ -56,7 +44,7 @@ steps:
   - -ceux
   - echo "$(.cloudbuild/should_tag_latest.sh gcr.io/$PROJECT_ID/k8s/dev $TAG_NAME)" > should_tag_latest
 
-- id: Maybe tag images latest
+- id: &MaybeTagImagesLatest Maybe tag images latest
   name: gcr.io/cloud-builders/docker
   waitFor:
   - *DetermineShouldTagLatest
@@ -71,14 +59,6 @@ steps:
       docker push gcr.io/$PROJECT_ID/k8s/deployer_helm:latest
       docker tag gcr.io/$PROJECT_ID/k8s/deployer_helm/onbuild:$TAG_NAME gcr.io/$PROJECT_ID/k8s/deployer_helm/onbuild:latest
       docker push gcr.io/$PROJECT_ID/k8s/deployer_helm/onbuild:latest
-      docker tag gcr.io/$PROJECT_ID/k8s/deployer_helm2:$TAG_NAME gcr.io/$PROJECT_ID/k8s/deployer_helm2:latest
-      docker push gcr.io/$PROJECT_ID/k8s/deployer_helm2:latest
-      docker tag gcr.io/$PROJECT_ID/k8s/deployer_helm2/onbuild:$TAG_NAME gcr.io/$PROJECT_ID/k8s/deployer_helm2/onbuild:latest
-      docker push gcr.io/$PROJECT_ID/k8s/deployer_helm2/onbuild:latest
-      docker tag gcr.io/$PROJECT_ID/k8s/deployer_helm_tiller:$TAG_NAME gcr.io/$PROJECT_ID/k8s/deployer_helm_tiller:latest
-      docker push gcr.io/$PROJECT_ID/k8s/deployer_helm_tiller:latest
-      docker tag gcr.io/$PROJECT_ID/k8s/deployer_helm_tiller/onbuild:$TAG_NAME gcr.io/$PROJECT_ID/k8s/deployer_helm_tiller/onbuild:latest
-      docker push gcr.io/$PROJECT_ID/k8s/deployer_helm_tiller/onbuild:latest
       docker tag gcr.io/$PROJECT_ID/k8s/deployer_envsubst:$TAG_NAME gcr.io/$PROJECT_ID/k8s/deployer_envsubst:latest
       docker push gcr.io/$PROJECT_ID/k8s/deployer_envsubst:latest
       docker tag gcr.io/$PROJECT_ID/k8s/deployer_envsubst/onbuild:$TAG_NAME gcr.io/$PROJECT_ID/k8s/deployer_envsubst/onbuild:latest
@@ -90,13 +70,12 @@ steps:
 - id: Publish Charts
   name: gcr.io/$PROJECT_ID/k8s/dev:$TAG_NAME
   waitFor:
-  - *PublishImages
+  - *MaybeTagImagesLatest
   entrypoint: bash
   args:
   - -ceux
   - |
     mkdir charts-tgz/
-    helm init --client-only
     helm package marketplace/charts/marketplace-integration/ \
         --version $TAG_NAME \
         --destination charts-tgz/
@@ -108,10 +87,6 @@ images:
 - gcr.io/$PROJECT_ID/k8s/dev:$TAG_NAME
 - gcr.io/$PROJECT_ID/k8s/deployer_helm:$TAG_NAME
 - gcr.io/$PROJECT_ID/k8s/deployer_helm/onbuild:$TAG_NAME
-- gcr.io/$PROJECT_ID/k8s/deployer_helm2:$TAG_NAME
-- gcr.io/$PROJECT_ID/k8s/deployer_helm2/onbuild:$TAG_NAME
-- gcr.io/$PROJECT_ID/k8s/deployer_helm_tiller:$TAG_NAME
-- gcr.io/$PROJECT_ID/k8s/deployer_helm_tiller/onbuild:$TAG_NAME
 - gcr.io/$PROJECT_ID/k8s/deployer_envsubst:$TAG_NAME
 - gcr.io/$PROJECT_ID/k8s/deployer_envsubst/onbuild:$TAG_NAME
 

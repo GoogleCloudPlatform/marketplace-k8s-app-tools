@@ -168,14 +168,6 @@ class Schema:
               'x-google-marketplace.images')
       if self._x_google_marketplace._deployer_service_account:
         self._x_google_marketplace._deployer_service_account.validate()
-        # Move to validate() once enforced on SERVICE_ACCOUNT properties as well.
-        if (self._x_google_marketplace._deployer_service_account
-            .has_discouraged_cluster_scoped_permissions()):
-          raise InvalidSchema(
-              'Disallowed deployerServiceAccount role(s): '
-              'For `ClusterRole` roles, only the "view" predefined role is '
-              'allowed. Instead, use a "CUSTOM" role with specific '
-              '"apiGroups" and/or "resources".')
 
     for _, p in self._properties.items():
       if p.xtype == XTYPE_SERVICE_ACCOUNT:
@@ -1040,6 +1032,12 @@ class SchemaXServiceAccount:
           'explaining purpose and permission requirements. See docs: '
           'https://github.com/GoogleCloudPlatform/marketplace-k8s-app-tools/blob/master/docs/schema.md#type-service_account'
       )
+    if self.has_discouraged_cluster_scoped_permissions():
+      raise InvalidSchema(
+          'Disallowed service account role(s): '
+          'For `ClusterRole` roles, only the "view" predefined role is '
+          'allowed. Instead, use a "CUSTOM" role with specific '
+          '"apiGroups" and/or "resources".')
 
   def has_discouraged_cluster_scoped_permissions(self):
     """Returns true if the service account has discouraged permissions."""
@@ -1051,13 +1049,12 @@ class SchemaXServiceAccount:
       return True
     # Consider apiGroups=['*'] + resources=['*'] + verbs=[<write>],
     # which is essentially `cluster-admin`.
+    # Allow if verbs are explicitly declared for applications which
+    # truly need those permissions.
     for rules in self.custom_cluster_role_rules():
       for rule in rules:
-        write_verbs = set(
-            ['*', 'create', 'update', 'patch', 'delete',
-             'deletecollection']).intersection(set(rule.get('verbs')))
         if '*' in rule.get('apiGroups') and '*' in rule.get(
-            'resources') and write_verbs:
+            'resources') and '*' in rule.get('verbs'):
           return True
     return False
 

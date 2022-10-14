@@ -44,6 +44,10 @@ case $i in
     image_pull_secret="${i#*=}"
     shift
     ;;
+  --storage_class_provisioner=*)
+    storage_class_provisioner="${i#*=}"
+    shift
+    ;;
   *)
     echo "Unrecognized flag: $i"
     exit 1
@@ -55,24 +59,46 @@ done
 [[ -z "$parameters" ]] && parameters="{}"
 [[ -z "$wait_timeout" ]] && wait_timeout=600
 
-error_summary_path="$(mktemp)"
+# Ensure /logs dir exists in case this script was run outside of scripts/dev
+mkdir -p "/logs"
+error_summary_path="/logs/errors_summary.log"
+
+function delete_apiservices() {
+  # Remove apiservices that are unavailable or attached to $NAMESPACE
+  # Namespaces cannot be deleted if there are any unavailable apiservices
+  # See: https://github.com/kubernetes/kubernetes/issues/60807 and
+  # NamespaceDeletionDiscoveryFailure
+  mapfile -t services < <({
+    kubectl get apiservices | grep False | awk '{print $1}'
+    kubectl get apiservices -o json |
+      jq -r --arg namespace $NAMESPACE '.items[] | select(.spec.service.namespace == $namespace) | .metadata.name'
+  } | sort | uniq)
+  if ((${#services[@]})); then
+    echo "INFO Deleting APIServices " "${services[@]}"
+    kubectl delete apiservices "${services[@]}"
+  fi
+}
 
 function delete_namespace() {
   if [[ -z "$namespace_deleted" ]]; then
     echo "INFO Collecting events for namespace \"$NAMESPACE\""
-    kubectl get events --namespace="$NAMESPACE" || echo "ERROR Failed to get events for namespace \"$NAMESPACE\""
+    kubectl get events --namespace="$NAMESPACE" | tee "/logs/events.log" || echo "ERROR Failed to get events for namespace \"$NAMESPACE\""
+    cat "/logs/events.log"
     error_events="$(kubectl get events --namespace="$NAMESPACE" --field-selector="type!=Normal" || echo "ERROR Failed to get events for namespace \"$NAMESPACE\"")"
 
     if [[ ! -z $deployer_name ]]; then
       echo "INFO Collecting logs for deployer"
-      deployer_logs="$(kubectl logs "jobs/$deployer_name" --namespace="$NAMESPACE" --tail 9999 || echo "ERROR Failed to get logs for deployer $deployer_name")"
-      echo "$deployer_logs"
+      (kubectl logs "jobs/$deployer_name" --namespace="$NAMESPACE" --tail 9999 || echo "ERROR Failed to get logs for deployer $deployer_name") > "/logs/deployer.log"
+      cat "/logs/deployer.log" | awk '{print "DEPLOYER "$0}'
 
-      deployer_errors="$(echo "$deployer_logs" | /scripts/filter_deployer_logs.py)"
+      deployer_errors="$(cat "/logs/deployer.log" | /scripts/filter_deployer_logs.py)"
     fi
 
+    delete_apiservices
+    
     echo "INFO Deleting namespace \"$NAMESPACE\""
-    kubectl get all --namespace "$NAMESPACE" --output=yaml
+    kubectl get all --namespace "$NAMESPACE" --output=yaml > "/logs/resources_cleanup.yaml"
+    cat "/logs/resources_cleanup.yaml"
     kubectl delete namespace "$NAMESPACE"
     namespace_deleted="true"
   fi
@@ -147,6 +173,14 @@ docker run \
     --rm "${deployer}" \
     -c 'cat /data/schema.yaml' \
 > /data/schema.yaml
+
+# If parameters is a gcs file, use the content of the file instead
+if [[ "$parameters" = "gs://"* ]]; then
+  echo "Using parameters from $parameters"
+  parameters="$(gsutil cat $parameters)"
+  echo "$parameters"
+fi
+
 echo "$parameters" \
   | json2yaml \
 > /data/values.yaml
@@ -239,6 +273,7 @@ echo "INFO Initializes the deployer container which will deploy all the applicat
   --deployer="$deployer" \
   --parameters="$parameters" \
   --entrypoint='/bin/deploy_with_tests.sh' \
+  --storage_class_provisioner="$storage_class_provisioner" \
   || clean_and_exit "ERROR Failed to start deployer"
 
 echo "INFO wait for the deployer to succeed"
@@ -269,15 +304,26 @@ while true; do
 done
 
 # Get the logs from the deployer before deleting the application. Set deployer name to empty so clean up doesn't try to get its logs again.
-kubectl logs "jobs/$deployer_name" --namespace="$NAMESPACE" || echo "ERROR Failed to get logs for deployer $deployer_name"
+(kubectl logs "jobs/$deployer_name" --namespace="$NAMESPACE" --tail 9999 || echo "ERROR Failed to get logs for deployer $deployer_name") > "/logs/deployer.log"
+cat "/logs/deployer.log" | awk '{print "DEPLOYER "$0}'
+cat "/logs/deployer.log" | grep '^SMOKE_TEST' > "/logs/tester.log" || echo "Failed to find tester logs"
+
 deployer_name=""
+
+resources_yaml="/logs/resources.yaml"
+kubectl get applications.app.k8s.io --namespace "$NAMESPACE" --output=yaml > "$resources_yaml"
+echo "---" >> "$resources_yaml"
+kubectl get all --namespace "$NAMESPACE" --output=yaml >> "$resources_yaml"
+echo "---" >> "$resources_yaml"
+kubectl get serviceaccounts,roles,rolebindings --namespace "$NAMESPACE" --output=yaml >> "$resources_yaml"
 
 echo "INFO Stop the application"
 kubectl delete "application/$NAME" \
     --namespace="$NAMESPACE" \
   || clean_and_exit "ERROR Failed to stop application"
 
-deletion_timeout=180
+deletion_timeout="$wait_timeout"
+
 echo "INFO Wait for the applications to be deleted"
 /scripts/wait_for_deletion.sh \
   --namespace="$NAMESPACE" \

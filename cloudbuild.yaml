@@ -115,66 +115,6 @@ steps:
   - marketplace/deployer_helm_base/onbuild/Dockerfile
   - .
 
-- id: &BuildHelm2 Build deployer_helm2
-  name: gcr.io/cloud-builders/docker
-  waitFor:
-  - '-'
-  args:
-  - build
-  - --tag
-  - gcr.io/$PROJECT_ID/k8s/deployer_helm2:sha_$COMMIT_SHA
-  - --tag
-  - gcr.io/$PROJECT_ID/k8s/deployer_helm2:sha_$SHORT_SHA
-  - --file
-  - marketplace/deployer_helm2_base/Dockerfile
-  - .
-
-- id: &BuildHelm2Onbuild Build deployer_helm2 onbuild
-  name: gcr.io/cloud-builders/docker
-  waitFor:
-  - *BuildHelm2
-  args:
-  - build
-  - --build-arg
-  - FROM=gcr.io/$PROJECT_ID/k8s/deployer_helm2:sha_$COMMIT_SHA
-  - --tag
-  - gcr.io/$PROJECT_ID/k8s/deployer_helm2/onbuild:sha_$COMMIT_SHA
-  - --tag
-  - gcr.io/$PROJECT_ID/k8s/deployer_helm2/onbuild:sha_$SHORT_SHA
-  - --file
-  - marketplace/deployer_helm2_base/onbuild/Dockerfile
-  - .
-
-- id: &BuildHelmTiller Build deployer_helm_tiller
-  name: gcr.io/cloud-builders/docker
-  waitFor:
-  - '-'
-  args:
-  - build
-  - --tag
-  - gcr.io/$PROJECT_ID/k8s/deployer_helm_tiller:sha_$COMMIT_SHA
-  - --tag
-  - gcr.io/$PROJECT_ID/k8s/deployer_helm_tiller:sha_$SHORT_SHA
-  - --file
-  - marketplace/deployer_helm_tiller_base/Dockerfile
-  - .
-
-- id: &BuildHelmTillerOnbuild Build deployer_helm_tiller onbuild
-  name: gcr.io/cloud-builders/docker
-  waitFor:
-  - *BuildHelmTiller
-  args:
-  - build
-  - --build-arg
-  - FROM=gcr.io/$PROJECT_ID/k8s/deployer_helm_tiller:sha_$COMMIT_SHA
-  - --tag
-  - gcr.io/$PROJECT_ID/k8s/deployer_helm_tiller/onbuild:sha_$COMMIT_SHA
-  - --tag
-  - gcr.io/$PROJECT_ID/k8s/deployer_helm_tiller/onbuild:sha_$SHORT_SHA
-  - --file
-  - marketplace/deployer_helm_tiller_base/onbuild/Dockerfile
-  - .
-
 - id: &BuildMarketplaceIntegrationChart Build marketplace-integration Chart
   name: gcr.io/$PROJECT_ID/k8s/dev:sha_$COMMIT_SHA
   waitFor:
@@ -184,7 +124,6 @@ steps:
   - -exc
   - |
     mkdir charts-tgz/
-    helm init --client-only
     helm package marketplace/charts/marketplace-integration/ \
         --version "0.0.0+sha.$COMMIT_SHA" \
         --destination charts-tgz/
@@ -204,7 +143,7 @@ steps:
     # and have a max length of 40 chars (BUILD_ID is 37). Then install App CRD.
     gcloud container clusters create 'c-$BUILD_ID' --zone '${_CLUSTER_LOCATION}' --project '$PROJECT_ID' --labels=creation-timestamp=`date +%s`
     gcloud container clusters get-credentials 'c-$BUILD_ID' --zone '${_CLUSTER_LOCATION}' --project '$PROJECT_ID'
-    kubectl apply -f "https://raw.githubusercontent.com/GoogleCloudPlatform/marketplace-k8s-app-tools/master/crd/app-crd.yaml"
+    kubectl apply -f "https://raw.githubusercontent.com/GoogleCloudPlatform/marketplace-k8s-app-tools/$COMMIT_SHA/crd/app-crd.yaml"
     mkdir -p /workspace/.kube/
     cp -r $$HOME/.kube/ /workspace/
     mkdir -p /workspace/.config/gcloud/
@@ -219,16 +158,13 @@ steps:
   - *BuildEnvsubstOnBuild
   - *BuildHelm
   - *BuildHelmOnbuild
-  - *BuildHelm2
-  - *BuildHelm2Onbuild
-  - *BuildHelmTiller
-  - *BuildHelmTillerOnbuild
   env:
   - 'KUBE_CONFIG=/workspace/.kube'
   - 'GCLOUD_CONFIG=/workspace/.config/gcloud'
+  - 'VERIFICATION_LOGS_PATH=/workspace/.mpdev_logs'
   # Use local Docker network named cloudbuild as described here:
   # https://cloud.google.com/cloud-build/docs/overview#build_configuration_and_build_steps
-  - 'EXTRA_DOCKER_PARAMS=--net cloudbuild'
+  - 'DOCKER_NETWORK=cloudbuild'
   - MARKETPLACE_TOOLS_TAG=testing-sha_$COMMIT_SHA
   args:
   - make
@@ -257,14 +193,6 @@ images:
   - gcr.io/$PROJECT_ID/k8s/deployer_helm:sha_$SHORT_SHA
   - gcr.io/$PROJECT_ID/k8s/deployer_helm/onbuild:sha_$COMMIT_SHA
   - gcr.io/$PROJECT_ID/k8s/deployer_helm/onbuild:sha_$SHORT_SHA
-  - gcr.io/$PROJECT_ID/k8s/deployer_helm2:sha_$COMMIT_SHA
-  - gcr.io/$PROJECT_ID/k8s/deployer_helm2:sha_$SHORT_SHA
-  - gcr.io/$PROJECT_ID/k8s/deployer_helm2/onbuild:sha_$COMMIT_SHA
-  - gcr.io/$PROJECT_ID/k8s/deployer_helm2/onbuild:sha_$SHORT_SHA
-  - gcr.io/$PROJECT_ID/k8s/deployer_helm_tiller:sha_$COMMIT_SHA
-  - gcr.io/$PROJECT_ID/k8s/deployer_helm_tiller:sha_$SHORT_SHA
-  - gcr.io/$PROJECT_ID/k8s/deployer_helm_tiller/onbuild:sha_$COMMIT_SHA
-  - gcr.io/$PROJECT_ID/k8s/deployer_helm_tiller/onbuild:sha_$SHORT_SHA
 
 artifacts:
   objects:
