@@ -70,8 +70,8 @@ app/build:: .build/wordpress/deployer \
                             .build/var/TAG \
                             | .build/wordpress
 	$(call print_target, $@)
-	docker pull launcher.gcr.io/google/wordpress4-php5-apache
-	docker tag launcher.gcr.io/google/wordpress4-php5-apache "$(REGISTRY)/example/wordpress:$(TAG)"
+	docker pull marketplace.gcr.io/google/wordpress5-php7-apache
+	docker tag marketplace.gcr.io/google/wordpress5-php7-apache "$(REGISTRY)/example/wordpress:$(TAG)"
 	docker push "$(REGISTRY)/example/wordpress:$(TAG)"
 	@touch "$@"
 
@@ -91,8 +91,8 @@ app/build:: .build/wordpress/deployer \
                         .build/var/TAG \
                         | .build/wordpress
 	$(call print_target, $@)
-	docker pull launcher.gcr.io/google/mysql5
-	docker tag launcher.gcr.io/google/mysql5 "$(REGISTRY)/example/wordpress/mysql:$(TAG)"
+	docker pull marketplace.gcr.io/google/mysql5
+	docker tag marketplace.gcr.io/google/mysql5 "$(REGISTRY)/example/wordpress/mysql:$(TAG)"
 	docker push "$(REGISTRY)/example/wordpress/mysql:$(TAG)"
 	@touch "$@"
 
