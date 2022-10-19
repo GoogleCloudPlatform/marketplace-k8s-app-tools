@@ -17,23 +17,10 @@
 set -eo pipefail
 
 # If host kubernetes configuration is mounted, copy it to the container's
-# default $KUBECONFIG location after adjusting system-specific fields.
+# default $KUBECONFIG location.
 if [[ -e "/mount/config/.kube/config" ]]; then
   mkdir -p "$HOME/.kube"
-
-  # Adjusting cmd-path for gcp auth-providers to this container's gcloud
-  # installation location.
-  cat /mount/config/.kube/config \
-    | yaml2json \
-    | jq \
-          --arg gcloud "$(readlink -f "$(which gcloud)")" \
-          '.users = [ .users[] |
-                      if .user["auth-provider"]["name"] == "gcp" and .user["auth-provider"]["config"]["cmd-path"]
-                        then .user["auth-provider"]["config"]["cmd-path"] = $gcloud
-                        else .
-                      end
-                    ]' \
-  > "$HOME/.kube/config"
+  cp /mount/config/.kube/config > "$HOME/.kube/config"
 fi
 
 # If host gcloud configuration is mounted, replace container gcloud
