@@ -20,7 +20,7 @@ set -eo pipefail
 # default $KUBECONFIG location.
 if [[ -e "/mount/config/.kube/config" ]]; then
   mkdir -p "$HOME/.kube"
-  cp /mount/config/.kube/config > "$HOME/.kube/config"
+  cp /mount/config/.kube/config "$HOME/.kube/config"
 fi
 
 # If host gcloud configuration is mounted, replace container gcloud
