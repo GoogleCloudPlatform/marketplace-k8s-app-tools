@@ -275,7 +275,7 @@ file is that values from the upstream chart can be respecified here.
 For example, to override `wordpressUsername`, this top level values
 file can specify a new value for `wordpress.wordpressUsername`.
 For more details, see helm's
-[documentation](https://github.com/helm/helm/blob/master/docs/chart_template_guide/subcharts_and_globals.md#overriding-values-from-a-parent-chart).
+[documentation](https://helm.sh/docs/chart_template_guide/subcharts_and_globals/#overriding-values-from-a-parent-chart).
 
 Run the following helm command to download the wordpress chart.
 
