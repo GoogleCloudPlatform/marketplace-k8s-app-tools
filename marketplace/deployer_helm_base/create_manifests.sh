@@ -91,6 +91,7 @@ for chart in "$data_dir/extracted"/*; do
   helm template "$NAME" "$chart/chart" \
     --namespace="$NAMESPACE" \
     --values=<(/bin/print_config.py --output=yaml) \
+    --validate \
     > "$manifest_dir/$chart_manifest_file"
 
   if [[ "$mode" != "test" ]]; then
