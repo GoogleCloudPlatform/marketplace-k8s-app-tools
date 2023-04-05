@@ -24,9 +24,8 @@ from yaml_util import load_resources_yaml
     a given manifest file. '''
 
 _HELM_HOOK_KEY = 'helm.sh/hook'
-_HOOK_SUCCESS = 'test-success'
-_HOOK_FAILURE = 'test-failure'
-
+_HOOK_SUCCESS = ['test-success', 'test']
+_HOOK_FAILURE = ['test-failure', 'test']
 
 def main():
   parser = ArgumentParser()
@@ -45,13 +44,15 @@ def main():
     helm_hook = deep_get(resource, "metadata", "annotations", _HELM_HOOK_KEY)
     if helm_hook is None:
       filtered_resources.append(resource)
-    elif helm_hook == _HOOK_SUCCESS:
+    elif _HOOK_SUCCESS.index(helm_hook):
       if args.deploy_tests:
+        print(helm_hook)
         annotations = deep_get(resource, "metadata", "annotations")
         del annotations[_HELM_HOOK_KEY]
         annotations[GOOGLE_CLOUD_TEST] = "test"
+        print(resource)
         filtered_resources.append(resource)
-    elif helm_hook == _HOOK_FAILURE:
+    elif _HOOK_FAILURE.index(helm_hook):
       if args.deploy_tests:
         raise Exception("Helm hook {} is not supported".format(helm_hook))
     else:
