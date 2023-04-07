@@ -46,7 +46,6 @@ def main():
       filtered_resources.append(resource)
     elif _HOOK_SUCCESS.index(helm_hook):
       if args.deploy_tests:
-        print(helm_hook)
         annotations = deep_get(resource, "metadata", "annotations")
         del annotations[_HELM_HOOK_KEY]
         annotations[GOOGLE_CLOUD_TEST] = "test"
