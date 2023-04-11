@@ -27,7 +27,7 @@ RUN pip3 install \
       pyyaml \
       six
 
-RUN for full_version in 1.24.10 1.24.10 1.26.2;  \
+RUN for full_version in 1.23.13 1.24.7 1.25.4;  \
      do \
         version=${full_version%.*} \
         && mkdir -p /opt/kubectl/$version \
@@ -44,7 +44,7 @@ RUN echo "deb [signed-by=/usr/share/keyrings/docker.gpg] https://download.docker
 
 RUN mkdir -p /bin/helm-downloaded \
      && wget -q -O /bin/helm-downloaded/helm.tar.gz \
-        https://get.helm.sh/helm-v3.11.2-linux-amd64.tar.gz \
+        https://get.helm.sh/helm-v3.10.3-linux-amd64.tar.gz \
      && tar -zxvf /bin/helm-downloaded/helm.tar.gz -C /bin/helm-downloaded \
      && mv /bin/helm-downloaded/linux-amd64/helm /bin/ \
      && rm -rf /bin/helm-downloaded
