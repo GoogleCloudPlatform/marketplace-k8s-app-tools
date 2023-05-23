@@ -12,19 +12,19 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 RUN pip3 install \
-      wheel \
-      pyOpenSSL \
-      pyyaml \
-      six
+    wheel \
+    pyOpenSSL \
+    pyyaml \
+    six
 
-RUN for full_version in 1.24.10 1.24.10 1.26.2;  \
-     do \
-        version=${full_version%.*} \
-        && mkdir -p /opt/kubectl/$version \
-        && wget -q -O /opt/kubectl/$version/kubectl \
-            https://storage.googleapis.com/kubernetes-release/release/v$full_version/bin/linux/amd64/kubectl \
-        && chmod 755 /opt/kubectl/$version/kubectl; \
-     done;
+RUN for full_version in 1.24.11 1.25.8 1.26.2;  \
+    do \
+    version=${full_version%.*} \
+    && mkdir -p /opt/kubectl/$version \
+    && wget -q -O /opt/kubectl/$version/kubectl \
+    https://storage.googleapis.com/kubernetes-release/release/v$full_version/bin/linux/amd64/kubectl \
+    && chmod 755 /opt/kubectl/$version/kubectl; \
+    done;
 RUN ln -s /opt/kubectl/1.24 /opt/kubectl/default
 
 COPY marketplace/deployer_envsubst_base/* /bin/
