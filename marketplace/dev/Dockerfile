@@ -35,7 +35,7 @@ RUN for full_version in 1.26.5 1.26.5 1.27.2;  \
             https://storage.googleapis.com/kubernetes-release/release/v$full_version/bin/linux/amd64/kubectl \
         && chmod 755 /opt/kubectl/$version/kubectl; \
      done;
-RUN ln -s /opt/kubectl/1.24 /opt/kubectl/default
+RUN ln -s /opt/kubectl/1.26 /opt/kubectl/default
 
 RUN echo "deb [signed-by=/usr/share/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu focal edge" | tee /etc/apt/sources.list.d/docker.list \
      && curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key --keyring /usr/share/keyrings/docker.gpg add - \
