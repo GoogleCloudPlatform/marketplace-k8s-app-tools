@@ -528,7 +528,9 @@ def make_v1_config(schema, namespace, app_name, labels, app_params):
           'namespace': namespace,
           'labels': labels,
       },
-      'data': {k: str(v) for k, v in app_params.items()},
+      'data': {
+          k: str(v) for k, v in app_params.items()
+      },
   }
 
 

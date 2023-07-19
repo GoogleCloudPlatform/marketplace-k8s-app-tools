@@ -27,7 +27,7 @@ RUN pip3 install \
       pyyaml \
       six
 
-RUN for full_version in 1.24.10 1.24.10 1.26.2;  \
+RUN for full_version in 1.26.5 1.26.5 1.27.2;  \
      do \
         version=${full_version%.*} \
         && mkdir -p /opt/kubectl/$version \
@@ -35,7 +35,7 @@ RUN for full_version in 1.24.10 1.24.10 1.26.2;  \
             https://storage.googleapis.com/kubernetes-release/release/v$full_version/bin/linux/amd64/kubectl \
         && chmod 755 /opt/kubectl/$version/kubectl; \
      done;
-RUN ln -s /opt/kubectl/1.24 /opt/kubectl/default
+RUN ln -s /opt/kubectl/1.26 /opt/kubectl/default
 
 RUN echo "deb [signed-by=/usr/share/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu focal edge" | tee /etc/apt/sources.list.d/docker.list \
      && curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key --keyring /usr/share/keyrings/docker.gpg add - \
@@ -44,7 +44,7 @@ RUN echo "deb [signed-by=/usr/share/keyrings/docker.gpg] https://download.docker
 
 RUN mkdir -p /bin/helm-downloaded \
      && wget -q -O /bin/helm-downloaded/helm.tar.gz \
-        https://get.helm.sh/helm-v3.11.2-linux-amd64.tar.gz \
+        https://get.helm.sh/helm-v3.12.2-linux-amd64.tar.gz \
      && tar -zxvf /bin/helm-downloaded/helm.tar.gz -C /bin/helm-downloaded \
      && mv /bin/helm-downloaded/linux-amd64/helm /bin/ \
      && rm -rf /bin/helm-downloaded
