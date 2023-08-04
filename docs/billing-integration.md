@@ -155,9 +155,14 @@ data:
     - name: servicecontrol
       servicecontrol:
         identity: gcp
-        # The service name is unique to your application and will be
-        # provided during onboarding.
-        serviceName: my-application.mp-my-company.appspot.com
+        # The service name is unique to your application. You can find 
+        # and use your product ID from the GCP Producer Portal.The following
+        # example uses the product ID as the serviceName.
+        #
+        # NOTE: If your published product is using the service name in this format
+        # "my-application.mp-my-company.appspot.com", you can continue
+        # to use the current serviceName  
+        serviceName: my-application.endpoints.projectId.cloud.goog
         consumerId: $AGENT_CONSUMER_ID  # From the reporting secret.
 
     # The sources section lists metric data sources run by the agent
