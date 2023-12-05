@@ -1,4 +1,4 @@
-FROM marketplace.gcr.io/google/ubuntu2004
+FROM marketplace.gcr.io/google/ubuntu2204
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
         apt-transport-https \
@@ -13,7 +13,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         gnupg \
         python3 \
         python3-pip \
-        python-is-python3 \
      && rm -rf /var/lib/apt/lists/*
 
 RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list \
@@ -24,10 +23,9 @@ RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.c
 RUN pip3 install \
       wheel \
       pyOpenSSL \
-      pyyaml \
-      six
+      pyyaml
 
-RUN for full_version in 1.26.5 1.26.5 1.27.2;  \
+RUN for full_version in 1.27.3 1.28.3;  \
      do \
         version=${full_version%.*} \
         && mkdir -p /opt/kubectl/$version \
@@ -35,16 +33,15 @@ RUN for full_version in 1.26.5 1.26.5 1.27.2;  \
             https://storage.googleapis.com/kubernetes-release/release/v$full_version/bin/linux/amd64/kubectl \
         && chmod 755 /opt/kubectl/$version/kubectl; \
      done;
-RUN ln -s /opt/kubectl/1.26 /opt/kubectl/default
+RUN ln -s /opt/kubectl/1.27 /opt/kubectl/default
 
-RUN echo "deb [signed-by=/usr/share/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu focal edge" | tee /etc/apt/sources.list.d/docker.list \
+RUN echo "deb [signed-by=/usr/share/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu jammy stable" | tee /etc/apt/sources.list.d/docker.list \
      && curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key --keyring /usr/share/keyrings/docker.gpg add - \
      && apt-get -y update \
-     && apt-get -y install docker-ce=5:19.03.13~3-0~ubuntu-focal
-
+     && apt-get -y install docker-ce
 RUN mkdir -p /bin/helm-downloaded \
      && wget -q -O /bin/helm-downloaded/helm.tar.gz \
-        https://get.helm.sh/helm-v3.12.2-linux-amd64.tar.gz \
+        https://get.helm.sh/helm-v3.13.2-linux-amd64.tar.gz \
      && tar -zxvf /bin/helm-downloaded/helm.tar.gz -C /bin/helm-downloaded \
      && mv /bin/helm-downloaded/linux-amd64/helm /bin/ \
      && rm -rf /bin/helm-downloaded
