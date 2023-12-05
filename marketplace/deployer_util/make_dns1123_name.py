@@ -18,8 +18,6 @@ import hashlib
 import re
 from argparse import ArgumentParser
 
-import six
-
 _PROG_HELP = """
 Turns a name into a proper DNS-1123 subdomain, with limitations.
 """
@@ -54,7 +52,7 @@ def limit_name(name, length=127):
     result = result[:length - 5]
     # Hash and get the first 4 characters of the hash.
     m = hashlib.sha256()
-    m.update(six.ensure_binary(name, 'utf-8'))
+    m.update(name.encode('utf-8'))
     h4sh = m.hexdigest()[:4]
     result = '{}-{}'.format(result, h4sh)
   return result
