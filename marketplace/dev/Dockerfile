@@ -13,7 +13,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         gnupg \
         python3 \
         python3-pip \
-        python-is-python3 \
      && rm -rf /var/lib/apt/lists/*
 
 RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list \
@@ -36,7 +35,7 @@ RUN for full_version in 1.27.3 1.28.3;  \
      done;
 RUN ln -s /opt/kubectl/1.27 /opt/kubectl/default
 
-RUN echo "deb [signed-by=/usr/share/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu jammy edge" | tee /etc/apt/sources.list.d/docker.list \
+RUN echo "deb [signed-by=/usr/share/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu jammy stable" | tee /etc/apt/sources.list.d/docker.list \
      && curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key --keyring /usr/share/keyrings/docker.gpg add - \
      && apt-get -y update \
      && apt-get -y install docker-ce
