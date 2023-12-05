@@ -37,7 +37,11 @@ class Command:
 
     parsedCmd = shlex.split(cmd)
     self._process = subprocess.Popen(
-        parsedCmd, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding='utf-8')
+        parsedCmd,
+        stdin=None,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        encoding='utf-8')
     self._exitcode = None
     self._output = None
     self._print_call = print_call
