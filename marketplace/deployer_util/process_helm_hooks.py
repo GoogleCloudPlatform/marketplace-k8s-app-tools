@@ -25,7 +25,8 @@ from yaml_util import load_resources_yaml
 
 _HELM_HOOK_KEY = 'helm.sh/hook'
 _HOOK_SUCCESS = ['test-success', 'test']
-_HOOK_FAILURE = ['test-failure', 'test']
+_HOOK_FAILURE = ['test-failure']
+
 
 def main():
   parser = ArgumentParser()
@@ -44,13 +45,13 @@ def main():
     helm_hook = deep_get(resource, "metadata", "annotations", _HELM_HOOK_KEY)
     if helm_hook is None:
       filtered_resources.append(resource)
-    elif _HOOK_SUCCESS.index(helm_hook):
+    elif helm_hook in _HOOK_SUCCESS:
       if args.deploy_tests:
         annotations = deep_get(resource, "metadata", "annotations")
         del annotations[_HELM_HOOK_KEY]
         annotations[GOOGLE_CLOUD_TEST] = "test"
         filtered_resources.append(resource)
-    elif _HOOK_FAILURE.index(helm_hook):
+    elif helm_hook in _HOOK_FAILURE:
       if args.deploy_tests:
         raise Exception("Helm hook {} is not supported".format(helm_hook))
     else:

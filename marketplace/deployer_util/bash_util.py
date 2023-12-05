@@ -16,8 +16,6 @@ import json
 import shlex
 import subprocess
 
-import six
-
 
 class CommandException(Exception):
 
@@ -39,7 +37,11 @@ class Command:
 
     parsedCmd = shlex.split(cmd)
     self._process = subprocess.Popen(
-        parsedCmd, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        parsedCmd,
+        stdin=None,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        encoding='utf-8')
     self._exitcode = None
     self._output = None
     self._print_call = print_call
@@ -48,8 +50,6 @@ class Command:
 
   def _run(self):
     self._output, error_message = self._process.communicate()
-    self._output = six.ensure_str(self._output, 'utf-8')
-    error_message = six.ensure_str(error_message, 'utf-8')
     self._exitcode = self._process.returncode
     if self._print_result:
       result = (f"result: {self._exitcode}\n"
