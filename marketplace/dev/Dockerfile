@@ -25,7 +25,7 @@ RUN pip3 install \
       pyOpenSSL \
       pyyaml
 
-RUN for full_version in 1.27.3 1.28.3;  \
+RUN for full_version in 1.27.10 1.28.6 1.29.1;  \
      do \
         version=${full_version%.*} \
         && mkdir -p /opt/kubectl/$version \
