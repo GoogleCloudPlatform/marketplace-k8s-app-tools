@@ -17,7 +17,7 @@ RUN pip3 install \
       pyyaml \
       six
 
-RUN for full_version in 1.27.3 1.28.3;  \
+RUN for full_version in 1.27.8 1.29.1;  \
      do \
         version=${full_version%.*} \
         && mkdir -p /opt/kubectl/$version \
