@@ -17,3 +17,5 @@ spec:
     kind: Job
   - group: v1
     kind: Pod
+  - group: stable.example.com
+    kind: CronTab
