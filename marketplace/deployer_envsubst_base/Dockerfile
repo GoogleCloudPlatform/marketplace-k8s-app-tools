@@ -17,7 +17,7 @@ RUN pip3 install \
       pyyaml \
       six
 
-RUN for full_version in 1.27.8 1.29.1;  \
+RUN for full_version in 1.29.6 1.29.7;  \
      do \
         version=${full_version%.*} \
         && mkdir -p /opt/kubectl/$version \
@@ -25,7 +25,7 @@ RUN for full_version in 1.27.8 1.29.1;  \
             https://storage.googleapis.com/kubernetes-release/release/v$full_version/bin/linux/amd64/kubectl \
         && chmod 755 /opt/kubectl/$version/kubectl; \
      done;
-RUN ln -s /opt/kubectl/1.27 /opt/kubectl/default
+RUN ln -s /opt/kubectl/1.29 /opt/kubectl/default
 
 COPY marketplace/deployer_envsubst_base/* /bin/
 COPY marketplace/deployer_util/* /bin/
