@@ -82,7 +82,7 @@ crds_output_file="/tmp/crds/validated_crds.yaml"
 /bin/crds_config.py --directory "$crds_directory" --output_file "$crds_output_file"
 echo -e "Applying CRDS for \"$NAME\" in namespace \"$NAMESPACE\":"
 if [[ -d "/tmp/crds" ]]; then
-kubectl apply --namespace="$NAMESPACE" --recursive --filename="/tmp/crds/validated_crds.yaml"
+kubectl apply --namespace="$NAMESPACE" --recursive --filename="$crds_output_file"
 fi
 
 # Apply the manifest.
