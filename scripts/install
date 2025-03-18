@@ -72,12 +72,9 @@ else
 fi
 
 # Extract schema and values files.
-docker run \
-    -i \
-    --entrypoint=/bin/bash \
-    --rm "${deployer}" \
-    -c 'cat /data/schema.yaml' \
-> /data/schema.yaml
+container_id=$(docker create "${deployer}")
+docker cp "$container_id:/data/schema.yaml" /data/schema.yaml
+docker rm "$container_id"
 echo "INFO: /data/schema.yaml:"
 cat /data/schema.yaml
 echo "$parameters" \
