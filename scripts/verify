@@ -168,11 +168,9 @@ handle_failure() {
 trap "handle_failure" EXIT
 
 # Extract schema and values files.
-docker run \
-    --entrypoint=/bin/bash \
-    --rm "${deployer}" \
-    -c 'cat /data/schema.yaml' \
-> /data/schema.yaml
+container_id=$(docker create "${deployer}")
+docker cp "$container_id:/data/schema.yaml" /data/schema.yaml
+docker rm "$container_id"
 
 # If parameters is a gcs file, use the content of the file instead
 if [[ "$parameters" = "gs://"* ]]; then
