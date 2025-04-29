@@ -1,4 +1,4 @@
-ARG FROM=gcr.io/cloud-marketplace-tools/k8s/deployer_envsubst:latest
+ARG FROM=artifact-registry/cloud-marketplace-tools/k8s/deployer_envsubst:latest
 FROM $FROM
 
 ONBUILD COPY manifest /data/manifest

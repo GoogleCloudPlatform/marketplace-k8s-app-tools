@@ -20,7 +20,7 @@ RUN cat /tmp/test/schema.yaml \
     && mv /tmp/test/schema.yaml.new /tmp/test/schema.yaml
 
 
-FROM gcr.io/cloud-marketplace-tools/k8s/deployer_envsubst:$MARKETPLACE_TOOLS_TAG
+FROM artifact-registry/cloud-marketplace-tools/k8s/deployer_envsubst:$MARKETPLACE_TOOLS_TAG
 
 COPY manifest /data/manifest
 COPY apptest/deployer /data-test/

@@ -69,8 +69,8 @@ application and the `namespace` where the k8s application will be deployed.
 
 ### Add an application descriptor
 
-In the `manifest` directory, add `application.yaml.template` with the following 
-content. 
+In the `manifest` directory, add `application.yaml.template` with the following
+content.
 
 ```yaml
 apiVersion: app.k8s.io/v1beta1
@@ -99,8 +99,8 @@ spec:
 
 This describes the application and is used in the GKE Applications UI.
 
-It's important to note that `partner_id` and `product_id` must match the values 
-declared in the schema, `partnerId` and `solutionId` respectively, which must also 
+It's important to note that `partner_id` and `product_id` must match the values
+declared in the schema, `partnerId` and `solutionId` respectively, which must also
 match your listing ID in Marketplace.
 
 ### Add the nginx manifest
@@ -150,7 +150,7 @@ spec:
 Create a `Dockerfile` with the following content:
 
 ```Dockerfile
-FROM gcr.io/cloud-marketplace-tools/k8s/deployer_envsubst/onbuild
+FROM artifact-registry/cloud-marketplace-tools/k8s/deployer_envsubst/onbuild
 ```
 
 Then you can build your container as follows:
@@ -191,8 +191,8 @@ mpdev install \
 See [mpdev reference](mpdev-references.md), for installing the mpdev tool.
 
 The `install` script simulates what the UI would do deploying your application.
-The app parameters are specified in a JSON string and `envsubst` is used to 
-substitute the parameters to the `*.template` files under the `manifest` 
+The app parameters are specified in a JSON string and `envsubst` is used to
+substitute the parameters to the `*.template` files under the `manifest`
 directory. In the UI, the user would have configured these parameters in a form.
 
 You can see your application in GKE UI by following this link:

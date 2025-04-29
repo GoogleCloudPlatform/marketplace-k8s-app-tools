@@ -35,7 +35,7 @@ endef
 .build/app/dev: .build/var/MARKETPLACE_TOOLS_TAG \
               | .build/app
 	docker run \
-	    "gcr.io/cloud-marketplace-tools/k8s/dev:$(MARKETPLACE_TOOLS_TAG)" \
+	    "artifact-registry/cloud-marketplace-tools/k8s/dev:$(MARKETPLACE_TOOLS_TAG)" \
 	    cat /scripts/dev > "$@"
 	chmod a+x "$@"
 

@@ -71,7 +71,7 @@ spec:
         spec:
           containers:
           - name: gc
-            image: gcr.io/cloud-marketplace-tools/k8s/dev:latest
+            image: artifact-registry/cloud-marketplace-tools/k8s/dev:latest
             imagePullPolicy: Always
             args: ["/bin/bash", "/scripts/gc.sh"]
             env:

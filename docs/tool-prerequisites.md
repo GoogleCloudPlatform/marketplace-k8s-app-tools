@@ -15,7 +15,7 @@ Pull our dev container. It contains everything necessary for developing
 your application.
 
 ```shell
-docker pull gcr.io/cloud-marketplace-tools/k8s/dev
+docker pull artifact-registry/cloud-marketplace-tools/k8s/dev
 ```
 
 Extract the helper script for running the dev tools. This command creates
@@ -27,7 +27,7 @@ automatically added to `$PATH`.)
 ```shell
 BIN_FILE="$HOME/bin/mpdev"
 docker run \
-  gcr.io/cloud-marketplace-tools/k8s/dev \
+  artifact-registry/cloud-marketplace-tools/k8s/dev \
   cat /scripts/dev > "$BIN_FILE"
 chmod +x "$BIN_FILE"
 ```

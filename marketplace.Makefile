@@ -26,7 +26,7 @@ marketplace/build: .build/marketplace/dev \
 		| .build/marketplace
 	$(call print_target)
 	docker build \
-	    --tag "gcr.io/cloud-marketplace-tools/k8s/dev:$(MARKETPLACE_TOOLS_TAG)" \
+	    --tag "artifact-registry/cloud-marketplace-tools/k8s/dev:$(MARKETPLACE_TOOLS_TAG)" \
 	    -f marketplace/dev/Dockerfile \
 	    .
 	@touch "$@"
@@ -43,7 +43,7 @@ marketplace/build: .build/marketplace/dev \
 		| .build/marketplace/deployer
 	$(call print_target)
 	docker build \
-	    --tag "gcr.io/cloud-marketplace-tools/k8s/deployer_envsubst:$(MARKETPLACE_TOOLS_TAG)" \
+	    --tag "artifact-registry/cloud-marketplace-tools/k8s/deployer_envsubst:$(MARKETPLACE_TOOLS_TAG)" \
 	    -f marketplace/deployer_envsubst_base/Dockerfile \
 	    .
 	@touch "$@"
@@ -56,8 +56,8 @@ marketplace/build: .build/marketplace/dev \
 		| .build/marketplace/deployer
 	$(call print_target)
 	docker build \
-	    --build-arg FROM="gcr.io/cloud-marketplace-tools/k8s/deployer_envsubst:$(MARKETPLACE_TOOLS_TAG)" \
-	    --tag "gcr.io/cloud-marketplace-tools/k8s/deployer_envsubst/onbuild:$(MARKETPLACE_TOOLS_TAG)" \
+	    --build-arg FROM="artifact-registry/cloud-marketplace-tools/k8s/deployer_envsubst:$(MARKETPLACE_TOOLS_TAG)" \
+	    --tag "artifact-registry/cloud-marketplace-tools/k8s/deployer_envsubst/onbuild:$(MARKETPLACE_TOOLS_TAG)" \
 	    -f marketplace/deployer_envsubst_base/onbuild/Dockerfile \
 	    .
 	@touch "$@"
@@ -70,7 +70,7 @@ marketplace/build: .build/marketplace/dev \
 		| .build/marketplace/deployer
 	$(call print_target)
 	docker build \
-	    --tag "gcr.io/cloud-marketplace-tools/k8s/deployer_helm:$(MARKETPLACE_TOOLS_TAG)" \
+	    --tag "artifact-registry/cloud-marketplace-tools/k8s/deployer_helm:$(MARKETPLACE_TOOLS_TAG)" \
 	    -f marketplace/deployer_helm_base/Dockerfile \
 	    .
 	@touch "$@"
@@ -84,8 +84,8 @@ marketplace/build: .build/marketplace/dev \
 		| .build/marketplace/deployer
 	$(call print_target)
 	docker build \
-	    --build-arg FROM="gcr.io/cloud-marketplace-tools/k8s/deployer_helm:$(MARKETPLACE_TOOLS_TAG)" \
-	    --tag "gcr.io/cloud-marketplace-tools/k8s/deployer_helm/onbuild:$(MARKETPLACE_TOOLS_TAG)" \
+	    --build-arg FROM="artifact-registry/cloud-marketplace-tools/k8s/deployer_helm:$(MARKETPLACE_TOOLS_TAG)" \
+	    --tag "artifact-registry/cloud-marketplace-tools/k8s/deployer_helm/onbuild:$(MARKETPLACE_TOOLS_TAG)" \
 	    -f marketplace/deployer_helm_base/onbuild/Dockerfile \
 	    .
 	@touch "$@"

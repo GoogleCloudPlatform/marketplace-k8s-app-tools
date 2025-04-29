@@ -17,7 +17,7 @@ docker build \
 docker push "$image"
 
 docker run \
-    "gcr.io/cloud-marketplace-tools/k8s/dev:$MARKETPLACE_TOOLS_TAG" \
+    "artifact-registry/cloud-marketplace-tools/k8s/dev:$MARKETPLACE_TOOLS_TAG" \
     cat /scripts/dev \
   > dev
 chmod a+x dev

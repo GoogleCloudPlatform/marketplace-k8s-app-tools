@@ -2,7 +2,7 @@
 
 ## Overview and setup
 
-Our dev container `gcr.io/cloud-marketplace-tools/k8s/dev`
+Our dev container `artifact-registry/cloud-marketplace-tools/k8s/dev`
 bundles all the libraries needed for development.
 
 When the dev container is run, gcloud configurations and
@@ -20,7 +20,7 @@ ensure that it is automatically added to `$PATH`.
 ```shell
 BIN_FILE="$HOME/bin/mpdev"
 docker run \
-  gcr.io/cloud-marketplace-tools/k8s/dev \
+  artifact-registry/cloud-marketplace-tools/k8s/dev \
   cat /scripts/dev > "$BIN_FILE"
 chmod +x "$BIN_FILE"
 ```

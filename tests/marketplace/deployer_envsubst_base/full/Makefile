@@ -101,7 +101,7 @@ app/build:: .build/wordpress/deployer \
                            .build/var/TAG \
                            | .build/wordpress
 	$(call print_target, $@)
-	docker pull "gcr.io/cloud-marketplace-tools/metering/ubbagent:sha_dfb8b727bd23a7e48b6b4904f4fa2aad43634607"
-	docker tag "gcr.io/cloud-marketplace-tools/metering/ubbagent:sha_dfb8b727bd23a7e48b6b4904f4fa2aad43634607" "$(REGISTRY)/example/wordpress/ubbagent:$(TAG)"
+	docker pull "artifact-registry/cloud-marketplace-tools/metering/ubbagent:sha_dfb8b727bd23a7e48b6b4904f4fa2aad43634607"
+	docker tag "artifact-registry/cloud-marketplace-tools/metering/ubbagent:sha_dfb8b727bd23a7e48b6b4904f4fa2aad43634607" "$(REGISTRY)/example/wordpress/ubbagent:$(TAG)"
 	docker push "$(REGISTRY)/example/wordpress/ubbagent:$(TAG)"
 	@touch "$@"

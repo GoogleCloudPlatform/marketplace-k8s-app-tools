@@ -246,7 +246,7 @@ properties:
       type: IMAGE
   imageUbbagent:
     type: string
-    default: gcr.io/cloud-marketplace-tools/metering/ubbagent:latest
+    default: artifact-registry/cloud-marketplace-tools/metering/ubbagent:latest
     x-google-marketplace:
       type: IMAGE
   reportingSecret:

@@ -1,4 +1,4 @@
-ARG FROM=gcr.io/cloud-marketplace-tools/k8s/deployer_helm:latest
+ARG FROM=artifact-registry/cloud-marketplace-tools/k8s/deployer_helm:latest
 FROM $FROM
 
 ONBUILD COPY chart /tmp/chart.tmp

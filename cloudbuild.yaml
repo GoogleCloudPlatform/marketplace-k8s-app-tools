@@ -8,7 +8,7 @@
 #
 # This build trigger asserts the invariant that the source code can
 # be built and pushed into a repository. Its success blocks pull
-# request. gcr.io/marketplace-k8s-app-tools read access restricted.
+# request. artifact-registry/marketplace-k8s-app-tools read access restricted.
 #
 #
 # Trigger #2: After master merge
@@ -18,7 +18,7 @@
 #
 # This build trigger asserts the invariant that each commit on the master
 # branch of GoogleCloudPlatform/marketplace-k8s-app-tools will be built
-# and tagged in gcr.io/cloud-marketplace-tools/k8s.
+# and tagged in artifact-registry/cloud-marketplace-tools/k8s.
 
 # The following variables will be provided by Cloud Build.
 #
