@@ -267,7 +267,7 @@ Use the following content for `requirements.yaml`.
 dependencies:
 - name: wordpress
   version: 9.x.x
-  repository: https://kubernetes-charts.storage.googleapis.com/
+  repository: https://charts.helm.sh/stable
 ```
 
 For starters, use an empty `values.yaml`. The nice thing about this
