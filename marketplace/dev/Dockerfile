@@ -25,7 +25,7 @@ RUN pip3 install \
       pyOpenSSL \
       pyyaml
 
-RUN for full_version in 1.30.4 1.31.0;  \
+RUN for full_version in 1.30.4 1.31.12 1.32.9 1.33.4;  \
      do \
         version=${full_version%.*} \
         && mkdir -p /opt/kubectl/$version \
@@ -33,7 +33,7 @@ RUN for full_version in 1.30.4 1.31.0;  \
             https://storage.googleapis.com/kubernetes-release/release/v$full_version/bin/linux/amd64/kubectl \
         && chmod 755 /opt/kubectl/$version/kubectl; \
      done;
-RUN ln -s /opt/kubectl/1.31 /opt/kubectl/default
+RUN ln -s /opt/kubectl/1.33 /opt/kubectl/default
 
 RUN echo "deb [signed-by=/usr/share/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu jammy stable" | tee /etc/apt/sources.list.d/docker.list \
      && curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key --keyring /usr/share/keyrings/docker.gpg add - \
