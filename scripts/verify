@@ -221,13 +221,9 @@ kubectl create namespace "$NAMESPACE"
 if [[ -n "$image_pull_secret" ]]; then
   echo "Copying secret/$image_pull_secret from namespace/default to namespace/$NAMESPACE."
   kubectl get secret --namespace=default -o=yaml "$image_pull_secret" | grep -v '^\s*namespace:' | kubectl create --namespace="$NAMESPACE" -f -
-  echo 'we created it'
   kubectl get secret "$image_pull_secret" --namespace="$NAMESPACE"
-  echo 'now patching the namespace to use it'
   kubectl patch namespace "$NAMESPACE" -p "{\"metadata\": {\"annotations\": {\"marketplace.cloud.google.com/imagePullSecret\": \"$image_pull_secret\"}}}"
 fi
-
-echo 'all done with the secret'
 
 if [[ "$istio" = "enabled" ]]; then
   echo "INFO Enabling istio in \"$NAMESPACE\" (istio-injection=enabled)."
