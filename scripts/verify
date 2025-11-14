@@ -220,7 +220,7 @@ kubectl create namespace "$NAMESPACE"
 
 if [[ -n "$image_pull_secret" ]]; then
   echo "Copying secret/$image_pull_secret from namespace/default to namespace/$NAMESPACE."
-  kubectl get secret --namespace=default -o=json "$image_pull_secret" | jq del('.metadata.namespace') | kubectl create --namespace="$NAMESPACE" -f -
+  kubectl get secret --namespace=default -o=json "$image_pull_secret" | jq 'del(.metadata.namespace)' | kubectl create --namespace="$NAMESPACE" -f -
   kubectl get secret "$image_pull_secret" --namespace="$NAMESPACE"
   kubectl patch namespace "$NAMESPACE" -p "{\"metadata\": {\"annotations\": {\"marketplace.cloud.google.com/imagePullSecret\": \"$image_pull_secret\"}}}"
 fi
