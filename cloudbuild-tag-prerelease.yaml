@@ -43,7 +43,7 @@ steps:
         --version $TAG_NAME \
         --destination charts-tgz/
 
-    gsutil cp gs://$PROJECT_ID/charts/index.yaml index.yaml
+    gcloud storage cp gs://$PROJECT_ID/charts/index.yaml index.yaml
     helm repo index --merge index.yaml charts-tgz/
 
 images:

@@ -61,5 +61,5 @@ print_version_metadata.py \
   --deployer_image_digest "${deployer_image_digest}" \
   > "/tmp/versions/${published_version}.yaml"
 
-gsutil cp "/tmp/versions/${published_version}.yaml" "${gcs_repo}/"
+gcloud storage cp "/tmp/versions/${published_version}.yaml" "${gcs_repo}/"
 echo "Version is available at ${gcs_repo}/${published_version}.yaml"

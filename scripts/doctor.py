@@ -228,13 +228,13 @@ https://github.com/kubernetes-sigs/application
 
 
 def check_gsutil(args):
-  p = subprocess.run(['gsutil', 'ls'],
+  p = subprocess.run(['gcloud', 'storage', 'ls'],
                      stdout=subprocess.DEVNULL,
                      stderr=subprocess.DEVNULL)
   if p.returncode != 0:
     return TaskEvent(
         success=False,
-        message='Unable to list the GCS buckets. Makes sure you are authenticated via gsutil.'
+        message='Unable to list the GCS buckets. Makes sure you are authenticated via gcloud.'
     )
   return TaskEvent(success=True)
 

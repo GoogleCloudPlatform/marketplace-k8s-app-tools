@@ -30,7 +30,7 @@ def load(path):
 
 def _gcs_load(path):
   """Returns a gcs object's contents as a string."""
-  return Command("gsutil cat {}".format(path)).output
+  return Command("gcloud storage cat {}".format(path)).output
 
 
 def _file_load(path):

@@ -175,7 +175,7 @@ docker rm "$container_id"
 # If parameters is a gcs file, use the content of the file instead
 if [[ "$parameters" = "gs://"* ]]; then
   echo "Using parameters from $parameters"
-  parameters="$(gsutil cat $parameters)"
+  parameters="$(gcloud storage cat $parameters)"
   echo "$parameters"
 fi
 
