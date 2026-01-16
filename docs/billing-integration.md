@@ -324,7 +324,7 @@ mpdev install ... \
 Alternately, you can download and apply this secret to your target namespace and then point your application to it:
 
 ```shell
-gsutil cp gs://cloud-marketplace-tools/reporting_secrets/fake_reporting_secret.yaml .
+gcloud storage cp gs://cloud-marketplace-tools/reporting_secrets/fake_reporting_secret.yaml .
 
 # The downloaded secret doesn't have a name. Give it one and apply to the target namespace.
 
