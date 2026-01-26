@@ -3,6 +3,7 @@ FROM $FROM
 
 ONBUILD COPY chart /tmp/chart.tmp
 ONBUILD RUN cd /tmp \
+        && mkdir -p chart \
         && mv chart.tmp/* chart \
         && tar -czvf /tmp/chart.tar.gz chart \
         && mkdir -p /data/chart \
