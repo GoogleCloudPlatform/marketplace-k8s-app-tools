@@ -27,13 +27,13 @@ RUN pip3 install \
       cryptography>=44.0.1
 
 RUN for full_version in 1.33.5 1.35.0;  \
-      do \
-          version=${full_version%.*} \
-          && mkdir -p /opt/kubectl/$version \
-          && wget -q -O /opt/kubectl/$version/kubectl \
-               https://storage.googleapis.com/kubernetes-release/release/v$full_version/bin/linux/amd64/kubectl \
-          && chmod 755 /opt/kubectl/$version/kubectl; \
-      done;
+     do \
+     version=${full_version%.*} \
+     && mkdir -p /opt/kubectl/$version \
+     && wget -q -O /opt/kubectl/$version/kubectl \
+          https://storage.googleapis.com/kubernetes-release/release/v$full_version/bin/linux/amd64/kubectl \
+     && chmod 755 /opt/kubectl/$version/kubectl; \
+     done;
 RUN ln -s /opt/kubectl/1.33 /opt/kubectl/default
 
 RUN echo "deb [signed-by=/usr/share/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu jammy stable" | tee /etc/apt/sources.list.d/docker.list \
@@ -42,7 +42,7 @@ RUN echo "deb [signed-by=/usr/share/keyrings/docker.gpg] https://download.docker
      && apt-get -y install docker-ce
 RUN mkdir -p /bin/helm-downloaded \
      && wget -q -O /bin/helm-downloaded/helm.tar.gz \
-     https://get.helm.sh/helm-v4.1.0-linux-amd64.tar.gz \
+          https://get.helm.sh/helm-v4.1.0-linux-amd64.tar.gz \
      && tar -zxvf /bin/helm-downloaded/helm.tar.gz -C /bin/helm-downloaded \
      && mv /bin/helm-downloaded/linux-amd64/helm /bin/ \
      && rm -rf /bin/helm-downloaded
