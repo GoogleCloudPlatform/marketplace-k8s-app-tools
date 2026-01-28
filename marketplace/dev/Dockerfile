@@ -42,7 +42,7 @@ RUN echo "deb [signed-by=/usr/share/keyrings/docker.gpg] https://download.docker
      && apt-get -y install docker-ce
 RUN mkdir -p /bin/helm-downloaded \
      && wget -q -O /bin/helm-downloaded/helm.tar.gz \
-          https://get.helm.sh/helm-v4.1.0-linux-amd64.tar.gz \
+        https://get.helm.sh/helm-v4.1.0-linux-amd64.tar.gz \
      && tar -zxvf /bin/helm-downloaded/helm.tar.gz -C /bin/helm-downloaded \
      && mv /bin/helm-downloaded/linux-amd64/helm /bin/ \
      && rm -rf /bin/helm-downloaded
