@@ -28,11 +28,11 @@ RUN pip3 install \
 
 RUN for full_version in 1.33.5 1.35.0;  \
      do \
-     version=${full_version%.*} \
-     && mkdir -p /opt/kubectl/$version \
-     && wget -q -O /opt/kubectl/$version/kubectl \
-          https://storage.googleapis.com/kubernetes-release/release/v$full_version/bin/linux/amd64/kubectl \
-     && chmod 755 /opt/kubectl/$version/kubectl; \
+        version=${full_version%.*} \
+        && mkdir -p /opt/kubectl/$version \
+        && wget -q -O /opt/kubectl/$version/kubectl \
+            https://storage.googleapis.com/kubernetes-release/release/v$full_version/bin/linux/amd64/kubectl \
+        && chmod 755 /opt/kubectl/$version/kubectl; \
      done;
 RUN ln -s /opt/kubectl/1.33 /opt/kubectl/default
 
