@@ -18,7 +18,7 @@ RUN pip3 install \
       six \
       cryptography>=44.0.1
 
-RUN for full_version in 1.33.5 1.35.0;  \
+RUN for full_version in 1.30.4 1.31.0;  \
      do \
         version=${full_version%.*} \
         && mkdir -p /opt/kubectl/$version \
@@ -26,7 +26,7 @@ RUN for full_version in 1.33.5 1.35.0;  \
             https://storage.googleapis.com/kubernetes-release/release/v$full_version/bin/linux/amd64/kubectl \
         && chmod 755 /opt/kubectl/$version/kubectl; \
      done;
-RUN ln -s /opt/kubectl/1.33 /opt/kubectl/default
+RUN ln -s /opt/kubectl/1.31 /opt/kubectl/default
 
 COPY marketplace/deployer_envsubst_base/* /bin/
 COPY marketplace/deployer_util/* /bin/
