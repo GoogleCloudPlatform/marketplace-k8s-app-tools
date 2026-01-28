@@ -17,7 +17,7 @@ RUN pip3 install \
       pyyaml \
       cryptography>=44.0.1
 
-RUN for full_version in 1.30.4 1.35.0;  \
+RUN for full_version in 1.30.4 1.31.0;  \
      do \
         version=${full_version%.*} \
         && mkdir -p /opt/kubectl/$version \
