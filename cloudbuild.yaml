@@ -166,6 +166,7 @@ steps:
   # https://cloud.google.com/cloud-build/docs/overview#build_configuration_and_build_steps
   - 'DOCKER_NETWORK=cloudbuild'
   - MARKETPLACE_TOOLS_TAG=testing-sha_$COMMIT_SHA
+  - 'DOCKER_API_VERSION=1.41'
   args:
   - make
   - -j10
