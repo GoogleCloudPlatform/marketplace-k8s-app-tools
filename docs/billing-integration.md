@@ -16,7 +16,7 @@ Kubernetes apps that bill a Google Cloud customer's account must report usage to
 
 Usage reporting requires the following information:
 * Predefined usage metrics. These metrics (such as `requests` or `instance_time`) are defined when choosing a pricing model. Usage for these metrics must be reported from your deployed application.
-* A service name. This name identifies your product and will look like `my-application.mp-my-company.appspot.com`. It will be provided by Google during onboarding.
+* A service name. This name identifies your product and will look like `my-application.endpoints.projectId.cloud.goog`. It will be provided by Google as your product ID during onboarding. You can also find your product ID on the producer portal. (If your published product on GCP Marketplace is using the service name in this previous format `my-application.mp-my-company.appspot.com`, you can continue using the current serviceName)
 * A GCP service account key to use for reporting. This will be provided to your application at deployment time.
 * A consumer ID. This will be provided to your application at deployment time.
 
@@ -155,9 +155,14 @@ data:
     - name: servicecontrol
       servicecontrol:
         identity: gcp
-        # The service name is unique to your application and will be
-        # provided during onboarding.
-        serviceName: my-application.mp-my-company.appspot.com
+        # The service name is unique to your application. You can find 
+        # and use your product ID from the GCP Producer Portal. The following
+        # example uses the product ID as the serviceName.
+        #
+        # NOTE: If your published product is using the service name in this previous format
+        # "my-application.mp-my-company.appspot.com", you can continue
+        # using the current serviceName.
+        serviceName: my-application.endpoints.projectId.cloud.goog
         consumerId: $AGENT_CONSUMER_ID  # From the reporting secret.
 
     # The sources section lists metric data sources run by the agent
