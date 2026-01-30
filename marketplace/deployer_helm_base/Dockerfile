@@ -17,7 +17,7 @@ RUN pip3 install \
       pyyaml \
       cryptography>=44.0.1
 
-RUN for full_version in 1.33.5 1.35.0;  \
+RUN for full_version in 1.30.4 1.31.0;  \
      do \
         version=${full_version%.*} \
         && mkdir -p /opt/kubectl/$version \
@@ -25,11 +25,11 @@ RUN for full_version in 1.33.5 1.35.0;  \
             https://storage.googleapis.com/kubernetes-release/release/v$full_version/bin/linux/amd64/kubectl \
         && chmod 755 /opt/kubectl/$version/kubectl; \
      done;
-RUN ln -s /opt/kubectl/1.33 /opt/kubectl/default
+RUN ln -s /opt/kubectl/1.31 /opt/kubectl/default
 
 RUN mkdir -p /bin/helm-downloaded \
     && wget -q -O /bin/helm-downloaded/helm.tar.gz \
-        https://get.helm.sh/helm-v4.0.4-linux-amd64.tar.gz \
+        https://get.helm.sh/helm-v3.19.0-linux-amd64.tar.gz \
     && tar -zxvf /bin/helm-downloaded/helm.tar.gz -C /bin/helm-downloaded \
     && mv /bin/helm-downloaded/linux-amd64/helm /bin/ \
     && rm -rf /bin/helm-downloaded

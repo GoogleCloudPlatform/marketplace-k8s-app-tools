@@ -49,6 +49,7 @@ docker run \
   --mount "type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock,readonly" \
   --mount "type=bind,source=$VERIFICATION_LOGS_PATH,target=/logs" \
   --net=${DOCKER_NETWORK} \
+  --env DOCKER_API_VERSION=1.41 \
   ${kube_mount[*]} \
   ${gcloud_mount[*]} \
   ${gcloud_original_path[*]} \
