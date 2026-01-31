@@ -373,7 +373,7 @@ For each property, you can define the following sub-properties:
 
 #### `title`
 
-The text shown in the in the Google Cloud Marketplace UI when users configure
+The text shown in the Google Cloud Marketplace UI when users configure
 their deployment.
 
 ![Custom property in the UI](images/custom-property-ui.png)
