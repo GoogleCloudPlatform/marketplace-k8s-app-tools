@@ -59,7 +59,7 @@ done
 
 if [[ -n "$version_meta_file" ]]; then
   if [[ "$version_meta_file" == gs://* ]]; then
-    deployer="$(gsutil cat "$version_meta_file" | yaml2json | jq -r '.url')"
+    deployer="$(gcloud storage cat "$version_meta_file" | yaml2json | jq -r '.url')"
   elif [[ "$version_meta_file" == http://* || "$version_meta_file" == http://* ]]; then
     deployer="$(wget -O- -q "$version_meta_file" | yaml2json | jq -r '.url')"
   else
