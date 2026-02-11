@@ -16,6 +16,9 @@
 
 set -eo pipefail
 
+# Fix Docker API version compatibility
+export DOCKER_API_VERSION=1.41
+
 for i in "$@"
 do
 case $i in
