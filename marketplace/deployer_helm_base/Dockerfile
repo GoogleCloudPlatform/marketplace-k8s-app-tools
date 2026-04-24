@@ -39,7 +39,8 @@ COPY marketplace/deployer_util/* /bin/
 ARG VERSION
 RUN echo "$VERSION" > /version
 
-RUN mkdir -p /data/chart
-RUN mkdir -p /data-test/chart
+RUN mkdir -p /data/chart \
+    && mkdir -p /data-test/chart \
+    && mkdir -p /data/crds
 
 ENTRYPOINT ["/bin/bash", "/bin/deploy.sh"]
