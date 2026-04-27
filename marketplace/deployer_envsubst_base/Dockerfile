@@ -1,4 +1,4 @@
-FROM marketplace.gcr.io/google/ubuntu2204
+FROM ubuntu:22.04
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     bash \
@@ -18,7 +18,7 @@ RUN pip3 install \
       six \
       cryptography>=46.0.7
 
-RUN for full_version in 1.30.4 1.31.0;  \
+RUN for full_version in 1.31.0 1.31.0;  \
      do \
         version=${full_version%.*} \
         && mkdir -p /opt/kubectl/$version \
