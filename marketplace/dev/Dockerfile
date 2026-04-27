@@ -24,7 +24,7 @@ RUN pip3 install \
       wheel \
       pyOpenSSL \
       pyyaml \
-      cryptography>=44.0.1
+      cryptography>=46.0.7
 
 RUN for full_version in 1.35.0 1.36.0;  \
      do \
