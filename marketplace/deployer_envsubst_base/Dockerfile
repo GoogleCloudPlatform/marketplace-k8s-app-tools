@@ -1,15 +1,17 @@
 FROM ubuntu:22.04
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    bash \
-    ca-certificates \
-    curl \
-    gettext \
-    jq \
-    wget \
-    python3 \
-    python3-pip \
-    python-is-python3 \
+RUN apt-get update \
+    && apt-get upgrade -y \
+    && apt-get install -y --no-install-recommends \
+        bash \
+        ca-certificates \
+        curl \
+        gettext \
+        jq \
+        wget \
+        python3 \
+        python3-pip \
+        python-is-python3 \
     && rm -rf /var/lib/apt/lists/*
 
 RUN pip3 install \
