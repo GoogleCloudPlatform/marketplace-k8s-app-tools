@@ -31,7 +31,7 @@ RUN pip3 install \
       pyyaml \
       cryptography>=46.0.7
 
-# Download the latest stable version of kubectl
+# Download the latest version of kubectl
 RUN LATEST_VERSION=$(curl -L -s https://dl.k8s.io/release/latest.txt) \
     && echo "Attempting to download kubectl version: $LATEST_VERSION" \
     && VERSION_MAJOR=$(echo $LATEST_VERSION | cut -d. -f1-2) \
