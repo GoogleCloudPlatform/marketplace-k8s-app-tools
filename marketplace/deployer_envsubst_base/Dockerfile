@@ -24,15 +24,15 @@ RUN pip3 install \
       cryptography>=46.0.7
 
 # Download the latest stable version of kubectl
-RUN LATEST_STABLE=$(curl -L -s https://dl.k8s.io/release/stable.txt) \
-    && echo "Attempting to download kubectl version: $LATEST_STABLE" \
-    && VERSION_MAJOR=$(echo $LATEST_STABLE | cut -d. -f1-2) \
+RUN RUN LATEST_VERSION=$(curl -L -s https://dl.k8s.io/release/latest.txt) \
+    && echo "Attempting to download kubectl version: $LATEST_VERSION" \
+    && VERSION_MAJOR=$(echo $LATEST_VERSION | cut -d. -f1-2) \
     && mkdir -p /opt/kubectl/$VERSION_MAJOR \
     && wget -q -O /opt/kubectl/$VERSION_MAJOR/kubectl \
-        https://dl.k8s.io/release/$LATEST_STABLE/bin/linux/amd64/kubectl \
+        https://dl.k8s.io/release/$LATEST_VERSION/bin/linux/amd64/kubectl \
     && chmod 755 /opt/kubectl/$VERSION_MAJOR/kubectl \
     && ln -sfn /opt/kubectl/$VERSION_MAJOR /opt/kubectl/default \
-    && echo "Successfully installed kubectl $LATEST_STABLE" \
+    && echo "Successfully installed kubectl $LATEST_VERSION" \
     && /opt/kubectl/default/kubectl version --client
 
 # Add kubectl to the PATH
