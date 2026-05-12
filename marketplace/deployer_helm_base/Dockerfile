@@ -12,6 +12,8 @@ RUN apt-get update \
         python3 \
         python3-pip \
         python-is-python3 \
+    && apt-get -y autoremove \
+    && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 RUN pip3 install \

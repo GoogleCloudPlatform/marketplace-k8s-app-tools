@@ -15,6 +15,8 @@ RUN apt-get update \
         gnupg \
         python3 \
         python3-pip \
+    && apt-get -y autoremove \
+    && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list \
