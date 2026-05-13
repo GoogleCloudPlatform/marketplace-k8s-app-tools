@@ -49,13 +49,15 @@ RUN echo "deb [signed-by=/usr/share/keyrings/docker.gpg] https://download.docker
      && apt-get -y install docker-ce \
      && rm -rf /var/lib/apt/lists/*
 
-# Install latest stable Helm version using the official script
-RUN curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 \
-     && chmod 700 get_helm.sh \
-     && ./get_helm.sh \
-     && rm ./get_helm.sh \
-     && echo "Successfully installed Helm:" \
-     && helm version
+# Install latest Helm version (including pre-releases)
+RUN LATEST_HELM_TAG=$(curl -s https://api.github.com/repos/helm/helm/releases | jq -r '.[0].tag_name') \
+    && echo "Attempting to install Helm version: ${LATEST_HELM_TAG}" \
+    && curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 \
+    && chmod 700 get_helm.sh \
+    && ./get_helm.sh --version ${LATEST_HELM_TAG} \
+    && rm ./get_helm.sh \
+    && echo "Successfully installed Helm:" \
+    && helm version
 
 RUN gcloud auth configure-docker
 
