@@ -112,3 +112,7 @@ Build container images:
 ```shell
 make marketplace/build
 ```
+
+## Kubectl versions
+
+Using latest stable kubectl, as of 6/30, it's 1.36.2
