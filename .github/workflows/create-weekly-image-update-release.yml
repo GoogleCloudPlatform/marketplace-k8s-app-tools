@@ -1,4 +1,4 @@
-name: Create Release
+name: Create Weekly Image Update Release
 
 on:
   push:
