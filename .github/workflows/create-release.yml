@@ -1,0 +1,54 @@
+name: Create Release
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'AUTOBUILD_CHANGELOG.md'
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Required to create tags and releases
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Fetch all history and tags
+
+      - name: Calculate Next Tag
+        id: calculate_tag
+        run: |
+          git fetch --tags
+          
+          # Find the latest SemVer tag (matching X.Y.Z)
+          LATEST_TAG=$(git tag -l | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -n1)
+          echo "Latest tag found: $LATEST_TAG"
+          
+          if [ -z "$LATEST_TAG" ]; then
+            # Fallback if no tags exist (should not happen in this repo)
+            NEW_TAG="1.0.0"
+          else
+            # Parse SemVer and increment patch version
+            IFS='.' read -r major minor patch <<< "$LATEST_TAG"
+            new_patch=$((patch + 1))
+            NEW_TAG="${major}.${minor}.${new_patch}"
+          fi
+          
+          echo "Next tag: $NEW_TAG"
+          echo "NEW_TAG=$NEW_TAG" >> $GITHUB_OUTPUT
+
+      - name: Create and Push Tag
+        run: |
+          git tag "${{ steps.calculate_tag.outputs.NEW_TAG }}"
+          git push origin "${{ steps.calculate_tag.outputs.NEW_TAG }}"
+
+      - name: Create GitHub Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${{ steps.calculate_tag.outputs.NEW_TAG }}" \
+            --title "${{ steps.calculate_tag.outputs.NEW_TAG }}" \
+            --generate-notes
