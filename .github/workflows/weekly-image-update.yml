@@ -1,0 +1,88 @@
+name: Weekly Kubectl Image Update PR
+
+on:
+  schedule:
+    # Runs at 11:00 UTC every Monday
+    - cron: '0 11 * * 1'
+  workflow_dispatch: # Allows manual triggering
+
+jobs:
+  create_update_pr:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write      # To checkout code, create/push branches, commit files
+      pull-requests: write # To create PRs, assign reviewers, comment on PRs
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Git
+        run: |
+          # Configure Git to use the official GitHub Actions bot name and email for proper attribution in the GitHub UI
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email '41898282+github-actions[bot]@users.noreply.github.com'
+
+      - name: Calculate Dates
+        id: dates
+        run: |
+          # Use ISO 8601 format
+          echo "LOG_ENTRY=- $(date +'%Y-%m-%d %H:%M') UTC: Automated weekly rebuild trigger" >> $GITHUB_OUTPUT
+
+      - name: Prepare Branch
+        id: branch
+        run: |
+          # Use a static branch name to prevent branch clutter and duplicate PRs
+          # from weekly runs. Force-pushing to this branch will update the open PR.
+          BRANCH_NAME="automated/kubectl-image-update"
+          echo "BRANCH_NAME=${BRANCH_NAME}" >> $GITHUB_OUTPUT
+          
+          # Checkout branch, creating it if it doesn't exist or resetting it if it does
+          git checkout -B "$BRANCH_NAME"
+          # Reset to origin/master to ensure we base changes on latest master
+          git reset --hard origin/master
+
+      - name: Update Changelog File
+        run: |
+          # Append to AUTOBUILD_CHANGELOG.md (creates it if it does not exist)
+          echo "${{ steps.dates.outputs.LOG_ENTRY }}" >> AUTOBUILD_CHANGELOG.md
+          echo "AUTOBUILD_CHANGELOG.md updated."
+
+      - name: Commit changes
+        run: |
+          git add AUTOBUILD_CHANGELOG.md
+          git commit -m "Automated weekly image rebuild trigger: ${{ steps.dates.outputs.LOG_ENTRY }}"
+
+      - name: Push Branch
+        run: |
+          # Force push is required since we reset the branch to origin/master
+          git push -f origin ${{ steps.branch.outputs.BRANCH_NAME }}
+
+      - name: Create or Locate Pull Request
+        id: create_pr
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH_NAME: ${{ steps.branch.outputs.BRANCH_NAME }}
+        run: |
+          # Check if PR already exists to avoid creating duplicates
+          PR_URL=$(gh pr list --head "$BRANCH_NAME" --state open --json url --jq '.[0].url')
+          if [ -z "$PR_URL" ]; then
+            PR_TITLE="Weekly Kubectl Image Rebuild"
+            # TODO: Once verified, consider replacing --assignee with --reviewer to target the whole team
+            PR_URL=$(gh pr create \
+              --title "$PR_TITLE" \
+              --body "Automated PR to trigger weekly kubectl image rebuild. Merging this PR will release updated images." \
+              --head "$BRANCH_NAME" \
+              --repo "$GITHUB_REPOSITORY" \
+              --assignee "erikcandeia,lamjonathan")
+            echo "Created PR: $PR_URL"
+          else
+            echo "PR already exists: $PR_URL. Updated branch will trigger new builds."
+          fi
+          echo "PR_URL=$PR_URL" >> $GITHUB_OUTPUT
+
+      - name: Comment /gcbrun on PR
+        if: steps.create_pr.outputs.PR_URL != ''
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr comment ${{ steps.create_pr.outputs.PR_URL }} --body "/gcbrun"
