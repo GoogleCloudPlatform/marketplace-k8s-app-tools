@@ -19,8 +19,8 @@ jobs:
       - name: Set up Git
         run: |
           # Configure Git to use the official GitHub Actions bot name and email for proper attribution in the GitHub UI
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git config --global user.name 'ccm-producer-saap-gh-bot'
+          git config --global user.email 'ccm-producer-saap-github-bot@google.com'
 
       - name: Calculate Dates
         id: dates
