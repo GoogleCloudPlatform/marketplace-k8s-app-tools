@@ -17,6 +17,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0 # Fetch all history and tags
+          token: ${{ secrets.PRODUCER_SAAP_BOT_PAT }}
 
       - name: Calculate Next Tag
         id: calculate_tag
@@ -47,7 +48,7 @@ jobs:
 
       - name: Create GitHub Release
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PRODUCER_SAAP_BOT_PAT }}
         run: |
           gh release create "${{ steps.calculate_tag.outputs.NEW_TAG }}" \
             --title "${{ steps.calculate_tag.outputs.NEW_TAG }}" \
