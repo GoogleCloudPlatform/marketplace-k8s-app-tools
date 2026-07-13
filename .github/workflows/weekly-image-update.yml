@@ -15,6 +15,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PRODUCER_SAAP_BOT_PAT }}
 
       - name: Set up Git
         run: |
@@ -60,7 +62,7 @@ jobs:
       - name: Create or Locate Pull Request
         id: create_pr
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PRODUCER_SAAP_BOT_PAT }}
           BRANCH_NAME: ${{ steps.branch.outputs.BRANCH_NAME }}
         run: |
           # Check if PR already exists to avoid creating duplicates
@@ -83,6 +85,6 @@ jobs:
       - name: Comment /gcbrun on PR
         if: steps.create_pr.outputs.PR_URL != ''
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PRODUCER_SAAP_BOT_PAT }}
         run: |
           gh pr comment ${{ steps.create_pr.outputs.PR_URL }} --body "/gcbrun"
