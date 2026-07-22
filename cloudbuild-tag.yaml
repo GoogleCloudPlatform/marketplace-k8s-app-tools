@@ -35,6 +35,57 @@ steps:
     docker pull gcr.io/$_STAGING_PROJECT_ID/k8s/deployer_envsubst/onbuild:sha_$COMMIT_SHA
     docker tag gcr.io/$_STAGING_PROJECT_ID/k8s/deployer_envsubst/onbuild:sha_$COMMIT_SHA gcr.io/$PROJECT_ID/k8s/deployer_envsubst/onbuild:$TAG_NAME
 
+- id: Manage Public Image Tags
+  name: gcr.io/cloud-builders/gcloud
+  waitFor:
+  - *PublishImages
+  entrypoint: bash
+  args:
+  - -ceux
+  - |
+    # Check if the tag is a non-prerelease SemVer version
+    if [[ -z "$(echo "$TAG_NAME" | egrep '^[0-9]+\.[0-9]+\.[0-9]+$')" ]]; then
+      echo "Prerelease tag $TAG_NAME. Skipping public image tag updates."
+      exit 0
+    fi
+
+    function rotate_public_tags() {
+      local image_name="$1"
+      echo "Processing public tags for $image_name..."
+
+      # Find the old image version currently tagged as public-image-*
+      local old_public_tag
+      old_public_tag=$(gcloud container images list-tags "$image_name" \
+        --filter="tags:public-image-*" --format="value(tags)" \
+        | tr ',' '\n' | grep '^public-image-' | head -n 1)
+
+      if [[ -n "$old_public_tag" ]]; then
+        local old_version="${old_public_tag#public-image-}"
+        local old_digest
+        old_digest=$(gcloud container images list-tags "$image_name" \
+          --filter="tags:$old_public_tag" --format="value(digest)")
+        
+        echo "[$image_name] Found old public image version: $old_version (digest: $old_digest)"
+        
+        # Remove old public-image-$old_version tag
+        gcloud container images untag "$image_name:$old_public_tag" --quiet
+        
+        # Add deprecated-public-image-$old_version tag to the old digest
+        gcloud container images add-tag "$image_name@$old_digest" "$image_name:deprecated-public-image-$old_version" --quiet
+      fi
+
+      # Tag the new image ($TAG_NAME) locally and push it
+      docker tag "$image_name:$TAG_NAME" "$image_name:public-image-$TAG_NAME"
+      docker push "$image_name:public-image-$TAG_NAME"
+    }
+
+    # Run for all 5 images
+    rotate_public_tags "gcr.io/$PROJECT_ID/k8s/dev"
+    rotate_public_tags "gcr.io/$PROJECT_ID/k8s/deployer_helm"
+    rotate_public_tags "gcr.io/$PROJECT_ID/k8s/deployer_helm/onbuild"
+    rotate_public_tags "gcr.io/$PROJECT_ID/k8s/deployer_envsubst"
+    rotate_public_tags "gcr.io/$PROJECT_ID/k8s/deployer_envsubst/onbuild"
+
 - id: &DetermineShouldTagLatest Determine if images should be tagged latest
   name: gcr.io/cloud-builders/gcloud
   waitFor:
