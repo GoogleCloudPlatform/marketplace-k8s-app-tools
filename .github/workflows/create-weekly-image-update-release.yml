@@ -19,6 +19,43 @@ jobs:
           fetch-depth: 0 # Fetch all history and tags
           token: ${{ secrets.PRODUCER_SAAP_BOT_PAT }}
 
+      - name: Wait for Staging Images Build
+        env:
+          GITHUB_TOKEN: ${{ secrets.PRODUCER_SAAP_BOT_PAT }}
+        run: |
+          SHA="${{ github.sha }}"
+          CHECK_NAME="Push-marketplace-k8s-app-tools (marketplace-k8s-app-tools)"
+          echo "Waiting for check '$CHECK_NAME' on commit $SHA to succeed..."
+          
+          max_attempts=30 # 30 minutes timeout
+          attempt=0
+          while [ $attempt -lt $max_attempts ]; do
+            # Query the check runs for the current commit
+            RESULT=$(gh api repos/${{ github.repository }}/commits/$SHA/check-runs \
+              --jq ".check_runs[] | select(.name == \"$CHECK_NAME\") | {status, conclusion}")
+            
+            STATUS=$(echo "$RESULT" | jq -r '.status // empty')
+            CONCLUSION=$(echo "$RESULT" | jq -r '.conclusion // empty')
+            
+            echo "Attempt $((attempt+1))/$max_attempts: Status=$STATUS, Conclusion=$CONCLUSION"
+            
+            if [ "$STATUS" = "completed" ]; then
+              if [ "$CONCLUSION" = "success" ]; then
+                echo "Staging build succeeded. Proceeding with release."
+                exit 0
+              else
+                echo "Staging build failed with conclusion: $CONCLUSION"
+                exit 1
+              fi
+            fi
+            
+            attempt=$((attempt+1))
+            sleep 60
+          done
+          
+          echo "Timeout waiting for staging build to complete."
+          exit 1
+
       - name: Calculate Next Tag
         id: calculate_tag
         run: |
