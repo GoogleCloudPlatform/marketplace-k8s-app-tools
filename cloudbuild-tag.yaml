@@ -50,33 +50,53 @@ steps:
     fi
 
     function rotate_public_tags() {
-      local image_name="$1"
-      echo "Processing public tags for $image_name..."
+      local gcr_image="$1"
+      local ar_image
+      ar_image=$(echo "$gcr_image" | sed -r 's|^gcr\.io/([^/]+)/(.*)$|us-docker.pkg.dev/\1/gcr.io/\2|')
 
-      # Find the old image version currently tagged as public-image-*
-      local old_public_tag
-      old_public_tag=$(gcloud container images list-tags "$image_name" \
+      echo "Processing public tags for GCR image: $gcr_image"
+      echo "Processing public tags for AR image: $ar_image"
+
+      # 1. Manage GCR Tags
+      local old_public_tag_gcr
+      old_public_tag_gcr=$(gcloud container images list-tags "$gcr_image" \
         --filter="tags:public-image-*" --format="value(tags)" \
         | tr ',' '\n' | grep '^public-image-' | head -n 1)
 
-      if [[ -n "$old_public_tag" ]]; then
-        local old_version="${old_public_tag#public-image-}"
-        local old_digest
-        old_digest=$(gcloud container images list-tags "$image_name" \
-          --filter="tags:$old_public_tag" --format="value(digest)")
+      if [[ -n "$old_public_tag_gcr" ]]; then
+        local old_version_gcr="${old_public_tag_gcr#public-image-}"
+        local old_digest_gcr
+        old_digest_gcr=$(gcloud container images list-tags "$gcr_image" \
+          --filter="tags:$old_public_tag_gcr" --format="value(digest)")
         
-        echo "[$image_name] Found old public image version: $old_version (digest: $old_digest)"
-        
-        # Remove old public-image-$old_version tag
-        gcloud container images untag "$image_name:$old_public_tag" --quiet
-        
-        # Add deprecated-public-image-$old_version tag to the old digest
-        gcloud container images add-tag "$image_name@$old_digest" "$image_name:deprecated-public-image-$old_version" --quiet
+        echo "[GCR] Found old public image version: $old_version_gcr (digest: $old_digest_gcr)"
+        gcloud container images untag "$gcr_image:$old_public_tag_gcr" --quiet
+        gcloud container images add-tag "$gcr_image@$old_digest_gcr" "$gcr_image:deprecated-public-image-$old_version_gcr" --quiet
       fi
 
-      # Tag the new image ($TAG_NAME) locally and push it
-      docker tag "$image_name:$TAG_NAME" "$image_name:public-image-$TAG_NAME"
-      docker push "$image_name:public-image-$TAG_NAME"
+      # Tag and push new version on GCR
+      docker tag "$gcr_image:$TAG_NAME" "$gcr_image:public-image-$TAG_NAME"
+      docker push "$gcr_image:public-image-$TAG_NAME"
+
+      # 2. Manage AR Tags
+      local tag_path version_path
+      if read -r tag_path version_path < <(gcloud artifacts docker tags list "$ar_image" --format="value(name,version)" \
+        | grep '/tags/public-image-' | head -n 1 || true); then
+        
+        if [[ -n "$tag_path" ]]; then
+          local old_public_tag_ar="${tag_path##*/tags/}"
+          local old_digest_ar="${version_path##*/versions/}"
+          local old_version_ar="${old_public_tag_ar#public-image-}"
+          
+          echo "[AR] Found old public image version: $old_version_ar (digest: $old_digest_ar)"
+          gcloud artifacts docker tags delete "$ar_image:$old_public_tag_ar" --quiet
+          gcloud artifacts docker tags add "$ar_image@$old_digest_ar" "$ar_image:deprecated-public-image-$old_version_ar" --quiet
+        fi
+      fi
+
+      # Tag and push new version on AR
+      docker tag "$gcr_image:$TAG_NAME" "$ar_image:public-image-$TAG_NAME"
+      docker push "$ar_image:public-image-$TAG_NAME"
     }
 
     # Run for all 5 images
