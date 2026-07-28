@@ -75,7 +75,7 @@ jobs:
               --body "Automated PR to trigger weekly kubectl image rebuild. Merging this PR will release updated images." \
               --head "$BRANCH_NAME" \
               --repo "$GITHUB_REPOSITORY" \
-              --assignee "erikcandeia,lamjonathan")
+              --reviewer "erikcandeia,lamjonathan")
             echo "Created PR: $PR_URL"
           else
             echo "PR already exists: $PR_URL. Updated branch will trigger new builds."
