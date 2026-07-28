@@ -62,8 +62,8 @@ steps:
       if [[ -n "$old_public_tag" ]]; then
         local old_version="${old_public_tag#public-image-}"
         local old_digest
-        old_digest=$(gcloud container images list-tags "$image_name" \
-          --filter="tags:$old_public_tag" --format="value(digest)")
+        old_digest=$(gcloud container images describe "$image_name:$old_public_tag" \
+          --format="value(image_summary.digest)")
         
         echo "[$image_name] Found old public image version: $old_version (digest: $old_digest)"
         
