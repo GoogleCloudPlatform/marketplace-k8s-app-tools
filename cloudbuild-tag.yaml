@@ -74,9 +74,8 @@ steps:
         gcloud container images add-tag "$image_name@$old_digest" "$image_name:deprecated-public-image-$old_version" --quiet
       fi
 
-      # Tag the new image ($TAG_NAME) locally and push it
-      docker tag "$image_name:$TAG_NAME" "$image_name:public-image-$TAG_NAME"
-      docker push "$image_name:public-image-$TAG_NAME"
+      # Tag the new image ($TAG_NAME) as public-image-$TAG_NAME registry-side
+      gcloud container images add-tag "$image_name:$TAG_NAME" "$image_name:public-image-$TAG_NAME" --quiet
     }
 
     # Run for all 5 images
