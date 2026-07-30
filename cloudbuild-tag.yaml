@@ -13,27 +13,18 @@ substitutions:
 steps:
 
 - id: &PublishImages Publish Images
-  name: gcr.io/cloud-builders/docker
+  name: gcr.io/cloud-builders/gcloud
   waitFor:
   - '-'
   entrypoint: bash
   args:
   - -ceux
   - |
-    docker pull gcr.io/$_STAGING_PROJECT_ID/k8s/dev:sha_$COMMIT_SHA
-    docker tag gcr.io/$_STAGING_PROJECT_ID/k8s/dev:sha_$COMMIT_SHA gcr.io/$PROJECT_ID/k8s/dev:$TAG_NAME
-
-    docker pull gcr.io/$_STAGING_PROJECT_ID/k8s/deployer_helm:sha_$COMMIT_SHA
-    docker tag gcr.io/$_STAGING_PROJECT_ID/k8s/deployer_helm:sha_$COMMIT_SHA gcr.io/$PROJECT_ID/k8s/deployer_helm:$TAG_NAME
-
-    docker pull gcr.io/$_STAGING_PROJECT_ID/k8s/deployer_helm/onbuild:sha_$COMMIT_SHA
-    docker tag gcr.io/$_STAGING_PROJECT_ID/k8s/deployer_helm/onbuild:sha_$COMMIT_SHA gcr.io/$PROJECT_ID/k8s/deployer_helm/onbuild:$TAG_NAME
-
-    docker pull gcr.io/$_STAGING_PROJECT_ID/k8s/deployer_envsubst:sha_$COMMIT_SHA
-    docker tag gcr.io/$_STAGING_PROJECT_ID/k8s/deployer_envsubst:sha_$COMMIT_SHA gcr.io/$PROJECT_ID/k8s/deployer_envsubst:$TAG_NAME
-
-    docker pull gcr.io/$_STAGING_PROJECT_ID/k8s/deployer_envsubst/onbuild:sha_$COMMIT_SHA
-    docker tag gcr.io/$_STAGING_PROJECT_ID/k8s/deployer_envsubst/onbuild:sha_$COMMIT_SHA gcr.io/$PROJECT_ID/k8s/deployer_envsubst/onbuild:$TAG_NAME
+    gcloud container images add-tag "gcr.io/$_STAGING_PROJECT_ID/k8s/dev:sha_$COMMIT_SHA" "gcr.io/$PROJECT_ID/k8s/dev:$TAG_NAME" --quiet
+    gcloud container images add-tag "gcr.io/$_STAGING_PROJECT_ID/k8s/deployer_helm:sha_$COMMIT_SHA" "gcr.io/$PROJECT_ID/k8s/deployer_helm:$TAG_NAME" --quiet
+    gcloud container images add-tag "gcr.io/$_STAGING_PROJECT_ID/k8s/deployer_helm/onbuild:sha_$COMMIT_SHA" "gcr.io/$PROJECT_ID/k8s/deployer_helm/onbuild:$TAG_NAME" --quiet
+    gcloud container images add-tag "gcr.io/$_STAGING_PROJECT_ID/k8s/deployer_envsubst:sha_$COMMIT_SHA" "gcr.io/$PROJECT_ID/k8s/deployer_envsubst:$TAG_NAME" --quiet
+    gcloud container images add-tag "gcr.io/$_STAGING_PROJECT_ID/k8s/deployer_envsubst/onbuild:sha_$COMMIT_SHA" "gcr.io/$PROJECT_ID/k8s/deployer_envsubst/onbuild:$TAG_NAME" --quiet
 
 - id: Manage Public Image Tags
   name: gcr.io/cloud-builders/gcloud
@@ -95,7 +86,7 @@ steps:
   - echo "$(.cloudbuild/should_tag_latest.sh gcr.io/$PROJECT_ID/k8s/dev $TAG_NAME)" > should_tag_latest
 
 - id: &MaybeTagImagesLatest Maybe tag images latest
-  name: gcr.io/cloud-builders/docker
+  name: gcr.io/cloud-builders/gcloud
   waitFor:
   - *DetermineShouldTagLatest
   entrypoint: /bin/bash
@@ -103,16 +94,11 @@ steps:
   - -ceux
   - |
     if [[ "$(cat should_tag_latest)" == "true" ]]; then
-      docker tag gcr.io/$PROJECT_ID/k8s/dev:$TAG_NAME gcr.io/$PROJECT_ID/k8s/dev:latest
-      docker push gcr.io/$PROJECT_ID/k8s/dev:latest
-      docker tag gcr.io/$PROJECT_ID/k8s/deployer_helm:$TAG_NAME gcr.io/$PROJECT_ID/k8s/deployer_helm:latest
-      docker push gcr.io/$PROJECT_ID/k8s/deployer_helm:latest
-      docker tag gcr.io/$PROJECT_ID/k8s/deployer_helm/onbuild:$TAG_NAME gcr.io/$PROJECT_ID/k8s/deployer_helm/onbuild:latest
-      docker push gcr.io/$PROJECT_ID/k8s/deployer_helm/onbuild:latest
-      docker tag gcr.io/$PROJECT_ID/k8s/deployer_envsubst:$TAG_NAME gcr.io/$PROJECT_ID/k8s/deployer_envsubst:latest
-      docker push gcr.io/$PROJECT_ID/k8s/deployer_envsubst:latest
-      docker tag gcr.io/$PROJECT_ID/k8s/deployer_envsubst/onbuild:$TAG_NAME gcr.io/$PROJECT_ID/k8s/deployer_envsubst/onbuild:latest
-      docker push gcr.io/$PROJECT_ID/k8s/deployer_envsubst/onbuild:latest
+      gcloud container images add-tag "gcr.io/$PROJECT_ID/k8s/dev:$TAG_NAME" "gcr.io/$PROJECT_ID/k8s/dev:latest" --quiet
+      gcloud container images add-tag "gcr.io/$PROJECT_ID/k8s/deployer_helm:$TAG_NAME" "gcr.io/$PROJECT_ID/k8s/deployer_helm:latest" --quiet
+      gcloud container images add-tag "gcr.io/$PROJECT_ID/k8s/deployer_helm/onbuild:$TAG_NAME" "gcr.io/$PROJECT_ID/k8s/deployer_helm/onbuild:latest" --quiet
+      gcloud container images add-tag "gcr.io/$PROJECT_ID/k8s/deployer_envsubst:$TAG_NAME" "gcr.io/$PROJECT_ID/k8s/deployer_envsubst:latest" --quiet
+      gcloud container images add-tag "gcr.io/$PROJECT_ID/k8s/deployer_envsubst/onbuild:$TAG_NAME" "gcr.io/$PROJECT_ID/k8s/deployer_envsubst/onbuild:latest" --quiet
     else
       echo "Not tagging latest"
     fi
