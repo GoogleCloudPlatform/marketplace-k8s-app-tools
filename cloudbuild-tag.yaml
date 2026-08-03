@@ -119,13 +119,6 @@ steps:
     gcloud storage cp gs://$PROJECT_ID/charts/index.yaml index.yaml
     helm repo index --merge index.yaml charts-tgz/
 
-images:
-- gcr.io/$PROJECT_ID/k8s/dev:$TAG_NAME
-- gcr.io/$PROJECT_ID/k8s/deployer_helm:$TAG_NAME
-- gcr.io/$PROJECT_ID/k8s/deployer_helm/onbuild:$TAG_NAME
-- gcr.io/$PROJECT_ID/k8s/deployer_envsubst:$TAG_NAME
-- gcr.io/$PROJECT_ID/k8s/deployer_envsubst/onbuild:$TAG_NAME
-
 artifacts:
   objects:
     location: gs://$PROJECT_ID/charts/
