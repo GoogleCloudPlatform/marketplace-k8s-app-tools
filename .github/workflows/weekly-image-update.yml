@@ -69,13 +69,12 @@ jobs:
           PR_URL=$(gh pr list --head "$BRANCH_NAME" --state open --json url --jq '.[0].url')
           if [ -z "$PR_URL" ]; then
             PR_TITLE="Weekly Kubectl Image Rebuild"
-            # TODO: Once verified, consider replacing --assignee with --reviewer to target the whole team
             PR_URL=$(gh pr create \
               --title "$PR_TITLE" \
               --body "Automated PR to trigger weekly kubectl image rebuild. Merging this PR will release updated images." \
               --head "$BRANCH_NAME" \
               --repo "$GITHUB_REPOSITORY" \
-              --reviewer "erikcandeia,lamjonathan")
+              --reviewer "GoogleCloudPlatform/ccm-saap-team")
             echo "Created PR: $PR_URL"
           else
             echo "PR already exists: $PR_URL. Updated branch will trigger new builds."
