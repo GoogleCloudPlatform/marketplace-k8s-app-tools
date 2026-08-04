@@ -14,7 +14,7 @@ jobs:
       pull-requests: write # To create PRs, assign reviewers, comment on PRs
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           token: ${{ secrets.PRODUCER_SAAP_BOT_PAT }}
 
@@ -44,20 +44,26 @@ jobs:
           git reset --hard origin/master
 
       - name: Update Changelog File
+        env:
+          LOG_ENTRY: ${{ steps.dates.outputs.LOG_ENTRY }}
         run: |
           # Append to AUTOBUILD_CHANGELOG.md (creates it if it does not exist)
-          echo "${{ steps.dates.outputs.LOG_ENTRY }}" >> AUTOBUILD_CHANGELOG.md
+          echo "$LOG_ENTRY" >> AUTOBUILD_CHANGELOG.md
           echo "AUTOBUILD_CHANGELOG.md updated."
 
       - name: Commit changes
+        env:
+          LOG_ENTRY: ${{ steps.dates.outputs.LOG_ENTRY }}
         run: |
           git add AUTOBUILD_CHANGELOG.md
-          git commit -m "Automated weekly image rebuild trigger: ${{ steps.dates.outputs.LOG_ENTRY }}"
+          git commit -m "Automated weekly image rebuild trigger: $LOG_ENTRY"
 
       - name: Push Branch
+        env:
+          BRANCH_NAME: ${{ steps.branch.outputs.BRANCH_NAME }}
         run: |
           # Force push is required since we reset the branch to origin/master
-          git push -f origin ${{ steps.branch.outputs.BRANCH_NAME }}
+          git push -f origin "$BRANCH_NAME"
 
       - name: Create or Locate Pull Request
         id: create_pr
@@ -85,5 +91,6 @@ jobs:
         if: steps.create_pr.outputs.PR_URL != ''
         env:
           GITHUB_TOKEN: ${{ secrets.PRODUCER_SAAP_BOT_PAT }}
+          PR_URL: ${{ steps.create_pr.outputs.PR_URL }}
         run: |
-          gh pr comment ${{ steps.create_pr.outputs.PR_URL }} --body "/gcbrun"
+          gh pr comment "$PR_URL" --body "/gcbrun"
