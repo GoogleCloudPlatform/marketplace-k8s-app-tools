@@ -224,7 +224,12 @@ def generate_v2_image_properties(schema, values_dict, result):
     else:
       registry_repo = repo_prefix
     registry, repo = registry_repo.split('/', 1)
-    full = '{}:{}'.format(registry_repo, tag)
+
+    if img.digest:
+      full = '{}@{}'.format(registry_repo, img.digest)
+    else:
+      full = '{}:{}'.format(registry_repo, tag)
+
     for prop in img.properties.values():
       if prop.part_type == config_helper.IMAGE_PROJECTION_TYPE_FULL:
         result[prop.name] = full
@@ -236,6 +241,19 @@ def generate_v2_image_properties(schema, values_dict, result):
         result[prop.name] = repo
       elif prop.part_type == config_helper.IMAGE_PROJECTION_TYPE_TAG:
         result[prop.name] = tag
+        if img.digest:
+          raise InvalidProperty(
+              'Image "{}" cannot have images.properties.type: {} and specify '
+              'a digest'.format(img.name,
+                                config_helper.IMAGE_PROJECTION_TYPE_TAG))
+      elif prop.part_type == config_helper.IMAGE_PROJECTION_TYPE_DIGEST:
+        if img.digest:
+          result[prop.name] = img.digest
+        else:
+          raise InvalidProperty('images.properties.type: {} requires digest '
+                                'to be specified in image "{}"'.format(
+                                    config_helper.IMAGE_PROJECTION_TYPE_DIGEST,
+                                    img.name))
       else:
         raise InvalidProperty(
             'Invalid type for images.properties.type: {}'.format(
