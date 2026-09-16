@@ -1,5 +1,5 @@
 ARG MARKETPLACE_TOOLS_TAG
-FROM marketplace.gcr.io/google/debian11 AS build
+FROM gcr.io/cloud-marketplace-tools/k8s/deployer_envsubst:$MARKETPLACE_TOOLS_TAG AS build
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends gettext
