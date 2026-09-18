@@ -8,7 +8,7 @@ The schema file provides the following:
   notes, etc.
 - A declaration and parameterization of all images used by the app. These images
   must be explicitly declared for security scanning, open source compliance, and
-  republishing to the Google Cloud Marketplace Google Container Registry (GCR).
+  republishing to the Google Cloud Marketplace Google Artifact Registry (AR).
   They must be accepted as parameters because their final locations will only be
   known at the time of deployment.
 - The parameters that users can customize when they deploy the app, and
@@ -134,7 +134,7 @@ security update. If `true`, users are encouraged to update as soon as possible.
 
 A declaration and parameterization of all images used in your app. Since the
 images are republished, and end users will use the versions republished in
-Google Cloud Marketplace's public Container Registry, all workloads must
+Google Cloud Marketplace's public Artifact Registry, all workloads must
 also parameterize the image fields. At deploy time, the final locations of
 the images will be available via property values declared here. You should
 not rely on knowing these final locations ahead of time, as they can change.
@@ -177,12 +177,12 @@ pass either the full image name or a specific part of it, depending on its
 assigned `type`:
 
 - `FULL` passes the entire image name,
-  `gcr.io/your-project/your-company/your-app:1.0.1`
-- `REGISTRY` only passes the initial `gcr.io`
+  for example, `gcr.io/your-project/your-company/your-app:1.0.1` or `us-docker.pkg.dev/your-project/your-company/your-app:1.0.1`
+- `REGISTRY` only passes the initial registry name `gcr.io` or `us-docker.pkg.dev`
 - `REPO_WITHOUT_REGISTRY` passes only the repo, without the registry or tag;
   for example, `your-project/your-company/your-app`
 - `REPO_WITH_REGISTRY` passes the repo, with the registry and without the
-  tag; for example, `gcr.io/your-project/your-company/your-app`
+  tag; for example, `gcr.io/your-project/your-company/your-app` or `us-docker.pkg.dev/your-project/your-company/your-app`
 - `TAG` only passes the image tag, which in this case is `1.0.1`
 
 In the earlier example, the `proxy` image is passed to the template with
@@ -226,7 +226,7 @@ be `v1beta1` or newer.
 
 A declaration and parameterization of all images used in your app. Since the
 images are republished, and end users will use the versions republished in
-Google Cloud Marketplace's public Container Registry, all workloads must also
+Google Cloud Marketplace's public Artifact Registry, all workloads must also
 parameterize the image fields. At deploy time, the final locations of the
 images will be available via property values declared here. You should not
 rely on knowing these final locations ahead of time, as they can change.
