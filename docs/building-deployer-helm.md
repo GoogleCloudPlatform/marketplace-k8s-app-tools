@@ -275,7 +275,7 @@ file is that values from the upstream chart can be respecified here.
 For example, to override `wordpressUsername`, this top level values
 file can specify a new value for `wordpress.wordpressUsername`.
 For more details, see helm's
-[documentation](https://github.com/helm/helm/blob/master/docs/chart_template_guide/subcharts_and_globals.md#overriding-values-from-a-parent-chart).
+[documentation](https://helm.sh/docs/chart_template_guide/subcharts_and_globals#overriding-values-from-a-parent-chart).
 
 Run the following helm command to download the wordpress chart.
 
@@ -313,7 +313,7 @@ See this [document](schema.md) for more references.
 ### Declare RBAC requirements (and disable RBAC in the chart)
 
 While helm
-[recommends](https://github.com/helm/helm/blob/master/docs/chart_best_practices/rbac.md)
+[recommends](https://helm.sh/docs/chart_best_practices/rbac)
 that charts should create RBAC resources by default, Marketplace
 requires that charts __must not__ create k8s service accounts or
 RBAC resources.
