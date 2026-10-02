@@ -642,6 +642,7 @@ class SchemaImage:
         k: SchemaImageProjectionProperty(k, v)
         for k, v in dictionary.get('properties', {}).items()
     }
+    self._digest = dictionary.get('digest')
 
   @property
   def name(self):
@@ -651,18 +652,24 @@ class SchemaImage:
   def properties(self):
     return self._properties
 
+  @property
+  def digest(self):
+    return self._digest
+
 
 IMAGE_PROJECTION_TYPE_FULL = 'FULL'
 IMAGE_PROJECTION_TYPE_REPO = 'REPO_WITHOUT_REGISTRY'
 IMAGE_PROJECTION_TYPE_REGISTRY_REPO = 'REPO_WITH_REGISTRY'
 IMAGE_PROJECTION_TYPE_REGISTRY = 'REGISTRY'
 IMAGE_PROJECTION_TYPE_TAG = 'TAG'
+IMAGE_PROJECTION_TYPE_DIGEST = 'DIGEST'
 _IMAGE_PROJECTION_TYPES = [
     IMAGE_PROJECTION_TYPE_FULL,
     IMAGE_PROJECTION_TYPE_REPO,
     IMAGE_PROJECTION_TYPE_REGISTRY_REPO,
     IMAGE_PROJECTION_TYPE_REGISTRY,
     IMAGE_PROJECTION_TYPE_TAG,
+    IMAGE_PROJECTION_TYPE_DIGEST,
 ]
 
 
