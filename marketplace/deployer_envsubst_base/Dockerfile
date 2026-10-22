@@ -16,12 +16,14 @@ RUN apt-get update \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-RUN pip3 install \
+RUN pip3 install --no-cache-dir --upgrade \
+      pip \
       wheel \
       pyOpenSSL \
       pyyaml \
       six \
-      cryptography>=46.0.7
+      cryptography>=46.0.7 \
+    && apt-get purge -y python3-pip python3-pip-whl
 
 # Download the latest stable version of kubectl
 RUN LATEST_STABLE=$(curl -L -s https://dl.k8s.io/release/stable.txt) \
