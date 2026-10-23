@@ -25,11 +25,13 @@ RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.c
      && apt-get install -y google-cloud-cli google-cloud-cli-gke-gcloud-auth-plugin \
      && rm -rf /var/lib/apt/lists/*
 
-RUN pip3 install \
+RUN pip3 install --no-cache-dir --upgrade \
+      pip \
       wheel \
       pyOpenSSL \
       pyyaml \
-      cryptography>=46.0.7
+      cryptography>=46.0.7 \
+    && apt-get purge -y python3-pip
 
 # Download the latest stable version of kubectl
 RUN LATEST_STABLE=$(curl -L -s https://dl.k8s.io/release/stable.txt) \
