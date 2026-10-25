@@ -122,3 +122,15 @@ properties:
     type: string
     default: Some default value
 ```
+
+### Application did not get ready before timeout of 300.0 seconds
+
+This indicates that the deployer job did not finish in the [default 300 seconds timeout](https://github.com/GoogleCloudPlatform/marketplace-k8s-app-tools/blob/c5899a928a2ac8d5022463c82823284a9e63b177/marketplace/deployer_util/deploy_with_tests.sh#L101), and environment variable `WAIT_FOR_READY_TIMEOUT` was not defined. To solve this make sure that environment `WAIT_FOR_READY_TIMEOUT` has been defined in deployer dockerfile. Example of dockerfile:
+```dockerfile
+FROM gcr.io/cloud-marketplace-tools/k8s/deployer_envsubst/onbuild
+COPY data-test /data-test
+ENV WAIT_FOR_READY_TIMEOUT 900
+ENV TESTER_TIMEOUT 900
+```
+
+`mpdev verify` itself also has a [default 600 seconds timeout](https://github.com/GoogleCloudPlatform/marketplace-k8s-app-tools/blob/c5899a928a2ac8d5022463c82823284a9e63b177/scripts/verify#L56), which can be taken care of with argument `--wait_timeout=900`.
