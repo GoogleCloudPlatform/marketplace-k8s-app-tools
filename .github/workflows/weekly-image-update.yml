@@ -9,6 +9,10 @@ on:
 jobs:
   create_update_pr:
     runs-on: ubuntu-latest
+    # Scheduled and manual runs force-push the same branch; don't overlap them.
+    concurrency:
+      group: weekly-image-update
+      cancel-in-progress: false
     permissions:
       contents: write      # To checkout code, create/push branches, commit files
       pull-requests: write # To create PRs, assign reviewers, comment on PRs
@@ -94,3 +98,44 @@ jobs:
           PR_URL: ${{ steps.create_pr.outputs.PR_URL }}
         run: |
           gh pr comment "$PR_URL" --body "/gcbrun"
+
+      - name: Enable auto-merge
+        if: steps.create_pr.outputs.PR_URL != '' && steps.branch.outputs.BRANCH_NAME == 'automated/kubectl-image-update'
+        env:
+          # Merge with the bot PAT so the merge push to master triggers
+          # create-weekly-image-update-release.yml (pushes made with
+          # GITHUB_TOKEN don't trigger workflows).
+          GITHUB_TOKEN: ${{ secrets.PRODUCER_SAAP_BOT_PAT }}
+          PR_URL: ${{ steps.create_pr.outputs.PR_URL }}
+        run: |
+          # Only auto-merge the bot branch into master, and only if the commit
+          # changes nothing but AUTOBUILD_CHANGELOG.md.
+          HEAD_SHA=$(git rev-parse HEAD)
+          FILES=$(git diff --name-only origin/master HEAD)
+          if [ "$FILES" != "AUTOBUILD_CHANGELOG.md" ]; then
+            echo "Not enabling auto-merge: unexpected changed files: $FILES"
+            exit 1
+          fi
+
+          # An existing PR's head updates asynchronously after a force-push.
+          for attempt in 1 2 3 4 5 6; do
+            PR_INFO=$(gh pr view "$PR_URL" --json headRefName,baseRefName,headRefOid,isCrossRepository \
+              --jq '[.headRefName, .baseRefName, .headRefOid, (.isCrossRepository | tostring)] | @tsv')
+            IFS=$'\t' read -r HEAD_REF BASE_REF PR_HEAD_SHA CROSS_REPO <<< "$PR_INFO"
+            [ "$PR_HEAD_SHA" = "$HEAD_SHA" ] && break
+            echo "Attempt $attempt: PR head is $PR_HEAD_SHA, waiting for $HEAD_SHA"
+            sleep 5
+          done
+          if [ "$HEAD_REF" != "automated/kubectl-image-update" ] || [ "$BASE_REF" != "master" ] \
+              || [ "$PR_HEAD_SHA" != "$HEAD_SHA" ] || [ "$CROSS_REPO" != "false" ]; then
+            echo "Not enabling auto-merge: head=$HEAD_REF base=$BASE_REF sha=$PR_HEAD_SHA (expected $HEAD_SHA) cross_repo=$CROSS_REPO"
+            exit 1
+          fi
+
+          # Merges once master's required status checks pass (or right away if
+          # they already have). Retry in case the PR becomes mergeable mid-call.
+          for attempt in 1 2 3; do
+            gh pr merge "$PR_URL" --auto --squash --match-head-commit "$HEAD_SHA" && exit 0
+            sleep 10
+          done
+          exit 1
