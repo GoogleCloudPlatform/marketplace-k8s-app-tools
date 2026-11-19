@@ -9,9 +9,15 @@ on:
 jobs:
   create_update_pr:
     runs-on: ubuntu-latest
+    # Scheduled and manual runs force-push the same branch; don't overlap them.
+    concurrency:
+      group: weekly-image-update
+      cancel-in-progress: false
     permissions:
-      contents: write      # To checkout code, create/push branches, commit files
-      pull-requests: write # To create PRs, assign reviewers, comment on PRs
+      # GITHUB_TOKEN is only used to approve the PR. Git and other gh calls
+      # use PRODUCER_SAAP_BOT_PAT.
+      contents: read
+      pull-requests: write
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -94,3 +100,75 @@ jobs:
           PR_URL: ${{ steps.create_pr.outputs.PR_URL }}
         run: |
           gh pr comment "$PR_URL" --body "/gcbrun"
+
+      - name: Approve and enable auto-merge
+        if: steps.create_pr.outputs.PR_URL != '' && steps.branch.outputs.BRANCH_NAME == 'automated/kubectl-image-update'
+        env:
+          # Merge with the bot PAT so the merge push to master triggers
+          # create-weekly-image-update-release.yml (pushes made with
+          # GITHUB_TOKEN don't trigger workflows).
+          GITHUB_TOKEN: ${{ secrets.PRODUCER_SAAP_BOT_PAT }}
+          # Approve as github-actions[bot]: the PR author (the PAT's account)
+          # can't approve its own PR.
+          APPROVE_TOKEN: ${{ github.token }}
+          PR_URL: ${{ steps.create_pr.outputs.PR_URL }}
+        run: |
+          # Only approve and auto-merge the commit pushed above, and only if
+          # it's the bot's changelog-only PR into master.
+          HEAD_SHA=$(git rev-parse HEAD)
+
+          # An existing PR's head updates asynchronously after a force-push.
+          for attempt in 1 2 3 4 5 6; do
+            PR_INFO=$(gh pr view "$PR_URL" \
+              --json number,headRefName,baseRefName,headRefOid,isCrossRepository,author \
+              --jq '[.number, .headRefName, .baseRefName, .headRefOid, (.isCrossRepository | tostring), .author.login] | @tsv')
+            IFS=$'\t' read -r PR_NUMBER HEAD_REF BASE_REF PR_HEAD_SHA CROSS_REPO AUTHOR <<< "$PR_INFO"
+            [ "$PR_HEAD_SHA" = "$HEAD_SHA" ] && break
+            echo "Attempt $attempt: PR head is $PR_HEAD_SHA, waiting for $HEAD_SHA"
+            if [ "$attempt" -lt 6 ]; then sleep 5; fi
+          done
+          if [ "$CROSS_REPO" != "false" ] || [ "$HEAD_REF" != "automated/kubectl-image-update" ] \
+              || [ "$BASE_REF" != "master" ] || [ "$AUTHOR" != "ccm-producer-saap-gh-bot" ] \
+              || [ "$PR_HEAD_SHA" != "$HEAD_SHA" ]; then
+            echo "::error::Not auto-merging PR #$PR_NUMBER: head=$HEAD_REF base=$BASE_REF author=$AUTHOR" \
+              "cross_repo=$CROSS_REPO sha=$PR_HEAD_SHA (expected $HEAD_SHA)"
+            exit 1
+          fi
+
+          # Files HEAD_SHA changes relative to its merge base with master,
+          # including the old name of renamed files.
+          FILES=$(gh api "repos/$GITHUB_REPOSITORY/compare/master...$HEAD_SHA" \
+            --jq '[.files[] | .filename, (.previous_filename // empty)] | unique | join(",")')
+          if [ "$FILES" != "AUTOBUILD_CHANGELOG.md" ]; then
+            echo "::error::Not auto-merging PR #$PR_NUMBER: unexpected changed files: $FILES"
+            exit 1
+          fi
+
+          # Approve exactly the commit that was checked above.
+          GH_TOKEN="$APPROVE_TOKEN" gh api -X POST "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/reviews" \
+            -f event=APPROVE -f commit_id="$HEAD_SHA" \
+            -f body="Auto-approved: weekly rebuild trigger that only changes AUTOBUILD_CHANGELOG.md." \
+            --silent
+
+          # Fail loudly if the approval doesn't satisfy master's review rules
+          # (for example, if CODEOWNERS changes), instead of leaving auto-merge
+          # stuck.
+          for attempt in 1 2 3; do
+            DECISION=$(gh pr view "$PR_URL" --json reviewDecision --jq .reviewDecision)
+            [ "$DECISION" = "APPROVED" ] && break
+            echo "Attempt $attempt: reviewDecision is $DECISION"
+            if [ "$attempt" -lt 3 ]; then sleep 5; fi
+          done
+          if [ "$DECISION" != "APPROVED" ]; then
+            echo "::error::bot approval did not satisfy required reviews"
+            exit 1
+          fi
+
+          # Merges once master's required status checks pass (or right away if
+          # they already have). Retry in case the PR becomes mergeable mid-call.
+          for attempt in 1 2 3; do
+            gh pr merge "$PR_URL" --auto --squash --match-head-commit "$HEAD_SHA" && exit 0
+            if [ "$attempt" -lt 3 ]; then sleep 10; fi
+          done
+          echo "::error::could not enable auto-merge for PR #$PR_NUMBER"
+          exit 1
