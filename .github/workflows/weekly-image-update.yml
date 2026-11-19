@@ -14,8 +14,10 @@ jobs:
       group: weekly-image-update
       cancel-in-progress: false
     permissions:
-      contents: write      # To checkout code, create/push branches, commit files
-      pull-requests: write # To create PRs, assign reviewers, comment on PRs
+      # GITHUB_TOKEN is only used to approve the PR. Git and other gh calls
+      # use PRODUCER_SAAP_BOT_PAT.
+      contents: read
+      pull-requests: write
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -99,38 +101,47 @@ jobs:
         run: |
           gh pr comment "$PR_URL" --body "/gcbrun"
 
-      - name: Enable auto-merge
+      - name: Approve and enable auto-merge
         if: steps.create_pr.outputs.PR_URL != '' && steps.branch.outputs.BRANCH_NAME == 'automated/kubectl-image-update'
         env:
           # Merge with the bot PAT so the merge push to master triggers
           # create-weekly-image-update-release.yml (pushes made with
           # GITHUB_TOKEN don't trigger workflows).
           GITHUB_TOKEN: ${{ secrets.PRODUCER_SAAP_BOT_PAT }}
+          # Approve as github-actions[bot]: the PR author (the PAT's account)
+          # can't approve its own PR.
+          APPROVE_TOKEN: ${{ github.token }}
           PR_URL: ${{ steps.create_pr.outputs.PR_URL }}
         run: |
-          # Only auto-merge the bot branch into master, and only if the commit
-          # changes nothing but AUTOBUILD_CHANGELOG.md.
+          # Only approve and auto-merge the bot branch into master, and only if
+          # the commit changes nothing but AUTOBUILD_CHANGELOG.md.
           HEAD_SHA=$(git rev-parse HEAD)
           FILES=$(git diff --name-only origin/master HEAD)
           if [ "$FILES" != "AUTOBUILD_CHANGELOG.md" ]; then
-            echo "Not enabling auto-merge: unexpected changed files: $FILES"
+            echo "Not auto-merging: unexpected changed files: $FILES"
             exit 1
           fi
 
           # An existing PR's head updates asynchronously after a force-push.
           for attempt in 1 2 3 4 5 6; do
-            PR_INFO=$(gh pr view "$PR_URL" --json headRefName,baseRefName,headRefOid,isCrossRepository \
-              --jq '[.headRefName, .baseRefName, .headRefOid, (.isCrossRepository | tostring)] | @tsv')
-            IFS=$'\t' read -r HEAD_REF BASE_REF PR_HEAD_SHA CROSS_REPO <<< "$PR_INFO"
+            PR_INFO=$(gh pr view "$PR_URL" --json number,headRefName,baseRefName,headRefOid,isCrossRepository \
+              --jq '[.number, .headRefName, .baseRefName, .headRefOid, (.isCrossRepository | tostring)] | @tsv')
+            IFS=$'\t' read -r PR_NUMBER HEAD_REF BASE_REF PR_HEAD_SHA CROSS_REPO <<< "$PR_INFO"
             [ "$PR_HEAD_SHA" = "$HEAD_SHA" ] && break
             echo "Attempt $attempt: PR head is $PR_HEAD_SHA, waiting for $HEAD_SHA"
             sleep 5
           done
           if [ "$HEAD_REF" != "automated/kubectl-image-update" ] || [ "$BASE_REF" != "master" ] \
               || [ "$PR_HEAD_SHA" != "$HEAD_SHA" ] || [ "$CROSS_REPO" != "false" ]; then
-            echo "Not enabling auto-merge: head=$HEAD_REF base=$BASE_REF sha=$PR_HEAD_SHA (expected $HEAD_SHA) cross_repo=$CROSS_REPO"
+            echo "Not auto-merging: head=$HEAD_REF base=$BASE_REF sha=$PR_HEAD_SHA (expected $HEAD_SHA) cross_repo=$CROSS_REPO"
             exit 1
           fi
+
+          # Approve exactly the commit that was checked above.
+          GH_TOKEN="$APPROVE_TOKEN" gh api -X POST "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/reviews" \
+            -f event=APPROVE -f commit_id="$HEAD_SHA" \
+            -f body="Auto-approved: weekly rebuild trigger that only changes AUTOBUILD_CHANGELOG.md." \
+            --silent
 
           # Merges once master's required status checks pass (or right away if
           # they already have). Retry in case the PR becomes mergeable mid-call.
