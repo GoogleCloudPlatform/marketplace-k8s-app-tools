@@ -1,0 +1,7 @@
+# Code-owner review is required on master, so every change needs an approval
+# from ccm-saap-team. github-actions[bot] can't satisfy that.
+*                       @GoogleCloudPlatform/ccm-saap-team
+
+# No owners: the weekly bot PR (changelog only) can be approved by the
+# weekly-image-update.yml workflow and auto-merged.
+/AUTOBUILD_CHANGELOG.md
