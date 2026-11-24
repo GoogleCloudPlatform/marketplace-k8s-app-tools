@@ -186,6 +186,19 @@ in your GKE cluster can access the image:
 docker push $REGISTRY/$APP_NAME/deployer
 ```
 
+**Note:** If you build with `docker buildx build --push`, disable the provenance
+and SBOM attestations that buildx adds by default. With them, the pushed image is
+an OCI image index rather than a single image manifest, and Producer Portal fails
+to extract the schema with `Image not found`
+([#629](https://github.com/GoogleCloudPlatform/marketplace-k8s-app-tools/issues/629)).
+For example:
+
+```shell
+docker buildx build --platform linux/amd64 --provenance=false --sbom=false --load \
+  --tag $REGISTRY/$APP_NAME/deployer .
+docker push $REGISTRY/$APP_NAME/deployer
+```
+
 ### First deployment
 
 Create a new namespace to cleanly deploy your app:
