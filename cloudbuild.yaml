@@ -37,7 +37,20 @@ options:
   machineType: 'N1_HIGHCPU_8'
 
 substitutions:
-  _CLUSTER_LOCATION: null
+  # Preferred location of the ephemeral integration test cluster. A zone (for
+  # example 'us-central1-c') is strongly preferred over a region: passing a
+  # region creates a *regional* cluster with _CLUSTER_NUM_NODES nodes in each
+  # of its zones. If a region is passed, its zones are tried one at a time.
+  _CLUSTER_LOCATION: 'us-central1-c'
+  # Locations tried, in order, when the cluster cannot be created in
+  # _CLUSTER_LOCATION, for example because of a transient GCE_STOCKOUT or
+  # because the regional CPU quota is exhausted by concurrent builds.
+  _CLUSTER_LOCATION_FALLBACKS: 'us-central1-f us-central1-b us-east1-c us-west1-b'
+  # Size of the test cluster. tests/integration runs 4 small deployments, so a
+  # handful of nodes in a single zone is enough. Bump these if the integration
+  # tests start failing to schedule.
+  _CLUSTER_NUM_NODES: '3'
+  _CLUSTER_MACHINE_TYPE: 'e2-standard-2'
 
 steps:
 
@@ -141,8 +154,54 @@ steps:
   - |
     # Use the 'c-$BUILD_ID' as the cluster name as it must start with a letter,
     # and have a max length of 40 chars (BUILD_ID is 37). Then install App CRD.
-    gcloud container clusters create 'c-$BUILD_ID' --zone '${_CLUSTER_LOCATION}' --project '$PROJECT_ID' --labels=creation-timestamp=`date +%s`
-    gcloud container clusters get-credentials 'c-$BUILD_ID' --zone '${_CLUSTER_LOCATION}' --project '$PROJECT_ID'
+    CLUSTER_NAME='c-$BUILD_ID'
+
+    # Build the ordered list of zones to try. Cluster creation is atomic and
+    # regularly fails with transient, location specific errors: GCE_STOCKOUT
+    # when Compute Engine is out of capacity for the machine type in a zone, or
+    # GCE_QUOTA_EXCEEDED when concurrent builds hold the regional CPU quota.
+    # Retrying elsewhere is much cheaper than failing the whole build.
+    ZONES=()
+    for location in ${_CLUSTER_LOCATION} ${_CLUSTER_LOCATION_FALLBACKS}; do
+      if [[ "$$location" == *-[a-z] ]]; then
+        ZONES+=("$$location")
+      else
+        # A region was given. Expand it so that zonal clusters are created: a
+        # regional cluster needs capacity in every zone of the region at once.
+        ZONES+=($$(gcloud compute zones list --project '$PROJECT_ID' \
+            --filter="region:( $$location ) AND status=UP" \
+            --format='value(name)' || echo "$$location"))
+      fi
+    done
+
+    CLUSTER_ZONE=''
+    for zone in "$${ZONES[@]}"; do
+      echo "Creating cluster $$CLUSTER_NAME in $$zone ..."
+      if gcloud container clusters create "$$CLUSTER_NAME" \
+          --zone "$$zone" \
+          --project '$PROJECT_ID' \
+          --num-nodes '${_CLUSTER_NUM_NODES}' \
+          --machine-type '${_CLUSTER_MACHINE_TYPE}' \
+          --labels=creation-timestamp=`date +%s`; then
+        CLUSTER_ZONE="$$zone"
+        break
+      fi
+      # A failed creation leaves the cluster behind in ERROR state, where it
+      # keeps consuming CPU quota until it is deleted.
+      echo "Cluster creation failed in $$zone, trying the next zone."
+      gcloud container clusters delete "$$CLUSTER_NAME" --zone "$$zone" \
+          --project '$PROJECT_ID' --quiet || true
+    done
+
+    if [[ -z "$$CLUSTER_ZONE" ]]; then
+      echo "Failed to create a test cluster in any of: $${ZONES[*]}"
+      exit 1
+    fi
+
+    # The Cleanup step must delete the cluster from the zone it ended up in.
+    echo -n "$$CLUSTER_ZONE" > /workspace/cluster_zone
+
+    gcloud container clusters get-credentials "$$CLUSTER_NAME" --zone "$$CLUSTER_ZONE" --project '$PROJECT_ID'
     kubectl apply -f "https://raw.githubusercontent.com/GoogleCloudPlatform/marketplace-k8s-app-tools/$COMMIT_SHA/crd/app-crd.yaml"
     mkdir -p /workspace/.kube/
     cp -r $$HOME/.kube/ /workspace/
@@ -167,13 +226,23 @@ steps:
   - 'DOCKER_NETWORK=cloudbuild'
   - MARKETPLACE_TOOLS_TAG=testing-sha_$COMMIT_SHA
   - 'DOCKER_API_VERSION=1.41'
+  # The image entrypoint (docker_entrypoint.sh) sets up the kubectl and gcloud
+  # configs before exec'ing these args, so the test command must be run through
+  # it rather than through a custom step entrypoint.
   args:
-  - make
-  - -j10
-  - --output-sync
-  - tests/integration
+  - bash
+  - -c
+  - |
+    # Record the result rather than failing the step, so that the Cleanup step
+    # below always runs and the test cluster is never leaked. The recorded
+    # result becomes the build status in 'Report verification result'.
+    make -j10 --output-sync tests/integration
+    echo "$$?" > /workspace/verify_exit_code
+  # Belt and braces: even if the step dies without recording a result, Cleanup
+  # must still run. The missing result is then reported as a failure.
+  allowFailure: true
 
-- id: Cleanup
+- id: &Cleanup Cleanup
   name: gcr.io/cloud-builders/gcloud
   waitFor:
   - *Verify
@@ -181,7 +250,25 @@ steps:
   args:
   - -exc
   - |
-    gcloud container clusters delete 'c-$BUILD_ID' --zone '${_CLUSTER_LOCATION}' --project '$PROJECT_ID' --quiet
+    CLUSTER_ZONE="$$(cat /workspace/cluster_zone)"
+    # Cleanup must not mask the verification result, so it never fails the
+    # build. A cluster that could not be deleted is called out loudly instead.
+    gcloud container clusters delete 'c-$BUILD_ID' --zone "$$CLUSTER_ZONE" --project '$PROJECT_ID' --quiet \
+      || echo "WARNING: could not delete cluster c-$BUILD_ID in $$CLUSTER_ZONE. It must be deleted manually."
+
+- id: Report verification result
+  name: gcr.io/cloud-builders/gcloud
+  waitFor:
+  - *Cleanup
+  entrypoint: bash
+  args:
+  - -c
+  - |
+    EXIT_CODE="$$(cat /workspace/verify_exit_code 2>/dev/null || echo 1)"
+    if [[ "$$EXIT_CODE" != '0' ]]; then
+      echo "Verification failed with exit code $$EXIT_CODE. See the 'Verify' step above."
+    fi
+    exit "$$EXIT_CODE"
 
 images:
   - gcr.io/$PROJECT_ID/k8s/dev:sha_$COMMIT_SHA
