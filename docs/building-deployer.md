@@ -121,7 +121,7 @@ Marketplace users. Users get the images from Marketplace's public Container
 Registry repo.
 
 The deployer image and all of the referenced app images will be copied into
-Marketplace's public Container Registry repo. This means that images will have
+Marketplace's public Artifact Registry repo. This means that images will have
 new names, and potentially also new tags.
 
 The deployer image does not, and **must not**, have the knowledge of how the
